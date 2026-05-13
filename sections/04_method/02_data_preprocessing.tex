@@ -8,7 +8,7 @@ Scenarios vary in the number of emitters and in sequence length so that training
 
 \subsection*{Windowing and context length}
 
-The encoder operates on fixed-length windows because self-attention cost scales quadratically with sequence length.
+The encoder operates on fixed-length windows because standard self-attention builds an $L \times L$ compatibility matrix between tokens at each layer, so time and memory scale as $\mathcal{O}(L^2)$ in the window length $L$ at fixed model width, repeated across depth.
 Let $L$ denote the window length (in pulses) fed to the model; experiments use $L = 1024$.
 Each scenario is partitioned into contiguous windows of length $L$.
 If the remainder after the last full window is shorter than $L$, it is dropped in the present pipeline; padding with an attention mask would retain the tail without changing the architecture and is left as a straightforward extension.
@@ -16,6 +16,10 @@ If the remainder after the last full window is shorter than $L$, it is dropped i
 Training windows are extracted with a stride of $L/2$, so consecutive windows overlap by half their length.
 This increases the number of training pulses seen per scenario and reduces sensitivity to the particular alignment of window boundaries relative to mode transitions.
 Validation and test windows use stride $L$ (no overlap), so that metrics are not inflated by near-duplicate windows.
+
+Interleaved traffic and heterogeneous dwell times imply that pulse counts per emitter and per operating mode vary widely inside a window.
+Some windows therefore contain few or no pulses from a rare emitter or a short-lived mode, even when that label is frequent in the parent scenario, and dropped tails can remove trailing segments entirely.
+These effects induce a form of \emph{label incidence imbalance} at the window level that is distinct from corpus-level class histograms and should be read alongside the reporting conventions in \cref{ch:experiments}.
 
 \subsection*{Per-feature scaling}
 

@@ -10,6 +10,8 @@ Training windows use stride $L/2$ with $L = 1024$ pulses, whereas validation and
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
 Emitter and mode columns count distinct simulator labels that appear anywhere in the corresponding split; they are upper bounds on the cardinality that unsupervised clustering must recover, because not every label may be present in every window.
+Scenario design and traffic rules also skew how often each emitter and each mode is exercised, so aggregate pulse counts need not match intuitive ``balanced'' priors even when the simulator exposes many labels.
+Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data}), rare combinations of emitter, mode, and interleaving pattern can be missing from individual windows or represented by only a handful of pulses, which limits what any single forward pass can evidence about those labels.
 The numeric entries are placeholders until the final export from the simulator pipeline is frozen; the intended reporting convention is scenarios for volume, pulses for aggregate exposure, and distinct labels for emitter and mode coverage.
 
 \begin{table}[t]

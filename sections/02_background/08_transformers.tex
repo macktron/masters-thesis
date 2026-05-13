@@ -30,3 +30,7 @@ A standard transformer \emph{encoder layer} alternates two sub-layers: \gls{mha}
 Each sub-layer uses a residual connection and layer normalisation \parencite{vaswani2017attention}.
 The \gls{ffn} is typically a two-layer \gls{mlp} with a wide inner dimension and a nonlinear activation, acting as the per-token nonlinearity while \gls{mha} handles cross-token mixing.
 Stacking $N$ such layers yields a deep encoder that maps an input sequence $(\vect{x}_1,\ldots,\vect{x}_L)$ to contextualised representations $(\vect{h}^{(N)}_1,\ldots,\vect{h}^{(N)}_L)$, which downstream heads can pool or read out for sequence-level or token-level predictions.
+
+\paragraph{Computational cost.}
+In the usual dense implementation, each self-attention block materialises an $L \times L$ matrix of token--token scores before the softmax, so time and activation memory for that block scale as $\mathcal{O}(L^2)$ in the sequence length $L$ at fixed embedding width, up to constants from the number of heads and projection ranks \parencite{vaswani2017attention}.
+Repeating the block across depth multiplies that cost by the number of layers, which motivates hard caps on $L$, sparse or low-rank attention variants, or chunked processing when inputs are long; the method chapter states the windowing choice adopted here.

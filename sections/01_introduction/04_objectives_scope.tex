@@ -8,5 +8,7 @@ Second, we formulate at least one joint training objective that couples sequence
 The scope is deliberately narrow.
 We operate at the level of \glspl{pdw} or equivalent tabular pulse features supplied to the model; pulse detection, \gls{rf} conditioning, antenna-level processing, and geometry-driven fusion across platforms are out of scope.
 The focus is offline or batch analysis of recorded streams rather than hard real-time implementation on embedded hardware, and we do not address full operational emitter naming against classified libraries.
+That choice excludes an \emph{online} regime in which models update continuously from a live pulse stream under latency and memory budgets: training and evaluation here assume access to bounded windows that can be revisited, shuffled, and mini-batched, which sidesteps causal filtering, drift handling, and resource accounting that a streaming deployment would require.
+Consequently, conclusions concern representation quality and clustering agreement on curated windows rather than end-to-end tracking performance over arbitrarily long horizons.
 When labels exist, they serve evaluation, ablations, and controlled supervision experiments, not the definition of the fielded learning target stated in \cref{sec:intro:problem}.
 Finally, we do not claim field validation on classified measurements; conclusions are drawn from synthetic or curated datasets together with stress tests that mimic deinterleaving noise (\cref{ch:experiments}).
