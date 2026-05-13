@@ -31,7 +31,7 @@ The pair $(e_n,m_n)$ is not observed at training time; the learning problem is t
 
 \Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order.
 Fill colour encodes the latent emitter index $e_n$; pulses that share a colour belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
-Mode labels $m_n$ are omitted from the schematic; in data, \emph{mode hopping} still couples $m_n$ to $e_n$ as described above and in the caption.
+Mode labels $m_n$ are omitted from the schematic; the formal partitions and mode hopping are defined in the text immediately below.
 
 \begin{figure}[t]
   \centering
@@ -48,9 +48,9 @@ Mode labels $m_n$ are omitted from the schematic; in data, \emph{mode hopping} s
     },
     >=Latex
   ]
-    \foreach \i/\col/\m [count=\n] in {
-      1/blue!18/1,2/orange!22/1,3/blue!18/2,4/orange!22/2,5/blue!18/1,
-      6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
+    \foreach \i/\col [count=\n] in {
+      1/blue!18,2/orange!22,3/blue!18,4/orange!22,5/blue!18,
+      6/green!20,7/orange!22,8/blue!18,9/green!20,10/orange!22
     } {
       \node[pdw, fill=\col] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
     }
