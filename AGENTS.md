@@ -16,7 +16,7 @@ Context: ELINT / ESM applications, where labelled emitter/mode data is scarce, m
 - **School:** Electrical Engineering and Computer Science (EECS).
 - **Programme:** Master's Programme in Machine Learning.
 - **Scope:** 30 ECTS degree project, second cycle.
-- **Expected length:** roughly 60–80 pages of body text.
+- **Expected length:** roughly 60 pages of body text.
 
 ## Writing conventions
 
