@@ -27,6 +27,75 @@ These variables take values in finite label sets whose cardinalities
 are \emph{unknown a priori} and need not match the number of physical platforms in the environment (for example, co-located antennas may map to a single inferred emitter index, or a single platform may split across indices when observations are ambiguous).
 The pair $(e_n,m_n)$ is not observed at training time; the learning problem is to infer representations from which both clusterings can be recovered reliably.
 
+\subsection*{Induced partitions, \gls{pdw} streams, and mode hopping}
+
+\Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order.
+Fill colour encodes the latent emitter index $e_n$; pulses that share a colour belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
+The row of mode annotations shows $m_n$ evolving along the stream; within a single emitter, \emph{mode hopping} appears as changes in $m_n$ while $e_n$ is unchanged between those pulses.
+
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=6.8mm,
+    font=\footnotesize,
+    pdw/.style={
+      draw,
+      rounded corners=1.4pt,
+      minimum width=6mm,
+      minimum height=7mm,
+      inner sep=0pt,
+      align=center
+    },
+    >=Latex
+  ]
+    \foreach \i/\col/\m [count=\n] in {
+      1/blue!18/1,2/orange!22/1,3/blue!18/2,4/orange!22/2,5/blue!18/1,
+      6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
+    } {
+      \node[pdw, fill=\col] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+      \node[anchor=north, inner sep=1pt] at (p\n.south) {\strut$m_{\i}=\m$};
+    }
+    \draw[->, thick] (0.35,-0.92) -- ({10+0.65},-0.92)
+      node[midway, below=2pt] {pulse index $n$ (time order)};
+    \begin{scope}[shift={(1.2,-1.55)}]
+      \node[pdw, fill=blue!18, minimum width=4mm, minimum height=3.5mm] (leg1) at (0,0) {};
+      \node[anchor=west] at (leg1.east) {\,emitter $1$};
+      \node[pdw, fill=orange!22, minimum width=4mm, minimum height=3.5mm] (leg2) at (2.1,0) {};
+      \node[anchor=west] at (leg2.east) {\,emitter $2$};
+      \node[pdw, fill=green!20, minimum width=4mm, minimum height=3.5mm] (leg3) at (4.2,0) {};
+      \node[anchor=west] at (leg3.east) {\,emitter $3$};
+    \end{scope}
+  \end{tikzpicture}
+  \caption{Illustration of a \gls{pdw} stream $\vect{x}_1,\ldots,\vect{x}_N$ in time order.
+    Background colour indicates latent emitter identity $e_n$; annotations show mode labels $m_n$.
+    Emitter clustering seeks a partition of indices into subsets $\mathcal{E}_k$ (constant $e_n$ on each subset); mode clustering seeks a second partition into subsets $\mathcal{M}_\ell$ (constant $m_n$), while allowing mode hops within a fixed emitter.}
+  \label{fig:method:pdw_emitter_stream}
+\end{figure}
+
+Emitter clustering is the recovery of the partition of $\{1,\ldots,N\}$ into emitter-coherent index sets
+\begin{equation}\label{eq:method:emitter_partition}
+  \mathcal{E}_k = \{\, n \in \{1,\ldots,N\} : e_n = k \,\},
+  \qquad
+  k \in \{1,\ldots,K_{\mathrm{em}}\},
+\end{equation}
+so that $\vect{x}_n$ and $\vect{x}_{n'}$ are grouped together if and only if $e_n=e_{n'}$.
+Equivalently, each $\mathcal{E}_k$ is the preimage of label $k$ under the map $n \mapsto e_n$, and $\{\mathcal{E}_1,\ldots,\mathcal{E}_{K_{\mathrm{em}}}\}$ is pairwise disjoint with union $\{1,\ldots,N\}$.
+
+Mode clustering targets an analogous partition into mode-coherent subsets,
+\begin{equation}\label{eq:method:mode_partition}
+  \mathcal{M}_\ell = \{\, n \in \{1,\ldots,N\} : m_n = \ell \,\},
+  \qquad
+  \ell \in \{1,\ldots,K_{\mathrm{md}}\},
+\end{equation}
+which groups pulses that share the same operating mode regardless of which physical emitter produced them.
+The two partitions are coupled because $(e_n,m_n)$ is generated jointly: restricting to a fixed emitter $k$, the induced set of mode labels
+\begin{equation}\label{eq:method:modes_per_emitter}
+  \mathcal{L}_k = \{\, m_n : n \in \mathcal{E}_k \,\}
+\end{equation}
+has cardinality $L_k = \lvert \mathcal{L}_k \rvert$ bounded by the number of distinct waveform programmes that emitter $k$ exercises.
+In many \gls{radar} systems, mode hopping switches among a small, essentially finite catalogue of modes, so $L_k$ is modest---often on the order of single-digit integers---even though the temporal pattern $(m_n)_{n \in \mathcal{E}_k}$ is not constant.
+The learning problem is to infer partitions that match $\{\mathcal{E}_k\}$ and $\{\mathcal{M}_\ell\}$ up to independent relabellings (permutations of emitter symbols $k$ and mode symbols $\ell$) from $\mat{X}$ alone, using the dual embeddings in \cref{eq:method:dual_embeddings}.
+
 \subsection*{Desired outputs: dual embeddings and discrete labels}
 
 The parametric model considered in this thesis maps each input sequence to two parallel trajectories in Euclidean embedding spaces,

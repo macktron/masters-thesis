@@ -40,7 +40,7 @@ The \gls{ami} is
   =
   \frac{\mathrm{MI}(Y;\hat{Y})-\mathbb{E}[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\mathbb{E}[\mathrm{MI}]}\,,
 \end{equation}
-where $H(\cdot)$ is Shannon entropy of the corresponding label distribution (the denominator uses the arithmetic mean of the marginal entropies, as in the default of common software implementations \parencite{vinh2010information}).
+where $H(\cdot)$ is Shannon entropy of the corresponding label distribution (the denominator is the arithmetic mean of $H(Y)$ and $H(\hat{Y})$; other normalizations are discussed by \textcite{vinh2010information}).
 
 \subsection*{V-measure}
 
