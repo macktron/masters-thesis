@@ -1,6 +1,31 @@
 \section{Data Representation and Preprocessing}\label{sec:method:data}
 
-% TODO: Per-feature normalization, encoding of categorical PDW fields,
-% sequence segmentation, padding/masking, augmentations for contrastive
-% learning.
-Placeholder paragraph.
+\Gls{elint} data are difficult to obtain at scale, and operational recordings are often sensitive.
+This work therefore relies on synthetic pulse trains from a proprietary scenario simulator (Saab), which yields controlled scenarios and full supervision of emitter identity and operating mode for evaluation, while the learning objectives remain unsupervised with respect to those labels.
+
+Each scenario is a time-ordered sequence of \glspl{pdw} together with emitter and mode annotations.
+Scenarios vary in the number of emitters and in sequence length so that training covers diverse traffic densities and temporal horizons; exact counts, train/validation/test splits, and sampling ranges are reported in \cref{ch:experiments}.
+
+\subsection*{Windowing and context length}
+
+The encoder operates on fixed-length windows because self-attention cost scales quadratically with sequence length.
+Let $L$ denote the window length (in pulses) fed to the model; experiments use $L = 1024$.
+Each scenario is partitioned into contiguous windows of length $L$.
+If the remainder after the last full window is shorter than $L$, it is dropped in the present pipeline; padding with an attention mask would retain the tail without changing the architecture and is left as a straightforward extension.
+
+Training windows are extracted with a stride of $L/2$, so consecutive windows overlap by half their length.
+This increases the number of training pulses seen per scenario and reduces sensitivity to the particular alignment of window boundaries relative to mode transitions.
+Validation and test windows use stride $L$ (no overlap), so that metrics are not inflated by near-duplicate windows.
+
+\subsection*{Per-feature scaling}
+
+Amplitude is already provided on a logarithmic scale (decibels).
+Continuous fields are transformed before windowing so that statistics are computed on the training split only and then applied to validation and test data.
+The log-amplitude, carrier frequency, and pulse width are standardised to zero mean and unit variance using the training-set mean and standard deviation of each field.
+Each \gls{toa} is first min--max scaled to $[0,1]$ using training-set bounds; within every window, all rescaled \gls{toa} values are shifted by subtracting the \gls{toa} of the first pulse so that the window starts at time zero.
+This removes absolute clock offset while preserving intra-window timing structure.
+
+% TODO: Encoding of any categorical PDW fields once the feature list is fixed.
+% TODO: Augmentations for contrastive learning (e.g., timing jitter, pulse dropout).
+
+Windows are grouped into mini-batches for optimisation; batch size and per-epoch shuffling of windows are stated in \cref{ch:experiments}.
