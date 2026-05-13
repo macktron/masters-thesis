@@ -1,0 +1,66 @@
+% =====================================================================
+% Master Thesis - KTH EECS
+% Title: Joint Radar Emitter and Mode Clustering Using a Transformer
+%        Encoder Architecture
+% Author: Markus Swegmark
+%
+% Build:  latexmk -pdf main.tex          (full build, runs biber)
+%         make                           (same, via Makefile)
+%         latexmk -pvc -pdf main.tex     (continuous watch mode)
+%
+% Each chapter lives in sections/NN_<name>/<name>.tex as a `subfiles`
+% wrapper that \inputs one .tex file per subsection. This keeps every
+% subsection a small, self-contained piece of prose, while still letting
+% you compile a single chapter standalone for fast iteration.
+% =====================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+\input{preamble}
+\input{kth-style}
+\input{glossary}
+
+\addbibresource{thesis.bib}
+
+\begin{document}
+
+% ------------------------- Front matter ------------------------------
+% The titlepage environment internally resets the page counter; start
+% the roman numbering AFTER the title page so the abstract is page i
+% (and the title page itself is unnumbered, as is conventional).
+\input{frontmatter/titlepage}
+\pagenumbering{roman}
+
+\input{frontmatter/abstract_en}
+\input{frontmatter/abstract_sv}
+\input{frontmatter/acknowledgments}
+
+\cleardoublepage%
+\pdfbookmark[0]{Contents}{toc}
+\tableofcontents
+\cleardoublepage%
+\listoffigures
+\cleardoublepage%
+\listoftables
+\cleardoublepage%
+\printglossary[type=\acronymtype,title={List of Acronyms},nonumberlist]
+
+% ------------------------- Main matter -------------------------------
+\cleardoublepage%
+\pagenumbering{arabic}
+
+\subfile{sections/01_introduction/introduction}
+\subfile{sections/02_background/background}
+\subfile{sections/03_related_work/related_work}
+\subfile{sections/04_method/method}
+\subfile{sections/05_experiments/experiments}
+\subfile{sections/06_discussion/discussion}
+\subfile{sections/07_conclusion/conclusion}
+
+% ------------------------- Back matter -------------------------------
+\cleardoublepage%
+\printbibliography[heading=bibintoc,title={References}]
+
+\appendix%
+\subfile{sections/08_appendix/appendix}
+
+\end{document}

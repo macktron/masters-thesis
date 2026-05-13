@@ -1,0 +1,52 @@
+# =====================================================================
+# .gitignore - LaTeX build artifacts and editor cruft.
+# =====================================================================
+
+# Build output directory (configured in .latexmkrc)
+build/
+
+# LaTeX intermediates (anywhere - in case build/ is not used)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.acn
+*.acr
+*.alg
+*.glo
+*.gls
+*.glg
+*.ist
+*.xdy
+*.nav
+*.snm
+*.vrb
+
+# The final PDF is copied up by latexmk; ignore intermediate PDFs of
+# individual subfiles but keep the root main.pdf if you want to commit
+# a snapshot.
+sections/**/*.pdf
+!main.pdf
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python tooling that may live next to the LaTeX repo
+__pycache__/
+*.pyc
+.venv/
+venv/

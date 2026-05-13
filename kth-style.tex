@@ -1,0 +1,99 @@
+% =====================================================================
+% kth-style.tex - KTH-flavored typographical conventions and a title-page
+% macro mimicking the KTH EECS master thesis layout. This is NOT the
+% official KTH template - it is a lightweight stand-in that follows the
+% same visual conventions (Latin Modern, A4, centered title page with
+% school + program + TRITA fields).
+% =====================================================================
+
+% ---- Headers / footers ----------------------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% ---- Chapter heading style (compact, KTH-ish) -----------------------
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\sffamily\Large\bfseries}
+  {\MakeUppercase{\chaptertitlename}\ \thechapter}
+  {0.5em}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{30pt}
+
+% ---- Thesis metadata (override in main.tex if desired) --------------
+\newcommand{\thesistitle}{Joint Radar Emitter and Mode Clustering Using a Transformer Encoder Architecture}
+\newcommand{\thesissubtitle}{}
+\newcommand{\thesisauthor}{Markus Swegmark}
+\newcommand{\thesisyear}{\the\year}
+\newcommand{\thesismonth}{\ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
+
+\newcommand{\thesisschool}{School of Electrical Engineering and Computer Science}
+\newcommand{\thesisuniversity}{KTH Royal Institute of Technology}
+\newcommand{\thesisprogram}{Master's Programme in Machine Learning}
+\newcommand{\thesissupervisor}{TBD}
+\newcommand{\thesisexaminer}{TBD}
+\newcommand{\thesishost}{TBD}
+\newcommand{\thesistrita}{TRITA-EECS-EX-XXXX:XXX}
+
+\hypersetup{
+  pdftitle={\thesistitle},
+  pdfauthor={\thesisauthor},
+  pdfsubject={Master's Thesis, KTH EECS},
+  pdfkeywords={transformer, clustering, radar, deep learning, ELINT}
+}
+
+% ---- Title-page macro ----------------------------------------------
+% Renders a centered KTH-style title page. Logos can be dropped into
+% figures/kth-logo.pdf later; we wrap the include in \IfFileExists so
+% the build does not fail when the asset is missing.
+\newcommand{\maketitlepageKTH}{%
+  \begin{titlepage}
+    % Suppress hyperref's "page.N" destination so the title page does
+    % not collide with later page-1's (abstract, first chapter).
+    \hypersetup{pageanchor=false}%
+    \centering
+    \IfFileExists{figures/kth-logo.pdf}{%
+      \includegraphics[width=0.25\textwidth]{figures/kth-logo.pdf}\par
+    }{%
+      {\sffamily\bfseries\Large KTH}\par
+    }
+    \vspace{1.5cm}
+    {\sffamily\large \MakeUppercase{Degree Project in Computer Science and Engineering}\par}
+    {\sffamily\large \MakeUppercase{Second Cycle, 30 Credits}\par}
+    \vspace{0.5cm}
+    {\sffamily\small Stockholm, Sweden \thesisyear\par}
+
+    \vfill
+    {\Huge\bfseries\thesistitle\par}
+    \ifx\thesissubtitle\empty\else
+      \vspace{0.4cm}{\Large\itshape\thesissubtitle\par}
+    \fi
+    \vspace{1.5cm}
+    {\Large\thesisauthor\par}
+
+    \vfill
+    \begin{tabular}{rl}
+      Supervisor: & \thesissupervisor \\
+      Examiner:   & \thesisexaminer   \\
+      Host:       & \thesishost       \\
+    \end{tabular}\par
+
+    \vspace{1cm}
+    {\sffamily\small \thesisuniversity\par}
+    {\sffamily\small \thesisschool\par}
+    {\sffamily\small \thesisprogram\par}
+    \vspace{0.5cm}
+    {\sffamily\footnotesize \thesistrita\par}
+  \end{titlepage}
+  \hypersetup{pageanchor=true}%
+}

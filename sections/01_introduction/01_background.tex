@@ -1,0 +1,24 @@
+\section{Background and Motivation}\label{sec:intro:background}
+
+% TODO: Set the scene. Cover (a) the role of ELINT/ESM in modern
+% electronic warfare, (b) why identifying radar emitters and their
+% operating modes is operationally important, (c) the data-driven turn
+% in radar signal analysis. End with a paragraph that funnels into the
+% specific problem this thesis tackles.
+
+Start with story about Ukraine and Information operations (IO).
+
+Electronic warfare (EW) is becoming increasingly important in modern warfare as technological advancements continues in radar technology, and the advancement of computer algorithms, such as machine learning, which can be superior to humans at some delimited tasks.
+
+One of the main objectives of electronic warfare is to control the electromagnetic spectrum. Identifying radars in your surroundings is a crucial part of this. In the subset of EW called electronic support measure (ESM), where one passively listens to the electromagnetic environment to infer and deduce useful information about it, especially information about other agents in it, including mapping which radars are present and information about them.
+
+
+In modern electronic warfare, so called agile radars, which can be anything from missiles to airplanes to stationary radars, are becoming more and more sophisticated. When emitting a signal for detection, they are intentionally varying the characteristics of the signal, like frequency, pulse width, amplitude, pulse repetition interval to hide their presence in an increasingly more unpredictable way and in expanding ranges, enabled by modern hardware and evolving algorithms (including machine learning). 
+
+This leads to a “cat and mouse”-like situation, where the agile radar agent wants to either scan an area, or lock into a target, sometimes being the entity with the ESM, or something else, without being detected themselves, or in other ways try and confuse the ESM.
+
+Apart from having different algorithms for varying the pulse signal, the agile radars also send out different signals depending on the objective, for example if it’s scanning it might have a radar rotating around an axis, leading to an oscillating received signal, while if the radar wants to track a single object it can send a more direct signals, leading to a constant signal in the naïve case. Usually, the algorithms for varying the signal characteristic are pretty simple, maybe it changes frequency in a set sequence or random etc, and keeps it like this. However, this can will make it hard to identify and also more advanced algorithms of course exists. This algorithm configuration for varying the signal characteristics combined is what we refer to a mode of the radar (this includes if it’s searching or locking on). If we know the mode of a radar, we basically know how the signal will look like (plus minus some noise and interference etc), and also it tells us about the agent sending out the signal if it’s searching or locking in, and also can be used to distinguish between emitters and tell us of how advanced the radar is and perhaps even the goal of the agent. Because of this, it would be ideal to identify not only what signals comes from what radar, but also what modes they are using. Note that two radars can have same modes, but also change the modes. We might need to make some limitations and assume that one radar stays in the same mode. Our input data also give us angle of incoming signal which should enable us to filter or give support for classifying different radars from positioning.
+
+
+In the field of ES we usually call it radar classification (RC) if we want to classify what type of emitter the pulses are coming from. E.i SA-6 radar, drone XXY, etc. While if we want to say exactly what instance it is, that is also distiguish the number of emitters from each emitter as well, e.i SA-6 radar 3, drone XXY 1 and 3, we call that specific radar identification (SRI). So you can say that RC is a superset of SR, and since it provied more informaiton it is more advantageous - however the marginal strategic gain from information of SRI compared to RC can be discuess while the marginal cost might be discussed. The marginal gains is we know the number of emitters exactly, and the ID hopefully, however this problem is sometimes harder and might have lower accurary compared to pure RC, thus decreaseing the Marginal gains. The marginal cost is however that out model might get more complicated, and depending on our model, it could also decrease the accuracy of the classification problem - we will not allow this to happened.
+

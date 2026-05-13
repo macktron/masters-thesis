@@ -1,0 +1,127 @@
+% =====================================================================
+% preamble.tex - Packages and global LaTeX configuration.
+% Keep this file orthogonal to KTH-specific styling (see kth-style.tex)
+% and to acronyms/glossary definitions (see glossary.tex).
+% =====================================================================
+
+% ---- Encoding / fonts / language ------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english,swedish,main=english]{babel}
+\usepackage{csquotes}
+\usepackage{microtype}
+
+% ---- Page geometry --------------------------------------------------
+\usepackage[a4paper,
+            inner=30mm,outer=25mm,
+            top=27mm,bottom=27mm,
+            headheight=15pt]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+
+% ---- Math -----------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+
+% ---- Floats, figures, tables ---------------------------------------
+\usepackage{graphicx}
+\graphicspath{{figures/}{../figures/}{../../figures/}}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\usepackage{float}
+\usepackage{siunitx}
+
+% ---- Algorithms / code ----------------------------------------------
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  showstringspaces=false,
+}
+
+% ---- TikZ / plots ---------------------------------------------------
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,shapes.geometric}
+
+% ---- Bibliography ---------------------------------------------------
+\usepackage[backend=biber,
+            style=ieee,
+            sorting=none,
+            maxbibnames=99,
+            giveninits=true]{biblatex}
+
+% ---- Glossaries / acronyms (loaded before hyperref per docs) -------
+\usepackage[acronym,toc,nopostdot,nonumberlist,nogroupskip]{glossaries-extra}
+
+% ---- Hyperlinks and cross-references --------------------------------
+\usepackage[hidelinks,
+            pdfusetitle,
+            bookmarksnumbered=true,
+            unicode=true]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+% ---- Modular compilation -------------------------------------------
+\usepackage{subfiles}
+
+% =====================================================================
+% Custom math macros / notation.
+% Keep these centralized so the AI agent reuses one symbol everywhere.
+% =====================================================================
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\indicator}{\mathbf{1}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\softmax}{softmax}
+\DeclareMathOperator{\sigmoid}{sigmoid}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\trace}{tr}
+\DeclareMathOperator{\KL}{KL}
+
+% Metrics
+\newcommand{\NMI}{\mathrm{NMI}}
+\newcommand{\ARI}{\mathrm{ARI}}
+\newcommand{\ACC}{\mathrm{ACC}}
+
+% Vectors / matrices: use \vect / \mat consistently
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\mat}[1]{\bm{#1}}
+
+% Datasets / sets
+\newcommand{\setX}{\mathcal{X}}
+\newcommand{\setY}{\mathcal{Y}}
+\newcommand{\setZ}{\mathcal{Z}}
+\newcommand{\setD}{\mathcal{D}}
+
+% Loss / encoder shorthands
+\newcommand{\Loss}{\mathcal{L}}
+\newcommand{\Enc}{f_{\bm{\theta}}}
+
+% ---- Theorem-like environments --------------------------------------
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Example}
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{proposition}[definition]{Proposition}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
