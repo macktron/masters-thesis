@@ -45,7 +45,11 @@ The mode space is assigned the higher dimensionality because, conditional on emi
 \subsection*{Per-window clustering with \gls{hdbscan}}
 
 The projection heads in \cref{eq:method:proj_heads} map each pulse to a continuous vector, whereas the latent emitter and mode assignments in \cref{sec:method:formulation} are discrete.
-\Gls{hdbscan} \parencite{mcinnes2017hdbscan} is applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a separate clustering instance on the corresponding branch.
+\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} is applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a separate clustering instance on the corresponding branch.
 Each window is thus a self-contained pulse train segment in embedding space, consistent with the windowing of \cref{sec:method:data}, and the effective cardinalities of the inferred emitter and mode partitions follow the density hierarchy instead of fixing $K_{\mathrm{em}}$ or $K_{\mathrm{md}}$ a priori.
+
+As defined in the framework of \textcite{campello2015hierarchical}, \gls{hdbscan} replaces the single global density threshold of DBSCAN \parencite{ester1996density} with a hierarchy of density estimates: nested level sets are summarised in a condensed tree, and a flat clustering is read off by favouring groups that persist as coherent peaks rather than artefacts of a particular threshold.
+The same construction supports an explicit noise category for points that are not density-reachable from any persistent cluster under the chosen stability extraction \parencite{campello2015hierarchical}.
+The computations use the reference library described by \textcite{mcinnes2017hdbscan}.
 
 The collection of all linear maps in \cref{eq:method:input_embed,eq:method:proj_heads} together with the attention and \gls{ffn} weights of the trunk and branches constitutes the parameter vector $\bm{\theta}$ that the loss in \cref{sec:method:loss} optimises.
