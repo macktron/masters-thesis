@@ -1,23 +1,78 @@
 \section{Loss Function and Clustering Objective}\label{sec:method:loss}
 
-% TODO: The joint loss. Likely contrastive + DEC-style clustering, or
-% two-head SwAV. Write and label the loss equation.
+The trainable objective combines contrastive terms on the emitter and mode branches so that both embedding geometries in \cref{eq:method:dual_embeddings} become informative for the unsupervised clusterings described in \cref{sec:method:formulation}.
+This section summarizes the representation-learning rationale, states a generic normalized temperature-scaled cross-entropy (NT-Xent) building block \parencite{chen2020simclr}, and explains how it is instantiated separately for emitter-centric deinterleaving and for mode-centric structure.
 
+\subsection*{Contrastive learning viewpoint}
 
-Contrastive loss was used. Good at creating reorestatoins. Need negatives an poitives sampels which we ahve. 
+Contrastive objectives encourage invariance to nuisance transformations while preserving factors that vary across instances \parencite{chen2020simclr}.
+Given two stochastic \emph{views} of the same underlying input (for example two augmentations of the same \gls{pdw} window), the model should assign similar embeddings to both views, whereas embeddings of unrelated inputs should disagree.
+Minimizing the resulting classification-style loss is closely related to maximizing a lower bound on mutual information between representations and predictive targets in contrastive predictive coding \parencite{oord2018representation}, and more pragmatically it acts as a metric-learning surrogate that spreads the batch on the hypersphere defined by $\ell_2$ normalization.
+A large set of negatives drawn from the mini-batch is essential: without repulsive pressure on unrelated pairs, encoders can trivially collapse to a constant map and still achieve low training error on a naïve agreement loss \parencite{chen2020simclr}.
 
-FORMAULAT REFERCNES ETC. Plase add relavante nuacnes from theory of represenational learnigng and add stuff.
+Swapping cluster assignments instead of raw embeddings is an alternative that couples representation learning with discrete structure \parencite{caron2020swav}; the present work stays with embedding-space contrast for clarity of exposition, but the same dual-embedding architecture could be paired with a SwAV-style term if prototype banks were introduced.
 
-Expalin maybe some how it works in out context.
+\subsection*{NT-Xent building block}
 
+Let $\phi(\vect{z}) = \vect{z}/\lVert \vect{z} \rVert_2$ denote $\ell_2$ normalization and fix a temperature $\tau > 0$.
+Write the scaled cosine similarity as
+\begin{equation}\label{eq:method:sim_tau}
+  s_\tau(\vect{a},\vect{b}) = \frac{1}{\tau}\,\phi(\vect{a})^\top \phi(\vect{b}).
+\end{equation}
+For a finite index set $\mathcal{I}$ with embeddings $\{\vect{z}_i\}_{i \in \mathcal{I}}$ and a distinguished \emph{positive} index $p(i) \neq i$ for each anchor $i \in \mathcal{I}$, define the InfoNCE / NT-Xent contribution
+\begin{equation}\label{eq:method:nt_xent}
+  \Loss_{\mathrm{NT}}(\mathcal{I},\{p(i)\}_{i \in \mathcal{I}})
+  =
+  -\frac{1}{\lvert \mathcal{I} \rvert}
+  \sum_{i \in \mathcal{I}}
+  \log
+  \frac{\exp\bigl(s_\tau(\vect{z}_i,\vect{z}_{p(i)})\bigr)}
+       {\sum_{\substack{j \in \mathcal{I} \\ j \neq i}} \exp\bigl(s_\tau(\vect{z}_i,\vect{z}_j)\bigr)}.
+\end{equation}
+The denominator collects every candidate in the mini-batch except the anchor itself, so unrelated pairs act as negatives and collapse is discouraged \parencite{chen2020simclr}.
+The same expression is reused below with different choices of index sets, corresponding to different geometric constraints on the emitter and mode spaces.
 
-For deitneiarlving we compare each windows of a batch seapratly and comapre sit, then agggragate by mean.
+\subsection*{Emitter-oriented term (deinterleaving)}
 
-For mode classification we do dimmilatr, but compare two windwos at a time. thsi makes more snnse since we want the models to learng represtaniotn between pulses also . Note that the emebddings are obtained windwoswise, jsut the comparios done between 2 windows, and intrawindow of course. This could help since contstaive leanring usually use the augmetnted (Explain this better), where we have 2 smpaels that are compares. Maybe good.
+The emitter branch targets a representation in which pulses from the same physical emitter are close and pulses from different emitters are separated, which is the geometric content expected of a deinterleaving embedding \parencite{gunn2025deinterleaving}.
+For each window in a mini-batch, two views are formed by independent draws of the augmentation pipeline (once augmentations beyond deterministic scaling are fixed in \cref{sec:method:data}); the two views share semantics at the pulse level up to controlled perturbations, so they play the role of a positive pair in the sense of SimCLR \parencite{chen2020simclr}.
 
+Because emitter identity is a \emph{window-level} hypothesis in dense traffic, the contrastive signal is applied to a per-window summary of the emitter tokens rather than to isolated pulses without batch context.
+Let $b = 1,\ldots,B$ index windows in a batch and let $\bar{\vect{z}}^{\mathrm{em}}_b \in \R^{p}$ denote a fixed aggregation of $\{\vect{z}^{\mathrm{em}}_{b,n}\}_{n=1}^{L}$, such as the arithmetic mean over pulse positions after \cref{eq:method:proj_heads}.
+For each $b$, collect the two pooled view embeddings $\bar{\vect{z}}^{\mathrm{em}}_{b,(1)}$ and $\bar{\vect{z}}^{\mathrm{em}}_{b,(2)}$ and form the index set $\mathcal{I}^{\mathrm{em}}_b = \{(b,1),(b,2)\}$ together with the positive pairing that swaps the two views.
+Concatenate negatives by including the first-view pooled embeddings of all \emph{other} windows in the batch, following the standard ``one positive, many negatives'' recipe \parencite{chen2020simclr}.
+The emitter loss is the batch average of per-window NT-Xent values,
+\begin{equation}\label{eq:method:loss_emitter}
+  \Loss_{\mathrm{em}}
+  =
+  \frac{1}{B}\sum_{b=1}^{B}
+  \Loss_{\mathrm{NT}}\bigl(\mathcal{I}^{\mathrm{em}}_b \cup \mathcal{N}^{\mathrm{em}}_b,\, p(\cdot)\bigr).
+\end{equation}
+where $\mathcal{N}^{\mathrm{em}}_b$ denotes the chosen negative multiset for window $b$.
+This mean over windows matches the implementation choice to score each window's contrastive problem separately before aggregating, which keeps the repulsive set size stable when $B$ changes.
 
-Then the output are usually the priejctoin head discarded, we will do this for modes, but deinterelanving dosne't care about represatinos, only the results.
+\subsection*{Mode-oriented term}
 
+Operating modes induce finer structure within an emitter, often visible only when comparing pulse patterns across longer horizons than a single position index.
+The mode branch therefore uses the same NT-Xent functional form but mixes \emph{intra-window} comparisons with \emph{inter-window} comparisons so gradients flow both along the token sequence and between windows drawn from the same batch.
 
+Intra-window mode contrast follows \cref{eq:method:nt_xent} with $\mathcal{I}$ equal to pulse indices inside a window, positives given by the second augmented view at the same token index, and negatives taken from other positions in the same window and view, which encourages local discrimination of mode-relevant features.
 
+Inter-window mode contrast forms ordered pairs $(b,b')$ of distinct batch indices (for example random pairs or pairs chosen to exploit the half-window stride in \cref{sec:method:data} when two windows overlap in time).
+For each pair, embeddings $\vect{z}^{\mathrm{md}}_{b,n}$ and $\vect{z}^{\mathrm{md}}_{b',n'}$ are compared for a small set of index pairs $(n,n')$ (including the diagonal $n = n'$ if both windows are aligned to the same clock after preprocessing).
+The resulting NT-Xent terms are averaged over sampled pairs and, together with the intra-window term, define $\Loss_{\mathrm{md}}$.
+The construction parallels visual pipelines in which two ``crops'' of the same image are positives \parencite{chen2020simclr}, except that the natural pairing is induced by overlapping windows and augmentation rather than by spatial cropping.
 
+\subsection*{Combined objective and use of the projection heads}
+
+The overall training loss is the weighted sum
+\begin{equation}\label{eq:method:loss_total}
+  \Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},
+  \qquad
+  \lambda_{\mathrm{md}} > 0,
+\end{equation}
+with $\lambda_{\mathrm{md}}$ and $\tau$ treated as hyperparameters and reported in \cref{ch:experiments}.
+An auxiliary \gls{dec}-style KL term between soft cluster assignments and a target distribution \parencite{xie2016unsupervised} is a natural extension when trainable centroids or prototypes are added; the experiments chapter states whether such a term is active.
+
+Following common practice in self-supervised encoders \parencite{chen2020simclr}, the mode embeddings retained for visualization or nearest-neighbor mode analysis are the vectors $\vect{z}^{\mathrm{md}}_n$ from \cref{eq:method:proj_heads}, that is, the outputs of the mode linear head.
+For emitter-centric deinterleaving, the downstream deliverable is primarily the discrete per-pulse assignment $\hat{e}_n$ obtained by clustering pooled emitter embeddings or by reading off a discrete head if one is added later; once those labels are fixed, storing every $\vect{z}^{\mathrm{em}}_n$ is optional because the continuous representation is not required for the same operational tasks that consume hard emitter tracks.
