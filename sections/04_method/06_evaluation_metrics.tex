@@ -38,9 +38,9 @@ The \gls{ami} is
 \begin{equation}\label{eq:method:ami}
   \AMI(Y;\hat{Y})
   =
-  \frac{\mathrm{MI}(Y;\hat{Y})-\mathbb{E}[\mathrm{MI}]}{\max\{H(Y),H(\hat{Y})\}-\mathbb{E}[\mathrm{MI}]}\,,
+  \frac{\mathrm{MI}(Y;\hat{Y})-\mathbb{E}[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\mathbb{E}[\mathrm{MI}]}\,,
 \end{equation}
-where $H(\cdot)$ is Shannon entropy of the corresponding label distribution.
+where $H(\cdot)$ is Shannon entropy of the corresponding label distribution (the denominator uses the arithmetic mean of the marginal entropies, as in the default of common software implementations \parencite{vinh2010information}).
 
 \subsection*{V-measure}
 
