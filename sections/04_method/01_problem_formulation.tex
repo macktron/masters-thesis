@@ -31,7 +31,8 @@ The pair $(e_n,m_n)$ is not observed at training time; the learning problem is t
 
 \Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order.
 Fill color encodes the latent emitter index $e_n$; pulses that share a color belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
-Superimposed fill patterns (grayscale) encode the operating mode $m_n$; the legend at the right maps patterns to mode indices.
+Each stream cell uses that emitter fill \emph{and} a grayscale pattern for operating mode $m_n$; the vector label $\vect{x}_i$ inside each cell is drawn in black for legibility.
+The right-hand legends separate the two cues: emitter entries are color-only (no pattern), and mode entries are monochrome pattern tiles with black text.
 The formal partitions and mode hopping are stated mathematically in the text below.
 
 \begin{figure}[t]
@@ -45,7 +46,8 @@ The formal partitions and mode hopping are stated mathematically in the text bel
       minimum width=8.8mm,
       minimum height=8mm,
       inner sep=1.5pt,
-      align=center
+      align=center,
+      text=black
     },
     >=Latex
   ]
@@ -68,29 +70,31 @@ The formal partitions and mode hopping are stated mathematically in the text bel
     % Emitter legend: fixed column (swatch east edges aligned; text on a common vertical line)
     \begin{scope}[font=\footnotesize]
       \path let \p{e}=(p10.east) in coordinate (legline) at ({\x{e}+8mm},0);
-      \foreach \k/\col/\y in {1/blue!18/0.46,2/orange!22/0,3/green!20/-0.46} {
+      % Emitter legend: solid fill only (no pattern); labels in emitter hues
+      \foreach \k/\col/\txtcol/\y in {1/blue!18/blue!78!black/0.46,2/orange!22/orange!90!black/0,3/green!20/green!58!black/-0.46} {
         \node[pdw, fill=\col, minimum width=5.2mm, minimum height=4.5mm, anchor=east]
           (legb\k) at ($(legline)+(0,\y)$) {};
-        \node[anchor=mid west] at ($(legline)+(2.2mm,\y)$) {emitter $\k$};
+        \node[anchor=mid west, text=\txtcol] at ($(legline)+(2.2mm,\y)$) {emitter $\k$};
       }
-      % Mode legend: gray tiles with black patterns; column aligned like emitter legend
+      % Mode legend: gray + pattern only (no emitter hue); labels in black
       \coordinate (mlegline) at ($(legline)+(26mm,0)$);
       \node[pdw, fill=gray!42, pattern=horizontal lines, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
         (mlegb1) at ($(mlegline)+(0,0.46)$) {};
-      \node[anchor=mid west] at ($(mlegline)+(2.2mm,0.46)$) {mode $1$};
+      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,0.46)$) {mode $1$};
       \node[pdw, fill=gray!42, pattern=dots, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
         (mlegb2) at ($(mlegline)+(0,0)$) {};
-      \node[anchor=mid west] at ($(mlegline)+(2.2mm,0)$) {mode $2$};
+      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,0)$) {mode $2$};
       \node[pdw, fill=gray!42, pattern=north east lines, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
         (mlegb3) at ($(mlegline)+(0,-0.46)$) {};
-      \node[anchor=mid west] at ($(mlegline)+(2.2mm,-0.46)$) {mode $3$};
+      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,-0.46)$) {mode $3$};
     \end{scope}
   \end{tikzpicture}
   \caption{Illustration of a \gls{pdw} stream $\vect{x}_1,\ldots,\vect{x}_N$ in time order.
-    Background color indicates latent emitter identity $e_n$; superimposed grayscale patterns indicate operating mode $m_n$ (horizontal lines for mode $1$, dots for mode $2$, north-east hatching for mode $3$).
+    Each cell combines emitter color (fill) and operating-mode pattern; the in-cell vector index is typeset in black.
+    The emitter legend uses color-only swatches with matching colored text; the mode legend uses grayscale pattern swatches with black text.
     Emitter clustering seeks a partition of indices into subsets $\mathcal{E}_k$ (constant $e_n$ on each subset); mode clustering seeks a second partition into subsets $\mathcal{M}_\ell$ (constant $m_n$), while allowing mode hops within a fixed emitter.}
   \label{fig:method:pdw_emitter_stream}
 \end{figure}
