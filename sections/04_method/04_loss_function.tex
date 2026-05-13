@@ -14,11 +14,14 @@ Swapping cluster assignments instead of raw embeddings is an alternative that co
 
 \subsection*{NT-Xent building block}
 
-Let $\phi(\vect{z}) = \vect{z}/\lVert \vect{z} \rVert_2$ denote $\ell_2$ normalization and fix a temperature $\tau > 0$.
+Let $\phi(\vect{z}) = \vect{z}/\lVert \vect{z} \rVert_2$ denote $\ell_2$ normalization and let $\tau > 0$ denote the contrastive temperature.
 Write the scaled cosine similarity as
 \begin{equation}\label{eq:method:sim_tau}
   s_\tau(\vect{a},\vect{b}) = \frac{1}{\tau}\,\phi(\vect{a})^\top \phi(\vect{b}).
 \end{equation}
+The temperature $\tau$ rescales inner products after normalization: smaller $\tau$ sharpens the softmax in \cref{eq:method:nt_xent}, so the loss concentrates on the hardest negatives and gradients emphasize fine separation on the sphere, whereas larger $\tau$ yields a softer distribution closer to uniform and can stabilize optimization when embeddings are poorly separated early in training \parencite{chen2020simclr}.
+All contrastive terms in this thesis share a fixed $\tau = 0.2$, in line with values often used for NT-Xent on normalized features \parencite{chen2020simclr}.
+
 For a finite index set $\mathcal{I}$ with embeddings $\{\vect{z}_i\}_{i \in \mathcal{I}}$ and a distinguished \emph{positive} index $p(i) \neq i$ for each anchor $i \in \mathcal{I}$, define the InfoNCE / NT-Xent contribution
 \begin{equation}\label{eq:method:nt_xent}
   \Loss_{\mathrm{NT}}(\mathcal{I},\{p(i)\}_{i \in \mathcal{I}})
@@ -71,7 +74,7 @@ The overall training loss is the weighted sum
   \qquad
   \lambda_{\mathrm{md}} > 0,
 \end{equation}
-with $\lambda_{\mathrm{md}}$ and $\tau$ treated as hyperparameters and reported in \cref{ch:experiments}.
+with $\lambda_{\mathrm{md}}$ treated as a hyperparameter and reported in \cref{ch:experiments}.
 An auxiliary \gls{dec}-style KL term between soft cluster assignments and a target distribution \parencite{xie2016unsupervised} is a natural extension when trainable centroids or prototypes are added; the experiments chapter states whether such a term is active.
 
 Following common practice in self-supervised encoders \parencite{chen2020simclr}, the mode embeddings retained for visualization or nearest-neighbor mode analysis are the vectors $\vect{z}^{\mathrm{md}}_n$ from \cref{eq:method:proj_heads}, that is, the outputs of the mode linear head.
