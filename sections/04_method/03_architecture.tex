@@ -1,8 +1,14 @@
 \section{Transformer Encoder Architecture}\label{sec:method:arch}
 
-The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches.
-This layout mirrors the dual-embedding structure introduced in \cref{sec:method:formulation}: the trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings.
-% TODO: include figures/method/architecture.pdf once the schematic is drawn.
+The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches; the overall layout is shown in \cref{fig:method:arch}.
+This structure mirrors the dual-embedding formulation introduced in \cref{sec:method:formulation}: the trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/architecture.tex}
+  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an input embedding, processed by a shared trunk of $6$ transformer-encoder layers, and then split into two parallel branches with their own $256\!\to\!128$ projection and $2$ encoder layers. Branch outputs are mapped by linear projection heads to the emitter embedding space $\R^{8}$ and the mode embedding space $\R^{16}$.}
+  \label{fig:method:arch}
+\end{figure}
 
 \subsection*{Input embedding}
 

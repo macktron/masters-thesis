@@ -1,0 +1,86 @@
+% =====================================================================
+% Schematic of the Y-shaped transformer encoder f_theta used in
+% \cref{sec:method:arch}.  Designed for the single-column thesis body
+% (text width ~155 mm); portrait orientation, bottom-up data flow.
+% Loaded from sections/04_method/03_architecture.tex via \input{...}.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    >=Latex,
+    node distance=6mm and 8mm,
+    every node/.style={transform shape},
+    block/.style={
+      draw, thick, rounded corners=2pt,
+      align=center,
+      inner sep=4pt, inner ysep=5pt,
+      minimum height=9mm,
+    },
+    io/.style={align=center, font=\small\itshape, inner sep=2pt},
+    embed/.style={block, fill=orange!12, minimum width=62mm},
+    trunk/.style={block, fill=gray!15,   minimum width=62mm},
+    proj/.style={block,  fill=blue!8,    minimum width=42mm},
+    branch/.style={block,fill=blue!15,   minimum width=42mm},
+    head/.style={block,  fill=green!15,  minimum width=42mm},
+    arrow/.style={->, thick, shorten <=1pt, shorten >=1pt},
+    line/.style={thick,  shorten <=1pt, shorten >=1pt},
+  ]
+
+  \node[io] (in)
+    {\glspl{pdw}: $\vect{x}_1,\ldots,\vect{x}_L \in \R^{d}$};
+
+  \node[embed, above=of in] (embed)
+    {Input embedding\\
+     $\vect{h}^{(0)}_n = \mat{W}_{\mathrm{in}}\vect{x}_n + \vect{b}_{\mathrm{in}}$
+     \;:\; $\R^{d}\!\to\!\R^{256}$};
+
+  \node[trunk, above=of embed] (trunk)
+    {Shared transformer trunk\\
+     $N_{\mathrm{sh}}{=}6$ encoder layers \;($\times 6$)\\
+     $d_{\mathrm{model}}{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
+
+  \coordinate (fork) at ($(trunk.north)+(0,5mm)$);
+
+  \node[proj] (proj_em) at ($(fork)+(-25mm, 9mm)$)
+    {Linear $256 \!\to\! 128$};
+  \node[proj] (proj_md) at ($(fork)+( 25mm, 9mm)$)
+    {Linear $256 \!\to\! 128$};
+
+  \node[branch, above=of proj_em] (br_em)
+    {Emitter branch\\
+     $N_{\mathrm{br}}{=}2$ enc.\ layers \;($\times 2$)\\
+     $d{=}128$,\; $h{=}4$,\; $d_{\mathrm{ff}}{=}1024$};
+  \node[branch, above=of proj_md] (br_md)
+    {Mode branch\\
+     $N_{\mathrm{br}}{=}2$ enc.\ layers \;($\times 2$)\\
+     $d{=}128$,\; $h{=}4$,\; $d_{\mathrm{ff}}{=}1024$};
+
+  \node[head, above=of br_em] (head_em)
+    {Projection head\\
+     $\mat{W}_{\mathrm{em}} : \R^{128}\!\to\!\R^{8}$};
+  \node[head, above=of br_md] (head_md)
+    {Projection head\\
+     $\mat{W}_{\mathrm{md}} : \R^{128}\!\to\!\R^{16}$};
+
+  \node[io, above=of head_em] (out_em)
+    {Emitter embedding\\$\vect{z}^{\mathrm{em}}_n \in \R^{8}$};
+  \node[io, above=of head_md] (out_md)
+    {Mode embedding\\$\vect{z}^{\mathrm{md}}_n \in \R^{16}$};
+
+  \draw[arrow] (in)        -- (embed);
+  \draw[arrow] (embed)     -- (trunk);
+  \draw[line]  (trunk.north) -- (fork);
+  \draw[arrow] (fork) -| (proj_em.south);
+  \draw[arrow] (fork) -| (proj_md.south);
+  \draw[arrow] (proj_em)   -- (br_em);
+  \draw[arrow] (proj_md)   -- (br_md);
+  \draw[arrow] (br_em)     -- (head_em);
+  \draw[arrow] (br_md)     -- (head_md);
+  \draw[arrow] (head_em)   -- (out_em);
+  \draw[arrow] (head_md)   -- (out_md);
+
+  \node[anchor=west, font=\footnotesize\itshape, gray!70!black]
+    at ($(trunk.east)+(2mm,0)$) {shared};
+  \node[anchor=west, font=\footnotesize\itshape, gray!70!black]
+    at ($(br_em.east -| trunk.east)+(2mm,0)$) {task-specific};
+
+\end{tikzpicture}
