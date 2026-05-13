@@ -1,5 +1,32 @@
 \section{Evaluation Metrics}\label{sec:method:metrics}
 
-% TODO: Define NMI (\NMI), ARI (\ARI), clustering accuracy with
-% Hungarian alignment (\ACC), and purity. Explain why each is used.
-Placeholder paragraph.
+Unsupervised models yield continuous embeddings and discrete cluster assignments; external evaluation compares those assignments to reference emitter and mode labels whenever they exist (for example in simulated or curated benchmarks).
+This section defines the metrics reported later in \cref{ch:experiments} and clarifies what each quantity measures.
+
+\paragraph{Information-theoretic agreement.}
+\gls{nmi} quantifies shared information between two partitions while normalizing by their marginal entropies, so that $0 \leq \NMI \leq 1$, with larger scores indicating closer agreement \parencite{vinh2010information}.
+\gls{ami} applies an additional correction for chance in the spirit of the adjusted Rand construction, which can stabilize comparisons when cluster sizes are imbalanced or the number of clusters differs from the number of reference classes \parencite{vinh2010information}.
+Both treat the partitions as categorical fields over pulses (or over sequences, if labels are defined at sequence level) and are invariant to permutations of cluster indices.
+
+\paragraph{Pairwise concordance.}
+\gls{ari} compares all pulse pairs and measures how often predicted co-assignment matches the reference, while subtracting the expected agreement under a random partition with the same cluster sizes \parencite{hubert1985comparing}.
+It ranges from negative values (worse than chance) to $1$ for perfect agreement and is less sensitive to homogeneous splits that inflate raw mutual information.
+
+\paragraph{Homogeneity and completeness.}
+\gls{vmeasure} is the harmonic mean of homogeneity (each cluster contains members of a single reference class) and completeness (all members of a reference class fall in one cluster), again in $[0,1]$ with $1$ indicating perfect correspondence up to renaming \parencite{rosenberg2007v}.
+It complements \gls{nmi} and \gls{ami} by making the trade-off between fragmentation and merging explicit.
+
+\paragraph{Hungarian accuracy.}
+\gls{acc} denotes clustering accuracy after an optimal permutation of cluster indices is chosen by the Hungarian algorithm so as to maximize the number of correctly assigned points.
+It is intuitive and widely reported, but it assumes one-to-one alignment between inferred clusters and reference classes and can be optimistic when the inferred number of clusters differs from the ground truth or when several physical modes map to the same cluster.
+
+\paragraph{Purity.}
+Purity averages, over predicted clusters, the largest fraction of points that share a single reference label.
+It is easy to interpret but favors fine partitions: splitting a coherent class into many singleton clusters yields high purity even though the clustering is not useful, so it is reported alongside the other metrics rather than in isolation.
+
+\paragraph{Qualitative inspection.}
+Two-dimensional scatter plots of embeddings after \gls{umap} reduction \parencite{mcinnes2018umap} provide a sanity check that local neighborhoods respect emitter or mode structure, especially when quantitative scores are similar across methods.
+Such plots are illustrative only: distances in the projection need not match distances in the original embedding space.
+
+\paragraph{Protocol remarks.}
+Metrics are computed on held-out batches or splits reserved for testing; exact batch construction, scenario identifiers, and the relationship between scenario difficulty (for example, emitter count and overlap) and scores are documented with the experimental results in \cref{ch:experiments}.
