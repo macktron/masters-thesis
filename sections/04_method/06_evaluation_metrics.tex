@@ -1,32 +1,63 @@
 \section{Evaluation Metrics}\label{sec:method:metrics}
 
-Unsupervised models yield continuous embeddings and discrete cluster assignments; external evaluation compares those assignments to reference emitter and mode labels whenever they exist (for example in simulated or curated benchmarks).
-This section defines the metrics reported later in \cref{ch:experiments} and clarifies what each quantity measures.
+Let $y_n$ denote a reference label and $\hat{y}_n$ a predicted cluster index for pulse $n\in\{1,\ldots,N\}$, as in \cref{eq:method:cardinalities,eq:method:dual_embeddings}.
+The same formulas apply when $(y_n,\hat{y}_n)$ is instantiated by emitter pairs $(e_n,\hat{e}_n)$ or mode pairs $(m_n,\hat{m}_n)$.
+Write $n_{ij}$ for the contingency count with reference class $i$ and predicted cluster $j$, with row and column sums $a_i=\sum_j n_{ij}$ and $b_j=\sum_i n_{ij}$.
 
-\paragraph{Information-theoretic agreement.}
-\gls{nmi} quantifies shared information between two partitions while normalizing by their marginal entropies, so that $0 \leq \NMI \leq 1$, with larger scores indicating closer agreement \parencite{vinh2010information}.
-\gls{ami} applies an additional correction for chance in the spirit of the adjusted Rand construction, which can stabilize comparisons when cluster sizes are imbalanced or the number of clusters differs from the number of reference classes \parencite{vinh2010information}.
-Both treat the partitions as categorical fields over pulses (or over sequences, if labels are defined at sequence level) and are invariant to permutations of cluster indices.
+\subsection*{Adjusted Rand index}
 
-\paragraph{Pairwise concordance.}
-\gls{ari} compares all pulse pairs and measures how often predicted co-assignment matches the reference, while subtracting the expected agreement under a random partition with the same cluster sizes \parencite{hubert1985comparing}.
-The score satisfies $\ARI \leq 1$, with $\ARI = 1$ for perfect agreement and values near zero under chance-like assignments; it is less sensitive than raw Rand index to homogeneous splits that inflate agreement counts.
+The \gls{ari} compares clusterings through pair counts and corrects for chance \parencite{hubert1985comparing},
+\begin{equation}\label{eq:method:ari}
+  \ARI
+  =
+  \frac{
+    \displaystyle\sum_{i,j}\binom{n_{ij}}{2}
+    -
+    \bigl[\sum_i\binom{a_i}{2}\bigr]\bigl[\sum_j\binom{b_j}{2}\bigr]\big/\binom{N}{2}
+  }{
+    \displaystyle\frac{1}{2}\Bigl[\sum_i\binom{a_i}{2}+\sum_j\binom{b_j}{2}\Bigr]
+    -
+    \bigl[\sum_i\binom{a_i}{2}\bigr]\bigl[\sum_j\binom{b_j}{2}\bigr]\big/\binom{N}{2}
+  }\,.
+\end{equation}
+It satisfies $\ARI\le 1$, with $\ARI=1$ for identical partitions up to renaming clusters.
 
-\paragraph{Homogeneity and completeness.}
-\gls{vmeasure} is the harmonic mean of homogeneity (each cluster contains members of a single reference class) and completeness (all members of a reference class fall in one cluster), again in $[0,1]$ with $1$ indicating perfect correspondence up to renaming \parencite{rosenberg2007v}.
-It complements \gls{nmi} and \gls{ami} by making the trade-off between fragmentation and merging explicit.
+\subsection*{Adjusted mutual information}
 
-\paragraph{Hungarian accuracy.}
-\gls{acc} denotes clustering accuracy after an optimal permutation of cluster indices is chosen by the Hungarian algorithm so as to maximize the number of correctly assigned points; we denote the resulting score by $\ACC$.
-It is intuitive and widely reported, but it assumes one-to-one alignment between inferred clusters and reference classes and can be optimistic when the inferred number of clusters differs from the ground truth or when several physical modes map to the same cluster.
+View $Y$ and $\hat{Y}$ as the labels of a uniformly sampled pulse index.
+Their (empirical) mutual information is
+\begin{equation}\label{eq:method:mi}
+  \mathrm{MI}(Y;\hat{Y})
+  =
+  \sum_{i,j}\frac{n_{ij}}{N}\,
+  \log\frac{N\,n_{ij}}{a_i b_j}\,,
+\end{equation}
+with the convention $0\log 0=0$.
+Let $\mathbb{E}[\mathrm{MI}]$ denote the expectation of mutual information under the permutation null that fixes one marginal partition while permuting assignments subject to fixed cluster sizes \parencite{vinh2010information}.
+The \gls{ami} is
+\begin{equation}\label{eq:method:ami}
+  \AMI(Y;\hat{Y})
+  =
+  \frac{\mathrm{MI}(Y;\hat{Y})-\mathbb{E}[\mathrm{MI}]}{\max\{H(Y),H(\hat{Y})\}-\mathbb{E}[\mathrm{MI}]}\,,
+\end{equation}
+where $H(\cdot)$ is Shannon entropy of the corresponding label distribution.
 
-\paragraph{Purity.}
-Purity averages, over predicted clusters, the largest fraction of points that share a single reference label.
-It is easy to interpret but favors fine partitions: splitting a coherent class into many singleton clusters yields high purity even though the clustering is not useful, so it is reported alongside the other metrics rather than in isolation.
+\subsection*{V-measure}
 
-\paragraph{Qualitative inspection.}
-Two-dimensional scatter plots of embeddings after \gls{umap} reduction \parencite{mcinnes2018umap} provide a sanity check that local neighborhoods respect emitter or mode structure, especially when quantitative scores are similar across methods.
-Such plots are illustrative only: distances in the projection need not match distances in the original embedding space.
+Let $H(Y\mid \hat{Y})$ and $H(\hat{Y}\mid Y)$ be conditional entropies computed from the same contingency table as in \cref{eq:method:mi}.
+Homogeneity and completeness are \parencite{rosenberg2007v}
+\begin{equation}\label{eq:method:vmeasure_hc}
+  h = 1-\frac{H(Y\mid \hat{Y})}{H(Y)}\,,\qquad
+  c = 1-\frac{H(\hat{Y}\mid Y)}{H(\hat{Y})}\,,
+\end{equation}
+with $h=1$ when $H(Y)=0$ and $c=1$ when $H(\hat{Y})=0$.
+The \gls{vmeasure} is their harmonic mean,
+\begin{equation}\label{eq:method:vmeasure}
+  \mathrm{V}(Y,\hat{Y})=\frac{2hc}{h+c}\,,\qquad h+c>0\,,
+\end{equation}
+and $\mathrm{V}=0$ if $h=c=0$.
 
-\paragraph{Protocol remarks.}
-Metrics are computed on held-out batches or splits reserved for testing; exact batch construction, scenario identifiers, and the relationship between scenario difficulty (for example, emitter count and overlap) and scores are documented with the experimental results in \cref{ch:experiments}.
+\subsection*{Visual inspection}
+
+Embeddings $\{\vect{z}^{\mathrm{em}}_n\}$ or $\{\vect{z}^{\mathrm{md}}_n\}$ are projected to two dimensions for scatter plots coloured by reference labels, as a qualitative check of local geometry when scores in \cref{eq:method:ari,eq:method:ami,eq:method:vmeasure} are tied across methods.
+Numerical results and evaluation protocols are given in \cref{ch:experiments}.
