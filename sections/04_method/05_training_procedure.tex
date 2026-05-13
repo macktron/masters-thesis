@@ -1,5 +1,23 @@
 \section{Training Procedure}\label{sec:method:training}
 
-% TODO: Optimizer, schedule, batch size, epochs, pretraining vs.
-% fine-tuning, target-distribution updates if DEC-style, loss warm-up.
-Placeholder paragraph.
+The parameter vector $\bm{\theta}$ attached to the maps in \cref{eq:method:input_embed,eq:method:proj_heads} is estimated by minimising the training objective $\Loss$ in \cref{eq:method:loss_total} on mini-batches of windows.
+Gradients are obtained by reverse-mode automatic differentiation and used in an adaptive first-order optimiser of the Adam family \parencite{kingma2015adam}.
+Unless \cref{ch:experiments} specifies otherwise, the implementation follows the default moment decay rates $(\beta_1,\beta_2) = (0.9,0.999)$, stabiliser $\epsilon = 10^{-8}$, and bias-corrected running estimates of the first and second moments described by \textcite{kingma2015adam}, as exposed by the PyTorch optimiser interface.
+
+The learning rate follows a cosine decay from a peak value down to a small floor over the course of training, which keeps step sizes comparatively large while the loss landscape is coarse and shrinks them during the final refinement phase.
+Peak learning rate, weight decay, batch size, number of passes over the training windows, and the exact step counting convention (per epoch versus global step) are hyperparameters and are listed in \cref{ch:experiments}.
+At the start of each epoch, training windows are shuffled so that consecutive mini-batches are not ordered by scenario; any fixed random seeds, data-loader worker counts, and reproducibility settings used in the reported runs are stated alongside those hyperparameters.
+
+Dropout inside the transformer blocks of \cref{sec:method:arch} follows the usual pattern of stochastic attention and feed-forward masks; dropout rates belong to the same hyperparameter table.
+Training can be stopped early when a validation score computed on held-out windows (for example the smoothed mini-batch loss or an auxiliary clustering criterion) fails to improve for a fixed patience measured in epochs, in which case the best checkpoint prior to stagnation is retained; patience, validation metric, and checkpoint policy are also recorded in \cref{ch:experiments}.
+
+If a \gls{dec}-style Kullback--Leibler term is added as suggested in \cref{sec:method:loss}, target distributions are recomputed from the student assignments on a schedule analogous to \textcite{xie2016unsupervised}, and any sharpening temperature or update period is treated as part of the optimisation protocol reported in \cref{ch:experiments}.
+Likewise, the mode-branch weight $\lambda_{\mathrm{md}}$ may be held small during an initial warm-up segment so that the trunk learns coarse temporal structure before the finer mode contrastive gradients dominate; whether such a ramp is used, and its length, is part of the same configuration table.
+The experiments in this thesis use a single continuous training phase; staged schedules such as representation pretraining followed by clustering fine-tuning would be documented here if they were adopted.
+
+@article{kingma2015adam,
+  title   = {Adam: A Method for Stochastic Optimization},
+  author  = {Kingma, Diederik P. and Ba, Jimmy},
+  journal = {International Conference on Learning Representations (ICLR)},
+  year    = {2015},
+}
