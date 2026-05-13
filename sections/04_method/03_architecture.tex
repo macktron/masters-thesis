@@ -3,4 +3,10 @@
 % TODO: Input embedding, positional encoding (with any custom variant
 % for irregular TOA), number of layers/heads/hidden dim, output
 % projection head(s). Include figures/method/architecture.pdf.
-Placeholder paragraph.
+Architectutre used was tranofmer encoders stacked. Without any posivaional encoding since the paper XXhttps://arxiv.org/pdf/2503.13476 sadi so , and we have teh TOA already. We use batch firzt and layer norm. The first 6 layers are shared between booth tasks. Then the output of hte 6 the layer is spit up into twp separate tranformers treams , one for modes, and one for deinitealerving. We use 2 lauers each here.
+
+the output is the finally also tranofrmaed using a projection head for each from d-modeel to 16 dims for modes clustering and 8 for deiniteralvng. 
+
+D model is 256 for the shared layers, with 8 heads and 2048 dim deedforamweds. 
+
+The splitted tranfomrer blocks wach have 2 layers, d model is 128, 4 heads and dim feedforward sis 1024.
