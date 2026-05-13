@@ -4,4 +4,9 @@
 % stream of PDWs containing multiple emitters and modes, learn an
 % embedding from which both emitter identity and mode can be recovered
 % by clustering.
-Placeholder paragraph.
+Modern radar systems are evolving rapidly. They can change their transmission behavior on the fly (often called “agile” radars), which makes it increasingly difficult for traditional, rule‑based methods to classify and identify them reliably. In Electronic Warfare (EW), Electronic Support Measures (ESM) systems passively listen to the electromagnetic environment and aim to detect, characterize, and identify radar emitters in order to enhance situational awareness and protection.
+Radars emit short bursts of energy known as pulses. Different radars tend to produce characteristic patterns across pulse features such as carrier frequency, pulse width, time of arrival, and angle of arrival. By analyzing these patterns, it is possible to infer how many emitters are present and which emitters they are. However, overlapping signals, agile behavior, noise, and dynamic scenarios make this a complex pattern recognition problem.
+
+
+This thesis addresses the end-to-end ML classification problem of determining, from recorded radar pulses, both the number of radar emitters present in a flight simulation and their identities. The work will use labeled, simulator‑generated ESM data provided by Saab, in which each pulse is described by features such as frequency, pulse width, time of arrival (ToA), and angle of arrival (AoA). The problem is formulated as a supervised learning task, with the goal of training models that map pulse observations to emitter identities. 
+For this thesis you will both design an AI model but also analyze the simulated data. To understand how good the model is it is also required to understand the difficulty of the data it is evaluated on. You will create metrics for measuring dataset complexity and then compare how your model performs on data of varying complexity according to your metrics. 
