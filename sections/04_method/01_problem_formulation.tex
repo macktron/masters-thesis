@@ -30,8 +30,9 @@ The pair $(e_n,m_n)$ is not observed at training time; the learning problem is t
 \subsection*{Induced partitions, \gls{pdw} streams, and mode hopping}
 
 \Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order.
-Fill colour encodes the latent emitter index $e_n$; pulses that share a colour belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
-Mode labels $m_n$ are omitted from the schematic; the formal partitions and mode hopping are defined in the text immediately below.
+Fill color encodes the latent emitter index $e_n$; pulses that share a color belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
+Superimposed fill patterns (grayscale) encode the operating mode $m_n$; the legend at the right maps patterns to mode indices.
+The formal partitions and mode hopping are stated mathematically in the text below.
 
 \begin{figure}[t]
   \centering
@@ -48,11 +49,19 @@ Mode labels $m_n$ are omitted from the schematic; the formal partitions and mode
     },
     >=Latex
   ]
-    \foreach \i/\col [count=\n] in {
-      1/blue!18,2/orange!22,3/blue!18,4/orange!22,5/blue!18,
-      6/green!20,7/orange!22,8/blue!18,9/green!20,10/orange!22
+    \foreach \i/\col/\m [count=\n] in {
+      1/blue!18/1,2/orange!22/1,3/blue!18/2,4/orange!22/2,5/blue!18/1,
+      6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
     } {
-      \node[pdw, fill=\col] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+      \ifnum\m=1
+        \node[pdw, fill=\col, pattern=horizontal lines, pattern color=black!48] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+      \else
+        \ifnum\m=2
+          \node[pdw, fill=\col, pattern=dots, pattern color=black!52] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+        \else
+          \node[pdw, fill=\col, pattern=north east lines, pattern color=black!48] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+        \fi
+      \fi
     }
     \draw[->, thick] (0.35,-0.62) -- ({10+0.65},-0.62)
       node[midway, below=2.5pt, font=\footnotesize] {pulse index $n$ (time order)};
@@ -64,10 +73,24 @@ Mode labels $m_n$ are omitted from the schematic; the formal partitions and mode
           (legb\k) at ($(legline)+(0,\y)$) {};
         \node[anchor=mid west] at ($(legline)+(2.2mm,\y)$) {emitter $\k$};
       }
+      % Mode legend: gray tiles with black patterns; column aligned like emitter legend
+      \coordinate (mlegline) at ($(legline)+(26mm,0)$);
+      \node[pdw, fill=gray!42, pattern=horizontal lines, pattern color=black!68,
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+        (mlegb1) at ($(mlegline)+(0,0.46)$) {};
+      \node[anchor=mid west] at ($(mlegline)+(2.2mm,0.46)$) {mode $1$};
+      \node[pdw, fill=gray!42, pattern=dots, pattern color=black!68,
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+        (mlegb2) at ($(mlegline)+(0,0)$) {};
+      \node[anchor=mid west] at ($(mlegline)+(2.2mm,0)$) {mode $2$};
+      \node[pdw, fill=gray!42, pattern=north east lines, pattern color=black!68,
+            minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+        (mlegb3) at ($(mlegline)+(0,-0.46)$) {};
+      \node[anchor=mid west] at ($(mlegline)+(2.2mm,-0.46)$) {mode $3$};
     \end{scope}
   \end{tikzpicture}
   \caption{Illustration of a \gls{pdw} stream $\vect{x}_1,\ldots,\vect{x}_N$ in time order.
-    Background colour indicates latent emitter identity $e_n$.
+    Background color indicates latent emitter identity $e_n$; superimposed grayscale patterns indicate operating mode $m_n$ (horizontal lines for mode $1$, dots for mode $2$, north-east hatching for mode $3$).
     Emitter clustering seeks a partition of indices into subsets $\mathcal{E}_k$ (constant $e_n$ on each subset); mode clustering seeks a second partition into subsets $\mathcal{M}_\ell$ (constant $m_n$), while allowing mode hops within a fixed emitter.}
   \label{fig:method:pdw_emitter_stream}
 \end{figure}
