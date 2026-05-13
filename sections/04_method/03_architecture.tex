@@ -1,12 +1,44 @@
 \section{Transformer Encoder Architecture}\label{sec:method:arch}
 
-% TODO: Input embedding, positional encoding (with any custom variant
-% for irregular TOA), number of layers/heads/hidden dim, output
-% projection head(s). Include figures/method/architecture.pdf.
-Architectutre used was tranofmer encoders stacked. Without any posivaional encoding since the paper XXhttps://arxiv.org/pdf/2503.13476 sadi so , and we have teh TOA already. We use batch firzt and layer norm. The first 6 layers are shared between booth tasks. Then the output of hte 6 the layer is spit up into twp separate tranformers treams , one for modes, and one for deinitealerving. We use 2 lauers each here.
+The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches.
+This layout mirrors the dual-embedding structure introduced in \cref{sec:method:formulation}: the trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings.
+% TODO: include figures/method/architecture.pdf once the schematic is drawn.
 
-the output is the finally also tranofrmaed using a projection head for each from d-modeel to 16 dims for modes clustering and 8 for deiniteralvng. 
+\subsection*{Input embedding}
 
-D model is 256 for the shared layers, with 8 heads and 2048 dim deedforamweds. 
+Each \gls{pdw} vector $\vect{x}_n \in \R^{d}$, normalised as described in \cref{sec:method:data}, is mapped to a token embedding through an affine projection
+\begin{equation}\label{eq:method:input_embed}
+  \vect{h}^{(0)}_n = \mat{W}_{\mathrm{in}}\vect{x}_n + \vect{b}_{\mathrm{in}},
+  \qquad
+  \vect{h}^{(0)}_n \in \R^{d_{\mathrm{model}}},
+\end{equation}
+where $\mat{W}_{\mathrm{in}} \in \R^{d_{\mathrm{model}} \times d}$ and $d_{\mathrm{model}}$ is the trunk width specified below.
+No positional encoding is added to $\vect{h}^{(0)}_n$.
+The temporal ordering of pulses is already carried by the \gls{toa} entry of $\vect{x}_n$, which makes a separate position signal redundant; consistent with this argument, \textcite{gunn2025deinterleaving} report that adding sinusoidal or learnable positional encodings to a transformer deinterleaver yields a small but reproducible drop in performance, attributed to the resulting redundancy with the \gls{toa} feature.
 
-The splitted tranfomrer blocks wach have 2 layers, d model is 128, 4 heads and dim feedforward sis 1024.
+\subsection*{Shared trunk}
+
+The token sequence $(\vect{h}^{(0)}_1,\ldots,\vect{h}^{(0)}_L)$ is processed by a stack of $N_{\mathrm{sh}}$ standard transformer-encoder layers, each comprising a \gls{mha} sub-layer and a position-wise \gls{ffn} sub-layer with residual connections and layer normalisation around both.
+Self-attention is unmasked, so every pulse can attend to every other pulse in the window.
+The trunk operates with hidden dimension $d_{\mathrm{model}} = 256$, $h_{\mathrm{sh}} = 8$ attention heads (so that each head has dimension $32$), and an inner \gls{ffn} dimension of $d_{\mathrm{ff,sh}} = 2048$; $N_{\mathrm{sh}} = 6$ layers are used.
+Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}^{\mathrm{sh}}_1,\ldots,\vect{h}^{\mathrm{sh}}_L)$ with $\vect{h}^{\mathrm{sh}}_n \in \R^{256}$, in which information has been mixed across the full window.
+
+\subsection*{Task-specific branches}
+
+The trunk output feeds two parallel branches that do not share parameters, producing the dual embeddings of \cref{eq:method:dual_embeddings}.
+Each branch begins with an affine projection that reduces the hidden width from $d_{\mathrm{model}} = 256$ to $d_{\mathrm{br}} = 128$, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
+Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (again with per-head dimension $32$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
+The reduced width and depth reflect a deliberate asymmetry: the trunk is intended to carry the heavy lifting of contextual mixing, while the branches only need to specialise the representation to either emitter identity or operating mode.
+Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{128}$.
+
+\subsection*{Projection heads}
+
+Each branch terminates in a linear projection head that maps every token to its respective embedding space,
+\begin{equation}\label{eq:method:proj_heads}
+  \vect{z}^{\mathrm{em}}_n = \mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}},
+  \qquad
+  \vect{z}^{\mathrm{md}}_n = \mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}},
+\end{equation}
+with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
+The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
+The collection of all linear maps in \cref{eq:method:input_embed,eq:method:proj_heads} together with the attention and \gls{ffn} weights of the trunk and branches constitutes the parameter vector $\bm{\theta}$ that the loss in \cref{sec:method:loss} optimises.
