@@ -31,7 +31,7 @@ The pair $(e_n,m_n)$ is not observed at training time; the learning problem is t
 
 \Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order.
 Fill colour encodes the latent emitter index $e_n$; pulses that share a colour belong to the same emitter-specific subset of indices even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
-The row of mode annotations shows $m_n$ evolving along the stream; within a single emitter, \emph{mode hopping} appears as changes in $m_n$ while $e_n$ is unchanged between those pulses.
+Mode labels $m_n$ are omitted from the schematic; in data, \emph{mode hopping} still couples $m_n$ to $e_n$ as described above and in the caption.
 
 \begin{figure}[t]
   \centering
@@ -53,24 +53,21 @@ The row of mode annotations shows $m_n$ evolving along the stream; within a sing
       6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
     } {
       \node[pdw, fill=\col] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
-      \node[below=0.2em of p\n.south, font=\scriptsize, inner sep=0pt, outer sep=0.15pt]
-        {$\scriptstyle m_{\i}\!=\!\m$};
     }
-    \draw[->, thick] (0.35,-1.12) -- ({10+0.65},-1.12)
+    \draw[->, thick] (0.35,-0.62) -- ({10+0.65},-0.62)
       node[midway, below=2.5pt, font=\footnotesize] {pulse index $n$ (time order)};
-    % Emitter legend: stacked to the right of the stream
+    % Emitter legend: fixed column (swatch east edges aligned; text on a common vertical line)
     \begin{scope}[font=\footnotesize]
-      \coordinate (leganchor) at ($(p10.east)+(6.5mm,0.12)$);
-      \node[pdw, fill=blue!18, minimum width=4.6mm, minimum height=4mm, anchor=west] (leg1) at (leganchor) {};
-      \node[anchor=west] at (leg1.east) {\kern2pt emitter $1$};
-      \node[pdw, fill=orange!22, minimum width=4.6mm, minimum height=4mm, anchor=north west, below=0.38em of leg1.south west] (leg2) {};
-      \node[anchor=west] at (leg2.east) {\kern2pt emitter $2$};
-      \node[pdw, fill=green!20, minimum width=4.6mm, minimum height=4mm, anchor=north west, below=0.38em of leg2.south west] (leg3) {};
-      \node[anchor=west] at (leg3.east) {\kern2pt emitter $3$};
+      \path let \p{e}=(p10.east) in coordinate (legline) at ({\x{e}+8mm},0);
+      \foreach \k/\col/\y in {1/blue!18/0.46,2/orange!22/0,3/green!20/-0.46} {
+        \node[pdw, fill=\col, minimum width=5.2mm, minimum height=4.5mm, anchor=east]
+          (legb\k) at ($(legline)+(0,\y)$) {};
+        \node[anchor=mid west] at ($(legline)+(2.2mm,\y)$) {emitter $\k$};
+      }
     \end{scope}
   \end{tikzpicture}
   \caption{Illustration of a \gls{pdw} stream $\vect{x}_1,\ldots,\vect{x}_N$ in time order.
-    Background colour indicates latent emitter identity $e_n$; annotations show mode labels $m_n$.
+    Background colour indicates latent emitter identity $e_n$.
     Emitter clustering seeks a partition of indices into subsets $\mathcal{E}_k$ (constant $e_n$ on each subset); mode clustering seeks a second partition into subsets $\mathcal{M}_\ell$ (constant $m_n$), while allowing mode hops within a fixed emitter.}
   \label{fig:method:pdw_emitter_stream}
 \end{figure}
