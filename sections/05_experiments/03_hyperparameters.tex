@@ -1,5 +1,33 @@
 \section{Hyperparameters and Training Details}\label{sec:exp:hparams}
 
-% TODO: Table of exact hyperparameters for proposed model and each
-% baseline; note any per-dataset variation.
-Placeholder paragraph.
+This section collects numerical training choices deferred from \cref{sec:method:training,sec:method:loss,sec:method:arch}.
+Unless \cref{sec:exp:ablation} states otherwise, baseline models use the same epoch budget, hardware (\cref{sec:exp:setup}), and early-stopping protocol so that differences reflect architecture and objective rather than compute.
+
+The contrastive temperature is fixed at $\tau = \num{0.2}$ as in \cref{sec:method:loss}.
+\cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder; entries marked with an em dash are still being matched to the released training script and will be filled before the final thesis submission.
+
+\begin{table}[t]
+  \centering
+  \caption{Primary optimisation hyperparameters for the proposed model.}
+  \label{tab:exp:hparams_main}
+  \begin{tabular}{@{}p{0.40\linewidth}p{0.48\linewidth}@{}}
+    \toprule
+    Setting & Value \\
+    \midrule
+    Optimiser & Adam \parencite{kingma2014adam} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
+    Peak learning rate $\eta_{\max}$ & --- \\
+    Minimum learning rate $\eta_{\min}$ & \num{0} (cosine floor; PyTorch default) \\
+    Cosine period $T_{\max}$ & \num{30} scheduler steps, one step per training epoch \\
+    Maximum epochs & \num{30} \\
+    Early stopping patience & \num{7} epochs without improvement on the validation loss \\
+    Early stopping checkpoint & Weights from the epoch with lowest validation loss so far \\
+    Dropout (attention and feed-forward) & \num{0.1} throughout the transformer blocks \\
+    Batch size $B$ (windows per step) & --- \\
+    Mode loss weight $\lambda_{\mathrm{md}}$ & --- \\
+    Weight decay & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The cosine scheduler follows the PyTorch \texttt{CosineAnnealingLR} convention: after each epoch the learning rate is updated from $\eta_{\max}$ toward $\eta_{\min}$ over $T_{\max} = \num{30}$ steps, which aligns the period with the nominal training horizon.
+If early stopping triggers first, training halts at the best validation checkpoint and the final few scheduler steps may not be executed.

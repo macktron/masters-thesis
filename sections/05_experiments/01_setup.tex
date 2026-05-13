@@ -1,5 +1,8 @@
 \section{Experimental Setup}\label{sec:exp:setup}
 
-% TODO: Hardware (GPU), software stack (PyTorch, libraries),
-% reproducibility (seeds, code/data availability).
-Placeholder paragraph.
+All neural models in this chapter were trained and evaluated on a single workstation with one NVIDIA A100 GPU (80~GB high-bandwidth memory; some system utilities report a capacity closer to \num{82}~GB because of binary versus decimal gigabyte conventions).
+The implementation uses Python with PyTorch; exact package versions are pinned in the environment file shipped with the thesis code repository when that repository is published.
+
+Random seeds control weight initialization, training-window shuffling each epoch, and stochastic augmentations.
+Unless an experiment explicitly varies the seed, the same seed set is reused so that ablations in \cref{sec:exp:ablation} are comparable under identical noise conditions.
+Concrete seed integers, per-run overrides, and mean $\pm$ standard deviation over multiple seeds for quantitative scores are reported with the tables in \cref{sec:exp:results}.
