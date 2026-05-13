@@ -36,14 +36,14 @@ The row of mode annotations shows $m_n$ evolving along the stream; within a sing
 \begin{figure}[t]
   \centering
   \begin{tikzpicture}[
-    x=6.8mm,
-    font=\footnotesize,
+    x=9.5mm,
+    font=\small,
     pdw/.style={
       draw,
-      rounded corners=1.4pt,
-      minimum width=6mm,
-      minimum height=7mm,
-      inner sep=0pt,
+      rounded corners=1.6pt,
+      minimum width=8.2mm,
+      minimum height=8mm,
+      inner sep=1.5pt,
       align=center
     },
     >=Latex
@@ -53,11 +53,12 @@ The row of mode annotations shows $m_n$ evolving along the stream; within a sing
       6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
     } {
       \node[pdw, fill=\col] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
-      \node[anchor=north, inner sep=1pt] at (p\n.south) {\strut$m_{\i}=\m$};
+      \node[below=0.42em of p\n.south, font=\scriptsize, inner sep=0pt, outer sep=0.6pt]
+        {$m_{\i}=\m$};
     }
-    \draw[->, thick] (0.35,-0.92) -- ({10+0.65},-0.92)
-      node[midway, below=2pt] {pulse index $n$ (time order)};
-    \begin{scope}[shift={(1.2,-1.55)}]
+    \draw[->, thick] (0.35,-1.28) -- ({10+0.65},-1.28)
+      node[midway, below=3pt, font=\footnotesize] {pulse index $n$ (time order)};
+    \begin{scope}[shift={(1.2,-1.95)}]
       \node[pdw, fill=blue!18, minimum width=4mm, minimum height=3.5mm] (leg1) at (0,0) {};
       \node[anchor=west] at (leg1.east) {\,emitter $1$};
       \node[pdw, fill=orange!22, minimum width=4mm, minimum height=3.5mm] (leg2) at (2.1,0) {};
