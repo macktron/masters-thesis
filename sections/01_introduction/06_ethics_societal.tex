@@ -1,6 +1,13 @@
 \section{Ethical and Societal Considerations}\label{sec:intro:ethics}
 
-% TODO: Required by KTH. Cover sustainability (energy/carbon),
-% ethics (dual-use of ELINT, defense applications), data ethics
-% (synthetic vs. real data), and societal impact. Half a page.
-Placeholder paragraph.
+Methods for passive \gls{esm} and \gls{elint} sit squarely in dual-use territory: the same representations that support defensive situational awareness, spectrum management, and safety-of-navigation applications can, in principle, support targeting or surveillance against specific platforms if deployed without appropriate policy, oversight, and legal constraints.
+This thesis develops \gls{ml} techniques on abstract pulse-level features and does not address deployment, rules of engagement, or classification of live operational data; nevertheless, the capability to group emitters and modes from unlabeled streams should be understood as a general-purpose building block whose societal consequences depend on the institutional context in which it is used.
+
+From a data-ethics perspective, the experimental work relies on controlled or synthetic \gls{pdw} streams rather than collections derived from live emitters, which limits privacy and classification sensitivity concerns at the cost of weaker guarantees about behavior under classified or vendor-specific waveforms.
+When such methods are extended toward operational data, stewards must enforce access control, purpose limitation, and retention policies consistent with national regulation and organizational policy, and they should document provenance and limitations so that operators do not over-trust cluster labels that lack ground truth.
+
+Training modern \gls{dl} encoders incurs non-negligible energy use for computation and cooling; relative to lightweight classical deinterleaving heuristics, transformer-scale models increase the carbon footprint of experimentation and of any future always-on training loops.
+Mitigation follows standard practice: reuse checkpoints, avoid redundant hyperparameter sweeps, prefer smaller models when they meet accuracy targets, and report approximate training cost where it informs reproducibility.
+
+At a societal level, automation of emitter and mode analysis may concentrate analytic capacity in well-resourced actors, widen asymmetries in electromagnetic situational awareness, and reduce the visibility of human expert judgment if clusters are treated as authoritative without audit trails.
+Responsible research therefore favors transparent evaluation protocols, clear statements of failure modes under noise and mixture, and conservative claims about operational readiness.

@@ -1,0 +1,85 @@
+% =====================================================================
+% Schematic of the parameters carried by a pulse descriptor word (PDW)
+% for use in \cref{sec:bg:pdw}.  A short pulse train illustrates the
+% time-domain PDW fields (TOA, PW, PRI, amplitude, RF carrier); a small
+% inset shows AOA as a spatial bearing on the receive aperture.
+% Loaded from sections/02_background/02_pdw.tex via \input{...}.
+% =====================================================================
+\begin{tikzpicture}[
+    >=Latex,
+    font=\small,
+    pulse/.style={draw=blue!60!black, thick, fill=blue!10},
+    rfwave/.style={very thin, red!60!black},
+    annot/.style={font=\small\itshape},
+    measure/.style={<->, thick, shorten >=1pt, shorten <=1pt},
+    drop/.style={dashed, thin, gray!70!black},
+  ]
+
+  % --- pulse train geometry (TOA = leading edge, all PW equal here) ---
+  \def\toaA{1.4}
+  \def\toaB{4.4}
+  \def\toaC{7.4}
+  \def\pw{0.9}
+  \def\ampA{2.4}
+  \def\ampB{2.2}
+  \def\ampC{2.5}
+
+  % --- axes -----------------------------------------------------------
+  \draw[->] (-0.2, 0) -- (10.4, 0) node[below] {time $t$};
+  \draw[->] (0, -0.2) -- (0, 3.6) node[left]  {amplitude};
+
+  % --- pulse envelopes ------------------------------------------------
+  \draw[pulse] (\toaA, 0) rectangle (\toaA + \pw, \ampA);
+  \draw[pulse] (\toaB, 0) rectangle (\toaB + \pw, \ampB);
+  \draw[pulse] (\toaC, 0) rectangle (\toaC + \pw, \ampC);
+
+  % --- illustrative RF carrier inside the middle pulse ---------------
+  \draw[rfwave, samples=120, smooth, domain=\toaB:\toaB+\pw]
+    plot (\x, {0.5*\ampB + 0.42*\ampB*sin(2880*(\x - \toaB))});
+
+  % --- TOA drop lines and labels --------------------------------------
+  \foreach \t/\lbl in {%
+      \toaA/$t_n$,%
+      \toaB/$t_{n+1}$,%
+      \toaC/$t_{n+2}$%
+    } {%
+    \draw[drop] (\t, 0) -- (\t, -0.35);
+    \node[annot, below] at (\t, -0.32) {\lbl};
+  }
+  \node[annot, below right=1pt and -2pt] at (\toaA, -0.32)
+    {\scriptsize\hspace{0.15em}(TOA)};
+
+  % --- amplitude arrow on the first pulse -----------------------------
+  \draw[measure] (\toaA - 0.5, 0) -- (\toaA - 0.5, \ampA);
+  \node[annot, left] at (\toaA - 0.5, \ampA/2) {$A_n$};
+
+  % --- PW arrow above the third pulse ---------------------------------
+  \draw[measure] (\toaC, \ampC + 0.3) -- (\toaC + \pw, \ampC + 0.3);
+  \node[annot, above] at (\toaC + \pw/2, \ampC + 0.3) {PW};
+
+  % --- PRI arrow between the first two leading edges ------------------
+  \pgfmathsetmacro{\priY}{\ampA + 0.95}
+  \draw[measure] (\toaA, \priY) -- (\toaB, \priY);
+  \node[annot, above] at ({(\toaA + \toaB)/2}, \priY) {PRI $= 1/$PRF};
+
+  % --- RF label with leader line into the middle-pulse oscillation ----
+  \node[annot, text=red!60!black] (rflabel) at (6.4, 0.55*\ampB)
+    {RF $f_n$};
+  \draw[->, very thin, red!60!black]
+    (rflabel.west) -- (\toaB + \pw - 0.05, 0.55*\ampB);
+
+  % --- AOA inset (upper right): bearing on the receive aperture -------
+  \begin{scope}[shift={(9.0, 2.55)}]
+    % receive aperture
+    \draw[thick] (-0.30, 0) -- (0.30, 0) -- (0, 0.45) -- cycle;
+    \node[font=\footnotesize, below=1pt] at (0, 0) {Rx};
+    % boresight reference
+    \draw[drop] (0, 0.45) -- (0, 1.55);
+    % incoming wavefront direction
+    \draw[->, thick] (1.0, 1.40) -- (0.04, 0.50);
+    % angle arc
+    \draw[->, thin] (0, 1.15) arc (90:50:0.7);
+    \node[annot] at (0.55, 1.00) {AOA $\theta_n$};
+  \end{scope}
+
+\end{tikzpicture}

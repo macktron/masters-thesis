@@ -3,4 +3,11 @@
 % TODO: Define the PDW vector (RF, PW, PRI/PRF, TOA, AOA, amplitude),
 % discuss measurement noise, missing/extra pulses, and the
 % deinterleaving step that produces PDW streams.
-Placeholder paragraph.
+Placeholder paragraph; the per-pulse parameters that the remainder of this section will discuss are illustrated in \cref{fig:bg:pdw}.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/background/pdw.tex}
+  \caption{Schematic of the parameters captured by a \gls{pdw} for a short pulse train. Each pulse contributes a \gls{toa} (the leading edge $t_n$ on the time axis), a pulse width (PW), a peak amplitude $A_n$, and a carrier \gls{rf} $f_n$, sketched as the fast oscillation inside the middle pulse; successive pulses also define a \gls{pri} (equivalently a \gls{prf} $=1/\mathrm{PRI}$). The inset shows the \gls{aoa} $\theta_n$ measured at the receive aperture relative to a boresight reference. A typical \gls{pdw} stacks these per-pulse measurements into a vector $\vect{x}_n = (f_n, \mathrm{PW}_n, t_n, A_n, \theta_n)$ that is the usual input to downstream emitter and mode reasoning \parencite{wiley2006elint}.}
+  \label{fig:bg:pdw}
+\end{figure}
