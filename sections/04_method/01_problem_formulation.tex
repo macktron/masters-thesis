@@ -49,6 +49,8 @@ The formal partitions and mode hopping are stated mathematically in the text bel
       align=center,
       text=black
     },
+    % Stream cells: fill + pattern (path picture paints emitter fill under pattern; plain fill+pattern often hides fill in PDF)
+    pdwstreamfill/.style={fill=none},
     >=Latex
   ]
     \foreach \i/\col/\m [count=\n] in {
@@ -56,12 +58,33 @@ The formal partitions and mode hopping are stated mathematically in the text bel
       6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
     } {
       \ifnum\m=1
-        \node[pdw, fill=\col, pattern=horizontal lines, pattern color=black!48] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+        \node[pdw, pdwstreamfill,
+          path picture={
+            \fill[\col] (path picture bounding box.south west)
+              rectangle (path picture bounding box.north east);
+            \path[pattern=horizontal lines, pattern color=black!48]
+              (path picture bounding box.south west)
+              rectangle (path picture bounding box.north east);
+          }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
       \else
         \ifnum\m=2
-          \node[pdw, fill=\col, pattern=dots, pattern color=black!52] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+          \node[pdw, pdwstreamfill,
+            path picture={
+              \fill[\col] (path picture bounding box.south west)
+                rectangle (path picture bounding box.north east);
+              \path[pattern=dots, pattern color=black!52]
+                (path picture bounding box.south west)
+                rectangle (path picture bounding box.north east);
+            }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
         \else
-          \node[pdw, fill=\col, pattern=north east lines, pattern color=black!48] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
+          \node[pdw, pdwstreamfill,
+            path picture={
+              \fill[\col] (path picture bounding box.south west)
+                rectangle (path picture bounding box.north east);
+              \path[pattern=north east lines, pattern color=black!48]
+                (path picture bounding box.south west)
+                rectangle (path picture bounding box.north east);
+            }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
         \fi
       \fi
     }
