@@ -1,6 +1,32 @@
 \section{The Transformer Encoder}\label{sec:bg:transformer}
 
-% TODO: Self-attention, multi-head attention, positional encoding, the
-% encoder block. Label the attention equation so the Method chapter can
-% reuse it.
-Placeholder paragraph.
+The transformer architecture replaces recurrence with a stack of layers built around \emph{self-attention}, so that every position in a sequence can directly attend to every other position in parallel \parencite{vaswani2017attention}.
+Encoder-only stacks, as in \gls{bert} \parencite{devlin2019bert}, map an input sequence to contextualised token representations of the same length and are a natural choice when the downstream task is representation learning or clustering over tokens rather than autoregressive generation.
+
+\paragraph{Scaled dot-product attention.}
+Attention maps three matrices of \emph{queries} $\mat{Q}$, \emph{keys} $\mat{K}$, and \emph{values} $\mat{V}$ to an output matrix of the same leading dimension as $\mat{Q}$.
+Each row of $\mat{Q}$ scores all rows of $\mat{K}$ through inner products; the scores are scaled, normalised with a row-wise $\softmax$, and used to form a convex combination of the rows of $\mat{V}$.
+With $d_k$ the dimension of each query and key vector (column width of $\mat{Q}$ and $\mat{K}$ after the usual transpose convention), the mapping is
+\begin{equation}\label{eq:bg:attention}
+  \mathrm{Attention}(\mat{Q}, \mat{K}, \mat{V})
+  =
+  \softmax\!\left(\frac{\mat{Q}\mat{K}^{\mathsf{T}}}{\sqrt{d_k}}\right)\mat{V}.
+\end{equation}
+The scaling by $\sqrt{d_k}$ keeps the inner products from growing too large in magnitude as $d_k$ increases, which would otherwise drive the $\softmax$ into near one-hot rows and yield vanishing gradients \parencite{vaswani2017attention}.
+\cref{eq:bg:attention} is reused later as the core attention primitive inside the encoder.
+
+\paragraph{Self-attention and \gls{mha}.}
+In \emph{self-attention}, $\mat{Q}$, $\mat{K}$, and $\mat{V}$ are all linear projections of the same input sequence layout, so a token's representation is updated by aggregating information from the full sequence.
+\Gls{mha} runs $h$ attention mechanisms in parallel on different learned subspaces, concatenates the head outputs, and applies one more linear map to restore the model width \parencite{vaswani2017attention}.
+The heads specialise to different relational patterns while sharing the same residual and normalisation wrapper as a single conceptual operator.
+
+\paragraph{Positional information.}
+Self-attention is permutation-equivariant in its inputs: reordering the rows of $\mat{Q}$, $\mat{K}$, and $\mat{V}$ in the same way reorders the output rows accordingly, but does not otherwise encode order.
+Transformer encoders therefore add a positional signal to token embeddings before the first layer, for example fixed sinusoidal features or learned position embeddings added element-wise to each token vector \parencite{vaswani2017attention,devlin2019bert}.
+When the raw inputs already carry absolute or relative timing, as is common for irregularly sampled sequences, practitioners sometimes omit a separate positional encoding and rely on those measurements instead; the method chapter returns to this choice for \gls{pdw} windows.
+
+\paragraph{Encoder layer.}
+A standard transformer \emph{encoder layer} alternates two sub-layers: \gls{mha} followed by a position-wise \gls{ffn} applied independently at every position.
+Each sub-layer uses a residual connection and layer normalisation \parencite{vaswani2017attention}.
+The \gls{ffn} is typically a two-layer \gls{mlp} with a wide inner dimension and a nonlinear activation, acting as the per-token nonlinearity while \gls{mha} handles cross-token mixing.
+Stacking $N$ such layers yields a deep encoder that maps an input sequence $(\vect{x}_1,\ldots,\vect{x}_L)$ to contextualised representations $(\vect{h}^{(N)}_1,\ldots,\vect{h}^{(N)}_L)$, which downstream heads can pool or read out for sequence-level or token-level predictions.
