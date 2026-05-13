@@ -41,4 +41,11 @@ Each branch terminates in a linear projection head that maps every token to its 
 \end{equation}
 with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
 The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
+
+\subsection*{Per-window clustering with \gls{hdbscan}}
+
+The projection heads in \cref{eq:method:proj_heads} map each pulse to a continuous vector, whereas the latent emitter and mode assignments in \cref{sec:method:formulation} are discrete.
+\Gls{hdbscan} \parencite{mcinnes2017hdbscan} is applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a separate clustering instance on the corresponding branch.
+Each window is thus a self-contained pulse train segment in embedding space, consistent with the windowing of \cref{sec:method:data}, and the effective cardinalities of the inferred emitter and mode partitions follow the density hierarchy instead of fixing $K_{\mathrm{em}}$ or $K_{\mathrm{md}}$ a priori.
+
 The collection of all linear maps in \cref{eq:method:input_embed,eq:method:proj_heads} together with the attention and \gls{ffn} weights of the trunk and branches constitutes the parameter vector $\bm{\theta}$ that the loss in \cref{sec:method:loss} optimises.
