@@ -11,6 +11,12 @@ These estimates are noisy, can be missing for weak emitters, and may include fal
 
 \emph{Sorting} and \emph{deinterleaving} group pulses into coherent pulse trains by exploiting periodic structure in inter-pulse timing and consistent parameter tracks across time.
 The output of this stage is commonly packaged as a stream of \glspl{pdw} (or closely related pulse descriptor records), which form the usual interface to downstream tasks such as emitter identification and mode analysis (\cref{sec:bg:pdw}).
-Later stages may maintain tracks, libraries, and operator displays, but for the learning problem in this thesis the critical contract is that the model consumes the deinterleaved \gls{pdw} stream produced here.
+
+In classical \gls{elint} architectures, specifications therefore treat train formation as an early, largely discrete step: deinterleaving is completed first so that downstream logic receives one dominant hypothesis per physical emission path, or a short ranked list, rather than a time-interleaved mixture \parencite{wiley2006elint}.
+\emph{Emitter reports} are assembled only after that gate, summarizing each train with aggregated \gls{pdw} statistics, tentative equipment identities from lookup tables, and temporal extent.
+Mode classification is then commonly framed as matching the train against a \emph{mode library} of nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, so that declared modes remain anchored to catalogued waveform templates.
+\emph{Positional estimation}---for example \gls{aoa} intersections from direction-finding networks, time-difference-of-arrival fixes along baselines, or fused tracks across collectors---consumes the same deinterleaved associations, which isolates geometry and timing errors from the sorting stage.
+
+Later stages may maintain libraries, threat lists, and operator displays, but for the learning problem in this thesis the critical contract is that the model consumes the deinterleaved \gls{pdw} stream produced here.
 
 % TODO: Add a schematic figure (figures/background/) and cite a standard EW/ESM text for the pipeline stages.
