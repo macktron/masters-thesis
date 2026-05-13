@@ -1,5 +1,28 @@
 \section{Machine Learning Fundamentals}\label{sec:bg:ml}
 
-% TODO: Supervised vs. unsupervised vs. self-supervised learning, ERM,
-% the role of representation learning. Keep concise.
-Placeholder paragraph.
+\Gls{ml} problems are often categorized by the supervision available at training time.
+In the supervised setting, a learner fits a mapping from inputs to labels by minimizing an empirical risk over a finite set of annotated examples.
+Unsupervised learning instead seeks structure in the input distribution itself, for example through density estimation, dimensionality reduction, or clustering, without externally supplied targets.
+Self-supervised learning occupies an intermediate regime: targets are derived automatically from the data through a designed pretext (for example predicting masked parts of an input or contrasting augmented views), which supplies learning signal without manual annotation.
+Across these regimes, a common formalism is empirical risk minimization, in which one minimizes an average training loss with respect to model parameters and relies on optimization, regularization, and held-out evaluation to control generalization.
+
+Much of modern \gls{dl} practice is best understood as \emph{representation learning}: a parametric encoder maps high-dimensional observations into a lower-dimensional vector space whose geometry is shaped by the training objective.
+Downstream tasks---classification, clustering, retrieval, or sequence prediction---then operate on these \emph{embeddings} rather than on raw sensor coordinates.
+The thesis later instantiates this pattern for \gls{pdw} streams by training an encoder whose outputs are intended to expose emitter and mode structure (\cref{ch:method}).
+
+\textcite{lecun2022path} argues for organizing this picture around \emph{joint embeddings}.
+In joint embedding predictive architectures, two related observations \(x\) and \(y\) (for example two temporal crops of the same scene) are mapped to representations \(s_x\) and \(s_y\) by encoders, and a predictor proposes \(\tilde{s}_y\) from \(s_x\) (possibly with latent variables that capture multi-valued futures).
+Compatibility is scored by an energy \(D(s_y,\tilde{s}_y)\) that measures prediction error in representation space rather than in pixel space or other raw domains.
+As \textcite{lecun2022path} puts it,
+\begin{quote}
+\enquote{The energy is simply the prediction error in representation space.}
+\end{quote}
+The same source emphasizes that the main advantage of this design is that prediction happens after irrelevant variability has been discarded by the encoders, so that the learning problem is not to reconstruct every detail of \(y\), but to align abstract embeddings that already summarize what must stay predictable.
+
+When \(D\) is instantiated as a squared Euclidean distance between embeddings, the landscape of \(D\) with respect to \(s_y\) is piecewise quadratic under standard predictor parameterizations.
+\textcite{lecun2022path} uses this viewpoint to explain why, in discrete-latent variants, low-energy regions can be visualized as competing wells in embedding space:
+\begin{quote}
+\enquote{In representation space, the energy will be the minimum of \(K\) quadratic energy wells.}
+\end{quote}
+Colloquially, one can read this as the claim that \emph{once} suitable embeddings and predictors have been identified, much of the remaining compatibility training reduces to a family of quadratic matching problems in representation coordinates; the scientific effort then concentrates on representation geometry, collapse prevention, and task-relevant invariances rather than on inventing elaborate scalar losses on raw inputs.
+The clustering objectives used in \cref{ch:method} should be interpreted against that backdrop: they reshape embedding space, while the parametric form of the pointwise loss can remain simple.
