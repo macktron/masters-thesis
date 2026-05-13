@@ -1,12 +1,7 @@
 \section{Problem Statement}\label{sec:intro:problem}
 
-% TODO: One precise paragraph stating the problem. Given an unlabelled
-% stream of PDWs containing multiple emitters and modes, learn an
-% embedding from which both emitter identity and mode can be recovered
-% by clustering.
-Modern radar systems are evolving rapidly. They can change their transmission behavior on the fly (often called “agile” radars), which makes it increasingly difficult for traditional, rule‑based methods to classify and identify them reliably. In Electronic Warfare (EW), Electronic Support Measures (ESM) systems passively listen to the electromagnetic environment and aim to detect, characterize, and identify radar emitters in order to enhance situational awareness and protection.
-Radars emit short bursts of energy known as pulses. Different radars tend to produce characteristic patterns across pulse features such as carrier frequency, pulse width, time of arrival, and angle of arrival. By analyzing these patterns, it is possible to infer how many emitters are present and which emitters they are. However, overlapping signals, agile behavior, noise, and dynamic scenarios make this a complex pattern recognition problem.
-
-
-This thesis addresses the end-to-end ML classification problem of determining, from recorded radar pulses, both the number of radar emitters present in a flight simulation and their identities. The work will use labeled, simulator‑generated ESM data provided by Saab, in which each pulse is described by features such as frequency, pulse width, time of arrival (ToA), and angle of arrival (AoA). The problem is formulated as a supervised learning task, with the goal of training models that map pulse observations to emitter identities. 
-For this thesis you will both design an AI model but also analyze the simulated data. To understand how good the model is it is also required to understand the difficulty of the data it is evaluated on. You will create metrics for measuring dataset complexity and then compare how your model performs on data of varying complexity according to your metrics. 
+Passive \gls{esm} produces a time-ordered stream of \glspl{pdw} in which pulses from multiple emitters are interleaved and each emitter may change operating mode over time (\cref{sec:intro:background}).
+Dense per-pulse supervision for emitter identity and mode is rarely available outside curated datasets, yet operators still require both emitter grouping and coarse mode structure from the same measurement stream.
+Classical pipelines therefore often chain deinterleaving with separate mode heuristics or supervised classifiers trained on narrow taxonomies; under agile waveforms and overlapping trains, that separation scales poorly and does not guarantee a single representation whose geometry exposes emitter- and mode-level structure simultaneously for clustering-based analysis.
+The problem addressed in this thesis is to learn, from such an unlabeled pulse stream, an embedding in which unsupervised clustering recovers distinct emitters and, to the extent supported by the features, operating modes, while remaining robust to mixture effects, noise, and imperfect preprocessing.
+Labels, when present, serve evaluation and objective specification in controlled settings rather than defining the operational learning target.

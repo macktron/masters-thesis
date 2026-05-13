@@ -1,10 +1,23 @@
 \section{Radar Systems and Passive Reception}\label{sec:bg:radar}
 
-% TODO: High-level pulsed radar overview, the radar equation, and the
-% ELINT/ESM viewpoint of a passive listener. Keep math light.
+Electromagnetic waves carry energy from a transmitter to one or more receivers.
+The same physical mechanism supports both communications and remote sensing: a receiver can infer information from the field strength, timing, and structure of an arriving wave.
+\Gls{radar} exploits this idea for echolocation at radio frequencies by comparing transmitted energy to echoes scattered from objects of interest \parencite{skolnik2008radar}.
 
-Radio is the art of communicating using electromagnetic waves, traditionally done, but not limited to, radio waves. Discovered in theory in the electromagnetic revolution in the 1800s by the Maxwell and others, and made reality in the end of that centrury by Guglielmo Marconi who in 1891 who transmitted the first morse code over a kilometer using radio waves from his device.
-xt
+In a typical pulsed system, a collocated or nearby transmitter and receiver emit short bursts and listen during the intervals between pulses.
+Echo delay maps to range under the speed-of-light propagation model, while angular information comes from antenna directivity or multi-channel processing.
+Successive pulses are repeated with a nominal \gls{pri} (equivalently, a \gls{prf}), which sets the unambiguous range window and the illumination duty cycle.
+On receive, matched filtering and integration improve the effective \gls{snr} before detection and parameter estimation \parencite{skolnik2008radar}.
 
-Radar, which is an abbreviation for radio detection and range, is a form of echolocalisation, using radio waves. It was discovered in the early 1900s, and it's development was greatly boosted due to it's utility detecting plans and warships in world war 2.
+For a monostatic configuration with common transmit and receive gain $G$, wavelength $\lambda$, target radar cross section $\sigma$, and slant range $R$, the received power obeys the familiar scaling
+\begin{equation}
+\label{eq:bg:radar}
+P_r = \frac{P_t G^2 \lambda^2 \sigma}{(4\pi)^3 R^4},
+\end{equation}
+where $P_t$ is the peak transmit power during the pulse \parencite{skolnik2008radar}.
+\cref{eq:bg:radar} shows why range and antenna gain dominate link budgets: $P_r$ falls approximately as $R^{-4}$, so small changes in geometry or losses can produce large swings in echo strength.
+In practice, designers also account for atmospheric attenuation, system losses, and processing gains; the simplified form is nevertheless the standard reference for how ``what the radar transmits'' couples to ``what comes back.''
 
+Passive \gls{esm} and \gls{elint} systems observe the same emissions from the sidelobe or mainlobe of a third-party radar, but without control of $P_t$, $G$, or the waveform timing on transmit.
+The analyst therefore works from one-way propagation, often with incomplete geometry, and must infer emitter behavior from measurable pulse parameters rather than from a known matched filter reference.
+Those per-pulse measurements and their downstream representations are the usual interface to learning-based methods; \cref{sec:bg:pdw} summarizes the corresponding feature view.
