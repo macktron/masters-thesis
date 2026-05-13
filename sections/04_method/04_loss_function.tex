@@ -2,4 +2,22 @@
 
 % TODO: The joint loss. Likely contrastive + DEC-style clustering, or
 % two-head SwAV. Write and label the loss equation.
-Placeholder paragraph.
+
+
+Contrastive loss was used. Good at creating reorestatoins. Need negatives an poitives sampels which we ahve. 
+
+FORMAULAT REFERCNES ETC. Plase add relavante nuacnes from theory of represenational learnigng and add stuff.
+
+Expalin maybe some how it works in out context.
+
+
+For deitneiarlving we compare each windows of a batch seapratly and comapre sit, then agggragate by mean.
+
+For mode classification we do dimmilatr, but compare two windwos at a time. thsi makes more snnse since we want the models to learng represtaniotn between pulses also . Note that the emebddings are obtained windwoswise, jsut the comparios done between 2 windows, and intrawindow of course. This could help since contstaive leanring usually use the augmetnted (Explain this better), where we have 2 smpaels that are compares. Maybe good.
+
+
+Then the output are usually the priejctoin head discarded, we will do this for modes, but deinterelanving dosne't care about represatinos, only the results.
+
+
+
+
