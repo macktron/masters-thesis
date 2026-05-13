@@ -78,9 +78,4 @@
   \draw[arrow] (head_em)   -- (out_em);
   \draw[arrow] (head_md)   -- (out_md);
 
-  \node[anchor=west, font=\footnotesize\itshape, gray!70!black]
-    at ($(trunk.east)+(2mm,0)$) {shared};
-  \node[anchor=west, font=\footnotesize\itshape, gray!70!black]
-    at ($(br_em.east -| trunk.east)+(2mm,0)$) {task-specific};
-
 \end{tikzpicture}
