@@ -8,19 +8,23 @@ Fundamentally, electromagnetic radiation is produced whenever electric charges a
 
 \subsection{Echo delay, ambiguity, and biosonar}
 
-Monostatic ranging ties round-trip delay $\tau$ to range $R$ by
+To understand how radar measures distance, consider the emission of an electromagnetic pulse from a transmitter and the detection of its echo after reflection from a distant object. The speed of electromagnetic waves in air, denoted as $c$, is close to the speed of light in vacuum. The time it takes for the pulse to travel to the target and back, called the round-trip delay $\tau$, directly determines the distance to the object.
+
+When the same antenna or closely co-located antennas are used for both transmitting and receiving, the arrangement is termed \emph{monostatic} radar. In a monostatic configuration, the radar emits a pulse and then waits to receive the echo from a potential target. The fundamental physical relationship between the round-trip time and the distance is given by
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
 \end{equation}
-with $c$ the propagation speed \parencite{skolnik2008radar}.
-The same bookkeeping appears in animal echolocation: a bat emits a short click, listens, and treats the echo arrival time as evidence about reflector distance, only with sound instead of radio \parencite{skolnik2008radar}.
-Trains of pulses repeat with \gls{pri} or \gls{prf}. A late echo from one pulse can be mistaken for an early echo from the next, which caps the unambiguous range by
+where $R$ is the range to the target and $c$ is the propagation speed of the wave \parencite{skolnik2008radar}. This relation arises because the pulse covers the distance to the target and back, so the total travel distance is $2R$ in time $\tau$.
+
+A similar approach is found in animal echolocation: for instance, a bat produces a short sound pulse and estimates the distance to an obstacle or prey by interpreting the delay before it hears the echo, substituting sound waves for electromagnetic ones \parencite{skolnik2008radar}.
+
+In practical radar operations, sequences of such pulses are transmitted, each separated by a fixed time interval called the pulse repetition interval (\gls{pri}), or equivalently at a pulse repetition frequency (\gls{prf}). A challenge arises when an echo from a previous pulse arrives after the next pulse has already been transmitted. This can cause ambiguity, as a late echo may be incorrectly associated with a later pulse. The maximum range at which this ambiguity can be avoided—the \emph{unambiguous range}—is determined by the repetition interval:
 \begin{equation}
 \label{eq:bg:runamb}
 R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
 \end{equation}
-Coherent matched filtering and integration still raise \gls{snr} at the detector, but the ambiguity identity in \cref{eq:bg:runamb} is the structural constraint that survives independent of hardware details \parencite{skolnik2008radar}.
+Within this structural constraint, advanced signal processing such as coherent matched filtering and integration can enhance detection sensitivity, but no amount of processing can resolve targets beyond the unambiguous range limit defined by \cref{eq:bg:runamb} \parencite{skolnik2008radar}.
 
 \begin{figure}[t]
 \centering
@@ -30,7 +34,7 @@ Coherent matched filtering and integration still raise \gls{snr} at the detector
   \draw[thick, orange!80!black] (5.1,0.15) -- (5.1,0.85) node[midway, right] {echo};
   \draw[<->] (0.3,-0.35) -- (5.1,-0.35) node[midway, below] {$\tau = 2R/c$};
 \end{tikzpicture}
-\caption{Cartoon timeline for one transmit pulse and its monostatic echo; the measured delay maps to range through \cref{eq:bg:range}.}
+\caption{Illustration of the time relationship in monostatic radar: a transmission (TX) and its received echo are separated by a delay $\tau$ corresponding to twice the target range divided by the propagation speed, as in \cref{eq:bg:range}.}
 \label{fig:bg:pulse_echo_timeline}
 \end{figure}
 
