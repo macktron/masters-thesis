@@ -1,28 +1,43 @@
 \section{Machine Learning Fundamentals}\label{sec:bg:ml}
 
-\Gls{ml} problems are often categorized by the supervision available at training time.
-In the supervised setting, a learner fits a mapping from inputs to labels by minimizing an empirical risk over a finite set of annotated examples.
-Unsupervised learning instead seeks structure in the input distribution itself, for example through density estimation, dimensionality reduction, or clustering, without externally supplied targets.
-Self-supervised learning occupies an intermediate regime: targets are derived automatically from the data through a designed pretext (for example predicting masked parts of an input or contrasting augmented views), which supplies learning signal without manual annotation.
-Across these regimes, a common formalism is empirical risk minimization, in which one minimizes an average training loss with respect to model parameters and relies on optimization, regularization, and held-out evaluation to control generalization.
+At its most general, \gls{ml} replaces hand-coded decision rules with parametric models whose parameters are fitted to data so that a chosen performance criterion is optimized on observed examples of the task.
+A model is a function \(\Enc\colon \setX \to \setY\) from an input space \(\setX\) to a task-specific output space \(\setY\), and learning consists of searching over parameter vectors \(\bm{\theta}\) until \(\Enc\) is consistent with the regularities present in the training data.
+What changes between problems is the nature of the supervision available, the structure of \(\setY\), and the loss that scores predictions against that supervision.
+
+A common formal frame is \emph{empirical risk minimization}.
+Given a dataset \(\setD = \{(\vect{x}_i, y_i)\}_{i=1}^{N}\) drawn from an unknown distribution and a pointwise loss \(\ell\), the learner solves
+\begin{equation}\label{eq:bg:erm}
+  \hat{\bm{\theta}}
+  =
+  \argmin_{\bm{\theta}}\;
+  \frac{1}{N}\sum_{i=1}^{N} \ell\bigl(\Enc(\vect{x}_i),\, y_i\bigr) + \Omega(\bm{\theta}),
+\end{equation}
+where \(\Omega\) is an optional regularizer that trades fidelity to the training data against complexity of the fitted model.
+Generalization to fresh inputs is then assessed on held-out data, and the entire training procedure---data, model class, loss, optimizer, regularization---is judged by its effect on that out-of-sample behavior rather than on the training fit alone.
+
+\subsection{Learning paradigms}
+
+\Gls{ml} problems are conventionally separated by the kind of supervision available at training time.
+In \emph{supervised} learning, each \(\vect{x}_i\) is paired with a label \(y_i\), categorical for classification or real-valued for regression, and \(\ell\) penalizes disagreement between the prediction and that label.
+In \emph{unsupervised} learning, labels are absent and the goal is to expose structure in the input distribution itself, for example through density estimation, dimensionality reduction, or clustering; \cref{sec:bg:clustering} treats clustering specifically because it is the central downstream consumer of the embeddings used in this thesis.
+\emph{Self-supervised} learning sits between the two: it constructs supervisory targets automatically from the data through a designed pretext task---predicting masked parts of an input, contrasting augmented views, or ordering shuffled tokens---so that an encoder can be trained without manual annotation.
+The remainder of this thesis combines an unsupervised clustering objective with a self-supervised pretext signal; the semi-supervised setting, in which a small labeled subset is augmented with abundant unlabeled data, is not considered.
+
+\subsection{Representation learning}
 
 Much of modern \gls{dl} practice is best understood as \emph{representation learning}: a parametric encoder maps high-dimensional observations into a lower-dimensional vector space whose geometry is shaped by the training objective.
-Downstream tasks---classification, clustering, retrieval, or sequence prediction---then operate on these \emph{embeddings} rather than on raw sensor coordinates.
-The thesis later instantiates this pattern for \gls{pdw} streams by training an encoder whose outputs are intended to expose emitter and mode structure (\cref{ch:method}).
+Downstream tasks---classification, clustering, retrieval, or sequence prediction---then operate on the resulting \emph{embeddings} \(\vect{z} = \Enc(\vect{x}) \in \R^{d}\) rather than on raw sensor coordinates.
+The advantage of routing tasks through a learned representation is that invariances, similarities, and task-relevant factors of variation can be encoded by \(\Enc\) once, after which simple linear or geometric operations on \(\vect{z}\) suffice for many downstream questions.
+\Cref{sec:bg:dl,sec:bg:transformer} expand on this view; the method chapter (\cref{ch:method}) instantiates it for \gls{pdw} streams, training an encoder whose embeddings are intended to expose emitter and mode structure.
 
-\textcite{lecun2022path} argues for organizing this picture around \emph{joint embeddings}.
-In joint embedding predictive architectures, two related observations \(x\) and \(y\) (for example two temporal crops of the same scene) are mapped to representations \(s_x\) and \(s_y\) by encoders, and a predictor proposes \(\tilde{s}_y\) from \(s_x\) (possibly with latent variables that capture multi-valued futures).
-Compatibility is scored by an energy \(D(s_y,\tilde{s}_y)\) that measures prediction error in representation space rather than in pixel space or other raw domains.
-As \textcite{lecun2022path} puts it,
-\begin{quote}
-\enquote{The energy is simply the prediction error in representation space.}
-\end{quote}
-The same source emphasizes that the main advantage of this design is that prediction happens after irrelevant variability has been discarded by the encoders, so that the learning problem is not to reconstruct every detail of \(y\), but to align abstract embeddings that already summarize what must stay predictable.
+\subsection{Applications in radar deinterleaving and mode classification}
 
-When \(D\) is instantiated as a squared Euclidean distance between embeddings, the landscape of \(D\) with respect to \(s_y\) is piecewise quadratic under standard predictor parameterizations.
-\textcite{lecun2022path} uses this viewpoint to explain why, in discrete-latent variants, low-energy regions can be visualized as competing wells in embedding space:
-\begin{quote}
-\enquote{In representation space, the energy will be the minimum of \(K\) quadratic energy wells.}
-\end{quote}
-Colloquially, one can read this as the claim that \emph{once} suitable embeddings and predictors have been identified, much of the remaining compatibility training reduces to a family of quadratic matching problems in representation coordinates; the scientific effort then concentrates on representation geometry, collapse prevention, and task-relevant invariances rather than on inventing elaborate scalar losses on raw inputs.
-The clustering objectives used in \cref{ch:method} should be interpreted against that backdrop: they reshape embedding space, while the parametric form of the pointwise loss can remain simple.
+Radar signal deinterleaving and operating-mode classification illustrate the practical pull of these ideas.
+For decades, both tasks were addressed by deterministic temporal rules and hand-crafted statistics over \gls{pdw} parameters, as outlined in \cref{sec:bg:elint_pipeline}.
+As emitters became more agile and electromagnetic environments more crowded, the field migrated first to \emph{shallow} \gls{ml} in the form of multi-parameter clustering---\(k\)-means and density-based methods over \gls{rf}, \gls{aoa}, and pulse width---and more recently to \emph{deep} sequence models that learn pulse-level features directly from data \parencite{qu2026radardeinterleavingreview}.
+Recurrent and attention-based architectures now treat deinterleaving as sequence labeling in which the per-pulse output identifies an emitter, while transformer encoders in particular are well suited to capturing the non-contiguous, multi-scale relationships induced by jittered, staggered, or grouped \glspl{pri} \parencite{qu2026radardeinterleavingreview,gunn2025deinterleaving}.
+
+Mode classification follows a parallel trajectory.
+Classical \gls{esm} systems match deinterleaved pulse trains against catalogued waveform templates in a mode library \parencite{wiley2006elint}, while learning-based approaches reframe the same task either as supervised classification over known mode labels or as unsupervised grouping over pulse trains when labels are scarce or incomplete \parencite{qu2026radardeinterleavingreview}.
+The latter setting is the one this thesis adopts: emitter and mode structure is to be \emph{discovered} jointly from the input distribution, rather than recognized against a fixed catalogue.
+The clustering tools in \cref{sec:bg:clustering} and the representation learning machinery in \cref{sec:bg:dl,sec:bg:transformer} provide the technical foundation that the method chapter builds on.
