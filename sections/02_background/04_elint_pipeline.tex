@@ -12,6 +12,19 @@ These estimates are noisy, can be missing for weak emitters, and may include fal
 \emph{Sorting} and \emph{deinterleaving} group pulses into coherent pulse trains by exploiting periodic structure in inter-pulse timing and consistent parameter tracks across time.
 The output of this stage is commonly packaged as a stream of \glspl{pdw} (or closely related pulse descriptor records), which form the usual interface to downstream tasks such as emitter identification and mode analysis (\cref{sec:bg:pdw}).
 
+\subsection{Evolution of classical deinterleaving}\label{sec:bg:deinterleaving_evolution}
+
+Operationally, deinterleaving developed from deterministic temporal rules toward multi-parameter clustering and, more recently, toward learned sequence models \parencite{qu2026radardeinterleavingreview}.
+In comparatively sparse environments with simple pulse trains, \gls{pri} inferred from \gls{toa} differences often behaved like a stable timing signature, so early algorithms searched for repetition by accumulating histograms of inter-pulse intervals.
+Cumulative and sequential difference histograms (CDIF and SDIF) are representative: they ``vote'' for candidate \gls{pri} values through peaks in the difference domain and remain standard pedagogical references \parencite{qu2026radardeinterleavingreview,wiley2006elint}.
+Their accuracy rests on approximately regular timing; dense mixing, harmonic ambiguity, false peaks from cross-emitter differences, and missing pulses that break sequential differencing all erode reliability \parencite{qu2026radardeinterleavingreview}.
+
+Once \gls{pri} agility became widespread, many systems augmented timing with unsupervised structure in joint spaces of \gls{rf}, pulse width, \gls{aoa}, and related measurements, using methods such as $k$-means or density-based clustering \parencite{qu2026radardeinterleavingreview,ester1996density}.
+That shift treats deinterleaving as geometric separability in hand-crafted feature space, but performance still depends on scaling, metric choices, and hyperparameters (for example cluster counts or neighborhood radii) that are difficult to set when emitters are unknown a priori \parencite{qu2026radardeinterleavingreview}.
+
+Modern emitters compound the difficulty through overlapping pulse trains, rapid mode changes, and low-observable emissions that increase loss and measurement jitter \parencite{qu2026radardeinterleavingreview}.
+Later sections of this chapter introduce the \gls{pdw} representation and learning-based tools used in the thesis to reason under those conditions.
+
 In classical \gls{elint} architectures, specifications therefore treat train formation as an early, largely discrete step: deinterleaving is completed first so that downstream logic receives one dominant hypothesis per physical emission path, or a short ranked list, rather than a time-interleaved mixture \parencite{wiley2006elint}.
 \emph{Emitter reports} are assembled only after that gate, summarizing each train with aggregated \gls{pdw} statistics, tentative equipment identities from lookup tables, and temporal extent.
 Mode classification is then commonly framed as matching the train against a \emph{mode library} of nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, so that declared modes remain anchored to catalogued waveform templates.
