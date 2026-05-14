@@ -1,6 +1,6 @@
 \section{Evaluation Metrics}\label{sec:method:metrics}
 
-Let $y_n$ and $\hat{y}_n$ denote reference and predicted cluster indices for pulse $n\in\{1,\ldots,N\}$, as in \cref{eq:method:cardinalities,eq:method:dual_embeddings}, instantiated by $(e_n,\hat{e}_n)$ or $(m_n,\hat{m}_n)$.
+Let $y_n$ and $\hat{y}_n$ denote reference and predicted cluster indices for pulse $n\in\{1,\ldots,N\}$, as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}, instantiated by $(e_n,\hat{e}_n)$ or $(m_n,\hat{m}_n)$.
 The contingency is $n_{ij}=\sum_{n=1}^N \indicator[y_n=i,\,\hat{y}_n=j]$ with marginals $a_i=\sum_j n_{ij}$ and $b_j=\sum_i n_{ij}$.
 
 \subsection*{Adjusted Rand index}
