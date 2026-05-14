@@ -1,5 +1,6 @@
 \section{Ablation Studies}\label{sec:exp:ablation}
 
-% TODO: Drop one component at a time (contrastive loss, clustering
-% head, single-head, positional encoding, fewer layers/heads).
-Placeholder paragraph.
+Ablations isolate the contribution of individual components in \cref{ch:method} by retraining with exactly one change relative to the full configuration (matched data, seeds, and hyperparameters unless the ablation itself is a hyperparameter).
+Planned comparisons include removing or downweighting the emitter contrastive term, the mode contrastive term, or the coupling between branches; reducing the number of attention layers or heads; disabling stochastic augmentations beyond deterministic scaling; and swapping \gls{hdbscan} post-processing for a simpler fixed-$k$ assignment when that variant is implemented.
+
+% TODO: add one table row per completed ablation with the same metric columns as \cref{sec:exp:results}.
