@@ -24,12 +24,12 @@ A single train may contain irregular sampling, missing pulses, and spurious dete
 \subsection*{Per-pulse supervision: emitter and mode labels}
 
 Every pulse in the training data is annotated with two ground-truth labels.
-For each index $n \in \{1,\ldots,N\}$ within a given train, let $e_n$ denote the emitter identity responsible for pulse $n$ and let $m_n$ denote its operating mode.
+For each index $n \in \{1,\ldots,N\}$ within a given train of length N, let $e_n$ denote the emitter identity responsible for pulse $n$ and let $m_n$ denote its operating mode.
 Although both quantities are observed during training, they have fundamentally different semantics.
 
-The mode label $m_n \in \{1,\ldots,M\}$ is drawn from a finite, \emph{global} catalogue of size $M$ that is shared across all pulse trains: the symbol $m_n = \ell$ denotes the same operating mode regardless of which train the pulse belongs to.
+The simulation has a programmed mode library, so the mode label $m_n \in \{1,\ldots,M\}$ is drawn from a finite, \emph{global} catalogue of size $M$ that is shared across all pulse trains: the symbol $m_n = \ell$ denotes the same operating mode regardless of which train the pulse belongs to. 
 The emitter label $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$, by contrast, is unique only \emph{within the current train}: the integer indexes the distinct physical emitters encountered in this particular observation window, and the same integer in a different train refers to an unrelated emitter.
-Consequently, two pulses can be declared to share an emitter only when both belong to the same train, and the supervision provides no notion of a global emitter identity.
+However, labels could be augmented to include the train id label, but this is not nessesary for our solution as we will see.
 
 The train-specific cardinality $K_{\mathrm{em}}$ is observed at training time but varies across trains, and the model is expected to operate on previously unseen trains whose values of $K_{\mathrm{em}}$ are unknown a priori.
 The catalogue size $M$ is fixed and shared across trains, although individual trains typically exercise only a small subset of the $M$ modes.
