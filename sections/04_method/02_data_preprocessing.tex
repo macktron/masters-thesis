@@ -1,13 +1,13 @@
 \section{Data Representation and Preprocessing}\label{sec:method:data}
 
 \Gls{elint} data are difficult to obtain at scale, and operational recordings are often sensitive.
-This work therefore relies on synthetic pulse trains from a proprietary scenario simulator at Saab, which yields controlled scenarios and full supervision of emitter identity and operating mode for evaluation, while the learning objectives remain unsupervised with respect to those labels.
+This work therefore relies on synthetic pulse trains from a proprietary scenario simulator at Saab, which yields controlled scenarios together with full per-pulse supervision of emitter identity and operating mode (\cref{sec:method:formulation}); both label streams are consumed directly by the training objective in \cref{sec:method:loss} as well as by the evaluation metrics in \cref{sec:method:metrics}.
 Earlier KTH degree projects hosted at Saab document synthetic radar-\gls{ml} pipelines at a comparable level of detail, including scenario-driven pulse generation and explicit noise models \parencite{jonsson2023supcon,svensson2022priemitter}.
 
 \subsection{Scenario simulation and pulse records}\label{sec:method:data:sim}
 
 The simulator produces \emph{scenarios}: time-ordered pulse-level timelines for one or more notional emitters and a receiving platform.
-Each pulse is described by the continuous fields that enter the \gls{pdw} representation used here (including \gls{toa}, \gls{rf}, pulse width, and amplitude on a logarithmic scale), together with discrete labels for emitter identity and operating mode that exist only for evaluation.
+Each pulse is described by the continuous fields that enter the \gls{pdw} representation used here (including \gls{toa}, \gls{rf}, pulse width, and amplitude on a logarithmic scale), together with two discrete labels: an emitter identity that is unique only within the scenario that produced the pulse, and an operating mode drawn from a finite catalogue shared across scenarios (\cref{sec:method:formulation}).
 \textcite{jonsson2023supcon} describes the unclassified OpenModesty tool in the same lineage: flight paths and emitter placements define a geometry, pulses are emitted and intercepted one at a time, and the simulator can apply modulations and controlled perturbations consistent with notional radar behavior.
 The present implementation is proprietary; the important methodological point is that every pulse in the export carries consistent timing and parameter fields so that windows formed below correspond to reproducible segments of a simulated electromagnetic timeline.
 

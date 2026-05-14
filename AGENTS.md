@@ -4,11 +4,13 @@ This file is read first by any AI coding agent working on the thesis. It capture
 
 ## Topic
 
-**Joint radar emitter and mode clustering using a transformer encoder architecture.**
+**Joint radar emitter clustering and mode classification using a transformer encoder architecture.**
 
-The thesis investigates whether a transformer encoder, trained with a clustering-friendly objective (e.g. deep embedded clustering, contrastive learning with cluster assignments, or a joint two-head approach), can simultaneously discover (a) distinct radar emitters and (b) the operating modes within each emitter, given a stream of pulse descriptor words (PDWs) or equivalent low-level features.
+The thesis investigates whether a transformer encoder, trained with a dual-objective loss (a within-train supervised contrastive term for the emitter branch and a cross-entropy classification term for the mode branch over a global mode catalogue), can simultaneously (a) produce embeddings that cluster pulses by physical emitter within each pulse train and (b) predict the operating mode of each pulse, given a stream of pulse descriptor words (PDWs) or equivalent low-level features.
 
-Context: ELINT / ESM applications, where labelled emitter/mode data is scarce, mixtures and previously unseen emitters are common, and the system must remain robust to deinterleaving noise.
+Label structure of the training data: every PDW carries two ground-truth labels. Emitter identifiers are unique only \emph{within} a pulse train (so they cannot be shared across trains), while operating-mode labels are drawn from a finite catalogue shared globally across all trains. This asymmetry shapes both the loss and the inference pipeline.
+
+Context: ELINT / ESM applications, where mixtures and previously unseen emitters are common at inference time and the system must remain robust to deinterleaving noise. Training data here are synthetic and fully labelled at the per-pulse level; the broader operational regime in which labels are scarce motivates the train-local emitter formulation rather than a global emitter classifier.
 
 ## Institutional context
 

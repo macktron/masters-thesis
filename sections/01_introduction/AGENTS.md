@@ -11,7 +11,7 @@ Motivate the thesis and frame the rest of the document. The reader should leave 
 ## Subsection contracts
 
 - `01_background.tex` — Set the scene: ELINT/ESM, why emitter identification matters, why operating-mode awareness matters, the historical shift toward data-driven methods. End with a paragraph that funnels into the specific problem this thesis tackles.
-- `02_problem_statement.tex` — One precise paragraph stating the problem: given an unlabelled stream of PDWs containing multiple emitters and modes, learn an embedding from which both emitter identity and mode can be recovered by clustering. Quantify the gap in existing approaches.
+- `02_problem_statement.tex` — One precise paragraph stating the problem: given pulse trains of PDWs whose pulses carry train-local emitter labels and global operating-mode labels, learn an embedding from which (i) emitters can be recovered by clustering within each pulse train at inference time and (ii) the global mode catalogue can be predicted per pulse. Quantify the gap in existing approaches.
 - `03_research_questions.tex` — 2–4 numbered research questions. Each must be answerable from the experiments in Chapter 5. Phrase them so that yes/no or measurable answers are possible (e.g. "RQ1: Can a single transformer encoder produce embeddings that separate both emitters and modes simultaneously?").
 - `04_objectives_scope.tex` — Concrete objectives that operationalize the research questions, plus an explicit scope statement (what is out of scope: e.g. real-time deployment, hardware constraints, multi-target deinterleaving).
 - `05_contributions.tex` — Bulleted list of contributions. Each bullet starts with a verb ("We propose ...", "We evaluate ...", "We release ..."). 3–5 bullets total.

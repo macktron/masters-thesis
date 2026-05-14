@@ -21,7 +21,7 @@ Generalization to fresh inputs is then assessed on held-out data, and the entire
 In \emph{supervised} learning, each \(\vect{x}_i\) is paired with a label \(y_i\), categorical for classification or real-valued for regression, and \(\ell\) penalizes disagreement between the prediction and that label.
 In \emph{unsupervised} learning, labels are absent and the goal is to expose structure in the input distribution itself, for example through density estimation, dimensionality reduction, or clustering; \cref{sec:bg:clustering} treats clustering specifically because it is the central downstream consumer of the embeddings used in this thesis.
 \emph{Self-supervised} learning sits between the two: it constructs supervisory targets automatically from the data through a designed pretext task---predicting masked parts of an input, contrasting augmented views, or ordering shuffled tokens---so that an encoder can be trained without manual annotation.
-The remainder of this thesis combines an unsupervised clustering objective with a self-supervised pretext signal; the semi-supervised setting, in which a small labeled subset is augmented with abundant unlabeled data, is not considered.
+The remainder of this thesis operates in the supervised regime: training pulse trains carry per-pulse emitter and operating-mode labels (\cref{sec:method:formulation,sec:method:data}), and the training objective uses both label streams directly; the unsupervised and self-supervised paradigms are summarised here only because the clustering tools in \cref{sec:bg:clustering} and the contrastive representation-learning machinery in \cref{sec:bg:dl} are inherited from those traditions.
 
 \subsection{Representation learning}
 
@@ -39,5 +39,5 @@ Recurrent and attention-based architectures now treat deinterleaving as sequence
 
 Mode classification follows a parallel trajectory.
 Classical \gls{esm} systems match deinterleaved pulse trains against catalogued waveform templates in a mode library \parencite{wiley2006elint}, while learning-based approaches reframe the same task either as supervised classification over known mode labels or as unsupervised grouping over pulse trains when labels are scarce or incomplete \parencite{qu2026radardeinterleavingreview}.
-The latter setting is the one this thesis adopts: emitter and mode structure is to be \emph{discovered} jointly from the input distribution, rather than recognized against a fixed catalogue.
-The clustering tools in \cref{sec:bg:clustering} and the representation learning machinery in \cref{sec:bg:dl,sec:bg:transformer} provide the technical foundation that the method chapter builds on.
+This thesis is positioned in the former, supervised regime for both targets: the operating mode is predicted against a fixed global catalogue per pulse, while the emitter task is trained with explicit per-pulse identity labels whose scope is local to each pulse train, so that the trained embedding can subsequently be clustered within previously unseen trains.
+The clustering tools in \cref{sec:bg:clustering} and the contrastive representation-learning machinery in \cref{sec:bg:dl,sec:bg:transformer} provide the technical foundation that the method chapter builds on.
