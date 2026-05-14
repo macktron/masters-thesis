@@ -2,7 +2,7 @@
 
 \subsection{Pulses for navigation, surveillance, and control}
 
-Engineered \gls{radar} grew from wartime range finding into a family of microwave systems used for air traffic control, weather mapping, altimetry, ship and vehicle navigation, and target tracking \parencite{skolnik2008radar}.
+Engineered \gls{radar} grew from wartime range finding into a family of microwave systems used for air traffic control, weather mapping, altimetry, ship and vehicle navigation, target tracking, and spectrum monitoring next to commercial communication services \parencite{skolnik2008radar}.
 The common thread is practical: launch a controlled electromagnetic disturbance, let it scatter, and read geometry and motion from the returned field.
 At the level of Maxwell's equations, radiation follows accelerating charge and current patterns in an antenna; for the purposes here it suffices to treat each emitted burst as a localized wave packet whose group delay encodes distance once propagation speed is known \parencite{skolnik2008radar}.
 
@@ -94,7 +94,7 @@ Measured descriptors obey $\vect{x}_n = \vect{g}(\vect{s}_n) + \vect{\epsilon}_n
 Weak pulses inflate effective noise or leave fields blank; false alarms inject samples with no meaningful $\vect{s}_n$.
 \emph{Deinterleaving} (\cref{sec:bg:elint_pipeline}) partitions detections into trains so that \cref{eq:bg:pdw_pri} is interpretable inside each train; mixture, misses, and spurious hits then show up as structured outliers in the sequence $(\vect{x}_n)$.
 
-For the learning part of this thesis, the model input is a \emph{time-ordered \gls{pdw} sequence} $(\vect{x}_1,\ldots,\vect{x}_T)$, that is, a \emph{pulse train} (possibly after association and sorting) rather than the raw digitized waveform.
+In later chapters, the model input is a \emph{time-ordered \gls{pdw} sequence} $(\vect{x}_1,\ldots,\vect{x}_T)$, that is, a \emph{pulse train} (possibly after association and sorting) rather than the raw digitized waveform.
 Each $\vect{x}_n$ is one token in a length-$T$ sequence whose coordinates carry explicit physical units and semantics, which matters when designing encoders and augmentation.
 
 \subsection{Physical sources and transmit schedules}\label{sec:bg:emitters}

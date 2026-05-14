@@ -14,7 +14,7 @@ Filenames mirror the `\section{...}` title in `sections/02_background/`. Each fi
 
 | File | `\section` title | Notes |
 |------|------------------|--------|
-| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; includes PDWs (`sec:bg:pdw`) and emitters/modes (`sec:bg:emitters`) as `\subsection`s. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
+| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; subsections: history and uses, echo delay and biosonar, active versus passive reception, sampling to pulse list (STFT `eq:bg:stft`), PDWs and pulse-train input (`sec:bg:pdw`), emitters versus modes (`sec:bg:emitters`). Figure `fig:bg:pulse_echo_timeline`. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
 | `02_signal_processing_pipeline_passive_elint.tex` | Signal Processing Pipeline for Passive ELINT | Label `sec:bg:elint_pipeline`; `\label{sec:bg:deinterleaving_evolution}` on the deinterleaving subsection. Add pipeline figure under `figures/background/`. |
 | `03_machine_learning_fundamentals.tex` | Machine Learning Fundamentals | Label `sec:bg:ml`. |
 | `04_clustering_methods.tex` | Clustering Methods | Label `sec:bg:clustering`. Cite `\parencite{xie2016unsupervised}`. |
