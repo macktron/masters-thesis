@@ -1,8 +1,10 @@
 \section{Problem Formulation}\label{sec:method:formulation}
 
 This chapter studies supervised representation learning from time-ordered streams of \glspl{pdw} produced by an \gls{esm} or deinterleaving front end, as outlined in \cref{sec:bg:elint_pipeline}.
-Each pulse in the training data carries two ground-truth labels: an \emph{emitter identity}, whose values are unique only within the pulse train that contains the pulse, and an \emph{operating mode}, whose label set is shared across all pulse trains.
-The goal is twofold: learn a representation from which (i) pulses originating from the same physical emitter within a pulse train can be reliably grouped, and (ii) the global operating mode of each pulse can be recovered.
+Each pulse in the training data carries two ground-truth labels: an \emph{emitter identity}, whose values are unique only within the pulse train that contains the pulse, and an \emph{operating mode}, whose label set is a finite catalogue shared across all pulse trains.
+Both labels are used to supervise embedding geometry during training, and both per-pulse outputs are produced by clustering the resulting embeddings at inference time.
+The goal is twofold: learn a representation from which (i) pulses originating from the same physical emitter within a pulse train can be reliably grouped by clustering the emitter embeddings, and (ii) pulses sharing the same operating mode --- including modulation types not present in the training catalogue --- can be reliably grouped by clustering the mode embeddings.
+Routing the mode output through clustering rather than through a closed-catalogue classifier is a deliberate design choice: it keeps the system open to previously unseen modulation variants, an experimental scenario investigated in \cref{ch:experiments} by holding out selected modulations during training and verifying that the model still groups their pulses into coherent mode clusters.
 
 
 \subsection*{Observed input}
@@ -150,7 +152,7 @@ The two partitions are coupled because $(e_n,m_n)$ is generated jointly: restric
 \end{equation}
 has cardinality $L_k = \lvert \mathcal{L}_k \rvert$ bounded by the number of distinct waveform programmes that emitter $k$ exercises.
 In many \gls{radar} systems, mode hopping switches among a small subset of the catalogue, so $L_k$ is modest---often on the order of single-digit integers---even though the temporal pattern $(m_n)_{n \in \mathcal{E}_k}$ is not constant.
-The supervised learning problem is then to fit a model whose outputs, on previously unseen trains, recover $\{\mathcal{E}_k\}$ up to an arbitrary relabelling of emitter symbols and assign each pulse to the correct global mode label in $\{1,\ldots,M\}$, using the dual embeddings in \cref{eq:method:dual_embeddings}.
+The supervised learning problem is then to fit a model whose outputs, on previously unseen trains, recover both partitions up to arbitrary relabellings of the cluster symbols, using the dual embeddings in \cref{eq:method:dual_embeddings}: for the emitter partition the relabelling acts within each train, while for the mode partition the relabelling acts globally and may introduce additional indices when previously unseen modulations are present.
 
 \subsection*{Desired outputs: dual embeddings and discrete labels}
 
@@ -166,7 +168,7 @@ The parametric model considered in this thesis maps an input pulse train to two 
 \end{equation}
 with dimensions $p$ and $q$ fixed by the architecture.
 
-The two trajectories play different roles dictated by the label semantics described above.
+The two trajectories play different roles dictated by the label semantics described above, but in both cases the supervision shapes embedding \emph{geometry} so that downstream discretisation is done by clustering rather than by a fixed-class softmax.
 Emitter-oriented vectors $\vect{z}^{\mathrm{em}}_n$ are trained so that, within each pulse train, embeddings with the same emitter label cluster tightly in $\R^{p}$ while embeddings with different emitter labels are pushed apart.
 Because the emitter symbol is train-local, the corresponding supervision is a within-train metric-learning signal rather than a global classifier, and discrete emitter assignments
 \begin{equation}\label{eq:method:emitter_predictor}
@@ -177,17 +179,22 @@ Because the emitter symbol is train-local, the corresponding supervision is a wi
 are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{N}$ within each train; the inferred count $\hat{K}_{\mathrm{em}}$ is either selected by the clustering algorithm or supplied from external knowledge.
 Their main deliverable is a per-pulse emitter index suitable for downstream \gls{elint} workflows such as emitter counting and localisation.
 
-Mode-oriented vectors $\vect{z}^{\mathrm{md}}_n$, by contrast, are trained against the shared global catalogue of $M$ modes.
-A classification head $f \colon \R^{q} \to \R^{M}$ on top of the embedding produces the predicted mode
+Mode-oriented vectors $\vect{z}^{\mathrm{md}}_n$ are trained against the global mode labels analogously: embeddings of pulses sharing the same mode in $\{1,\ldots,M\}$ are pulled together while embeddings of pulses with different modes are pushed apart, this time with positives drawn from the entire batch rather than only from within a single train.
+Discrete mode assignments
 \begin{equation}\label{eq:method:mode_predictor}
-  \hat{m}_n = \argmax_{\ell \in \{1,\ldots,M\}} f_\ell\!\left(\vect{z}^{\mathrm{md}}_n\right),
+  \hat{m}_n \in \{1,\ldots,\hat{M}\},
+  \qquad
+  n \in \{1,\ldots,N\},
 \end{equation}
-and the embedding additionally aims to summarise mode-dependent waveform behaviour so that operating modes can be inspected, compared, or matched against a library of known waveforms.
+are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^{N}$, optionally aided by the cluster centroids of the training-time modes when an alignment to the catalogue $\{1,\ldots,M\}$ is desired.
+The inferred catalogue size $\hat{M}$ may exceed $M$ when modulation types that were absent or held out during training are exercised at inference; in that regime, additional clusters are expected to emerge as evidence of previously unseen modes rather than to be forced into existing catalogue entries.
+The embedding additionally aims to summarise mode-dependent waveform behaviour so that operating modes can be inspected, compared, or matched against external waveform libraries.
 
-Architecturally, both streams are produced from a shared encoder $\Enc$ with task-specific heads (see \cref{sec:method:arch}); in deployment, emitter embeddings may be less critical to retain after discrete $\hat{e}_n$ have been fixed, whereas mode embeddings (or intermediate encoder activations feeding the mode head) are natural inputs to specialised mode classifiers.
+Architecturally, both streams are produced from a shared encoder $\Enc$ with task-specific heads (see \cref{sec:method:arch}); in deployment, the per-pulse deliverables are the discrete pairs $(\hat{e}_n,\hat{m}_n)$, while the continuous embeddings remain available for inspection, prototype matching, and downstream tasks that benefit from a geometric rather than purely categorical mode representation.
 
 \subsection*{Learning objective}
 
-The optimisation problem combines (i) a supervised within-train metric-learning loss that uses the emitter labels $\{e_n\}$ to shape $\mat{Z}^{\mathrm{em}}$ and (ii) a supervised classification loss against the global mode catalogue $\{1,\ldots,M\}$ that shapes $\mat{Z}^{\mathrm{md}}$ through the head in \cref{eq:method:mode_predictor}.
-The two terms exploit the asymmetric label semantics: emitter labels enter the loss only through within-train comparisons, while mode labels are used identically across trains.
+The optimisation problem combines two supervised metric-learning losses sharing the same functional form but operating on different scopes: (i) a within-train term that uses the emitter labels $\{e_n\}$ to shape $\mat{Z}^{\mathrm{em}}$, with positives drawn only from the same pulse train; and (ii) a global term that uses the mode labels $\{m_n\}$ to shape $\mat{Z}^{\mathrm{md}}$, with positives drawn from anywhere in the batch.
+The two terms exploit the asymmetric label semantics: emitter labels enter the loss only through within-train comparisons because the symbols are not shared across trains, while mode labels are used identically across trains because the catalogue is global.
+Neither term commits to a fixed output cardinality at inference; downstream cluster counts $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are read from the post-hoc clustering of \cref{eq:method:emitter_predictor,eq:method:mode_predictor} and may differ from the training-time cardinalities.
 The concrete loss terms and training protocol are given in \cref{sec:method:loss,sec:method:training}.

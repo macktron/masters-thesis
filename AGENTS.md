@@ -4,13 +4,13 @@ This file is read first by any AI coding agent working on the thesis. It capture
 
 ## Topic
 
-**Joint radar emitter clustering and mode classification using a transformer encoder architecture.**
+**Joint radar emitter and mode clustering using a transformer encoder architecture.**
 
-The thesis investigates whether a transformer encoder, trained with a dual-objective loss (a within-train supervised contrastive term for the emitter branch and a cross-entropy classification term for the mode branch over a global mode catalogue), can simultaneously (a) produce embeddings that cluster pulses by physical emitter within each pulse train and (b) predict the operating mode of each pulse, given a stream of pulse descriptor words (PDWs) or equivalent low-level features.
+The thesis investigates whether a transformer encoder, trained with two supervised contrastive losses that differ only in the scope of their positive sets (within-window emitter labels for the emitter branch and batch-wide global mode labels for the mode branch), can simultaneously produce embeddings that (a) cluster pulses by physical emitter within each pulse train and (b) cluster pulses by operating mode across pulse trains, given a stream of pulse descriptor words (PDWs) or equivalent low-level features.
 
-Label structure of the training data: every PDW carries two ground-truth labels. Emitter identifiers are unique only \emph{within} a pulse train (so they cannot be shared across trains), while operating-mode labels are drawn from a finite catalogue shared globally across all trains. This asymmetry shapes both the loss and the inference pipeline.
+Label structure of the training data: every PDW carries two ground-truth labels. Emitter identifiers are unique only \emph{within} a pulse train (so they cannot be shared across trains), while operating-mode labels are drawn from a finite catalogue shared globally across all trains. This asymmetry shapes the scope of each contrastive term and is preserved at inference, but the per-pulse outputs of \emph{both} branches are obtained by post-hoc clustering of the corresponding embeddings rather than by a closed-catalogue softmax. The clustering-based mode output is deliberate: it keeps the system open to modulation types not present in the training catalogue, which is the regime investigated by held-out-modulation experiments.
 
-Context: ELINT / ESM applications, where mixtures and previously unseen emitters are common at inference time and the system must remain robust to deinterleaving noise. Training data here are synthetic and fully labelled at the per-pulse level; the broader operational regime in which labels are scarce motivates the train-local emitter formulation rather than a global emitter classifier.
+Context: ELINT / ESM applications, where mixtures and previously unseen emitters or modulations are common at inference time and the system must remain robust to deinterleaving noise. Training data here are synthetic and fully labelled at the per-pulse level; the broader operational regime in which novel emitters and modulations appear motivates both the train-local emitter formulation and the open-set mode clustering.
 
 ## Institutional context
 

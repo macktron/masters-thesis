@@ -48,17 +48,17 @@ Each branch terminates in a linear projection head that maps every token to its 
 with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
 The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
 
-\subsection*{Per-window emitter clustering with \gls{hdbscan} and mode classification}
+\subsection*{Per-window clustering with \gls{hdbscan}}
 
 The projection heads in \cref{eq:method:proj_heads} map each pulse to a continuous vector, whereas the per-pulse emitter and mode outputs of the system in \cref{sec:method:formulation} are discrete.
-The two branches differ in how that discretisation is obtained, because of the asymmetric label semantics described in \cref{sec:method:formulation}.
+\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} is applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a self-contained clustering instance on the corresponding branch.
+Each window is thus a self-contained segment in embedding space, consistent with the windowing of \cref{sec:method:data}, and the effective cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ from \cref{eq:method:emitter_predictor,eq:method:mode_predictor} follow the density hierarchy rather than being fixed in advance.
 
-For the emitter branch, emitter identifiers are train-local and the inferred count $\hat{K}_{\mathrm{em}}$ in \cref{eq:method:emitter_predictor} is not known a priori on previously unseen pulse trains.
-\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} is therefore applied to the emitter embedding trajectory within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ form a self-contained clustering instance, and the effective number of clusters follows the density hierarchy rather than being fixed in advance.
 As defined in the framework of \textcite{campello2015hierarchical}, \gls{hdbscan} replaces the single global density threshold of DBSCAN \parencite{ester1996density} with a hierarchy of density estimates: nested level sets are summarised in a condensed tree, and a flat clustering is read off by favouring groups that persist as coherent peaks rather than artefacts of a particular threshold.
 The same construction supports an explicit noise category for points that are not assigned to any cluster leaf retained after the hierarchy is flattened \parencite{campello2015hierarchical}, and the computations use the reference library described by \textcite{mcinnes2017hdbscan}.
 
-For the mode branch, the global catalogue $\{1,\ldots,M\}$ is known and shared across pulse trains, so a fixed classification head $f \colon \R^{q} \to \R^{M}$ is attached to $\vect{z}^{\mathrm{md}}_n$ and the per-pulse prediction $\hat{m}_n$ is the argmax of its logits, as introduced in \cref{eq:method:mode_predictor}.
-The mode embeddings $\vect{z}^{\mathrm{md}}_n$ remain available for downstream qualitative analysis (visualisation, nearest-neighbour mode lookup) but the operational mode label is read directly from the classifier rather than from an unsupervised clustering of the mode embeddings.
+The two branches differ in how the resulting cluster indices are interpreted, reflecting the asymmetric label semantics of \cref{sec:method:formulation}.
+Emitter cluster indices are inherently train-local: each window is clustered in isolation and the integer labels carry no meaning across windows or across trains.
+Mode cluster indices, by contrast, refer to globally meaningful operating modes, so an additional matching step compares each mode-cluster centroid against prototypes derived from the training-time modes: clusters near a known prototype inherit the corresponding catalogue index in $\{1,\ldots,M\}$, while clusters far from every prototype are flagged as candidates for modulation types not present in the training catalogue, which is the open-set behaviour required by the held-out-mode experiments in \cref{ch:experiments}.
 
-The collection of all linear maps in \cref{eq:method:input_embed,eq:method:proj_heads}, the classification head $f$, and the attention and \gls{ffn} weights of the trunk and branches constitutes the parameter vector $\bm{\theta}$ that the loss in \cref{sec:method:loss} optimises.
+The collection of all linear maps in \cref{eq:method:input_embed,eq:method:proj_heads} together with the attention and \gls{ffn} weights of the trunk and branches constitutes the parameter vector $\bm{\theta}$ that the loss in \cref{sec:method:loss} optimises.

@@ -3,9 +3,9 @@
 \subsection{Objectives}\label{sec:intro:objectives}
 
 The work pursues objectives that operationalize the research questions in \cref{sec:intro:rq}.
-First, we specify and implement a transformer-style encoder that ingests bounded windows of \glspl{pdw} from interleaved pulse streams and maps them to a dual embedding (\cref{sec:method:formulation}), together with a post-hoc clustering stage for the emitter branch and a classification head over the global mode catalogue for the mode branch.
+First, we specify and implement a transformer-style encoder that ingests bounded windows of \glspl{pdw} from interleaved pulse streams and maps them to a dual embedding (\cref{sec:method:formulation}), together with a post-hoc clustering stage applied independently to the emitter and the mode branches.
 We then study how performance depends on practical limits on context length, mixture density, and noise, reporting agreement with the ground-truth simulator partitions using standard scores such as \gls{nmi} and \gls{ari} (\cref{ch:experiments}).
-Second, we formulate at least one joint training objective that couples a within-train supervised contrastive term for emitter identity with a global classification term for operating mode, and compare it against a matched baseline trained primarily for deinterleaving or representation quality without that coupling, holding architecture capacity and data conditions as constant as feasible (\cref{ch:method,ch:experiments}).
+Second, we formulate at least one joint training objective that couples a within-train supervised contrastive term for emitter identity with a batch-wide supervised contrastive term over the global mode labels, and compare it against a matched baseline trained primarily for deinterleaving or representation quality without that coupling, holding architecture capacity and data conditions as constant as feasible (\cref{ch:method,ch:experiments}).
 
 \subsection{Delimitations}\label{sec:intro:delimitations}
 
@@ -14,5 +14,5 @@ We operate at the level of \glspl{pdw} or equivalent tabular pulse features supp
 The focus is offline or batch analysis of recorded streams rather than hard real-time implementation on embedded hardware, and we do not address full operational emitter naming against classified libraries.
 That choice excludes an \emph{online} regime in which models update continuously from a live pulse stream under latency and memory budgets: training and evaluation here assume access to bounded windows that can be revisited, shuffled, and mini-batched, which sidesteps causal filtering, drift handling, and resource accounting that a streaming deployment would require.
 Consequently, conclusions concern representation quality and clustering agreement on curated windows rather than end-to-end tracking performance over arbitrarily long horizons.
-Training relies on the simulator-provided emitter and mode labels (\cref{sec:method:data}); at inference time the trained encoder is intended to operate on previously unseen pulse trains whose emitter membership is recovered by clustering and whose operating modes are read from the classifier head described in \cref{sec:intro:problem}.
+Training relies on the simulator-provided emitter and mode labels (\cref{sec:method:data}); at inference time the trained encoder is intended to operate on previously unseen pulse trains whose emitter and mode memberships are both recovered by clustering the corresponding embedding trajectories, as described in \cref{sec:intro:problem}.
 Finally, we do not claim field validation on classified measurements; conclusions are drawn from synthetic or curated datasets together with stress tests that mimic deinterleaving noise (\cref{ch:experiments}).

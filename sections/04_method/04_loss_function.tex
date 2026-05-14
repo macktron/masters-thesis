@@ -1,7 +1,7 @@
 \section{Loss Function}\label{sec:method:loss}
 
-The trainable objective uses both label streams introduced in \cref{sec:method:formulation}: a within-window \emph{supervised contrastive} loss that uses the train-local emitter labels $\{e_n\}$ to shape $\mat{Z}^{\mathrm{em}}$, and a per-pulse cross-entropy loss that uses the global mode labels $\{m_n\}$ to shape $\mat{Z}^{\mathrm{md}}$ through the classification head from \cref{eq:method:mode_predictor}.
-The two terms are summed with a weight on the mode branch and minimised jointly.
+The trainable objective applies the same \emph{supervised contrastive} functional form to both label streams introduced in \cref{sec:method:formulation}, with positive sets chosen so that each term respects its label's scope: positives for the emitter branch are restricted to the current window (because emitter symbols are train-local), whereas positives for the mode branch are drawn from anywhere in the batch (because the mode catalogue is global).
+The two terms are summed with a weight on the mode branch and minimised jointly; the post-hoc clustering of the resulting embeddings, as specified in \cref{eq:method:emitter_predictor,eq:method:mode_predictor}, is left for inference time and is not part of the training objective.
 
 \subsection*{Supervised contrastive viewpoint}
 
@@ -9,9 +9,12 @@ Contrastive objectives shape the geometry of an embedding space by encouraging p
 In the original SimCLR formulation, positives are constructed without supervision from two stochastic augmentations of the same input, and the loss is closely related to a lower bound on mutual information between two views in contrastive predictive coding \parencite{oord2018representation}.
 When per-sample labels are available, the same machinery generalises to \emph{supervised contrastive} learning, in which every other sample sharing the anchor's label is treated as a positive and the remaining samples are negatives \parencite{khosla2020supcon}.
 
-The supervised variant is a natural fit for the emitter task in \cref{sec:method:formulation}: within each pulse-train window, every pulse carries an emitter label and the positive set for an anchor is exactly the set of other pulses with the same emitter symbol.
-Because emitter symbols are unique only within a pulse train, contrasts are restricted to the current window, which matches both the train-local semantics of $e_n$ and the windowing strategy in \cref{sec:method:data}.
-A large set of negatives drawn from the same window is essential in either viewpoint: without repulsive pressure on unrelated pairs, encoders can collapse to a constant map and still achieve low training error on a naïve agreement loss \parencite{chen2020simclr}.
+The supervised variant is a natural fit for both tasks in \cref{sec:method:formulation} and is used uniformly across the emitter and mode branches; the two branches differ only in the \emph{scope} from which positives and negatives are drawn.
+For the emitter branch, every pulse in a pulse train carries an emitter label and the positive set for an anchor is exactly the set of other pulses in the same window with the same emitter symbol; because emitter symbols are unique only within a pulse train, contrasts are restricted to the current window, which matches both the train-local semantics of $e_n$ and the windowing strategy in \cref{sec:method:data}.
+For the mode branch, every pulse carries a global mode label that refers to the same operating mode across all pulse trains, so positives and negatives are pooled across the entire mini-batch, making the mode-branch supervision identical to the standard SupCon setting \parencite{khosla2020supcon}.
+A large set of negatives is essential in either case: without repulsive pressure on unrelated pairs, encoders can collapse to a constant map and still achieve low training error on a naïve agreement loss \parencite{chen2020simclr}.
+
+Routing both branches through supervised contrastive losses --- rather than attaching a closed-catalogue softmax head to the mode branch --- keeps the inference path through clustering open and is the reason both branches can in principle handle previously unseen labels: emitters by virtue of the train-local re-indexing, and modes by virtue of the open-set clustering described in \cref{sec:method:formulation,sec:method:arch}.
 
 \subsection*{Supervised contrastive building block}
 
@@ -59,19 +62,25 @@ A pulse whose emitter is unique inside its window (so $\mathcal{P}^{\mathrm{em}}
 \subsection*{Mode-oriented term}
 
 Operating modes carry meaning across pulse trains, and every pulse in the training data is annotated with a global mode label $m_n \in \{1,\ldots,M\}$.
-A linear classification head $f \colon \R^{q} \to \R^{M}$ on top of the mode embedding produces per-class logits, and the mode branch is trained with the standard per-pulse cross-entropy
+The mode branch uses the same supervised contrastive functional form as the emitter branch but with positives drawn across the whole mini-batch.
+Concatenate the per-window pulse sequences of a mini-batch into a global index set
+\begin{equation}\label{eq:method:mode_index_set}
+  \mathcal{I}^{\mathrm{md}} = \{\,(b,n) : b \in \{1,\ldots,B\},\, n \in \{1,\ldots,L\}\,\},
+\end{equation}
+together with the corresponding embeddings $\{\vect{z}^{\mathrm{md}}_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}$ and labels $\{m_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}$.
+The positive set for an anchor $(b,n)$ is then the set of all other pulses in the batch with the same global mode label,
+\begin{equation}\label{eq:method:mode_positives}
+  \mathcal{P}^{\mathrm{md}}_{b,n} = \{\, (b',n') \in \mathcal{I}^{\mathrm{md}} \setminus \{(b,n)\} : m_{b',n'} = m_{b,n} \,\},
+\end{equation}
+and the mode loss is the supervised contrastive contribution \cref{eq:method:supcon} on the batch-wide index set:
 \begin{equation}\label{eq:method:loss_mode}
   \Loss_{\mathrm{md}}
   =
-  -\frac{1}{B\,L}
-  \sum_{b=1}^{B}\sum_{n=1}^{L}
-  \log
-  \frac{\exp\bigl(f_{m_{b,n}}\!\bigl(\vect{z}^{\mathrm{md}}_{b,n}\bigr)\bigr)}
-       {\displaystyle\sum_{\ell=1}^{M}\exp\bigl(f_{\ell}\!\bigl(\vect{z}^{\mathrm{md}}_{b,n}\bigr)\bigr)},
+  \Loss_{\mathrm{SC}}\bigl(\mathcal{I}^{\mathrm{md}},\, \{\mathcal{P}^{\mathrm{md}}_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}\bigr).
 \end{equation}
-where $m_{b,n}$ denotes the ground-truth mode label of pulse $n$ in window $b$ and $f$ is the head used at inference in \cref{eq:method:mode_predictor}.
-Because the catalogue $\{1,\ldots,M\}$ is shared across windows, this term applies the same supervision identically to every window, and gradients on $f$ and on $\Enc$ pull together mode embeddings whose ground-truth modes coincide regardless of which physical emitter or which train produced them.
-Auxiliary contrastive structure on $\vect{z}^{\mathrm{md}}_n$ (for example, a SupCon term that uses mode labels as positives \parencite{khosla2020supcon}) is a natural extension when classifier confidence alone is insufficient to organise mode geometry; whether such a term is active is part of the optimisation configuration recorded in \cref{ch:experiments}.
+Because the catalogue $\{1,\ldots,M\}$ is shared across windows, batch-wide pooling pulls together embeddings whose ground-truth modes coincide regardless of which physical emitter or which train produced them, and pushes apart embeddings of pulses belonging to different modes.
+Crucially, the loss never references the cardinality $M$ explicitly: it only consumes pairwise label coincidences.
+Consequently, embeddings of modes that are held out during training receive no direct gradient signal but still inherit the geometry induced by their neighbours in $\R^{q}$, which is the geometric prerequisite for the open-set mode clustering at inference described in \cref{sec:method:formulation,sec:method:arch}.
 
 \subsection*{Combined objective and use of the projection heads}
 
@@ -83,5 +92,7 @@ The overall training loss is the weighted sum
 \end{equation}
 with $\lambda_{\mathrm{md}}$ treated as a hyperparameter and reported in \cref{ch:experiments}.
 
-For emitter inference on a previously unseen pulse train, the deliverable is the discrete per-pulse assignment $\hat{e}_n$ in \cref{eq:method:emitter_predictor}, obtained by clustering the emitter embeddings $\{\vect{z}^{\mathrm{em}}_n\}$ within each test window with the post-hoc clustering algorithm of \cref{sec:method:arch}; once those labels are fixed, storing every $\vect{z}^{\mathrm{em}}_n$ is optional because the continuous representation is not required for the operational tasks that consume hard emitter tracks.
-For mode inference, the per-pulse prediction $\hat{m}_n$ is read directly from the classification head as in \cref{eq:method:mode_predictor}, while the mode embeddings $\vect{z}^{\mathrm{md}}_n$ remain useful for visualisation, nearest-neighbour mode analysis, and any future matching against external waveform libraries.
+For emitter inference on a previously unseen pulse train, the deliverable is the discrete per-pulse assignment $\hat{e}_n$ in \cref{eq:method:emitter_predictor}, obtained by clustering the emitter embeddings $\{\vect{z}^{\mathrm{em}}_n\}$ within each test window with the post-hoc clustering algorithm of \cref{sec:method:arch}.
+For mode inference, the analogous discrete assignment $\hat{m}_n$ in \cref{eq:method:mode_predictor} is obtained by clustering the mode embeddings $\{\vect{z}^{\mathrm{md}}_n\}$ with the same algorithm.
+The clustering for the mode branch is allowed to produce more clusters than the number of catalogue entries $M$ seen during training: cluster centroids that align to training-time mode prototypes can be labelled with their catalogue index, whereas additional clusters far from every training prototype are flagged as candidate previously unseen modes.
+The continuous embeddings $\vect{z}^{\mathrm{em}}_n$ and $\vect{z}^{\mathrm{md}}_n$ remain useful for inspection, prototype matching, and downstream tasks that benefit from a geometric rather than purely categorical representation, but once $\hat{e}_n$ and $\hat{m}_n$ have been fixed, storing every embedding is optional for operational consumers of the discrete output.
