@@ -8,7 +8,7 @@ The exact implementation varies with platform, band, and mission software, but t
 At the \emph{front end}, antennas and \gls{rf} conditioning capture emissions over one or more instantaneous bandwidths, often after wideband digitization or channelized sub-band processing.
 A \emph{detection} stage then marks pulse-like events against a noise and clutter background, producing a sparse list of candidate pulse times (and sometimes coarse frequency hints).
 
-Given detections, \emph{parameter estimation} attaches per-pulse measurements such as carrier frequency, pulse width, time of arrival, direction of arrival when available, and amplitude or signal-to-noise proxies.
+Given detections, \emph{parameter estimation} attaches per-pulse measurements such as carrier frequency, pulse width, time of arrival, direction of arrival when available, and amplitude or signal-to-noise proxies, this becomes our PDWs after possibly attatching AoA after triangulation.
 These estimates are noisy, can be missing for weak emitters, and may include false alarms that are not associated with any physical radar.
 
 \subsection{Deinterleaving and pulse-train formation}\label{sec:bg:deinterleaving_evolution}

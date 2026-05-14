@@ -2,17 +2,19 @@
 
 This chapter studies unsupervised structure recovery from a time-ordered stream of \glspl{pdw} produced by an \gls{esm} or deinterleaving front end, as outlined in \cref{sec:bg:elint_pipeline}.
 The goal is twofold: associate each pulse with a physical \emph{emitter instance} and, within that instance, with an \emph{operating mode}, without prior knowledge of how many emitters or modes appear in the data.
-Both quantities are latent because labels are scarce in \gls{elint} settings and because novel emitters and modes must be accommodated.
+
 
 \subsection*{Observed input}
 
-Let a sequence of $N$ pulses be represented by feature vectors
+Let a sequence of $N$ pulses be represented by feature vectors (PDWs)
 \begin{equation}\label{eq:method:pdw_sequence}
   \mat{X} = (\vect{x}_1,\ldots,\vect{x}_N),
   \qquad
   \vect{x}_n \in \R^{d},
 \end{equation}
-where each $\vect{x}_n$ encodes the measured pulse parameters associated with one \gls{pdw} (carrier frequency, pulse width, timing, spatial cues, and any auxiliary fields).
+
+where each $\vect{x}_n$ encodes the measured pulse parameters associated with one \gls{pdw} (carrier frequency, amplitude, pulse width, time of arrival, angle of arrival including azimuth and elevation).
+
 The sequence may contain irregular sampling, missing pulses, and spurious detections inherited from upstream processing; robustness to such effects is a design constraint rather than part of the formal specification.
 
 \subsection*{Latent emitter and mode assignments}
