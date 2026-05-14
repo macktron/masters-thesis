@@ -10,7 +10,7 @@ What unifies all radar systems is a practical goal: they emit a carefully contro
 
 At its core, radar sensing uses the physics of wave propagation to measure distance. A transmitter emits a brief electromagnetic pulse, which travels at speed $c$ (the speed of light in air), reflects from an object, and returns as an echo. By measuring the elapsed time $\tau$ between emission and reception—known as the round-trip delay—the system can infer the distance to the object.
 
-In the canonical case, a single (monostatic) radar platform handles both transmission and reception, with the wave traversing to the target and back. The fundamental relation connecting time delay to range follows directly from the definition of speed:
+In the canonical configuration, a single (monostatic) radar platform handles both transmission and reception, with the wave traversing to the target and back. The fundamental relation connecting time delay to range follows directly from the definition of speed:
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
@@ -18,6 +18,8 @@ R = \frac{c\tau}{2},
 where $R$ is the target range and $c$ is the wave speed \parencite{skolnik2008radar}. The factor of 2 accounts for the outbound and return paths.
 
 A similar approach is found in animal echolocation: for instance, a bat produces a short sound pulse and estimates the distance to an obstacle or prey by interpreting the delay before it hears the echo, substituting sound waves for electromagnetic ones \parencite{skolnik2008radar}.
+
+While monostatic setups are common, many practical radar and electronic support systems employ multiple spatially separated receive antennas, or distributed arrays, forming so-called bistatic or multistatic configurations. By correlating the signals arriving at different locations, these systems can measure angles of arrival and other spatial properties in addition to range, thus supporting direction finding and improved localization.
 
 Practical radar systems emit periodic pulses, each separated by a pulse repetition interval (\gls{pri}) or, equivalently, a pulse repetition frequency (\gls{prf}). A core challenge appears when echoes from earlier pulses arrive after a new pulse is sent. This leads to \emph{range ambiguity}, where it is unclear which transmitted pulse a received echo should be attributed to. The largest range without ambiguity—the \emph{unambiguous range}—is set by the time between pulses:
 \begin{equation}
