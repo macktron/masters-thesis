@@ -1,13 +1,17 @@
 \section{Limitations}\label{sec:disc:limitations}
 
-The experimental programme is offline: models are trained and scored on bounded, revisit-able windows rather than under the latency, memory, and non-stationarity constraints of a continuously arriving pulse stream (\cref{sec:intro:scope,sec:method:data}).
-That setting supports controlled optimisation and reproducible metrics but does not demonstrate that the same representations would support stable online emitter or mode tracking without periodic retraining or revised windowing policy.
+The experimental programme is offline: models are trained and scored on bounded, revisit-able windows rather than under the latency, memory, and non-stationarity constraints of a continuously arriving pulse stream (\cref{sec:intro:scope,sec:intro:delimitations,sec:method:data}).
+That setting supports controlled optimization and reproducible metrics but does not demonstrate that the same representations would support stable online emitter or mode tracking without periodic retraining or revised windowing policy.
 
 Fixed-length windows are partly a consequence of full self-attention, whose standard implementation scales quadratically with the number of pulses in the window (\cref{sec:method:data}).
 The chosen cap on $L$ therefore trades faithful coverage of long mode segments and rare emitters against compute, and the present pipeline drops trailing segments shorter than $L$, which can remove evidence entirely when a scenario does not fill an integral number of windows.
 
-Interleaved emitters and mode-hopping further skew how many pulses from each ground-truth label appear inside any given window, so performance summaries aggregate over heterogeneous label incidence rather than over an idealised balanced design (\cref{sec:exp:datasets}).
+Interleaved emitters and mode-hopping further skew how many pulses from each ground-truth label appear inside any given window, so performance summaries aggregate over heterogeneous label incidence rather than over an idealized balanced design (\cref{sec:exp:datasets}).
 Where metrics depend on comparing inferred partitions to reference labels, conclusions are most informative for label configurations that actually recur with sufficient mass inside windows; weak support for a label in a window is a limitation of the observation model, not necessarily of the encoder in isolation.
 
 Finally, all quantitative evidence is derived from synthetic scenarios with full reference labels; operational recordings with imperfect deinterleaving, sensor dropouts, and distribution shift are not included here.
+Related Saab-line work on track association under deinterleaving errors highlights that real pipelines fragment pulse trains and introduce structured mistakes that are only partly captured by the stylized drop and spurious models used for stress tests \parencite{jakobsson2024trackassociation}.
+Likewise, classifiers trained on simulator draws can exhibit overconfidence on held-out emitters or modulation families, which motivates explicit out-of-distribution and drift analyses when moving toward fielded receivers \parencite{coleman2023rwrdrift}.
+The present thesis does not implement drift monitors or uncertainty heads; those remain orthogonal safeguards if embeddings from \cref{ch:method} are ever deployed under evolving threat libraries.
+
 The \gls{hdbscan} post-processing used in \cref{sec:method:arch} also encodes density assumptions that may not match every deployment, and we do not exhaust efficient-attention or hierarchical alternatives that could extend context within the same hardware envelope.

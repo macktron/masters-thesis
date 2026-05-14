@@ -1,5 +1,13 @@
-\section{Deep Clustering}\label{sec:related:deep_clustering}
+\section{Deep Clustering and Joint Representation Learning}\label{sec:related:deep_clustering}
 
-% TODO: DEC, IDEC, DeepCluster, SwAV, contrastive clustering.
-% Methodological inspiration for the thesis.
-Placeholder paragraph.
+Classical clustering assumes that either raw features or a fixed embedding already reveal the desired partition.
+\Gls{dec} departs from that split by learning an encoder jointly with a soft assignment to a small set of trainable cluster centroids in embedding space \parencite{xie2016unsupervised}.
+Training alternates between computing soft assignments from the current encoder and refining the encoder with a Kullback--Leibler objective that sharpens confident assignments toward an auxiliary target distribution, so that the network discovers both features and cluster structure.
+Follow-on work tightens initialization, adds reconstruction constraints, or refines the target distribution; the common theme is that discrete structure is not fixed in advance but co-adapts with the representation.
+
+SwAV and related \emph{prototype} methods replace dense pairwise contrastive negatives with a prediction problem onto a modest codebook of cluster prototypes, swapping predicted codes between augmented views to avoid representation collapse while still encouraging invariance \parencite{caron2020swav}.
+They sit between purely self-supervised contrastive pretraining \parencite{chen2020simclr} and hard assignment $k$-means: gradients still flow through discrete-like targets, but the geometry is anchored by learned prototypes rather than by instance indices alone.
+
+Several lines extend deep clustering to \emph{multiple} partitions or hierarchical labels, for example by stacking separate assignment heads, alternating optimization over two clusterings, or enforcing orthogonality constraints between subspaces.
+The gap relevant to this thesis is narrower: emitter identity and operating mode are not arbitrary independent clusterings---modes nest inside emitters---yet many published pipelines still treat a single flat label space or a purely supervised multi-head classifier.
+Work that jointly addresses deinterleaving-style separation and finer-grained mode structure from \emph{unlabeled} \gls{pdw} windows with a shared transformer encoder remains comparatively sparse, which motivates the method in \cref{ch:method}.

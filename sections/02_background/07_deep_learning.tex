@@ -26,10 +26,7 @@ Large-scale implementations such as SimCLR combine strong augmentations with wid
 
 Pretext tasks offer an alternative route: the network solves an auxiliary problem (predicting rotations, solving jigsaw permutations, inpainting masked regions) whose solution is incidental, but the representation \(\vect{z}\) becomes predictive of semantically stable factors.
 Such objectives can be combined with clustering when the end goal is partition discovery rather than linear probe accuracy on a fixed label set.
-
-\Gls{dec} couples an encoder with a soft assignment to a small set of cluster centroids in embedding space and trains the model by minimizing a Kullback--Leibler divergence between the soft assignments and an auxiliary target distribution that sharpens confident predictions \parencite{xie2016unsupervised}.
-SwAV replaces pairwise instance contrast with \emph{prototype} classification: views are mapped to cluster codes, and the loss enforces prediction consistency across augmentations while preventing collapse through swapped assignments \parencite{caron2020swav}.
-Both families treat the encoder as the shared backbone through which raw inputs are mapped to a geometry where classical clusterers or learned assignment heads operate.
+\cref{sec:related:deep_clustering} surveys deep embedded clustering and prototype-based alternatives that couple encoder training with discrete structure, together with the gap relative to nested emitter--mode organization in \gls{elint} streams.
 
 Sequence encoders based on self-attention, including the transformer blocks reviewed in \cref{sec:bg:transformer}, instantiate \(\Enc\) when \(\vect{x}\) is an ordered set of tokens (for example, a window of \glspl{pdw}).
 The Method chapter builds on this stack: a contrastive or clustering-friendly loss shapes the embedding space, while the attention-based encoder models temporal context within each window.

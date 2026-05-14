@@ -1,5 +1,8 @@
 \section{Comparison with Related Work}\label{sec:disc:comparison}
 
-% TODO: Position against \cref{ch:related_work}. Attribute wins/losses
-% to the transformer backbone vs. the joint clustering objective.
-Placeholder paragraph.
+Relative to classical \gls{elint} fingerprinter pipelines surveyed in \cref{sec:related:classical}, the proposed approach trades hand-engineered feature logic for a learned encoder, at the cost of data hunger, compute, and reduced transparency unless accompanied by diagnostics such as those in \cref{sec:exp:qualitative}.
+Unlike supervised radar classifiers discussed in \cref{sec:related:dl_radar}, the training objective here does not assume a fixed label set for emitters or modes at train time; evaluation still uses reference labels where available, but they are not required by the learning rule itself.
+
+Deep clustering methods in \cref{sec:related:deep_clustering} typically optimize a \emph{single} flat partition or require labels for each head.
+This thesis instead targets two aligned partitions with a nesting interpretation (modes within emitters), which is closer in spirit to offline pulse-level grouping work that reasons about geometry and overlap in \gls{esm} data \parencite{bedoire2022offlineclustering} but uses gradient-based representation learning rather than hand-tuned density stages alone.
+Where scores fall short of the best published supervised benchmarks, the gap is expected: those models exploit label information throughout training and often operate on curated single-emitter tracks, whereas the present setting stresses mixture windows and unsupervised objectives.

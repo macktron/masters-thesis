@@ -1,9 +1,13 @@
 \section{Objectives and Scope}\label{sec:intro:scope}
 
+\subsection{Objectives}\label{sec:intro:objectives}
+
 The work pursues objectives that operationalize the research questions in \cref{sec:intro:rq}.
 First, we specify and implement a transformer-style encoder that ingests bounded windows of \glspl{pdw} from interleaved pulse streams and maps them to fixed-dimensional embeddings, together with a clustering stage that groups embeddings into emitter- and mode-level hypotheses.
 We then study how performance depends on practical limits on context length, mixture density, and noise, reporting agreement with reference partitions using standard scores such as \gls{nmi} and \gls{ari} where ground truth is available (\cref{ch:experiments}).
 Second, we formulate at least one joint training objective that couples sequence modeling with clustering-friendly terms, and compare it against a matched baseline trained primarily for deinterleaving or representation quality without that coupling, holding architecture capacity and data conditions as constant as feasible (\cref{ch:method,ch:experiments}).
+
+\subsection{Delimitations}\label{sec:intro:delimitations}
 
 The scope is deliberately narrow.
 We operate at the level of \glspl{pdw} or equivalent tabular pulse features supplied to the model; pulse detection, \gls{rf} conditioning, antenna-level processing, and geometry-driven fusion across platforms are out of scope.

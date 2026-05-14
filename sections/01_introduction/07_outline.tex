@@ -1,4 +1,9 @@
 \section{Thesis Outline}\label{sec:intro:outline}
 
-% TODO: One short paragraph per remaining chapter, in order.
-The remainder of this thesis is organized as follows. \Cref{ch:background} introduces the necessary background on radar signal processing and deep learning. \Cref{ch:related_work} surveys related work. \Cref{ch:method} describes the proposed method. \Cref{ch:experiments} presents experiments and results. \Cref{ch:discussion} discusses the findings. \Cref{ch:conclusion} concludes and outlines future work.
+The remainder of the thesis is organized as follows.
+\Cref{ch:background} supplies textbook-style background on pulsed radar, \glspl{pdw}, emitters and operating modes, the \gls{elint} processing chain, and the \gls{ml} and transformer concepts needed to read the method.
+\Cref{ch:related_work} turns to the literature, contrasting classical emitter identification with deep supervised radar models, deep clustering objectives, sequence transformers, and work on joint or hierarchical cluster structure; each subsection closes with the limitation that motivates the present approach.
+\Cref{ch:method} states the formal problem, documents data representation and preprocessing (\cref{sec:method:data}), specifies the dual-branch encoder and losses (\cref{sec:method:arch,sec:method:loss}), describes training and metrics, and lists baselines.
+\Cref{ch:experiments} reports hardware and software setup, the synthetic scenario corpus (\cref{sec:exp:datasets}), hyperparameters, quantitative scores, ablations, and qualitative analyses.
+\Cref{ch:discussion} interprets findings, positions them against prior art, states limitations---including simulator-only evidence and operational gaps---and discusses implications.
+\Cref{ch:conclusion} summarizes answers to the research questions and outlines future work.

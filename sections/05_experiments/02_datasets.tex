@@ -31,3 +31,11 @@ The numeric entries are placeholders until the final export from the simulator p
     \bottomrule
   \end{tabular}
 \end{table}
+
+\subsection{Qualitative properties of the synthetic corpus}\label{sec:exp:datasets:qualitative}
+
+Beyond aggregate counts, the corpus is checked qualitatively before large training runs: example timelines are inspected for plausible \gls{pri} structure per mode, for physically admissible \gls{rf} and pulse-width ranges, and for the intended mixture density when multiple emitters are active.
+When receiver-side degradations are enabled (\cref{sec:method:data:noise}), spot checks confirm that dropped pulses thin pulse trains without reordering surviving pulses and that spurious insertions remain within the configured rule set.
+This mirrors the reporting practice in earlier Saab-hosted simulator studies, which often include illustrative emitter tracks alongside tables \parencite{jonsson2023supcon}.
+\cref{sec:exp:qualitative} complements the brief sanity checks here with embedding-space visualizations and other qualitative diagnostics once model checkpoints are available.
+% TODO: add \texttt{figures/experiments/corpus\_examples.pdf} (e.g.\ example windows by emitter/mode) and reference with \cref{fig:exp:corpus_examples}.
