@@ -8,7 +8,7 @@ Earlier KTH degree projects hosted at Saab document synthetic radar-\gls{ml} pip
 
 The simulator produces \emph{scenarios}: time-ordered pulse-level timelines for one or more notional emitters and a receiving platform.
 Each pulse is described by the continuous fields that enter the \gls{pdw} representation used here (including \gls{toa}, \gls{rf}, pulse width, and amplitude on a logarithmic scale), together with discrete labels for emitter identity and operating mode that exist only for evaluation.
-\textcite{jonsson2023supcon} describes the unclassified OpenModesty tool in the same lineage: flight paths and emitter placements define a geometry, pulses are emitted and intercepted one at a time, and the simulator can apply modulations and controlled perturbations consistent with notional radar behaviour.
+\textcite{jonsson2023supcon} describes the unclassified OpenModesty tool in the same lineage: flight paths and emitter placements define a geometry, pulses are emitted and intercepted one at a time, and the simulator can apply modulations and controlled perturbations consistent with notional radar behavior.
 The present implementation is proprietary; the important methodological point is that every pulse in the export carries consistent timing and parameter fields so that windows formed below correspond to reproducible segments of a simulated electromagnetic timeline.
 
 Scenarios differ in the number of emitters, dwell in each mode, and simulated horizon so that training covers diverse traffic densities; exact counts and split assignments are deferred to \cref{ch:experiments}.
@@ -17,7 +17,7 @@ Scenarios differ in the number of emitters, dwell in each mode, and simulated ho
 
 Even when emitter physics are ideal in the simulator, downstream \gls{esm} processing introduces structured errors.
 \textcite{jonsson2023supcon} distinguishes \emph{dropped pulses}, where a transmitted pulse is not registered by the receiver chain, from \emph{spurious pulses}, where extra pulses appear in a track because deinterleaving or detection stages attach energy to the wrong pulse train.
-\textcite{svensson2022priemitter} likewise emphasises controlled drop, spurious, and additive Gaussian regimes when studying \gls{pri} sequences.
+\textcite{svensson2022priemitter} likewise emphasizes controlled drop, spurious, and additive Gaussian regimes when studying \gls{pri} sequences.
 When the experimental programme applies such degradations, they are implemented as stochastic edits on the ordered pulse list \emph{before} windowing: each pulse may be removed with a scenario- or split-specific drop probability, and spurious insertions may be drawn by copying and perturbing existing pulses or by drawing alternative parameter vectors from a bounded rule set.
 Discrete grids of drop and spurious rates, rather than only single operating points, simplify reporting across noise sweeps in \cref{ch:experiments}.
 
