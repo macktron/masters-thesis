@@ -1,64 +1,64 @@
 \section{Radar Systems and Passive Reception}\label{sec:bg:radar}
 
-\subsection{Propagation and radiation}
+\subsection{Pulses for navigation, surveillance, and control}
 
-A time-varying current in a conductor sets up propagating electric and magnetic fields; together they carry power and phase information away from the source. An antenna shapes how that power leaves (or enters) the structure, but the underlying mechanism is the same: accelerated charges radiate \parencite{skolnik2008radar}.
+Engineered \gls{radar} grew from wartime range finding into a family of microwave systems used for air traffic control, weather mapping, altimetry, ship and vehicle navigation, and target tracking \parencite{skolnik2008radar}.
+The common thread is practical: launch a controlled electromagnetic disturbance, let it scatter, and read geometry and motion from the returned field.
+At the level of Maxwell's equations, radiation follows accelerating charge and current patterns in an antenna; for the purposes here it suffices to treat each emitted burst as a localized wave packet whose group delay encodes distance once propagation speed is known \parencite{skolnik2008radar}.
 
-\subsection{Active pulsed radar}
+\subsection{Echo delay, ambiguity, and biosonar}
 
-\Gls{radar} uses controlled radio-frequency illumination and listens for scattered returns. A transmitter emits short pulses; a receiver records echoes. If the one-way delay is $\tau/2$, the round-trip delay is $\tau$ and the monostatic range estimate is
+Monostatic ranging ties round-trip delay $\tau$ to range $R$ by
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
 \end{equation}
-with $c$ the speed of light in the propagation medium \parencite{skolnik2008radar}.
-
-Pulse timing repeats with \gls{pri} or \gls{prf}. The largest range for which an echo can be assigned to the pulse that produced it without ambiguity satisfies
+with $c$ the propagation speed \parencite{skolnik2008radar}.
+The same bookkeeping appears in animal echolocation: a bat emits a short click, listens, and treats the echo arrival time as evidence about reflector distance, only with sound instead of radio \parencite{skolnik2008radar}.
+Trains of pulses repeat with \gls{pri} or \gls{prf}. A late echo from one pulse can be mistaken for an early echo from the next, which caps the unambiguous range by
 \begin{equation}
 \label{eq:bg:runamb}
-R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2},
+R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
 \end{equation}
-since a late echo from pulse $k$ can be mistaken for an early echo from pulse $k+1$ if $R > R_{\mathrm{u}}$. Coherent processing (matched filtering, integration) raises echo energy relative to noise and interference before detection; that gain is summarized by the \gls{snr} at the detector \parencite{skolnik2008radar}.
-
-\subsection{Received power}
-
-For monostatic geometry (collocated transmit and receive), the peak received power from a resolved scatterer is
-\begin{equation}
-\label{eq:bg:radar}
-P_r = \frac{P_t G^2 \lambda^2 \sigma}{(4\pi)^3 R^4},
-\end{equation}
-where $P_t$ is transmit pulse power, $G$ is antenna gain on transmit and receive (same aperture), $\lambda$ is wavelength, $\sigma$ is radar cross section, and $R$ is slant range \parencite{skolnik2008radar}. The factor $R^{-4}$ is two-way spherical spreading plus inverse-square receive.
+Coherent matched filtering and integration still raise \gls{snr} at the detector, but the ambiguity identity in \cref{eq:bg:runamb} is the structural constraint that survives independent of hardware details \parencite{skolnik2008radar}.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.72\linewidth,
-  height=0.32\linewidth,
-  xlabel={$R/R_0$},
-  ylabel={$P_r(R)/P_r(R_0)$},
-  xmin=1, xmax=8,
-  ymin=0, ymax=1.05,
-  grid=both,
-  minor tick num=1,
-]
-\addplot[thick, domain=1:8, samples=200] {(1/x)^4};
-\end{axis}
+\begin{tikzpicture}[>=Latex, font=\small]
+  \draw[->] (0,0) -- (8.2,0) node[right] {$t$};
+  \draw[thick, blue!70!black] (0.3,0.15) -- (0.3,0.85) node[midway, left] {TX};
+  \draw[thick, orange!80!black] (5.1,0.15) -- (5.1,0.85) node[midway, right] {echo};
+  \draw[<->] (0.3,-0.35) -- (5.1,-0.35) node[midway, below] {$\tau = 2R/c$};
 \end{tikzpicture}
-\caption{Normalized received power versus normalized range from \cref{eq:bg:radar} with fixed $P_t$, $G$, $\lambda$, and $\sigma$. Doubling $R$ cuts $P_r$ by a factor of $16$.}
-\label{fig:bg:radar_r4}
+\caption{Cartoon timeline for one transmit pulse and its monostatic echo; the measured delay maps to range through \cref{eq:bg:range}.}
+\label{fig:bg:pulse_echo_timeline}
 \end{figure}
 
-Absorption, ohmic losses, and processing gains modify \cref{eq:bg:radar} in deployed systems, but the scaling in \cref{fig:bg:radar_r4} sets the usual trade-off between range and hardware.
+\subsection{Transmitting radars versus receive-only systems}
 
-\subsection{Passive reception}
+A pulsed radar platform both illuminates and listens, so it can exploit a known transmit waveform when forming correlations and Doppler filters \parencite{skolnik2008radar}.
+Passive \gls{esm} and \gls{elint} systems instead sit on the sidelobe or distant mainlobe energy of someone else's transmitter.
+They do not control $P_t$, antenna gain schedules, or internal timing laws, so cooperative echo models are largely unavailable.
+Inference therefore leans on measured per-pulse parameters (carrier, arrival time, width, angle, amplitude) rather than on matched filtering against a secret template.
+That posture is exactly what motivates the \gls{pdw} abstraction developed below and detailed further in \cref{sec:bg:elint_pipeline}.
 
-\Gls{esm} and \gls{elint} receivers do not transmit. They observe one-way emissions, often via sidelobes, without knowing $P_t$, $G$, or internal timing laws. Inference uses measured pulse parameters (frequency, arrival time, width, angle, amplitude) instead of a cooperative echo model. That measurement-centric view matches the \gls{pdw} interface formalized in \cref{sec:bg:pdw}.
+\subsection{From passband samples to a list of pulses}
 
-\subsection{Pulse descriptor words}\label{sec:bg:pdw}
+A typical front end produces a digitized passband or near-baseband record $x[n]$ at a sample rate high enough to capture the emitted bandwidth.
+Energy detection marks candidate pulse intervals against thermal noise, after which parameter estimation attaches scalars to each event.
+Spectral location of narrowband energy is naturally read from a windowed discrete Fourier transform,
+\begin{equation}
+\label{eq:bg:stft}
+X_m[k] = \sum_{n=0}^{N-1} w[n]\, x[n + m H]\, e^{-i 2\pi kn/N},
+\end{equation}
+with window $w[n]$, hop $H$, and bin index $k$ tied to physical frequency through the tuning plan \parencite{skolnik2008radar}.
+Time of arrival and pulse width are then obtained from correlation against a template or from threshold crossings on the envelope, depending on the receiver \parencite{wiley2006elint}.
+The intermediate waveform is discarded once those numbers are stable, which is why later learning stages never see the raw $x[n]$.
 
-After detection and parameter estimation in the pipeline of \cref{sec:bg:elint_pipeline}, each accepted pulse is summarized by a \emph{\gls{pdw}}: a fixed-layout record of measured pulse parameters that discards intermediate waveforms while retaining the quantities \gls{elint} algorithms consume \parencite{wiley2006elint}.
-Indexing pulses in time order by $n \in \{1,2,\ldots\}$, write the $n$th descriptor as a real vector
+\subsection{Pulse descriptor words and the pulse train}\label{sec:bg:pdw}
+
+After detection and parameter estimation in the pipeline of \cref{sec:bg:elint_pipeline}, each accepted pulse is summarized by a \emph{\gls{pdw}}: a fixed-layout record of measured pulse parameters that discards intermediate waveforms while retaining the quantities downstream algorithms consume \parencite{wiley2006elint}.
+Index pulses in time order by $n \in \{1,2,\ldots\}$ and write the $n$th descriptor as
 \begin{equation}\label{eq:bg:pdw_vector}
   \vect{x}_n
   =
@@ -72,9 +72,9 @@ Indexing pulses in time order by $n \in \{1,2,\ldots\}$, write the $n$th descrip
   \bigr)^{\top}
   \in \R^{d},
 \end{equation}
-where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ the pulse width, $t_n$ the \gls{toa} of a chosen reference point on the pulse (often the leading edge), $A_n$ a scalar amplitude or energy proxy, and $\theta_n$ the \gls{aoa} when direction finding is available.
-The ellipsis collects any additional fields the sensor supplies (sub-band identifiers, polarisation, intra-pulse modulation labels, and so on); the dimension $d$ is therefore platform-specific but fixed for a given export format once the column order is fixed.
-\cref{fig:bg:pdw} illustrates the core scalar fields in a minimal five-dimensional template aligned with \cref{eq:bg:pdw_vector}.
+where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ the pulse width, $t_n$ the \gls{toa} of a chosen reference point (often the leading edge), $A_n$ a scalar amplitude or energy proxy, and $\theta_n$ the \gls{aoa} when direction finding exists.
+The ellipsis stands for any extra columns the sensor exports (sub-band tags, polarization flags, intra-pulse modulation labels); $d$ is fixed once the column order is frozen.
+\cref{fig:bg:pdw} matches the minimal five-field template implied by \cref{eq:bg:pdw_vector}.
 
 \begin{figure}[tbp]
   \centering
@@ -83,36 +83,29 @@ The ellipsis collects any additional fields the sensor supplies (sub-band identi
   \label{fig:bg:pdw}
 \end{figure}
 
-When pulses are already assigned to a single coherent pulse train, successive \glspl{toa} define inter-pulse intervals
+For a single coherent pulse train, successive \glspl{toa} define inter-pulse intervals
 \begin{equation}\label{eq:bg:pdw_pri}
   \tau_n = t_n - t_{n-1}, \qquad n \ge 2,
 \end{equation}
-from which a nominal \gls{pri} is read directly and a \gls{prf} follows as $\mathrm{PRF}_n = 1/\tau_n$ whenever $\tau_n$ is well defined and the train is approximately periodic.
-Staggered or jittered \gls{pri} programs replace a single $\tau_n$ with structured sequences of intervals; in that setting either $\tau_n$ is stored explicitly in the \gls{pdw} stream or stagger parameters appear as additional columns, but the abstract role of \cref{eq:bg:pdw_vector} is unchanged: each index $n$ labels one pulse vector in $\R^{d}$.
+so a nominal \gls{pri} is read from $\tau_n$ and a \gls{prf} follows as $\mathrm{PRF}_n = 1/\tau_n$ when the train is close to periodic.
+Agile \gls{pri} schedules replace one constant $\tau_n$ with structured sequences; either $\tau_n$ is stored per pulse or extra columns carry stagger metadata, but each index $n$ still labels one row in $\R^{d}$ as in \cref{eq:bg:pdw_vector}.
 
-Measured descriptors are noisy projections of latent physical state.
-A convenient bookkeeping form is $\vect{x}_n = \vect{g}(\vect{s}_n) + \vect{\epsilon}_n$, where $\vect{s}_n$ collects true frequency, timing, and antenna coupling, $\vect{g}$ is the deterministic part of the sensor forward model, and $\vect{\epsilon}_n$ aggregates thermal noise, quantisation, and parameter-estimation error.
-Weak pulses yield large effective noise or missing fields; false detections insert spurious samples with no true $\vect{s}_n$.
-\emph{Deinterleaving} (\cref{sec:bg:elint_pipeline}) attempts to partition the detection list into trains so that, within each train, \cref{eq:bg:pdw_pri} is interpretable; residual mixture, missed pulses, and extra pulses then appear as structured outliers in the sequence $(\vect{x}_n)$ rather than as isolated scalar errors.
+Measured descriptors obey $\vect{x}_n = \vect{g}(\vect{s}_n) + \vect{\epsilon}_n$ with latent physical state $\vect{s}_n$, deterministic sensor map $\vect{g}$, and aggregate error $\vect{\epsilon}_n$ from noise, quantization, and estimator bias.
+Weak pulses inflate effective noise or leave fields blank; false alarms inject samples with no meaningful $\vect{s}_n$.
+\emph{Deinterleaving} (\cref{sec:bg:elint_pipeline}) partitions detections into trains so that \cref{eq:bg:pdw_pri} is interpretable inside each train; mixture, misses, and spurious hits then show up as structured outliers in the sequence $(\vect{x}_n)$.
 
-\subsection{Radar emitters and operating modes}\label{sec:bg:emitters}
+For the learning part of this thesis, the model input is a \emph{time-ordered \gls{pdw} sequence} $(\vect{x}_1,\ldots,\vect{x}_T)$, that is, a \emph{pulse train} (possibly after association and sorting) rather than the raw digitized waveform.
+Each $\vect{x}_n$ is one token in a length-$T$ sequence whose coordinates carry explicit physical units and semantics, which matters when designing encoders and augmentation.
 
-In passive \gls{esm} and \gls{elint}, a \emph{radar emitter} denotes a physical transmitting source whose emissions can be tied to a train of pulses in time and frequency \parencite{wiley2006elint}, though this coherence has become increasingly complex to discern in modern, modulated radar systems.
+\subsection{Physical sources and transmit schedules}\label{sec:bg:emitters}
 
-An \emph{operating mode}, by contrast, describes the particular way in which a radar system chooses to transmit its signals at a given time.
-This includes a set of instructions or parameters that control the radar's outgoing pulses: for example, which frequency the radar uses, whether it changes frequencies over time (hopping law), how long each pulse lasts (pulse width), how often pulses are transmitted (repetition structure), how the radar beam is moved or scanned, and any programmed rules for changing these settings from one pulse to the next \parencite{skolnik2008radar,wiley2006elint}.
-While an emitter refers to the underlying physical equipment and its stable identity, a mode is about the operational settings and purposes carried out at a given moment.
-The same radar hardware can switch between different modes as its tasks or mission requirements change.
+In passive \gls{esm} and \gls{elint}, a \emph{radar emitter} means a physical transmitter whose pulses line up in time and frequency strongly enough to be treated as one source \parencite{wiley2006elint}.
+An \emph{operating mode} is the instantaneous transmit recipe: carrier plan, pulse width, repetition pattern, beam motion, and any programmed switching rules among them \parencite{skolnik2008radar,wiley2006elint}.
+The same hardware cycles among modes as tasks change, so a timeline of \glspl{pdw} mixes mode segments even when the physical box is fixed.
+Different platforms can also implement the same functional mode with different numerical parameters, for example two trackers with distinct nominal \glspl{prf} \parencite{wiley2006elint}.
 
-
-%% EXMAPLES OF MODES.
 Illustrative mode families include wide-area search, acquisition and track, fire-control illumination, weather sensing, and terminal guidance support \parencite{skolnik2008radar}.
-Each family implies characteristic constraints on \gls{pri}/\gls{prf}, dwell time, frequency agility, and antenna motion: search modes favor broad coverage and may use staggered or agile repetition to balance range and velocity ambiguity, while dedicated tracking or illuminator modes often concentrate energy in fewer directions with higher update rates on a target of interest.
-Navigation radars on ships and aircraft emphasize short-range obstacle and surface mapping; their emissions tend to repeat with comparatively regular timing tied to a fixed sector or rotating beam pattern, whereas long-range surveillance and fire-control systems interleave search and track waveforms and may switch \gls{rf} bands or burst structures when countering interference \parencite{skolnik2008radar,wiley2006elint}.
-The resulting diversity matters for downstream analysis because operators must interpret not only ``which radar,'' but also ``what it is doing now,'' and because the same measured \gls{pdw} parameters can arise from different combinations of hardware and scheduling (\cref{sec:bg:pdw}).
+Those roles push different combinations of \gls{pri}, dwell, agility, and scan law, which is why operators care both about identity and about what the transmitter is doing at a given time \parencite{skolnik2008radar,wiley2006elint}.
 
-The relationship between emitters and modes is many-to-many.
-A single emitter implements many modes over a mission timeline, so a time-ordered pulse stream is a mixture of mode segments whose boundaries need not align with changes of physical source.
-Conversely, different emitters can realize the same functional mode with different parameter sets---for example, two fire-control radars may both run a track waveform but with distinct nominal \glspl{prf} and frequency plans.
-That structure motivates joint reasoning about physical identity and instantaneous configuration: clustering only over pulses loses scheduling context, whereas treating modes without emitter linkage obscures which trains belong together after deinterleaving errors or overlap \parencite{wiley2006elint}.
-The remainder of this chapter situates passive reception in the EW/ESM processing chain (\cref{sec:bg:elint_pipeline}) and then supplies the learning background needed to formalize such joint structure in the method.
+The relationship between emitters and modes is many-to-many: one emitter runs many modes over a mission, and different emitters can realize similar modes with different parameter sets \parencite{wiley2006elint}.
+The rest of this chapter walks through the passive processing chain (\cref{sec:bg:elint_pipeline}) and then supplies the learning background used in the method.
