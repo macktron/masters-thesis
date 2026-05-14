@@ -42,15 +42,17 @@ Signal processing techniques such as matched filtering and coherent integration 
 
 \subsection{Transmitting radars versus receive-only systems}
 
-Radiation is observable: any receiver in range can try to measure a deliberate transmission, and repeated pulses make timing and angle information available to third parties as well as to the intended user \parencite{wiley2006elint}.
-That is the elementary information warfare trade behind ranging systems. Emitting buys sensing, but it also spends concealment in the electromagnetic domain, because each outbound burst is evidence of activity, location, and intent for anyone who listens.
+Any receiver within range can detect intentional electromagnetic transmissions, and repeated radar pulses make timing and direction information available not only to the radar user, but to anyone listening in \parencite{wiley2006elint}.
+This exposes a fundamental trade-off: transmitting enables the measurement of objects at a distance, but simultaneously reveals the radar's presence, position, and activity to others in the environment.
 
-A cooperative pulsed radar closes a loop between a waveform it knows and the echoes it collects \parencite{skolnik2008radar}.
-Passive \gls{esm} and \gls{elint} equipment does not close that loop. It listens to other parties' emissions and tries to summarize what the spectrum shows about their behavior \parencite{wiley2006elint}.
-Skipping a dedicated illuminator removes one loud way for the collection side to reveal itself on the air, which matters whenever staying off the transmit side of the contest is tactically preferable.
+Traditional (transmitting) radar systems measure the delay between their own outgoing pulses and the returning echoes, allowing direct range estimation \parencite{skolnik2008radar}.
+In contrast, passive systems such as \gls{esm} and \gls{elint} do not transmit their own signals.
+Instead, they monitor emissions from other sources and attempt to infer information about those emitters and their behavior \parencite{wiley2006elint}.
+Because they do not transmit, passive receivers maintain a lower profile and avoid revealing themselves by radiation—a key advantage in situations where stealth is important.
 
-Without the cooperative transmit reference used in echo processing, passive inference leans on whatever scalar measurements survive detection and estimation: carrier, arrival time, width, angle when available, and amplitude.
-That posture motivates the \gls{pdw} abstraction developed next; \cref{sec:bg:elint_pipeline} places it in the wider processing chain.
+Lacking direct control over the transmitted waveform, passive receivers rely on whatever pulse measurements they can extract after detection: carrier frequency, time of arrival, pulse width, amplitude, and angle of arrival if available.
+This necessity motivates the \gls{pdw} abstraction described next.
+\cref{sec:bg:elint_pipeline} shows how PDWs fit into the overall signal processing chain.
 
 \subsection{From passband samples to a list of pulses}
 
