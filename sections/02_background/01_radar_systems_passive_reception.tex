@@ -6,25 +6,25 @@ Engineered \gls{radar} grew from wartime range finding into a family of microwav
 The common thread is practical: launch a controlled electromagnetic disturbance, let it scatter, and read geometry and motion from the returned field.
 Fundamentally, electromagnetic radiation is produced whenever electric charges accelerate, such as when alternating current flows in an antenna. This disturbance travels outward as a wave at a predictable speed—the speed of light in air. For radar applications, each transmission can be understood as a short, localized wave packet. By carefully measuring how long it takes for this packet to return after reflecting off an object, and knowing the propagation speed, the distance to the object can be calculated directly \parencite{skolnik2008radar}.
 
-\subsection{Echo delay, ambiguity, and biosonar}
+\subsection{Time-of-Flight Ranging and Ambiguity Fundamentals}
 
-To understand how radar measures distance, consider the emission of an electromagnetic pulse from a transmitter and the detection of its echo after reflection from a distant object. The speed of electromagnetic waves in air, denoted as $c$, is close to the speed of light in vacuum. The time it takes for the pulse to travel to the target and back, called the round-trip delay $\tau$, directly determines the distance to the object.
+At its core, radar sensing uses the physics of wave propagation to measure distance. A transmitter emits a brief electromagnetic pulse, which travels at speed $c$ (the speed of light in air), reflects from an object, and returns as an echo. By measuring the elapsed time $\tau$ between emission and reception—known as the round-trip delay—the system can infer the distance to the object.
 
-When the same antenna or closely co-located antennas are used for both transmitting and receiving, the arrangement is termed \emph{monostatic} radar. In a monostatic configuration, the radar emits a pulse and then waits to receive the echo from a potential target. The fundamental physical relationship between the round-trip time and the distance is given by
+In the canonical case, a single (monostatic) radar platform handles both transmission and reception, with the wave traversing to the target and back. The fundamental relation connecting time delay to range follows directly from the definition of speed:
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
 \end{equation}
-where $R$ is the range to the target and $c$ is the propagation speed of the wave \parencite{skolnik2008radar}. This relation arises because the pulse covers the distance to the target and back, so the total travel distance is $2R$ in time $\tau$.
+where $R$ is the target range and $c$ is the wave speed \parencite{skolnik2008radar}. The factor of 2 accounts for the outbound and return paths.
 
 A similar approach is found in animal echolocation: for instance, a bat produces a short sound pulse and estimates the distance to an obstacle or prey by interpreting the delay before it hears the echo, substituting sound waves for electromagnetic ones \parencite{skolnik2008radar}.
 
-In practical radar operations, sequences of such pulses are transmitted, each separated by a fixed time interval called the pulse repetition interval (\gls{pri}), or equivalently at a pulse repetition frequency (\gls{prf}). A challenge arises when an echo from a previous pulse arrives after the next pulse has already been transmitted. This can cause ambiguity, as a late echo may be incorrectly associated with a later pulse. The maximum range at which this ambiguity can be avoided—the \emph{unambiguous range}—is determined by the repetition interval:
+Practical radar systems emit periodic pulses, each separated by a pulse repetition interval (\gls{pri}) or, equivalently, a pulse repetition frequency (\gls{prf}). A core challenge appears when echoes from earlier pulses arrive after a new pulse is sent. This leads to \emph{range ambiguity}, where it is unclear which transmitted pulse a received echo should be attributed to. The largest range without ambiguity—the \emph{unambiguous range}—is set by the time between pulses:
 \begin{equation}
 \label{eq:bg:runamb}
 R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
 \end{equation}
-Within this structural constraint, advanced signal processing such as coherent matched filtering and integration can enhance detection sensitivity, but no amount of processing can resolve targets beyond the unambiguous range limit defined by \cref{eq:bg:runamb} \parencite{skolnik2008radar}.
+Signal processing techniques such as matched filtering and coherent integration increase detection performance within this range, but no algorithm can resolve targets unambiguously beyond $R_{\mathrm{u}}$ as limited by the physics of pulse timing \parencite{skolnik2008radar}.
 
 \begin{figure}[t]
 \centering
