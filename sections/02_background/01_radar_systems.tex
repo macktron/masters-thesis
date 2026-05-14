@@ -18,7 +18,7 @@ Pulse timing repeats with \gls{pri} or \gls{prf}. The largest range for which an
 \label{eq:bg:runamb}
 R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2},
 \end{equation}
-since a late echo from pulse $k$ can be mistaken for an early echo from pulse $k{+}1$ if $R > R_{\mathrm{u}}$. Coherent processing (matched filtering, integration) raises echo energy relative to noise and interference before detection; that gain is summarized by the \gls{snr} at the detector \parencite{skolnik2008radar}.
+since a late echo from pulse $k$ can be mistaken for an early echo from pulse $k+1$ if $R > R_{\mathrm{u}}$. Coherent processing (matched filtering, integration) raises echo energy relative to noise and interference before detection; that gain is summarized by the \gls{snr} at the detector \parencite{skolnik2008radar}.
 
 \subsection{Received power}
 
@@ -41,7 +41,6 @@ where $P_t$ is transmit pulse power, $G$ is antenna gain on transmit and receive
   ymin=0, ymax=1.05,
   grid=both,
   minor tick num=1,
-  legend pos=north east,
 ]
 \addplot[thick, domain=1:8, samples=200] {(1/x)^4};
 \end{axis}
@@ -52,6 +51,6 @@ where $P_t$ is transmit pulse power, $G$ is antenna gain on transmit and receive
 
 Absorption, ohmic losses, and processing gains modify \cref{eq:bg:radar} in deployed systems, but the scaling in \cref{fig:bg:radar_r4} sets the usual trade-off between range and hardware.
 
-\subsection{Passive ESM and \gls{elint}}
+\subsection{Passive reception}
 
 \Gls{esm} and \gls{elint} receivers do not transmit. They observe one-way emissions, often via sidelobes, without knowing $P_t$, $G$, or internal timing laws. Inference uses measured pulse parameters (frequency, arrival time, width, angle, amplitude) instead of a cooperative echo model. That measurement-centric view matches the \gls{pdw} interface used later; see \cref{sec:bg:pdw}.
