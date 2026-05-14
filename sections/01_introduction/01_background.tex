@@ -10,7 +10,7 @@ The same physical emitter also switches \emph{modes}---recurrent control policie
 Mode awareness is therefore operationally informative: it constrains how the waveform may evolve, signals intent at a coarse level, and can help disambiguate emitters when type-level signatures overlap.
 
 At the same time, \gls{ml} and \gls{dl} have become the default toolkit for sequence modeling and representation learning in other domains.
-Radar pulse analysis naturally presents as a stream of low-level measurements---often summarized as \glspl{pdw}---where long-range dependence and mixture structure (multiple emitters superposed in time) favor learned encoders over purely hand-crafted feature pipelines, even when labels exist only for development or evaluation data.
+Radar pulse analysis naturally presents as a stream of low-level measurements---often summarized as \glspl{pdw}---where long-range dependence and mixture structure (multiple emitters superposed in time) favor learned encoders over purely hand-crafted feature pipelines, and where the available supervision is itself asymmetric: emitter identifiers in curated training data are typically defined per pulse train rather than across an open global population, while operating modes are drawn from a much smaller, shared catalogue.
 
 This thesis studies whether a transformer-style encoder, trained with objectives suited to clustering, can produce embeddings in which both distinct emitters and their operating modes emerge as separable structure.
 The remainder of the introduction states the problem precisely, lists the research questions, and outlines scope, contributions, and ethics.

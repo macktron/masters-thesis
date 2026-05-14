@@ -3,7 +3,7 @@
 Qualitative analysis complements the scalar metrics in \cref{sec:exp:results} by checking whether embeddings organize pulses in ways that align with physical emitter boundaries and with mode transitions inside a window.
 The checks in \cref{sec:exp:datasets:qualitative} validate that the simulator export behaves as intended; this section applies analogous scrutiny \emph{after} models are trained.
 
-Two-dimensional projections of pooled or per-pulse embeddings (for example UMAP or t-SNE) should be colored separately by reference emitter and by reference mode when labels exist only for evaluation.
+Two-dimensional projections of pooled or per-pulse embeddings (for example UMAP or t-SNE) should be colored separately by reference emitter (using the train-local emitter label of each pulse) and by reference mode (using the global mode catalogue from \cref{sec:method:formulation}).
 Disjoint emitter-colored manifolds with mode-colored substructure that stays coherent within an emitter are evidence that the dual geometry in \cref{ch:method} is behaving as designed; elongated bridges between emitter manifolds often indicate residual deinterleaving ambiguity or shared waveform parameters across platforms.
 
 Attention maps or head-wise statistics, if exported, can be overlaid on \gls{toa}-ordered pulses to see whether specific heads track stable intervals versus rapid mode hops.
