@@ -54,23 +54,13 @@ Lacking direct control over the transmitted waveform, passive receivers rely on 
 This necessity motivates the \gls{pdw} abstraction described next.
 \cref{sec:bg:elint_pipeline} shows how PDWs fit into the overall signal processing chain.
 
-\subsection{From passband samples to a list of pulses}
+\subsection{From the raw signal to a pulse sequence and descriptor words}\label{sec:bg:pdw}
 
-A typical front end produces a digitized passband or near-baseband record $x[n]$ at a sample rate high enough to capture the emitted bandwidth.
-Energy detection marks candidate pulse intervals against thermal noise, after which parameter estimation attaches scalars to each event.
-Spectral location of narrowband energy is naturally read from a windowed discrete Fourier transform,
-\begin{equation}
-\label{eq:bg:stft}
-X_m[k] = \sum_{n=0}^{N-1} w[n]\, x[n + m H]\, e^{-i 2\pi kn/N},
-\end{equation}
-with window $w[n]$, hop $H$, and bin index $k$ tied to physical frequency through the tuning plan \parencite{skolnik2008radar}.
-Time of arrival and pulse width are then obtained from correlation against a template or from threshold crossings on the envelope, depending on the receiver \parencite{wiley2006elint}.
-The intermediate waveform is discarded once those numbers are stable, which is why later learning stages never see the raw $x[n]$.
+Every radar or receiver starts by collecting a raw electrical signal—essentially a voltage that varies in time as electromagnetic waves are picked up by the antenna. This raw signal can be viewed as a digital recording of the environment’s radio activity, capturing everything present, including both the pulses of interest and background noise.
 
-\subsection{Pulse descriptor words and the pulse train}\label{sec:bg:pdw}
+To extract information, the system looks for brief increases in signal energy that stand out above the noise. These increases correspond to pulses—short bursts of transmitted energy. Locating a pulse means finding where in time the signal rises above a set threshold. After locating pulses, the receiver estimates several physical properties for each one: when it arrived (its time of arrival), how long it lasted (its pulse width), how strong it was (amplitude or energy), and what frequency it had. If the receiver has directional antennas, it can also estimate the angle from which the pulse arrived.
 
-After detection and parameter estimation in the pipeline of \cref{sec:bg:elint_pipeline}, each accepted pulse is summarized by a \emph{\gls{pdw}}: a fixed-layout record of measured pulse parameters that discards intermediate waveforms while retaining the quantities downstream algorithms consume \parencite{wiley2006elint}.
-Index pulses in time order by $n \in \{1,2,\ldots\}$ and write the $n$th descriptor as
+After initial detection and measurement, each pulse is summarized into a standardized set of numbers called a \emph{\gls{pdw}} (pulse descriptor word). This record captures the essential measured properties of a pulse, such as:
 \begin{equation}\label{eq:bg:pdw_vector}
   \vect{x}_n
   =
@@ -84,9 +74,7 @@ Index pulses in time order by $n \in \{1,2,\ldots\}$ and write the $n$th descrip
   \bigr)^{\top}
   \in \R^{d},
 \end{equation}
-where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ the pulse width, $t_n$ the \gls{toa} of a chosen reference point (often the leading edge), $A_n$ a scalar amplitude or energy proxy, and $\theta_n$ the \gls{aoa} when direction finding exists.
-The ellipsis stands for any extra columns the sensor exports (sub-band tags, polarization flags, intra-pulse modulation labels); $d$ is fixed once the column order is frozen.
-\cref{fig:bg:pdw} matches the minimal five-field template implied by \cref{eq:bg:pdw_vector}.
+where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $t_n$ is time of arrival (often the leading edge), $A_n$ is amplitude, and $\theta_n$ is angle of arrival if available. The ellipsis allows for extra recorded properties, but the main idea is that each column represents a specific physical measurement, and the format is fixed once chosen. \cref{fig:bg:pdw} visualizes this five-parameter template.
 
 \begin{figure}[tbp]
   \centering
@@ -95,19 +83,15 @@ The ellipsis stands for any extra columns the sensor exports (sub-band tags, pol
   \label{fig:bg:pdw}
 \end{figure}
 
-For a single coherent pulse train, successive \glspl{toa} define inter-pulse intervals
+A sequence of such pulses, indexed by order of arrival $(\vect{x}_1, \vect{x}_2, \ldots)$, forms what is called a \emph{pulse train}. For pulses that come from a single transmitter operating in a stable mode, the intervals between arrivals ($\tau_n = t_n - t_{n-1}$, for $n \ge 2$) are usually regular or follow a set schedule. This interval is called the pulse repetition interval (\gls{pri}); its inverse, the pulse repetition frequency (\gls{prf}), describes how often pulses are sent:
 \begin{equation}\label{eq:bg:pdw_pri}
-  \tau_n = t_n - t_{n-1}, \qquad n \ge 2,
+  \tau_n = t_n - t_{n-1}, \qquad n \ge 2.
 \end{equation}
-so a nominal \gls{pri} is read from $\tau_n$ and a \gls{prf} follows as $\mathrm{PRF}_n = 1/\tau_n$ when the train is close to periodic.
-Agile \gls{pri} schedules replace one constant $\tau_n$ with structured sequences; either $\tau_n$ is stored per pulse or extra columns carry stagger metadata, but each index $n$ still labels one row in $\R^{d}$ as in \cref{eq:bg:pdw_vector}.
+While simple systems use a fixed interval, more complex transmitters may change their intervals in a predictable or agile way, and this information can be included in the record for each pulse.
 
-Measured descriptors obey $\vect{x}_n = \vect{g}(\vect{s}_n) + \vect{\epsilon}_n$ with latent physical state $\vect{s}_n$, deterministic sensor map $\vect{g}$, and aggregate error $\vect{\epsilon}_n$ from noise, quantization, and estimator bias.
-Weak pulses inflate effective noise or leave fields blank; false alarms inject samples with no meaningful $\vect{s}_n$.
-\emph{Deinterleaving} (\cref{sec:bg:elint_pipeline}) partitions detections into trains so that \cref{eq:bg:pdw_pri} is interpretable inside each train; mixture, misses, and spurious hits then show up as structured outliers in the sequence $(\vect{x}_n)$.
+Each measured descriptor is thus a function of both the true (but unknown) properties of the transmitting source and the effects of noise, measurement error, and possible missing data. Very weak pulses may be missed, and noise or spurious events may be incorrectly identified as pulses.
 
-In later chapters, the model input is a \emph{time-ordered \gls{pdw} sequence} $(\vect{x}_1,\ldots,\vect{x}_T)$, that is, a \emph{pulse train} (possibly after association and sorting) rather than the raw digitized waveform.
-Each $\vect{x}_n$ is one token in a length-$T$ sequence whose coordinates carry explicit physical units and semantics, which matters when designing encoders and augmentation.
+Finally, rather than carrying forward the full raw signal, the system represents each pulse only by its measured properties in the form of a time-ordered sequence of \glspl{pdw}. This sequence $(\vect{x}_1,\ldots,\vect{x}_T)$—sometimes called the pulse train—is the main input to later processing and learning algorithms. Each $\vect{x}_n$ is a compact summary of one pulse, and the order reflects the timeline of arrivals, replacing the need for direct inspection of the original sampled voltage trace.
 
 \subsection{Physical sources and transmit schedules}\label{sec:bg:emitters}
 
