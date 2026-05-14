@@ -32,13 +32,14 @@ Context: ELINT / ESM applications, where labelled emitter/mode data is scarce, m
 
 ## File layout
 
-- Each chapter is `sections/NN_<name>/<name>.tex` — a `subfiles` wrapper that `\input`s a numbered sequence of subsection `.tex` files in the same directory.
-- Subsection files contain only `\section{...}` / `\subsection{...}` headings and prose. **Do not** add `\documentclass` or `\begin{document}` lines to them.
+- Each chapter is `sections/NN_<name>/<name>.tex` — a `subfiles` wrapper that `\input`s a numbered sequence of `.tex` files in the same directory.
+- In most chapters, each input file is one `\section{...}` (and its nested headings). Chapter~2 follows that rule strictly: one file per `\section`, with filenames aligned to the section title; see `sections/02_background/AGENTS.md`.
+- Input files contain only `\section{...}` / `\subsection{...}` headings and prose. **Do not** add `\documentclass` or `\begin{document}` lines to them.
 - The wrapper opens with `\documentclass[../../main.tex]{subfiles}\begin{document}\chapter{...}\label{ch:...}` and ends with `\end{document}`.
 
 ## Editing rules for the AI
 
-1. Edit one subsection file at a time. Do not refactor the chapter structure unless explicitly asked.
+1. Edit one chapter input file at a time (typically one `\section` per file). Do not refactor the chapter structure unless explicitly asked.
 2. Before introducing a new acronym, check `glossary.tex`. Before introducing a new symbol, check the macros at the bottom of `preamble.tex`. Reuse what is there.
 3. Before adding a citation, check `thesis.bib`. Append new entries in BibLaTeX format with stable keys (`firstauthorYearKeyword`).
 4. Keep paragraphs short (3–6 sentences). Never produce a wall of unstructured text.

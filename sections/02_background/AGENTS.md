@@ -8,14 +8,18 @@ Give the reader the technical vocabulary needed to follow the Method and Experim
 
 15–20 pages — the largest chapter.
 
-## Section and subsection contracts
+## File layout (one `\section` per file)
 
-- **Section 2.1 (three files, one `\section`):** `01_radar_systems.tex` opens `\section{Radar Systems and Passive Reception}` with `\subsection{...}` blocks on propagation, pulsed radar, received power, and passive reception. `02_pdw.tex` and `03_emitters_modes.tex` continue the *same section* as `\subsection{...}` (not new `\section` commands): PDW definition and noise/deinterleaving artefacts; emitters versus modes and many-to-many structure. Cite `\parencite{skolnik2008radar}` and `\parencite{wiley2006elint}` as today.
-- `04_elint_pipeline.tex` — `\section{Signal Processing Pipeline for Passive ELINT}` with application-oriented `\subsection{...}` blocks: front-end through parameter estimation; deinterleaving and classical evolution (label `sec:bg:deinterleaving_evolution`); emitter reporting; operating-mode analysis and libraries (including clustering when labels are scarce); geolocation and downstream displays. Section label `sec:bg:elint_pipeline`. Add a pipeline figure under `figures/background/` and cite a standard EW/ESM text.
-- `05_ml_fundamentals.tex` — Supervised vs. unsupervised vs. self-supervised learning. Empirical risk minimization in one paragraph. Skip what is universally known (gradient descent details); focus on the framing relevant to this thesis.
-- `06_clustering.tex` — k-means, Gaussian mixture models, spectral clustering, hierarchical clustering. Limitations on high-dimensional data motivate deep clustering. Cite `\parencite{xie2016unsupervised}`.
-- `07_deep_learning.tex` — Representation learning, encoder networks, contrastive losses (InfoNCE), self-supervised pretext tasks. Briefly position deep clustering (DEC, SwAV) `\parencite{xie2016unsupervised,caron2020swav}` — this is the bridge to the proposed method.
-- `08_transformers.tex` — Self-attention, multi-head attention, positional encoding, encoder block. Use `\Cref{eq:...}` to label the attention equation; the Method chapter will reuse the same notation. Cite `\parencite{vaswani2017attention,devlin2019bert}`.
+Filenames mirror the `\section{...}` title in `sections/02_background/`. Each file contains exactly one `\section{...}` and its `\subsection{...}` / `\paragraph{...}` blocks.
+
+| File | `\section` title | Notes |
+|------|------------------|--------|
+| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; includes PDWs (`sec:bg:pdw`) and emitters/modes (`sec:bg:emitters`) as `\subsection`s. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
+| `02_signal_processing_pipeline_passive_elint.tex` | Signal Processing Pipeline for Passive ELINT | Label `sec:bg:elint_pipeline`; `\label{sec:bg:deinterleaving_evolution}` on the deinterleaving subsection. Add pipeline figure under `figures/background/`. |
+| `03_machine_learning_fundamentals.tex` | Machine Learning Fundamentals | Label `sec:bg:ml`. |
+| `04_clustering_methods.tex` | Clustering Methods | Label `sec:bg:clustering`. Cite `\parencite{xie2016unsupervised}`. |
+| `05_deep_representation_learning.tex` | Deep Representation Learning | Label `sec:bg:dl`; bridge to DEC/SwAV `\parencite{xie2016unsupervised,caron2020swav}`. |
+| `06_transformer_encoder.tex` | The Transformer Encoder | Label `sec:bg:transformer`. Cite `\parencite{vaswani2017attention,devlin2019bert}`. |
 
 ## Style notes
 
