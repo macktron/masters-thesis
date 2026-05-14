@@ -42,11 +42,15 @@ Signal processing techniques such as matched filtering and coherent integration 
 
 \subsection{Transmitting radars versus receive-only systems}
 
-A pulsed radar platform both illuminates and listens, so it can exploit a known transmit waveform when forming correlations and Doppler filters \parencite{skolnik2008radar}.
-Passive \gls{esm} and \gls{elint} systems instead sit on the sidelobe or distant mainlobe energy of someone else's transmitter.
-They do not control $P_t$, antenna gain schedules, or internal timing laws, so cooperative echo models are largely unavailable.
-Inference therefore leans on measured per-pulse parameters (carrier, arrival time, width, angle, amplitude) rather than on matched filtering against a secret template.
-That posture is exactly what motivates the \gls{pdw} abstraction developed below and detailed further in \cref{sec:bg:elint_pipeline}.
+Radiation is observable: any receiver in range can try to measure a deliberate transmission, and repeated pulses make timing and angle information available to third parties as well as to the intended user \parencite{wiley2006elint}.
+That is the elementary information warfare trade behind ranging systems. Emitting buys sensing, but it also spends concealment in the electromagnetic domain, because each outbound burst is evidence of activity, location, and intent for anyone who listens.
+
+A cooperative pulsed radar closes a loop between a waveform it knows and the echoes it collects \parencite{skolnik2008radar}.
+Passive \gls{esm} and \gls{elint} equipment does not close that loop. It listens to other parties' emissions and tries to summarize what the spectrum shows about their behavior \parencite{wiley2006elint}.
+Skipping a dedicated illuminator removes one loud way for the collection side to reveal itself on the air, which matters whenever staying off the transmit side of the contest is tactically preferable.
+
+Without the cooperative transmit reference used in echo processing, passive inference leans on whatever scalar measurements survive detection and estimation: carrier, arrival time, width, angle when available, and amplitude.
+That posture motivates the \gls{pdw} abstraction developed next; \cref{sec:bg:elint_pipeline} places it in the wider processing chain.
 
 \subsection{From passband samples to a list of pulses}
 
