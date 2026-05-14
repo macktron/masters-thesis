@@ -2,8 +2,14 @@
 
 In passive \gls{esm} and \gls{elint}, a \emph{radar emitter} denotes a physical transmitting source whose emissions can be tied to a train of pulses in time and frequency \parencite{wiley2006elint}, though this coherence has become increasingly complex to discern in modern, modulated radar systems.
 
-An \emph{operating mode}, by contrast, is a parameterized configuration of the transmitted waveform and scheduling policy: nominal carrier frequency or hopping law, pulse width, repetition structure, beam scan program, and any agility rules that govern how those quantities change from pulse to pulse \parencite{skolnik2008radar,wiley2006elint}.
-Modes are therefore properties of the emission process at a given time, whereas emitters are stable identities of hardware and platform; the same hardware cycles through modes as the mission evolves.
+An \emph{operating mode}, by contrast, describes the particular way in which a radar system chooses to transmit its signals at a given time.
+This includes a set of instructions or parameters that control the radar's outgoing pulses: for example, which frequency the radar uses, whether it changes frequencies over time (hopping law), how long each pulse lasts (pulse width), how often pulses are transmitted (repetition structure), how the radar beam is moved or scanned, and any programmed rules for changing these settings from one pulse to the next \parencite{skolnik2008radar,wiley2006elint}.
+While an emitter refers to the underlying physical equipment and its stable identity, a mode is about the operational settings and purposes carried out at a given moment.
+The same radar hardware can switch between different modes as its tasks or mission requirements change.
+
+
+
+%% EXMAPLES OF MODES.
 
 Illustrative mode families include wide-area search, acquisition and track, fire-control illumination, weather sensing, and terminal guidance support \parencite{skolnik2008radar}.
 Each family implies characteristic constraints on \gls{pri}/\gls{prf}, dwell time, frequency agility, and antenna motion: search modes favor broad coverage and may use staggered or agile repetition to balance range and velocity ambiguity, while dedicated tracking or illuminator modes often concentrate energy in fewer directions with higher update rates on a target of interest.
