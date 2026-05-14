@@ -1,16 +1,57 @@
 \section{Radar Systems and Passive Reception}\label{sec:bg:radar}
 
-Electromagnetic waves are disturbances in electric and magnetic fields that can propagate through space, carrying both energy and information from one location to another. When an oscillating current drives an antenna, it emits electromagnetic radiation, which can travel vast distances and interact with objects in its path. This fundamental process underlies technologies such as wireless communication and various sensing modalities.
+\subsection{Propagation and radiation}
 
-Radar, an acronym for \emph{radio detection and ranging}, applies these principles to remote sensing at radio frequencies. The basic concept is analogous to using sound echoes for locating objects, but here electromagnetic waves are used. A transmitter generates rapid pulses of radio-frequency energy, which spread outward from the source. If these waves encounter an object, some of the energy is scattered and can be received as an echo by the same or another antenna. By measuring properties of the incoming electromagnetic field, such as its strength (amplitude), time of arrival, and structural changes, a radar system can infer characteristics—including position and velocity—of distant objects \parencite{skolnik2008radar}.
+A time-varying current in a conductor sets up propagating electric and magnetic fields; together they carry power and phase information away from the source. An antenna shapes how that power leaves (or enters) the structure, but the underlying mechanism is the same: accelerated charges radiate \parencite{skolnik2008radar}.
 
-To make this abstract principle concrete, consider a pulsed radar system, in which the transmitter periodically emits short bursts of radio waves and then waits in between pulses for any potential echoes to return. The time delay between sending a pulse and receiving its echo can, via the finite speed of light $c$, be directly converted to an estimate of range (distance) to the reflecting target. Information about the angle of arrival, which gives the direction to the target, can be extracted using the directional properties of antennas or by comparing measurements from multiple receivers. The repetition rate of pulses is governed by the pulse repetition interval (\gls{pri}) or its reciprocal, the pulse repetition frequency (\gls{prf}); this repetition sets fundamental constraints on the unambiguous detection range and determines how often the target scene is illuminated. On reception, signal processing methods such as matched filtering and coherent integration are applied to strengthen weak echoes relative to background noise and interference—a process usually described as improving the signal-to-noise ratio (\gls{snr}) before the system attempts to detect pulses or estimate their properties \parencite{skolnik2008radar}.
+\subsection{Active pulsed radar}
 
-From a quantitative perspective, the amount of power actually received from a reflecting object is governed by both the physics of electromagnetic propagation and the technical properties of the system. For a so-called monostatic radar—where the same location is used for both transmitting and receiving—the received power $P_r$ is given by
+\Gls{radar} uses controlled radio-frequency illumination and listens for scattered returns. A transmitter emits short pulses; a receiver records echoes. If the one-way delay is $\tau/2$, the round-trip delay is $\tau$ and the monostatic range estimate is
+\begin{equation}
+\label{eq:bg:range}
+R = \frac{c\tau}{2},
+\end{equation}
+with $c$ the speed of light in the propagation medium \parencite{skolnik2008radar}.
+
+Pulse timing repeats with \gls{pri} or \gls{prf}. The largest range for which an echo can be assigned to the pulse that produced it without ambiguity satisfies
+\begin{equation}
+\label{eq:bg:runamb}
+R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2},
+\end{equation}
+since a late echo from pulse $k$ can be mistaken for an early echo from pulse $k{+}1$ if $R > R_{\mathrm{u}}$. Coherent processing (matched filtering, integration) raises echo energy relative to noise and interference before detection; that gain is summarized by the \gls{snr} at the detector \parencite{skolnik2008radar}.
+
+\subsection{Received power}
+
+For monostatic geometry (collocated transmit and receive), the peak received power from a resolved scatterer is
 \begin{equation}
 \label{eq:bg:radar}
 P_r = \frac{P_t G^2 \lambda^2 \sigma}{(4\pi)^3 R^4},
 \end{equation}
-where $P_t$ is the peak power transmitted during a pulse, $G$ represents the antenna gain (a measure of how effectively the antenna radiates or collects energy), $\lambda$ is the wavelength, $\sigma$ denotes the radar cross section of the target (reflectivity), and $R$ is the distance (slant range) between radar and target \parencite{skolnik2008radar}. The strong dependence on $R^{-4}$ shows that as the distance doubles, the received power drops by a factor of sixteen, making both range and antenna gain critical determinants of radar performance. Although additional effects—such as atmospheric absorption, hardware inefficiencies, and extra signal processing gains—are important in practice, equation~\eqref{eq:bg:radar} remains a key reference for understanding how transmitted energy is ultimately observed as an echo.
+where $P_t$ is transmit pulse power, $G$ is antenna gain on transmit and receive (same aperture), $\lambda$ is wavelength, $\sigma$ is radar cross section, and $R$ is slant range \parencite{skolnik2008radar}. The factor $R^{-4}$ is two-way spherical spreading plus inverse-square receive.
 
-In contrast, passive systems for electronic support measures (\gls{esm}) and electronic intelligence (\gls{elint}) do not generate their own signals, but instead listen for emissions from other, independent radar systems. These receivers may capture transmissions from the primary radar's main beam or its sidelobes, but they lack direct control or knowledge of key parameters such as $P_t$, $G$, or the exact timing of emitted waveforms. Consequently, the problem shifts from transmitting and measuring echoes to inferring properties of external emitters using only one-way propagation under often partial or uncertain geometric information. Analysts rely on directly observable pulse features—such as frequency, arrival time, pulse width, and direction—rather than predefined references, to characterize emitter behavior. Such per-pulse measurements and their structured representations are the central data interface for contemporary learning-based analytical methods; see \cref{sec:bg:pdw} for details of this feature-based perspective.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.72\linewidth,
+  height=0.32\linewidth,
+  xlabel={$R/R_0$},
+  ylabel={$P_r(R)/P_r(R_0)$},
+  xmin=1, xmax=8,
+  ymin=0, ymax=1.05,
+  grid=both,
+  minor tick num=1,
+  legend pos=north east,
+]
+\addplot[thick, domain=1:8, samples=200] {(1/x)^4};
+\end{axis}
+\end{tikzpicture}
+\caption{Normalized received power versus normalized range from \cref{eq:bg:radar} with fixed $P_t$, $G$, $\lambda$, and $\sigma$. Doubling $R$ cuts $P_r$ by a factor of $16$.}
+\label{fig:bg:radar_r4}
+\end{figure}
+
+Absorption, ohmic losses, and processing gains modify \cref{eq:bg:radar} in deployed systems, but the scaling in \cref{fig:bg:radar_r4} sets the usual trade-off between range and hardware.
+
+\subsection{Passive ESM and \gls{elint}}
+
+\Gls{esm} and \gls{elint} receivers do not transmit. They observe one-way emissions, often via sidelobes, without knowing $P_t$, $G$, or internal timing laws. Inference uses measured pulse parameters (frequency, arrival time, width, angle, amplitude) instead of a cooperative echo model. That measurement-centric view matches the \gls{pdw} interface used later; see \cref{sec:bg:pdw}.
