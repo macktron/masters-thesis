@@ -1,162 +1,39 @@
 \section{Problem Formulation}\label{sec:method:formulation}
 
-This chapter studies supervised representation learning from time-ordered streams of \glspl{pdw} produced by an \gls{esm} or deinterleaving front end, as outlined in \cref{sec:bg:elint_pipeline}.
-Each pulse in the training data carries two ground-truth labels: an \emph{emitter identity}, whose values are unique only within the pulse train that contains the pulse, and an \emph{operating mode}, whose label set is a finite catalogue shared across all pulse trains.
-Both labels are used to supervise embedding geometry during training, and both per-pulse outputs are produced by clustering the resulting embeddings at inference time.
-The goal is twofold: learn a representation from which (i) pulses originating from the same physical emitter within a pulse train can be reliably grouped by clustering the emitter embeddings, and (ii) pulses sharing the same operating mode --- including modulation types not present in the training catalogue --- can be reliably grouped by clustering the mode embeddings.
-Routing the mode output through clustering rather than through a closed-catalogue classifier is a deliberate design choice: it keeps the system open to previously unseen modulation variants, an experimental scenario investigated in \cref{ch:experiments} by holding out selected modulations during training and verifying that the model still groups their pulses into coherent mode clusters.
+\subsection*{Input}
 
-
-\subsection*{Observed input}
-
-The data is organised as a collection of \emph{pulse trains}, each a finite, time-ordered sequence of \glspl{pdw} produced during one observation window.
-A single pulse train of $N$ pulses is represented by feature vectors
-\begin{equation}\label{eq:method:pdw_sequence}
+A \emph{pulse train} is a finite, time-ordered sequence of \glspl{pdw}
+\[
   \mat{X} = (\vect{x}_1,\ldots,\vect{x}_N),
   \qquad
   \vect{x}_n \in \R^{d},
-\end{equation}
-where each $\vect{x}_n$ encodes the measured pulse parameters associated with one \gls{pdw} (carrier frequency, amplitude, pulse width, time of arrival, angle of arrival including azimuth and elevation).
-The model receives one pulse train at a time and produces per-pulse outputs for that train; to keep notation light, we suppress an explicit train index in \cref{eq:method:pdw_sequence} and in what follows.
+\]
+where each $\vect{x}_n$ encodes the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angle of arrival).
+The length $N$ varies between trains.
 
-A single train may contain irregular sampling, missing pulses, and spurious detections inherited from upstream processing; robustness to such effects is a design constraint rather than part of the formal specification.
+\subsection*{Labels and induced partitions}
 
-\subsection*{Per-pulse supervision: emitter and mode labels}
+Each pulse $n \in \{1,\ldots,N\}$ carries two labels: an emitter identity $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$ and an operating mode $m_n \in \{1,\ldots,M\}$.
+The emitter symbol is unique only \emph{within the current train}: the same integer in a different train indexes an unrelated emitter, and $K_{\mathrm{em}}$ varies between trains.
+The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all trains, so $m_n = \ell$ identifies the same mode irrespective of the originating train.
 
-Every pulse in the training data is annotated with two ground-truth labels.
-For each index $n \in \{1,\ldots,N\}$ within a given train of length N, let $e_n$ denote the emitter identity responsible for pulse $n$ and let $m_n$ denote its operating mode.
-Although both quantities are observed during training, they have fundamentally different semantics.
-
-The simulation has a programmed mode library, so the mode label $m_n \in \{1,\ldots,M\}$ is drawn from a finite, \emph{global} catalogue of size $M$ that is shared across all pulse trains: the symbol $m_n = \ell$ denotes the same operating mode regardless of which train the pulse belongs to. 
-The emitter label $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$, by contrast, is unique only \emph{within the current train}: the integer indexes the distinct physical emitters encountered in this particular observation window, and the same integer in a different train refers to an unrelated emitter.
-However, labels could be augmented to include the train id label, but this is not nessesary for our solution as we will see.
-
-The train-specific cardinality $K_{\mathrm{em}}$ is observed at training time but varies across trains, and the model is expected to operate on previously unseen trains whose values of $K_{\mathrm{em}}$ are unknown a priori.
-The catalogue size $M$ is fixed and shared across trains, although individual trains typically exercise only a small subset of the $M$ modes.
-
-\subsection*{Induced partitions, \gls{pdw} streams, and mode hopping}
-
-\Cref{fig:method:pdw_emitter_stream} sketches a short \gls{pdw} stream in chronological order for a single pulse train.
-Fill color encodes the train-local emitter index $e_n$; pulses that share a color belong to the same emitter even though they need not be contiguous in time (interleaved emissions from several \gls{radar} platforms are typical).
-Each stream cell uses that emitter fill \emph{and} a grayscale pattern for the global operating-mode label $m_n$; the vector label $\vect{x}_i$ inside each cell is drawn in black for legibility.
-The right-hand legends separate the two cues: emitter entries are color-only (no pattern), and mode entries are monochrome pattern tiles with black text.
-The formal partitions and mode hopping are stated mathematically in the text below.
-
-\begin{figure}[t]
-  \centering
-  \begin{tikzpicture}[
-    x=12mm,
-    font=\small,
-    pdw/.style={
-      draw,
-      rounded corners=1.6pt,
-      minimum width=8.8mm,
-      minimum height=8mm,
-      inner sep=1.5pt,
-      align=center,
-      text=black
-    },
-    % Stream cells: fill + pattern (path picture paints emitter fill under pattern; plain fill+pattern often hides fill in PDF)
-    pdwstreamfill/.style={fill=none},
-    >=Latex
-  ]
-    \foreach \i/\col/\m [count=\n] in {
-      1/blue!18/1,2/orange!22/1,3/blue!18/2,4/orange!22/2,5/blue!18/1,
-      6/green!20/1,7/orange!22/2,8/blue!18/2,9/green!20/3,10/orange!22/1
-    } {
-      \ifnum\m=1
-        \node[pdw, pdwstreamfill,
-          path picture={
-            \fill[\col] (path picture bounding box.south west)
-              rectangle (path picture bounding box.north east);
-            \path[pattern=horizontal lines, pattern color=black!48]
-              (path picture bounding box.south west)
-              rectangle (path picture bounding box.north east);
-          }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
-      \else
-        \ifnum\m=2
-          \node[pdw, pdwstreamfill,
-            path picture={
-              \fill[\col] (path picture bounding box.south west)
-                rectangle (path picture bounding box.north east);
-              \path[pattern=dots, pattern color=black!52]
-                (path picture bounding box.south west)
-                rectangle (path picture bounding box.north east);
-            }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
-        \else
-          \node[pdw, pdwstreamfill,
-            path picture={
-              \fill[\col] (path picture bounding box.south west)
-                rectangle (path picture bounding box.north east);
-              \path[pattern=north east lines, pattern color=black!48]
-                (path picture bounding box.south west)
-                rectangle (path picture bounding box.north east);
-            }] (p\n) at (\n, 0) {$\vect{x}_{\i}$};
-        \fi
-      \fi
-    }
-    \draw[->, thick] (0.35,-0.62) -- ({10+0.65},-0.62)
-      node[midway, below=2.5pt, font=\footnotesize] {pulse index $n$ (time order)};
-    % Emitter legend: fixed column (swatch east edges aligned; text on a common vertical line)
-    \begin{scope}[font=\footnotesize]
-      \path let \p{e}=(p10.east) in coordinate (legline) at ({\x{e}+8mm},0);
-      % Emitter legend: solid fill only (no pattern); labels in emitter hues
-      \foreach \k/\col/\txtcol/\y in {1/blue!18/blue!78!black/0.46,2/orange!22/orange!90!black/0,3/green!20/green!58!black/-0.46} {
-        \node[pdw, fill=\col, minimum width=5.2mm, minimum height=4.5mm, anchor=east]
-          (legb\k) at ($(legline)+(0,\y)$) {};
-        \node[anchor=mid west, text=\txtcol] at ($(legline)+(2.2mm,\y)$) {emitter $\k$};
-      }
-      % Mode legend: gray + pattern only (no emitter hue); labels in black
-      \coordinate (mlegline) at ($(legline)+(26mm,0)$);
-      \node[pdw, fill=gray!42, pattern=horizontal lines, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
-        (mlegb1) at ($(mlegline)+(0,0.46)$) {};
-      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,0.46)$) {mode $1$};
-      \node[pdw, fill=gray!42, pattern=dots, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
-        (mlegb2) at ($(mlegline)+(0,0)$) {};
-      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,0)$) {mode $2$};
-      \node[pdw, fill=gray!42, pattern=north east lines, pattern color=black!68,
-            minimum width=5.2mm, minimum height=4.5mm, anchor=east, draw=black!75]
-        (mlegb3) at ($(mlegline)+(0,-0.46)$) {};
-      \node[anchor=mid west, text=black] at ($(mlegline)+(2.2mm,-0.46)$) {mode $3$};
-    \end{scope}
-  \end{tikzpicture}
-  \caption{Illustration of a \gls{pdw} stream $\vect{x}_1,\ldots,\vect{x}_N$ for one pulse train, in time order.
-    Each cell combines emitter color (fill) and operating-mode pattern; the in-cell vector index is typeset in black.
-    The emitter legend uses color-only swatches with matching colored text for the train-local emitter labels; the mode legend uses grayscale pattern swatches with black text for the global mode catalogue.
-    Emitter recovery seeks the within-train partition into subsets $\mathcal{E}_k$ (constant $e_n$ on each subset); mode prediction labels each pulse with its global mode $m_n$, while allowing mode hops within a fixed emitter.}
-  \label{fig:method:pdw_emitter_stream}
-\end{figure}
-
-Within a pulse train, the emitter supervision induces a partition of $\{1,\ldots,N\}$ into emitter-coherent index sets
+These labels induce two partitions of the index set $\{1,\ldots,N\}$,
 \begin{equation}\label{eq:method:emitter_partition}
-  \mathcal{E}_k = \{\, n \in \{1,\ldots,N\} : e_n = k \,\},
+  \mathcal{E}_k = \{\, n : e_n = k \,\},
   \qquad
   k \in \{1,\ldots,K_{\mathrm{em}}\},
 \end{equation}
-so that $\vect{x}_n$ and $\vect{x}_{n'}$ belong to the same emitter-coherent subset if and only if $e_n = e_{n'}$.
-Each $\mathcal{E}_k$ is the preimage of label $k$ under the map $n \mapsto e_n$, and $\{\mathcal{E}_1,\ldots,\mathcal{E}_{K_{\mathrm{em}}}\}$ is pairwise disjoint with union $\{1,\ldots,N\}$.
-Because emitter symbols are not shared across trains, this equivalence relation is defined only within each train; the recovery problem at inference time is to reconstruct it from $\mat{X}$ alone.
-
-The global mode catalogue induces a second partition,
 \begin{equation}\label{eq:method:mode_partition}
-  \mathcal{M}_\ell = \{\, n \in \{1,\ldots,N\} : m_n = \ell \,\},
+  \mathcal{M}_\ell = \{\, n : m_n = \ell \,\},
   \qquad
-  \ell \in \{1,\ldots,M\},
+  \ell \in \{1,\ldots,M\}.
 \end{equation}
-which groups pulses that share the same operating mode regardless of which physical emitter produced them.
-The two partitions are coupled because $(e_n,m_n)$ is generated jointly: restricting to a fixed emitter $k$, the induced set of mode labels
-\begin{equation}\label{eq:method:modes_per_emitter}
-  \mathcal{L}_k = \{\, m_n : n \in \mathcal{E}_k \,\} \subseteq \{1,\ldots,M\}
-\end{equation}
-has cardinality $L_k = \lvert \mathcal{L}_k \rvert$ bounded by the number of distinct waveform programmes that emitter $k$ exercises.
-In many \gls{radar} systems, mode hopping switches among a small subset of the catalogue, so $L_k$ is modest---often on the order of single-digit integers---even though the temporal pattern $(m_n)_{n \in \mathcal{E}_k}$ is not constant.
-The supervised learning problem is then to fit a model whose outputs, on previously unseen trains, recover both partitions up to arbitrary relabellings of the cluster symbols, using the dual embeddings in \cref{eq:method:dual_embeddings}: for the emitter partition the relabelling acts within each train, while for the mode partition the relabelling acts globally and may introduce additional indices when previously unseen modulations are present.
+The first is defined only within a single train, the second is comparable across trains.
+The two partitions are coupled: restricted to a fixed emitter $k$, the set $\{\, m_n : n \in \mathcal{E}_k \,\}$ is in general non-singleton, so $(m_n)_{n \in \mathcal{E}_k}$ may hop between several catalogue entries.
 
-\subsection*{Desired outputs: dual embeddings and discrete labels}
+\subsection*{Dual embeddings and discrete outputs}
 
-The parametric model considered in this thesis maps an input pulse train to two parallel trajectories in Euclidean embedding spaces,
+The parametric model maps $\mat{X}$ to two parallel embedding sequences,
 \begin{equation}\label{eq:method:dual_embeddings}
   \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_N),
   \quad
@@ -164,37 +41,24 @@ The parametric model considered in this thesis maps an input pulse train to two 
   \qquad
   \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_N),
   \quad
-  \vect{z}^{\mathrm{md}}_n \in \R^{q},
+  \vect{z}^{\mathrm{md}}_n \in \R^{q}.
 \end{equation}
-with dimensions $p$ and $q$ fixed by the architecture.
+The emitter branch $\mat{Z}^{\mathrm{em}}$ is trained so that, within each train, pulses with the same $e_n$ are close in $\R^{p}$ and pulses with different $e_n$ are pushed apart.
+The mode branch $\mat{Z}^{\mathrm{md}}$ is trained analogously against $\{m_n\}$, but with positives and negatives drawn from the entire batch rather than from within a single train.
 
-The two trajectories play different roles dictated by the label semantics described above, but in both cases the supervision shapes embedding \emph{geometry} so that downstream discretisation is done by clustering rather than by a fixed-class softmax.
-Emitter-oriented vectors $\vect{z}^{\mathrm{em}}_n$ are trained so that, within each pulse train, embeddings with the same emitter label cluster tightly in $\R^{p}$ while embeddings with different emitter labels are pushed apart.
-Because the emitter symbol is train-local, the corresponding supervision is a within-train metric-learning signal rather than a global classifier, and discrete emitter assignments
+Discrete per-pulse outputs
 \begin{equation}\label{eq:method:emitter_predictor}
   \hat{e}_n \in \{1,\ldots,\hat{K}_{\mathrm{em}}\},
-  \qquad
-  n \in \{1,\ldots,N\},
+  \qquad n \in \{1,\ldots,N\},
 \end{equation}
-are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{N}$ within each train; the inferred count $\hat{K}_{\mathrm{em}}$ is either selected by the clustering algorithm or supplied from external knowledge.
-Their main deliverable is a per-pulse emitter index suitable for downstream \gls{elint} workflows such as emitter counting and localisation.
-
-Mode-oriented vectors $\vect{z}^{\mathrm{md}}_n$ are trained against the global mode labels analogously: embeddings of pulses sharing the same mode in $\{1,\ldots,M\}$ are pulled together while embeddings of pulses with different modes are pushed apart, this time with positives drawn from the entire batch rather than only from within a single train.
-Discrete mode assignments
 \begin{equation}\label{eq:method:mode_predictor}
   \hat{m}_n \in \{1,\ldots,\hat{M}\},
-  \qquad
-  n \in \{1,\ldots,N\},
+  \qquad n \in \{1,\ldots,N\},
 \end{equation}
-are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^{N}$, optionally aided by the cluster centroids of the training-time modes when an alignment to the catalogue $\{1,\ldots,M\}$ is desired.
-The inferred catalogue size $\hat{M}$ may exceed $M$ when modulation types that were absent or held out during training are exercised at inference; in that regime, additional clusters are expected to emerge as evidence of previously unseen modes rather than to be forced into existing catalogue entries.
-The embedding additionally aims to summarise mode-dependent waveform behaviour so that operating modes can be inspected, compared, or matched against external waveform libraries.
-
-Architecturally, both streams are produced from a shared encoder $\Enc$ with task-specific heads (see \cref{sec:method:arch}); in deployment, the per-pulse deliverables are the discrete pairs $(\hat{e}_n,\hat{m}_n)$, while the continuous embeddings remain available for inspection, prototype matching, and downstream tasks that benefit from a geometric rather than purely categorical mode representation.
+are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}$ within each train and $\{\vect{z}^{\mathrm{md}}_n\}$ across trains.
+The cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are determined by the clustering rather than fixed in advance; in particular $\hat{M}$ may exceed $M$ when modulation types absent from training are encountered at inference.
 
 \subsection*{Learning objective}
 
-The optimisation problem combines two supervised metric-learning losses sharing the same functional form but operating on different scopes: (i) a within-train term that uses the emitter labels $\{e_n\}$ to shape $\mat{Z}^{\mathrm{em}}$, with positives drawn only from the same pulse train; and (ii) a global term that uses the mode labels $\{m_n\}$ to shape $\mat{Z}^{\mathrm{md}}$, with positives drawn from anywhere in the batch.
-The two terms exploit the asymmetric label semantics: emitter labels enter the loss only through within-train comparisons because the symbols are not shared across trains, while mode labels are used identically across trains because the catalogue is global.
-Neither term commits to a fixed output cardinality at inference; downstream cluster counts $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are read from the post-hoc clustering of \cref{eq:method:emitter_predictor,eq:method:mode_predictor} and may differ from the training-time cardinalities.
-The concrete loss terms and training protocol are given in \cref{sec:method:loss,sec:method:training}.
+Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form but differ in scope: a within-train term acting on $\mat{Z}^{\mathrm{em}}$ with positives drawn from the same train, and a batch-wide term acting on $\mat{Z}^{\mathrm{md}}$ with positives drawn from anywhere in the batch.
+On a previously unseen train, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.
