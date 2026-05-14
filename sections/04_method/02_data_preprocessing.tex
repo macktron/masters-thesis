@@ -1,76 +1,73 @@
 \section{Data Representation and Preprocessing}\label{sec:method:data}
 
-\Gls{elint} data are difficult to obtain at scale, and operational recordings are often sensitive.
-This work therefore relies on synthetic pulse trains from a proprietary scenario simulator at Saab, which yields controlled scenarios together with full per-pulse supervision of emitter identity and operating mode (\cref{sec:method:formulation}); both label streams are consumed directly by the training objective in \cref{sec:method:loss} as well as by the evaluation metrics in \cref{sec:method:metrics}.
-Earlier KTH degree projects hosted at Saab document synthetic radar-\gls{ml} pipelines at a comparable level of detail, including scenario-driven pulse generation and explicit noise models \parencite{jonsson2023supcon,svensson2022priemitter}.
+Operational \gls{elint} recordings are scarce and sensitive, so all training and evaluation data are synthetic.
+Pulse trains are produced by Saab's OpenModesty scenario simulator, the same tool used by earlier KTH degree projects on radar pulse data \parencite{jonsson2023supcon}.
+OpenModesty specifies flight paths, emitter placements, and operating-mode schedules, then emits and intercepts pulses one at a time.
+Receiver-side imperfections (dropped pulses, spurious detections, parameter jitter) are produced inside the simulator and are already present in the exported pulse records, so no separate noise injection is applied downstream.
+Each exported pulse carries the continuous fields used here together with the two discrete labels defined in \cref{sec:method:formulation}.
 
-\subsection{Scenario simulation and pulse records}\label{sec:method:data:sim}
+\subsection{Windowing}\label{sec:method:data:window}
 
-The simulator produces \emph{scenarios}: time-ordered pulse-level timelines for one or more notional emitters and a receiving platform.
-Each pulse is described by the continuous fields that enter the \gls{pdw} representation used here (including \gls{toa}, \gls{rf}, pulse width, and amplitude on a logarithmic scale), together with two discrete labels: an emitter identity that is unique only within the scenario that produced the pulse, and an operating mode drawn from a finite catalogue shared across scenarios (\cref{sec:method:formulation}).
-\textcite{jonsson2023supcon} describes the unclassified OpenModesty tool in the same lineage: flight paths and emitter placements define a geometry, pulses are emitted and intercepted one at a time, and the simulator can apply modulations and controlled perturbations consistent with notional radar behavior.
-The present implementation is proprietary; the important methodological point is that every pulse in the export carries consistent timing and parameter fields so that windows formed below correspond to reproducible segments of a simulated electromagnetic timeline.
+Self-attention builds an $L \times L$ compatibility matrix between tokens at every layer, so the cost of one forward pass scales as $\mathcal{O}(L^2)$ in the window length $L$.
+The encoder therefore operates on fixed-length windows of $L = 1024$ pulses.
+Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$, the $w$th window is
+\begin{equation}\label{eq:method:windowing}
+  \mat{X}^{(w)}
+  =
+  \bigl(\vect{x}_{1 + (w-1)s},\,\ldots,\,\vect{x}_{L + (w-1)s}\bigr),
+  \qquad
+  w \in \Bigl\{1,\ldots,\bigl\lfloor (N - L)/s \bigr\rfloor + 1\Bigr\}.
+\end{equation}
+Training uses $s = L/2$, so consecutive windows overlap by half their length; this increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
+Validation and test windows use $s = L$ so that metrics are not inflated by near-duplicate windows.
+The trailing remainder shorter than $L$ is dropped.
 
-Scenarios differ in the number of emitters, dwell in each mode, and simulated horizon so that training covers diverse traffic densities; exact counts and split assignments are deferred to \cref{ch:experiments}.
-
-\subsection{Optional receiver-side degradation}\label{sec:method:data:noise}
-
-Even when emitter physics are ideal in the simulator, downstream \gls{esm} processing introduces structured errors.
-\textcite{jonsson2023supcon} distinguishes \emph{dropped pulses}, where a transmitted pulse is not registered by the receiver chain, from \emph{spurious pulses}, where extra pulses appear in a track because deinterleaving or detection stages attach energy to the wrong pulse train.
-\textcite{svensson2022priemitter} likewise emphasizes controlled drop, spurious, and additive Gaussian regimes when studying \gls{pri} sequences.
-When the experimental programme applies such degradations, they are implemented as stochastic edits on the ordered pulse list \emph{before} windowing: each pulse may be removed with a scenario- or split-specific drop probability, and spurious insertions may be drawn by copying and perturbing existing pulses or by drawing alternative parameter vectors from a bounded rule set.
-Discrete grids of drop and spurious rates, rather than only single operating points, simplify reporting across noise sweeps in \cref{ch:experiments}.
-
-\begin{algorithm}[t]
-  \caption{Optional stochastic degradation of an ordered pulse list (conceptual).}\label{alg:method:pulse_degradation}
-  \begin{algorithmic}[1]
-    \Require Ordered pulses $\{p_1,\ldots,p_N\}$, drop probability $\rho_{\mathrm{drop}} \in [0,1)$, spurious probability $\rho_{\mathrm{spu}} \in [0,1)$
-    \Ensure Degraded list of pulses preserving time order where applicable
-    \State $\mathcal{L} \gets \mathrm{copy}(\{p_1,\ldots,p_N\})$
-    \For{each pulse $q$ in $\mathcal{L}$ scanned in forward time order}
-      \If{uniform draw $u < \rho_{\mathrm{drop}}$}
-        \State remove $q$ from $\mathcal{L}$
-      \EndIf
-    \EndFor
-    \For{each remaining pulse $q$ in $\mathcal{L}$}
-      \If{uniform draw $u' < \rho_{\mathrm{spu}}$}
-        \State insert a spurious pulse after $q$ using the chosen perturbation rule (duplicate with noise or independent draw)
-      \EndIf
-    \EndFor
-  \end{algorithmic}
-\end{algorithm}
-
-\cref{alg:method:pulse_degradation} is only a bookkeeping template: concrete probabilities, conditioning on track boundaries, and whether noise is re-drawn per window or fixed per scenario appear in the experiment log together with the simulator export manifest.
-
-\subsection{Windowing and context length}\label{sec:method:data:window}
-
-The encoder operates on fixed-length windows because standard self-attention builds an $L \times L$ compatibility matrix between tokens at each layer, so time and memory scale as $\mathcal{O}(L^2)$ in the window length $L$ at fixed model width, repeated across depth.
-Let $L$ denote the window length (in pulses) fed to the model; experiments use $L = 1024$.
-Each scenario is partitioned into contiguous windows of length $L$.
-If the remainder after the last full window is shorter than $L$, it is dropped in the present pipeline; padding with an attention mask would retain the tail without changing the architecture and is left as a straightforward extension.
-
-Training windows are extracted with a stride of $L/2$, so consecutive windows overlap by half their length.
-This increases the number of training pulses seen per scenario and reduces sensitivity to the particular alignment of window boundaries relative to mode transitions.
-Validation and test windows use stride $L$ (no overlap), so that metrics are not inflated by near-duplicate windows.
-
-Interleaved traffic and heterogeneous dwell times imply that pulse counts per emitter and per operating mode vary widely inside a window, and the effective \gls{pri} structure can make the number of pulses per emitter differ across the corpus even when scenario durations match \parencite{jonsson2023supcon}.
-Some windows therefore contain few or no pulses from a rare emitter or a short-lived mode, even when that label is frequent in the parent scenario, and dropped tails can remove trailing segments entirely.
-These effects induce a form of \emph{label incidence imbalance} at the window level that is distinct from corpus-level class histograms and should be read alongside the reporting conventions in \cref{ch:experiments}.
+At inference, the same fixed-length contract approximates a rolling window over a live pulse stream: a receiver buffers the most recent $L$ pulses, applies the trained encoder, advances by $s$, and repeats.
+Training-time windows are therefore representative of the operational reasoning unit, not just a memory convenience.
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
-Amplitude is already provided on a logarithmic scale (decibels).
-Continuous fields are transformed before windowing so that statistics are computed on the training split only and then applied to validation and test data.
-The log-amplitude, carrier frequency, and pulse width are standardised to zero mean and unit variance using the training-set mean and standard deviation of each field, so that channels measured in different physical units contribute comparably to dot products in the encoder \parencite{jonsson2023supcon}.
-Each \gls{toa} is first min--max scaled to $[0,1]$ using training-set bounds; within every window, all rescaled \gls{toa} values are shifted by subtracting the \gls{toa} of the first pulse so that the window starts at time zero.
-This removes absolute clock offset while preserving intra-window timing structure.
+Let $\mathcal{P}_{\mathrm{tr}}$ denote the multiset of all pulses in the training split, pooled across pulse trains.
+All scaling statistics are estimated on $\mathcal{P}_{\mathrm{tr}}$ and applied unchanged to validation and test pulses.
+A per-train fit would normalise out absolute parameter ranges and thereby sharpen contrasts that help intra-train deinterleaving, but operating-mode signatures are defined by those same absolute ranges and are comparable across trains by construction (\cref{sec:method:formulation}); pooling statistics keeps the cross-train scale information that the mode branch relies on, at the price of a softer per-train normalisation for the emitter branch.
 
-% TODO: Encoding of any categorical PDW fields once the feature list is fixed.
+For each pulse parameter $g \in \{f,\, \mathrm{PW},\, \log_{10} A\}$, the empirical mean and standard deviation on $\mathcal{P}_{\mathrm{tr}}$ are
+\begin{equation}\label{eq:method:standardize_stats}
+  \mu_g = \frac{1}{|\mathcal{P}_{\mathrm{tr}}|} \sum_{n \in \mathcal{P}_{\mathrm{tr}}} g_n,
+  \qquad
+  \sigma_g^2 = \frac{1}{|\mathcal{P}_{\mathrm{tr}}|} \sum_{n \in \mathcal{P}_{\mathrm{tr}}} (g_n - \mu_g)^2,
+\end{equation}
+and the standardised feature is
+\begin{equation}\label{eq:method:standardize}
+  \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
+\end{equation}
+Amplitude enters the pipeline as $\log_{10} A_n$ rather than $A_n$.
+Pulse amplitudes span several orders of magnitude across emitters, ranges, and antenna patterns, and a logarithm compresses that dynamic range so that a few high-power pulses do not dominate the standardised channel.
+
+Time of arrival and the azimuth and lateral components of \gls{aoa}, written $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, are bounded by construction.
+They are min--max scaled to $[0,1]$ against the training-corpus extrema,
+\begin{equation}\label{eq:method:minmax}
+  \tilde{u}_n
+  =
+  \frac{u_n - u_{\min}}{u_{\max} - u_{\min}},
+  \qquad
+  u \in \{t,\, \theta^{\mathrm{az}},\, \theta^{\mathrm{lat}}\},
+\end{equation}
+with $u_{\min}, u_{\max}$ taken over $\mathcal{P}_{\mathrm{tr}}$.
+Within every window $w$, the scaled \gls{toa} is then offset by the \gls{toa} of the first pulse in that window,
+\begin{equation}\label{eq:method:toa_offset}
+  \hat{t}_n
+  =
+  \tilde{t}_n - \tilde{t}_{1 + (w-1)s},
+  \qquad
+  n \in \{1 + (w-1)s,\,\ldots,\, L + (w-1)s\},
+\end{equation}
+so that the first pulse of every window has $\hat{t} = 0$.
+This removes absolute clock offset while preserving intra-window timing structure; the global min--max step fixes the unit of $\hat{t}$, so $\hat{t}$ differences are comparable across windows.
+The \gls{aoa} channels are not offset because their absolute values, not their increments, are physically meaningful.
 
 \subsection{Augmentations for contrastive views}\label{sec:method:data:aug}
 
-Contrastive objectives in \cref{sec:method:loss} consume two stochastic views of each training window.
-Those views combine the deterministic normalisation above with additional pulse-level or window-level perturbations (for example timing jitter, amplitude scaling, small frequency offsets, or pulse dropout) so that invariances reflect both simulator noise and plausible analogue front-end variability.
-The exact augmentation set and sampling ranges are part of the training configuration and are listed with other hyperparameters in \cref{sec:exp:hparams}.
-
-Windows are grouped into mini-batches for optimisation; batch size and per-epoch shuffling of windows are stated in \cref{sec:exp:hparams}.
+The contrastive objective in \cref{sec:method:loss} consumes two stochastic views of each training window.
+Views combine the deterministic scaling above with pulse-level or window-level perturbations (timing jitter, amplitude scaling, small frequency offsets, pulse dropout) so that the learned invariances cover plausible analog front-end variability on top of the simulator-side noise already present in the exports.
+The exact augmentation set, the sampling ranges, and the mini-batch composition are listed with other hyperparameters in \cref{sec:exp:hparams}.
