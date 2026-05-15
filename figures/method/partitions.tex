@@ -1,0 +1,131 @@
+% =====================================================================
+% Schematic of the two label-induced partitions of a single pulse train
+% used in \cref{sec:method:formulation}.  Each \gls{pdw} carries two
+% labels: an emitter identity (encoded by fill colour) and an operating
+% mode (encoded by border style: solid, dashed, dotted).  These two
+% labellings induce two distinct partitions of the same index set:
+% the emitter partition $\{\mathcal{E}_k\}$ (within-train) and the mode
+% partition $\{\mathcal{M}_\ell\}$ (defined relative to a global mode
+% catalogue).  Loaded from
+% sections/04_method/01_problem_formulation.tex via \input{...}.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    >=Latex,
+    pulse/.style={
+      circle, draw,
+      minimum size=8mm,
+      inner sep=0pt,
+      line width=0.55pt,
+    },
+    em1/.style={fill=blue!22},
+    em2/.style={fill=red!22},
+    em3/.style={fill=green!32},
+    modeA/.style={},
+    modeB/.style={densely dashed, line width=0.85pt},
+    modeC/.style={densely dotted, line width=1.1pt},
+    brace/.style={inner xsep=1pt, inner ysep=0pt},
+    rowlabel/.style={font=\footnotesize, anchor=east, align=right},
+  ]
+
+  \def\dx{0.95}
+
+  % ------------------------------------------------------------------
+  % Top row: input pulse train.
+  % Per-pulse labels used throughout the figure:
+  %   x1: em1,A   x2: em2,A   x3: em1,B   x4: em3,A   x5: em2,B
+  %   x6: em3,C   x7: em1,C   x8: em1,A   x9: em2,C
+  % ------------------------------------------------------------------
+  \node[pulse, em1, modeA] (t1) at (0*\dx, 0) {$\vect{x}_1$};
+  \node[pulse, em2, modeA] (t2) at (1*\dx, 0) {$\vect{x}_2$};
+  \node[pulse, em1, modeB] (t3) at (2*\dx, 0) {$\vect{x}_3$};
+  \node[pulse, em3, modeA] (t4) at (3*\dx, 0) {$\vect{x}_4$};
+  \node[pulse, em2, modeB] (t5) at (4*\dx, 0) {$\vect{x}_5$};
+  \node[pulse, em3, modeC] (t6) at (5*\dx, 0) {$\vect{x}_6$};
+  \node[pulse, em1, modeC] (t7) at (6*\dx, 0) {$\vect{x}_7$};
+  \node[pulse, em1, modeA] (t8) at (7*\dx, 0) {$\vect{x}_8$};
+  \node[pulse, em2, modeC] (t9) at (8*\dx, 0) {$\vect{x}_9$};
+
+  \node[brace, anchor=east] (top_lb) at ([xshift=-1mm]t1.west) {$\Bigg\{$};
+  \node[brace, anchor=west] (top_rb) at ([xshift=1mm]t9.east)  {$\Bigg\}$};
+
+  % ------------------------------------------------------------------
+  % Forking arrows from the input to each partition.
+  % ------------------------------------------------------------------
+  \coordinate (fork)   at (4*\dx, -0.7);
+  \coordinate (em_in)  at (4*\dx, -1.7);
+  \coordinate (md_in)  at (4*\dx, -3.7);
+
+  \draw[thick] (4*\dx, -0.55) -- (fork);
+  \draw[thick, ->] (fork) -- (em_in)
+        node[midway, right, font=\footnotesize]
+            {by emitter $e_n$};
+  \draw[thick, ->] (fork) -- (md_in)
+        node[midway, right, font=\footnotesize]
+            {by mode $m_n$};
+
+  % ------------------------------------------------------------------
+  % Emitter partition (within-train).
+  %   E1 (blue):  x1, x3, x7, x8
+  %   E2 (red):   x2, x5, x9
+  %   E3 (green): x4, x6
+  % ------------------------------------------------------------------
+  \def\yem{-2.5}
+  \node[pulse, em1, modeA] (e1) at (0.0*\dx, \yem) {$\vect{x}_1$};
+  \node[pulse, em1, modeB] (e3) at (1.0*\dx, \yem) {$\vect{x}_3$};
+  \node[pulse, em1, modeC] (e7) at (2.0*\dx, \yem) {$\vect{x}_7$};
+  \node[pulse, em1, modeA] (e8) at (3.0*\dx, \yem) {$\vect{x}_8$};
+
+  \node[pulse, em2, modeA] (e2) at (4.3*\dx, \yem) {$\vect{x}_2$};
+  \node[pulse, em2, modeB] (e5) at (5.3*\dx, \yem) {$\vect{x}_5$};
+  \node[pulse, em2, modeC] (e9) at (6.3*\dx, \yem) {$\vect{x}_9$};
+
+  \node[pulse, em3, modeA] (e4) at (7.6*\dx, \yem) {$\vect{x}_4$};
+  \node[pulse, em3, modeC] (e6) at (8.6*\dx, \yem) {$\vect{x}_6$};
+
+  \node[brace, anchor=east] (em1lb) at ([xshift=-0.5mm]e1.west) {$\Big\{$};
+  \node[brace, anchor=west] (em1rb) at ([xshift=0.5mm]e8.east)  {$\Big\},$};
+  \node[brace, anchor=east] (em2lb) at ([xshift=-0.5mm]e2.west) {$\Big\{$};
+  \node[brace, anchor=west] (em2rb) at ([xshift=0.5mm]e9.east)  {$\Big\},$};
+  \node[brace, anchor=east] (em3lb) at ([xshift=-0.5mm]e4.west) {$\Big\{$};
+  \node[brace, anchor=west] (em3rb) at ([xshift=0.5mm]e6.east)  {$\Big\}$};
+
+  \node[brace, anchor=east] (em_lb) at ([xshift=-1.5mm]em1lb.west) {$\Bigg\{$};
+  \node[brace, anchor=west] (em_rb) at ([xshift=1.5mm]em3rb.east)  {$\Bigg\}$};
+
+  \node[rowlabel] at ([xshift=-3mm]em_lb.west)
+        {emitter partition\\$\{\mathcal{E}_k\}_{k=1}^{K_{\mathrm{em}}}$};
+
+  % ------------------------------------------------------------------
+  % Mode partition (global catalogue).
+  %   A (solid):  x1, x2, x4, x8
+  %   B (dashed): x3, x5
+  %   C (dotted): x6, x7, x9
+  % ------------------------------------------------------------------
+  \def\ymd{-4.5}
+  \node[pulse, em1, modeA] (m1) at (0.0*\dx, \ymd) {$\vect{x}_1$};
+  \node[pulse, em2, modeA] (m2) at (1.0*\dx, \ymd) {$\vect{x}_2$};
+  \node[pulse, em3, modeA] (m4) at (2.0*\dx, \ymd) {$\vect{x}_4$};
+  \node[pulse, em1, modeA] (m8) at (3.0*\dx, \ymd) {$\vect{x}_8$};
+
+  \node[pulse, em1, modeB] (m3) at (4.3*\dx, \ymd) {$\vect{x}_3$};
+  \node[pulse, em2, modeB] (m5) at (5.3*\dx, \ymd) {$\vect{x}_5$};
+
+  \node[pulse, em3, modeC] (m6) at (6.6*\dx, \ymd) {$\vect{x}_6$};
+  \node[pulse, em1, modeC] (m7) at (7.6*\dx, \ymd) {$\vect{x}_7$};
+  \node[pulse, em2, modeC] (m9) at (8.6*\dx, \ymd) {$\vect{x}_9$};
+
+  \node[brace, anchor=east] (md1lb) at ([xshift=-0.5mm]m1.west) {$\Big\{$};
+  \node[brace, anchor=west] (md1rb) at ([xshift=0.5mm]m8.east)  {$\Big\},$};
+  \node[brace, anchor=east] (md2lb) at ([xshift=-0.5mm]m3.west) {$\Big\{$};
+  \node[brace, anchor=west] (md2rb) at ([xshift=0.5mm]m5.east)  {$\Big\},$};
+  \node[brace, anchor=east] (md3lb) at ([xshift=-0.5mm]m6.west) {$\Big\{$};
+  \node[brace, anchor=west] (md3rb) at ([xshift=0.5mm]m9.east)  {$\Big\}$};
+
+  \node[brace, anchor=east] (md_lb) at ([xshift=-1.5mm]md1lb.west) {$\Bigg\{$};
+  \node[brace, anchor=west] (md_rb) at ([xshift=1.5mm]md3rb.east)  {$\Bigg\}$};
+
+  \node[rowlabel] at ([xshift=-3mm]md_lb.west)
+        {mode partition\\$\{\mathcal{M}_\ell\}_{\ell=1}^{M}$};
+
+\end{tikzpicture}

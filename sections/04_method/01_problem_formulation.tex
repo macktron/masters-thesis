@@ -30,6 +30,14 @@ These labels induce two partitions of the index set $\{1,\ldots,N\}$,
 \end{equation}
 The first is defined only within a single train, the second is comparable across trains.
 The two partitions are coupled: restricted to a fixed emitter $k$, the set $\{\, m_n : n \in \mathcal{E}_k \,\}$ is in general non-singleton, so $(m_n)_{n \in \mathcal{E}_k}$ may hop between several catalogue entries.
+\Cref{fig:method:partitions} illustrates the two induced partitions on a toy pulse train of $N = 9$ pulses, with the dual labelling rendered as a fill colour for the emitter index and a border style for the mode index.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/partitions.tex}
+  \caption{The two label-induced partitions of a single pulse train. Each pulse $\vect{x}_n$ carries two labels: an emitter identity $e_n$ (encoded as fill colour) and an operating mode $m_n$ (encoded as border style: solid, dashed, or dotted). The same index set $\{1,\ldots,N\}$ is partitioned in two distinct ways, by the emitter labelling (\cref{eq:method:emitter_partition}) and by the mode labelling (\cref{eq:method:mode_partition}). Within each emitter subset the modes are in general mixed, and within each mode subset the emitters are in general mixed, reflecting the coupling between the two labellings.}
+  \label{fig:method:partitions}
+\end{figure}
 
 \subsection*{Dual embeddings and discrete outputs}
 
