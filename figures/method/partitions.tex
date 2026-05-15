@@ -49,20 +49,15 @@
   \node[brace, anchor=east] (top_lb) at ([xshift=-1mm]t1.west) {$\Bigg\{$};
   \node[brace, anchor=west] (top_rb) at ([xshift=1mm]t9.east)  {$\Bigg\}$};
 
-  % ------------------------------------------------------------------
-  % Forking arrows from the input to each partition.
-  % ------------------------------------------------------------------
-  \coordinate (fork)   at (4*\dx, -0.7);
-  \coordinate (em_in)  at (4*\dx, -1.7);
-  \coordinate (md_in)  at (4*\dx, -3.7);
+  % Optional left-hand label so all three rows share a labelled column.
+  \node[rowlabel] (top_lab) at ([xshift=-3mm]top_lb.west)
+        {pulse train\\$\{\vect{x}_n\}_{n=1}^{N}$};
 
-  \draw[thick] (4*\dx, -0.55) -- (fork);
-  \draw[thick, ->] (fork) -- (em_in)
-        node[midway, right, font=\footnotesize]
-            {by emitter $e_n$};
-  \draw[thick, ->] (fork) -- (md_in)
-        node[midway, right, font=\footnotesize]
-            {by mode $m_n$};
+  % ------------------------------------------------------------------
+  % Downward double arrow shared by both partitions.  Reads as
+  % "induces the following two partitions".
+  % ------------------------------------------------------------------
+  \node[font=\Large] (split) at (4*\dx, -1.0) {$\Downarrow$};
 
   % ------------------------------------------------------------------
   % Emitter partition (within-train).
@@ -70,7 +65,7 @@
   %   E2 (red):   x2, x5, x9
   %   E3 (green): x4, x6
   % ------------------------------------------------------------------
-  \def\yem{-2.5}
+  \def\yem{-2.3}
   \node[pulse, em1, modeA] (e1) at (0.0*\dx, \yem) {$\vect{x}_1$};
   \node[pulse, em1, modeB] (e3) at (1.0*\dx, \yem) {$\vect{x}_3$};
   \node[pulse, em1, modeC] (e7) at (2.0*\dx, \yem) {$\vect{x}_7$};
@@ -102,7 +97,7 @@
   %   B (dashed): x3, x5
   %   C (dotted): x6, x7, x9
   % ------------------------------------------------------------------
-  \def\ymd{-4.5}
+  \def\ymd{-4.0}
   \node[pulse, em1, modeA] (m1) at (0.0*\dx, \ymd) {$\vect{x}_1$};
   \node[pulse, em2, modeA] (m2) at (1.0*\dx, \ymd) {$\vect{x}_2$};
   \node[pulse, em3, modeA] (m4) at (2.0*\dx, \ymd) {$\vect{x}_4$};
