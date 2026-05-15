@@ -8,7 +8,8 @@ Each exported pulse carries the continuous fields used here together with the tw
 
 \subsection{Windowing}\label{sec:method:data:window}
 
-Self-attention builds an $L \times L$ compatibility matrix between tokens at every layer, so the cost of one forward pass scales as $\mathcal{O}(L^2)$ in the window length $L$.
+Self-attention computes an $L \times L$ compatibility matrix at each layer, so the computational and memory cost of a forward pass grows quadratically with the window length $L$, i.e., $\mathcal{O}(L^2)$. Because a pulse train may contain millions of pulses, processing an entire train at once is infeasible with standard self-attention due to prohibitive memory requirements. While recent work on transformers proposes sub-quadratic attention variants to address this, the present thesis restricts itself to evaluating the baseline (plain) attention mechanism without architectural modifications.
+
 The encoder therefore operates on fixed-length windows of $L = 1024$ pulses.
 Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$, the $w$th window is
 \begin{equation}\label{eq:method:windowing}
