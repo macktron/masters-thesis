@@ -29,6 +29,7 @@
   ]
 
   \def\dx{0.95}
+  \def\xlab{-1.4}  % x of the right edge of all left-hand row labels
 
   % ------------------------------------------------------------------
   % Top row: input pulse train.
@@ -49,9 +50,9 @@
   \node[brace, anchor=east] (top_lb) at ([xshift=-1mm]t1.west) {$\Bigg\{$};
   \node[brace, anchor=west] (top_rb) at ([xshift=1mm]t9.east)  {$\Bigg\}$};
 
-  % Optional left-hand label so all three rows share a labelled column.
-  \node[rowlabel] (top_lab) at ([xshift=-3mm]top_lb.west)
-        {pulse train\\$\{\vect{x}_n\}_{n=1}^{N}$};
+  % Left-hand label so all three rows share a labelled column.
+  \node[rowlabel] (top_lab) at (\xlab, 0)
+        {\gls{pdw} sequence};
 
   % ------------------------------------------------------------------
   % Downward double arrow shared by both partitions.  Reads as
@@ -88,7 +89,7 @@
   \node[brace, anchor=east] (em_lb) at ([xshift=-1.5mm]em1lb.west) {$\Bigg\{$};
   \node[brace, anchor=west] (em_rb) at ([xshift=1.5mm]em3rb.east)  {$\Bigg\}$};
 
-  \node[rowlabel] at ([xshift=-3mm]em_lb.west)
+  \node[rowlabel] at (\xlab, \yem)
         {emitter partition\\$\{\mathcal{E}_k\}_{k=1}^{K_{\mathrm{em}}}$};
 
   % ------------------------------------------------------------------
@@ -120,7 +121,7 @@
   \node[brace, anchor=east] (md_lb) at ([xshift=-1.5mm]md1lb.west) {$\Bigg\{$};
   \node[brace, anchor=west] (md_rb) at ([xshift=1.5mm]md3rb.east)  {$\Bigg\}$};
 
-  \node[rowlabel] at ([xshift=-3mm]md_lb.west)
+  \node[rowlabel] at (\xlab, \ymd)
         {mode partition\\$\{\mathcal{M}_\ell\}_{\ell=1}^{M}$};
 
 \end{tikzpicture}
