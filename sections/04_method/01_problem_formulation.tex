@@ -68,5 +68,5 @@ The cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are determined by the cl
 
 \subsection*{Learning objective}
 
-Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form but differ in scope: a within-train term acting on $\mat{Z}^{\mathrm{em}}$ with positives drawn from the same train, and a batch-wide term acting on $\mat{Z}^{\mathrm{md}}$ with positives drawn from anywhere in the batch.
+Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form but differ in scope: a within-train term acting on $\mat{Z}^{\mathrm{em}}$ with positives drawn from the same train, and a partially batch-wide term acting on $\mat{Z}^{\mathrm{md}}$ with positives drawn from anywhere in the batch.
 On a previously unseen train, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.
