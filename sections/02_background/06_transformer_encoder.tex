@@ -1,6 +1,6 @@
 \section{The Transformer Encoder}\label{sec:bg:transformer}
 
-The transformer architecture replaces recurrence with a stack of layers built around \emph{self-attention}, so that every position in a sequence can directly attend to every other position in parallel \parencite{vaswani2017attention}.
+The transformer architecture replaces recurrence with a stack of layers built around \emph{self-attention}, so that every position in a sequence can directly attend to every other position in parallel \parencite{vaswani2017attention}. One understanding of this is a weighted fully connected graph.
 Encoder-only stacks, as in \gls{bert} \parencite{devlin2019bert}, map an input sequence to contextualised token representations of the same length and are a natural choice when the downstream task is representation learning or clustering over tokens rather than autoregressive generation.
 
 \paragraph{Scaled dot-product attention.}
