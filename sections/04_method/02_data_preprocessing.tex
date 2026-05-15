@@ -71,3 +71,10 @@ Within every window $w$, the scaled \gls{toa} is then offset by the \gls{toa} of
 so that the first pulse of every window has $\hat{t} = 0$.
 This removes absolute clock offset while preserving intra-window timing structure; the global min--max step fixes the unit of $\hat{t}$, so $\hat{t}$ differences are comparable across windows.
 The \gls{aoa} channels are not offset because their absolute values, not their increments, are physically meaningful.
+
+\subsection{Labels}\label{sec:method:data:aug}
+
+
+Our labels consists of emitter IDs, and mode labels. Aswell as pulse train ID. The pulse train IDs are not neeed for the trianing but used in evaluationg the metrics.
+
+All labels are ensued to be e numeric value.
