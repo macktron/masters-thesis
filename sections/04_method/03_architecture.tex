@@ -48,14 +48,22 @@ Each branch terminates in a linear projection head that maps every token to its 
 with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
 The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
 
-\subsection*{Per-window clustering with \gls{hdbscan}}
+\subsection*{From continuous embeddings to discrete partitions}
 
-The projection heads in \cref{eq:method:proj_heads} map each pulse to a continuous vector, whereas the per-pulse emitter and mode outputs of the system in \cref{sec:method:formulation} are discrete.
-\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} is applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a self-contained clustering instance on the corresponding branch.
+The projection heads in \cref{eq:method:proj_heads} produce continuous vectors, whereas the per-pulse emitter and mode outputs of \cref{sec:method:formulation} are discrete.
+At inference time, each branch is therefore paired with a fixed, non-trainable clustering decoder that maps the $L$-token embedding sequence of a window to a discrete per-pulse labelling, as sketched in \cref{fig:method:cluster_decoding}.
+The decoder is not part of $\Enc$ and contributes no gradients; the trunk and branch weights are fitted solely against the contrastive objective of \cref{sec:method:loss}, and the present subsection only fixes how the resulting embedding geometry is read out as labels.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/cluster_decoding.tex}
+  \caption{Inference-time mapping from continuous branch embeddings to discrete per-pulse labels. Each window is clustered independently with \gls{hdbscan}: the emitter branch (left) maps to train-local integer IDs $\hat{e}_n$ that are only meaningful inside the current window, while the mode branch (right) compares each cluster centroid against catalogue prototypes (yellow stars) so that nearby clusters inherit a global mode index in $\{1,\ldots,M\}$ and clusters far from every prototype are flagged as candidate modes not present in the training catalogue. Dots represent pulse embeddings $\vect{z}^{\mathrm{em}}_n,\vect{z}^{\mathrm{md}}_n$ and dashed ellipses indicate the \gls{hdbscan} clusters of \cref{eq:method:emitter_predictor,eq:method:mode_predictor}.}
+  \label{fig:method:cluster_decoding}
+\end{figure}
+
+\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} is the clustering algorithm chosen for this read-out, applied independently to the two embedding trajectories within every analysis window: the $L$ points $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^L$ and $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^L$ each form a self-contained instance on the corresponding branch.
 Each window is thus a self-contained segment in embedding space, consistent with the windowing of \cref{sec:method:data}, and the effective cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ from \cref{eq:method:emitter_predictor,eq:method:mode_predictor} follow the density hierarchy rather than being fixed in advance.
-
-As defined in the framework of \textcite{campello2015hierarchical}, \gls{hdbscan} replaces the single global density threshold of DBSCAN \parencite{ester1996density} with a hierarchy of density estimates: nested level sets are summarised in a condensed tree, and a flat clustering is read off by favouring groups that persist as coherent peaks rather than artefacts of a particular threshold.
-The same construction supports an explicit noise category for points that are not assigned to any cluster leaf retained after the hierarchy is flattened \parencite{campello2015hierarchical}, and the computations use the reference library described by \textcite{mcinnes2017hdbscan}.
+\Gls{hdbscan} replaces the single global density threshold of DBSCAN \parencite{ester1996density} with a hierarchy of density estimates, summarises the nested level sets in a condensed tree, and reads off a flat clustering by favouring groups that persist as coherent peaks rather than artefacts of a particular threshold \parencite{campello2015hierarchical}; the same construction supports an explicit noise category for points that are not assigned to any cluster leaf retained after the hierarchy is flattened, and the computations use the reference library described by \textcite{mcinnes2017hdbscan}.
 
 The two branches differ in how the resulting cluster indices are interpreted, reflecting the asymmetric label semantics of \cref{sec:method:formulation}.
 Emitter cluster indices are inherently train-local: each window is clustered in isolation and the integer labels carry no meaning across windows or across trains.

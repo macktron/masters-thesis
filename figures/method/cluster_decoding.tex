@@ -1,0 +1,135 @@
+% =====================================================================
+% Schematic of the inference-time mapping from continuous branch
+% embeddings to discrete per-pulse labels.  Two parallel pipelines
+% (emitter / mode) take the $L$-token embedding sequences produced by
+% the projection heads of \cref{sec:method:arch}, cluster them with
+% \gls{hdbscan} on a per-window basis, and emit the discrete partitions
+% of \cref{eq:method:emitter_predictor,eq:method:mode_predictor}.  The
+% mode branch adds a centroid-matching step against the training-time
+% catalogue prototypes, opening a ``novel mode'' pathway.  Loaded from
+% sections/04_method/03_architecture.tex via \input{...}.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    >=Latex,
+    block/.style={
+      draw, thick, rounded corners=2pt,
+      align=center, inner sep=4pt,
+      minimum height=8mm, minimum width=48mm,
+    },
+    scatterbox/.style={
+      draw, thick, rounded corners=2pt,
+      fill=gray!4,
+      minimum width=48mm, minimum height=32mm,
+    },
+    hdb/.style={block, fill=blue!12},
+    matchstep/.style={block, fill=orange!15},
+    outblock/.style={block, fill=green!15},
+    io/.style={align=center, font=\small\itshape, inner sep=2pt},
+    pt/.style={circle, fill, inner sep=0pt, minimum size=1.8pt},
+    proto/.style={
+      star, star points=5, star point ratio=2.2,
+      fill=yellow!85!black, draw=black, very thin,
+      inner sep=0pt, minimum size=3mm,
+    },
+    arrow/.style={->, thick, shorten <=1pt, shorten >=1pt},
+    contour/.style={dashed, thick},
+  ]
+
+  % =================== EMITTER COLUMN ===================
+  \begin{scope}[xshift=0mm]
+    \node[io] (em_in) at (0, 0)
+      {Emitter embeddings $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L} \subset \R^{p}$};
+
+    \node[scatterbox] (em_scatter) at (0, -19mm) {};
+
+    % Cluster A
+    \draw[contour, color=blue!70!black]
+      ($(em_scatter.center)+(-13mm, 6mm)$) ellipse [x radius=6mm, y radius=4mm];
+    \foreach \x/\y in {-15/7, -13/8, -12/5, -10/7, -14/4, -11/6}
+      \node[pt, color=blue!70!black] at ($(em_scatter.center)+(\x mm, \y mm)$) {};
+    \node[font=\scriptsize, color=blue!70!black]
+      at ($(em_scatter.center)+(-13mm, 12mm)$) {$\hat{e}{=}1$};
+
+    % Cluster B
+    \draw[contour, color=red!70!black]
+      ($(em_scatter.center)+(11mm, 5mm)$) ellipse [x radius=6mm, y radius=4mm];
+    \foreach \x/\y in {8/4, 10/6, 12/4, 14/5, 11/3, 13/6}
+      \node[pt, color=red!70!black] at ($(em_scatter.center)+(\x mm, \y mm)$) {};
+    \node[font=\scriptsize, color=red!70!black]
+      at ($(em_scatter.center)+(11mm, 11mm)$) {$\hat{e}{=}2$};
+
+    % Cluster C
+    \draw[contour, color=green!45!black]
+      ($(em_scatter.center)+(-2mm, -8mm)$) ellipse [x radius=7mm, y radius=4mm];
+    \foreach \x/\y in {-5/-7, -3/-9, 0/-8, 2/-7, -1/-10, 3/-9}
+      \node[pt, color=green!45!black] at ($(em_scatter.center)+(\x mm, \y mm)$) {};
+    \node[font=\scriptsize, color=green!45!black]
+      at ($(em_scatter.center)+(-2mm, -13mm)$) {$\hat{e}{=}3$};
+
+    \node[hdb] (em_hdb) at (0, -42mm)
+      {\gls{hdbscan} per window};
+    \node[outblock] (em_out) at (0, -57mm)
+      {Train-local emitter IDs\\$\hat{e}_n \in \{1,\ldots,\hat{K}_{\mathrm{em}}\}$};
+
+    \draw[arrow] (em_in) -- (em_scatter);
+    \draw[arrow] (em_scatter) -- (em_hdb);
+    \draw[arrow] (em_hdb) -- (em_out);
+
+    \node[font=\footnotesize\bfseries, anchor=south]
+      at (0, 4mm) {Emitter branch};
+  \end{scope}
+
+  % =================== MODE COLUMN ===================
+  \begin{scope}[xshift=65mm]
+    \node[io] (md_in) at (0, 0)
+      {Mode embeddings $\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^{L} \subset \R^{q}$};
+
+    \node[scatterbox] (md_scatter) at (0, -19mm) {};
+
+    % Cluster A -- matches catalogue prototype 1
+    \draw[contour, color=blue!70!black]
+      ($(md_scatter.center)+(-13mm, 6mm)$) ellipse [x radius=6mm, y radius=4mm];
+    \foreach \x/\y in {-15/7, -13/8, -12/5, -10/7, -14/4}
+      \node[pt, color=blue!70!black] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
+    \node[proto] at ($(md_scatter.center)+(-13mm, 6mm)$) {};
+    \node[font=\scriptsize, color=blue!70!black]
+      at ($(md_scatter.center)+(-13mm, 12mm)$) {$\hat{m}{=}1$};
+
+    % Cluster B -- matches catalogue prototype 2
+    \draw[contour, color=red!70!black]
+      ($(md_scatter.center)+(5mm, 3mm)$) ellipse [x radius=5mm, y radius=3mm];
+    \foreach \x/\y in {3/2, 5/4, 7/3, 4/5, 6/1}
+      \node[pt, color=red!70!black] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
+    \node[proto] at ($(md_scatter.center)+(5mm, 3mm)$) {};
+    \node[font=\scriptsize, color=red!70!black]
+      at ($(md_scatter.center)+(5mm, 8mm)$) {$\hat{m}{=}2$};
+
+    % Cluster C -- novel (no prototype nearby)
+    \draw[contour, color=purple!75]
+      ($(md_scatter.center)+(8mm, -8mm)$) ellipse [x radius=6mm, y radius=4mm];
+    \foreach \x/\y in {6/-7, 8/-9, 10/-8, 7/-10, 10/-7}
+      \node[pt, color=purple!75] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
+    \node[font=\scriptsize, color=purple!75]
+      at ($(md_scatter.center)+(8mm, -13mm)$) {$\hat{m}{=}\,\text{novel}$};
+
+    % An unmatched catalogue prototype off on its own
+    \node[proto] at ($(md_scatter.center)+(-13mm, -9mm)$) {};
+
+    \node[hdb] (md_hdb) at (0, -42mm)
+      {\gls{hdbscan} per window};
+    \node[matchstep] (md_match) at (0, -54mm)
+      {Centroid matching to\\catalogue prototypes};
+    \node[outblock] (md_out) at (0, -66mm)
+      {Mode IDs $\hat{m}_n \in \{1,\ldots,M\}\,\cup\,\{\text{novel}\}$};
+
+    \draw[arrow] (md_in) -- (md_scatter);
+    \draw[arrow] (md_scatter) -- (md_hdb);
+    \draw[arrow] (md_hdb) -- (md_match);
+    \draw[arrow] (md_match) -- (md_out);
+
+    \node[font=\footnotesize\bfseries, anchor=south]
+      at (0, 4mm) {Mode branch};
+  \end{scope}
+
+\end{tikzpicture}
