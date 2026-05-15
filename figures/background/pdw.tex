@@ -69,17 +69,28 @@
     (rflabel.west) -- (\toaB + \pw - 0.05, 0.55*\ampB);
 
   % --- AOA inset (upper right): bearing on the receive aperture -------
-  \begin{scope}[shift={(9.0, 2.55)}]
-    % receive aperture
-    \draw[thick] (-0.30, 0) -- (0.30, 0) -- (0, 0.45) -- cycle;
-    \node[font=\footnotesize, below=1pt] at (0, 0) {Rx};
-    % boresight reference
-    \draw[drop] (0, 0.45) -- (0, 1.55);
-    % incoming wavefront direction
-    \draw[->, thick] (1.0, 1.40) -- (0.04, 0.50);
-    % angle arc
-    \draw[->, thin] (0, 1.15) arc (90:50:0.7);
-    \node[annot] at (0.55, 1.00) {AOA $\theta_n$};
+  % Local origin is centred on the aperture; geometry is self-consistent
+  % so that the angle arc matches the incoming-wave direction exactly.
+  \begin{scope}[shift={(9.05, 2.50)}]
+    \pgfmathsetmacro{\aoa}{30}            % angle of arrival from boresight
+    \pgfmathsetmacro{\arrowL}{0.78}       % length of the incoming-wave ray
+    \pgfmathsetmacro{\arcR}{0.40}         % radius of the angle arc
+    % subtle dashed frame to mark the diagram as an inset
+    \draw[gray!35, dashed, rounded corners=2pt]
+      (-0.65, -0.30) rectangle (1.30, 1.05);
+    % horizontal receive aperture drawn as a thin filled bar
+    \fill[gray!55!black] (-0.45, -0.03) rectangle (0.45, 0.03);
+    \node[font=\footnotesize] at (0, -0.20) {Rx};
+    % boresight reference perpendicular to the aperture
+    \draw[drop] (0, 0.03) -- (0, 0.92);
+    % incoming-wave direction, terminating just above the aperture centre
+    \draw[->, thick]
+      ({\arrowL*sin(\aoa)}, {\arrowL*cos(\aoa)}) -- (0.02, 0.06);
+    % angle arc between boresight and incoming-wave direction
+    \draw[->, thin]
+      (0, \arcR) arc[start angle=90, end angle=90-\aoa, radius=\arcR];
+    % AOA label placed above the arrow tail, clear of every other element
+    \node[annot] at (0.55, 0.80) {AOA $\theta_n$};
   \end{scope}
 
 \end{tikzpicture}
