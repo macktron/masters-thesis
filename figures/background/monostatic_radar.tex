@@ -65,22 +65,22 @@
     at ({(\dishX + \targetX)/2}, -0.10) {echo};
 
   % --- range arrow ---------------------------------------------------
-  \draw[measure] (\dishX + 0.07,-1.45) -- (\targetX,-1.45);
+  \draw[measure] (\dishX + 0.07,-1.85) -- (\targetX,-1.85);
   \node[annot, fill=white, inner sep=2pt]
-    at ({(\dishX + \targetX)/2}, -1.45) {range $R$};
+    at ({(\dishX + \targetX)/2}, -1.85) {range $R$};
 
   % --- timeline below the scene --------------------------------------
-  \def\tlY{-2.6}
-  \def\txT{0.5}
-  \def\rxT{5.5}
+  \def\tlY{-3.4}
+  \def\txT{1.6}
+  \def\rxT{6.6}
 
-  \draw[->] (-0.2,\tlY) -- (\Rrange + 0.5,\tlY) node[right] {time $t$};
-  \draw[txstyle, line width=1pt] (\txT,\tlY) -- (\txT,\tlY + 0.7);
-  \node[annot, blue!60!black, above] at (\txT,\tlY + 0.7) {TX};
-  \draw[rxstyle, line width=1pt] (\rxT,\tlY) -- (\rxT,\tlY + 0.55);
-  \node[annot, orange!70!black, above] at (\rxT,\tlY + 0.55) {RX (echo)};
-  \draw[measure] (\txT,\tlY - 0.45) -- (\rxT,\tlY - 0.45);
+  \draw[->] (\txT - 1.0,\tlY) -- (\Rrange + 0.5,\tlY) node[right] {time $t$};
+  \draw[txstyle, line width=1pt] (\txT,\tlY) -- (\txT,\tlY + 0.65);
+  \node[annot, blue!60!black, above] at (\txT,\tlY + 0.65) {TX};
+  \draw[rxstyle, line width=1pt] (\rxT,\tlY) -- (\rxT,\tlY + 0.65);
+  \node[annot, orange!70!black, above] at (\rxT,\tlY + 0.65) {RX (echo)};
+  \draw[measure] (\txT,\tlY - 0.5) -- (\rxT,\tlY - 0.5);
   \node[annot, fill=white, inner sep=2pt]
-    at ({(\txT + \rxT)/2}, \tlY - 0.45) {$\tau = 2R/c$};
+    at ({(\txT + \rxT)/2}, \tlY - 0.5) {$\tau = 2R/c$};
 
 \end{tikzpicture}
