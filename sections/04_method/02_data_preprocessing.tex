@@ -72,9 +72,8 @@ so that the first pulse of every window has $\hat{t} = 0$.
 This removes absolute clock offset while preserving intra-window timing structure; the global min--max step fixes the unit of $\hat{t}$, so $\hat{t}$ differences are comparable across windows.
 The \gls{aoa} channels are not offset because their absolute values, not their increments, are physically meaningful.
 
-\subsection{Labels}\label{sec:method:data:aug}
+\subsection{Labels}\label{sec:method:data:labels}
 
+Each pulse is assigned three labels: a train-local emitter identifier, a global operating mode label, and a pulse train ID. Only the emitter and mode labels are used during training; the pulse train ID is included solely for evaluating clustering metrics.
 
-Our labels consists of emitter IDs, and mode labels. Aswell as pulse train ID. The pulse train IDs are not neeed for the trianing but used in evaluationg the metrics.
-
-All labels are ensued to be e numeric value.
+All labels are cast to unique numeric values for consistency and ease of processing.
