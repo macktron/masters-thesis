@@ -72,9 +72,9 @@
   % Local origin is centred on the aperture; geometry is self-consistent
   % so that the angle arc matches the incoming-wave direction exactly.
   \begin{scope}[shift={(8.95, 2.35)}]
-    \pgfmathsetmacro{\aoa}{32}            % angle of arrival from boresight
-    \pgfmathsetmacro{\arrowL}{0.92}       % length of the incoming-wave ray
-    \pgfmathsetmacro{\arcR}{0.50}         % radius of the angle arc
+    \pgfmathsetmacro{\aoa}{36}            % angle of arrival from boresight
+    \pgfmathsetmacro{\arrowL}{0.95}       % length of the incoming-wave ray
+    \pgfmathsetmacro{\arcR}{0.55}         % radius of the angle arc
     % subtle dashed frame to mark the diagram as an inset
     \draw[gray!35, dashed, rounded corners=2pt]
       (-0.55, -0.32) rectangle (1.45, 1.24);
@@ -87,7 +87,7 @@
     \draw[->, thick]
       ({\arrowL*sin(\aoa)}, {\arrowL*cos(\aoa)}) -- (0.02, 0.06);
     % angle arc between boresight and incoming-wave direction
-    \draw[->, thin]
+    \draw[->, semithick]
       (0, \arcR) arc[start angle=90, end angle=90-\aoa, radius=\arcR];
     % AOA label placed above the arrow tail so nothing overlaps
     \node[annot] at (0.55, 1.10) {AOA $\theta_n$};
