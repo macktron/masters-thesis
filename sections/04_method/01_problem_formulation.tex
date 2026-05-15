@@ -15,7 +15,8 @@ The length $N$ varies between trains.
 
 Each pulse $n \in \{1,\ldots,N\}$ carries two labels: an emitter identity $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$ and an operating mode $m_n \in \{1,\ldots,M\}$.
 The emitter symbol is unique only \emph{within the current train}: the same integer in a different train indexes an unrelated emitter, and $K_{\mathrm{em}}$ varies between trains.
-The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all trains, so $m_n = \ell$ identifies the same mode irrespective of the originating train.
+The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all trains, so $m_n = \ell$ refers to the same mode regardless of which train the pulse comes from.
+However, in real-world scenarios, the actual number of distinct modes present is not fixed or known in advance, and our architecture does not require $M$ as an input or impose a closed-set assumption.
 
 These labels induce two partitions of the index set $\{1,\ldots,N\}$,
 \begin{equation}\label{eq:method:emitter_partition}
