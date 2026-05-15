@@ -1,16 +1,16 @@
 \section{Loss Function}\label{sec:method:loss}
 
-The trainable objective applies the same \emph{supervised contrastive} functional form to both label streams introduced in \cref{sec:method:formulation}, with positive sets chosen so that each term respects its label's scope: positives for the emitter branch are restricted to the current window (because emitter symbols are train-local), whereas positives for the mode branch are drawn from anywhere in the batch (because the mode catalogue is global).
+The training objective applies the same \emph{supervised contrastive} functional form to both label streams introduced in \cref{sec:method:formulation}, with positive sets chosen so that each term respects its label's scope: positives for the emitter branch are restricted to the current window (because emitter symbols are train-local), whereas positives for the mode branch are drawn from anywhere in the batch (because the mode catalogue is global).
 The two terms are summed with a weight on the mode branch and minimised jointly; the post-hoc clustering of the resulting embeddings, as specified in \cref{eq:method:emitter_predictor,eq:method:mode_predictor}, is left for inference time and is not part of the training objective.
 
 \subsection*{Supervised contrastive viewpoint}
 
 Contrastive objectives shape the geometry of an embedding space by encouraging positives (semantically related samples) to lie close together while pushing unrelated negatives apart \parencite{chen2020simclr}.
-In the original SimCLR formulation, positives are constructed without supervision from two stochastic augmentations of the same input, and the loss is closely related to a lower bound on mutual information between two views in contrastive predictive coding \parencite{oord2018representation}.
-When per-sample labels are available, the same machinery generalises to \emph{supervised contrastive} learning, in which every other sample sharing the anchor's label is treated as a positive and the remaining samples are negatives \parencite{khosla2020supcon}.
+In the self-supervised setting of SimCLR \parencite{chen2020simclr} and contrastive predictive coding \parencite{oord2018representation}, positives are constructed without supervision from two stochastic augmentations of the same input and the resulting InfoNCE / NT-Xent objective can be interpreted as a lower bound on the mutual information between the two views \parencite{oord2018representation}.
+When per-sample labels are available, the same machinery generalises to \emph{supervised contrastive} learning \parencite{khosla2020supcon}, in which the single augmentation-based positive is replaced by the full set of other samples sharing the anchor's label and the remaining samples in the batch act as negatives; the loss in \cref{eq:method:supcon} below is the $\Loss^{\mathrm{sup}}_{\mathrm{out}}$ formulation recommended by \textcite{khosla2020supcon} for its more favourable gradient structure.
 
-The supervised variant is a natural fit for both tasks in \cref{sec:method:formulation} and is used uniformly across the emitter and mode branches; the two branches differ only in the \emph{scope} from which positives and negatives are drawn.
-For the emitter branch, every pulse in a pulse train carries an emitter label and the positive set for an anchor is exactly the set of other pulses in the same window with the same emitter symbol; because emitter symbols are unique only within a pulse train, contrasts are restricted to the current window, which matches both the train-local semantics of $e_n$ and the windowing strategy in \cref{sec:method:data}.
+The supervised variant is a natural fit for both tasks in \cref{sec:method:formulation} and is used uniformly across the emitter and mode branches; the two differ only in the \emph{scope} from which positives and negatives are drawn.
+For the emitter branch, every pulse in a window carries an emitter label and the positives of an anchor are the other pulses in the same window with the same emitter symbol; because emitter symbols are unique only within a pulse train, contrasts are restricted to the current window, which matches both the train-local semantics of $e_n$ and the windowing strategy in \cref{sec:method:data}.
 For the mode branch, every pulse carries a global mode label that refers to the same operating mode across all pulse trains, so positives and negatives are pooled across the entire mini-batch, making the mode-branch supervision identical to the standard SupCon setting \parencite{khosla2020supcon}.
 A large set of negatives is essential in either case: without repulsive pressure on unrelated pairs, encoders can collapse to a constant map and still achieve low training error on a naïve agreement loss \parencite{chen2020simclr}.
 
@@ -18,69 +18,68 @@ Routing both branches through supervised contrastive losses --- rather than atta
 
 \subsection*{Supervised contrastive building block}
 
-Let $\phi(\vect{z}) = \vect{z}/\lVert \vect{z} \rVert_2$ denote $\ell_2$ normalisation and let $\tau > 0$ denote the contrastive temperature.
-Write the scaled cosine similarity as
-\begin{equation}\label{eq:method:sim_tau}
-  s_\tau(\vect{a},\vect{b}) = \frac{1}{\tau}\,\phi(\vect{a})^\top \phi(\vect{b}).
+All embeddings produced by the projection heads of \cref{eq:method:proj_heads} are $\ell_2$-normalised before the loss is evaluated, so that the inner product equals the cosine similarity
+\begin{equation}\label{eq:method:sim}
+  \mathrm{sim}(\vect{z}_i,\vect{z}_j) = \frac{\vect{z}_i^\top \vect{z}_j}{\lVert \vect{z}_i \rVert_2\,\lVert \vect{z}_j \rVert_2} \in [-1,1].
 \end{equation}
-The temperature $\tau$ rescales inner products after normalisation: smaller $\tau$ sharpens the softmax in \cref{eq:method:supcon}, so the loss concentrates on the hardest negatives and gradients emphasise fine separation on the sphere, whereas larger $\tau$ yields a softer distribution closer to uniform and can stabilise optimisation when embeddings are poorly separated early in training \parencite{chen2020simclr}.
+A scalar temperature $\tau > 0$ rescales these similarities inside the softmax of the loss: smaller $\tau$ sharpens the distribution so the loss concentrates on the hardest negatives, whereas larger $\tau$ yields a softer distribution and stabilises optimisation when embeddings are poorly separated early in training \parencite{chen2020simclr}.
 All contrastive terms in this thesis share a fixed $\tau = 0.2$, in line with values commonly used for normalised contrastive features \parencite{chen2020simclr,khosla2020supcon}.
 
-Given a finite anchor set $\mathcal{I}$ with embeddings $\{\vect{z}_i\}_{i \in \mathcal{I}}$ and, for each anchor $i \in \mathcal{I}$, a positive set $\mathcal{P}(i) \subseteq \mathcal{I} \setminus \{i\}$ defined by label coincidence, the supervised contrastive contribution averages a per-positive InfoNCE / NT-Xent term over $\mathcal{P}(i)$ \parencite{khosla2020supcon}:
+Given a finite anchor set $I$ with embeddings $\{\vect{z}_i\}_{i \in I}$, write $A(i) = I \setminus \{i\}$ for the candidate set of anchor $i$ and let $P(i) \subseteq A(i)$ be its positive set, defined by label coincidence.
+The supervised contrastive contribution is then
 \begin{equation}\label{eq:method:supcon}
-  \Loss_{\mathrm{SC}}\bigl(\mathcal{I},\{\mathcal{P}(i)\}_{i \in \mathcal{I}}\bigr)
+  \Loss_{\mathrm{SC}}\bigl(I,\{P(i)\}_{i \in I}\bigr)
   =
-  -\frac{1}{\lvert \mathcal{I}^{+} \rvert}
-  \sum_{i \in \mathcal{I}^{+}}
-  \frac{1}{\lvert \mathcal{P}(i) \rvert}
-  \sum_{p \in \mathcal{P}(i)}
+  \sum_{i \in I^{+}}
+  \frac{-1}{\lvert P(i) \rvert}
+  \sum_{p \in P(i)}
   \log
-  \frac{\exp\bigl(s_\tau(\vect{z}_i,\vect{z}_p)\bigr)}
-       {\displaystyle\sum_{\substack{j \in \mathcal{I} \\ j \neq i}} \exp\bigl(s_\tau(\vect{z}_i,\vect{z}_j)\bigr)},
+  \frac{\exp\!\bigl(\mathrm{sim}(\vect{z}_i,\vect{z}_p)/\tau\bigr)}
+       {\displaystyle\sum_{a \in A(i)} \exp\!\bigl(\mathrm{sim}(\vect{z}_i,\vect{z}_a)/\tau\bigr)},
 \end{equation}
-where $\mathcal{I}^{+} = \{i \in \mathcal{I} : \mathcal{P}(i) \neq \emptyset\}$ collects anchors with at least one positive available, and the convention $\Loss_{\mathrm{SC}} = 0$ is used when $\mathcal{I}^{+}$ is empty.
-The denominator collects every candidate in $\mathcal{I}$ except the anchor itself, so unrelated pulses act as negatives and collapse is discouraged \parencite{chen2020simclr}.
+where $I^{+} = \{\,i \in I : P(i) \neq \emptyset\,\}$ collects the anchors with at least one positive available, and $\Loss_{\mathrm{SC}} = 0$ when $I^{+}$ is empty.
+The denominator runs over every candidate in $A(i)$, so unrelated pulses act as negatives and collapse to a constant map is discouraged \parencite{chen2020simclr}; anchors with $P(i) = \emptyset$ contribute only as negatives for other anchors.
 
 \subsection*{Emitter-oriented term}
 
 The emitter branch targets a representation in which pulses from the same train-local emitter are close and pulses from different emitters are separated, which is the geometric content expected of a deinterleaving embedding \parencite{gunn2025deinterleaving}.
-For a window of $L$ pulses with emitter labels $(e_1,\ldots,e_L)$ and emitter embeddings $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L}$ obtained from \cref{eq:method:proj_heads}, the within-window positive set for anchor position $n$ is
+For a window of $L$ pulses with emitter labels $(e_1,\ldots,e_L)$ and emitter embeddings $\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L}$ from \cref{eq:method:proj_heads}, the within-window anchor set is $I^{\mathrm{em}}_b = \{1,\ldots,L\}$ and the positive set of anchor $n$ is
 \begin{equation}\label{eq:method:emitter_positives}
-  \mathcal{P}^{\mathrm{em}}_n = \{\, n' \in \{1,\ldots,L\}\setminus\{n\} : e_{n'} = e_n \,\}.
+  P^{\mathrm{em}}_{b,n} = \{\, n' \in I^{\mathrm{em}}_b \setminus \{n\} : e_{n'} = e_n \,\},
 \end{equation}
-The per-window emitter loss is the supervised contrastive contribution \cref{eq:method:supcon} on the index set $\{1,\ldots,L\}$ with these positive sets, and the batch loss is the mean over the $B$ windows in a mini-batch:
+where the subscript $b$ indicates that the labels are read from window $b$.
+The per-window emitter loss is the supervised contrastive contribution \cref{eq:method:supcon} evaluated on $I^{\mathrm{em}}_b$ with these positive sets, and the batch loss is the mean over the $B$ windows in a mini-batch:
 \begin{equation}\label{eq:method:loss_emitter}
   \Loss_{\mathrm{em}}
   =
   \frac{1}{B}\sum_{b=1}^{B}
-  \Loss_{\mathrm{SC}}\bigl(\{1,\ldots,L\},\, \{\mathcal{P}^{\mathrm{em}}_{b,n}\}_{n=1}^{L}\bigr),
+  \Loss_{\mathrm{SC}}\bigl(I^{\mathrm{em}}_b,\, \{P^{\mathrm{em}}_{b,n}\}_{n \in I^{\mathrm{em}}_b}\bigr).
 \end{equation}
-where the subscript $b$ in $\mathcal{P}^{\mathrm{em}}_{b,n}$ indicates that positives are determined by the emitter labels of window $b$.
 Restricting both anchors and negatives to the current window enforces the train-local semantics of the emitter symbol from \cref{sec:method:formulation}: pulses from different pulse trains are never compared, so the loss never attaches meaning to coincidences between emitter integers across windows.
-A pulse whose emitter is unique inside its window (so $\mathcal{P}^{\mathrm{em}}_n = \emptyset$) contributes only as a negative for other anchors and is excluded from the per-window average, following the convention in \cref{eq:method:supcon}.
+A pulse whose emitter is unique inside its window has $P^{\mathrm{em}}_{b,n} = \emptyset$ and contributes only as a negative for other anchors, following the convention in \cref{eq:method:supcon}.
 
 \subsection*{Mode-oriented term}
 
 Operating modes carry meaning across pulse trains, and every pulse in the training data is annotated with a global mode label $m_n \in \{1,\ldots,M\}$.
-The mode branch uses the same supervised contrastive functional form as the emitter branch but with positives drawn across the whole mini-batch.
-Concatenate the per-window pulse sequences of a mini-batch into a global index set
+The mode branch uses the same functional form as the emitter branch, but with the anchor set pooled across the whole mini-batch.
+Concatenating the per-window pulse sequences yields a global anchor set
 \begin{equation}\label{eq:method:mode_index_set}
-  \mathcal{I}^{\mathrm{md}} = \{\,(b,n) : b \in \{1,\ldots,B\},\, n \in \{1,\ldots,L\}\,\},
+  I^{\mathrm{md}} = \{\,(b,n) : b \in \{1,\ldots,B\},\, n \in \{1,\ldots,L\}\,\},
 \end{equation}
-together with the corresponding embeddings $\{\vect{z}^{\mathrm{md}}_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}$ and labels $\{m_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}$.
-The positive set for an anchor $(b,n)$ is then the set of all other pulses in the batch with the same global mode label,
+together with the corresponding embeddings $\{\vect{z}^{\mathrm{md}}_{b,n}\}_{(b,n) \in I^{\mathrm{md}}}$ and labels $\{m_{b,n}\}_{(b,n) \in I^{\mathrm{md}}}$.
+The positive set of an anchor $(b,n)$ is the set of all other pulses in the batch with the same global mode label,
 \begin{equation}\label{eq:method:mode_positives}
-  \mathcal{P}^{\mathrm{md}}_{b,n} = \{\, (b',n') \in \mathcal{I}^{\mathrm{md}} \setminus \{(b,n)\} : m_{b',n'} = m_{b,n} \,\},
+  P^{\mathrm{md}}_{b,n} = \{\, (b',n') \in I^{\mathrm{md}} \setminus \{(b,n)\} : m_{b',n'} = m_{b,n} \,\},
 \end{equation}
-and the mode loss is the supervised contrastive contribution \cref{eq:method:supcon} on the batch-wide index set:
+and the mode loss is the supervised contrastive contribution \cref{eq:method:supcon} on this batch-wide anchor set:
 \begin{equation}\label{eq:method:loss_mode}
   \Loss_{\mathrm{md}}
   =
-  \Loss_{\mathrm{SC}}\bigl(\mathcal{I}^{\mathrm{md}},\, \{\mathcal{P}^{\mathrm{md}}_{b,n}\}_{(b,n) \in \mathcal{I}^{\mathrm{md}}}\bigr).
+  \Loss_{\mathrm{SC}}\bigl(I^{\mathrm{md}},\, \{P^{\mathrm{md}}_{b,n}\}_{(b,n) \in I^{\mathrm{md}}}\bigr).
 \end{equation}
-Because the catalogue $\{1,\ldots,M\}$ is shared across windows, batch-wide pooling pulls together embeddings whose ground-truth modes coincide regardless of which physical emitter or which train produced them, and pushes apart embeddings of pulses belonging to different modes.
-Crucially, the loss never references the cardinality $M$ explicitly: it only consumes pairwise label coincidences.
-Consequently, embeddings of modes that are held out during training receive no direct gradient signal but still inherit the geometry induced by their neighbours in $\R^{q}$, which is the geometric prerequisite for the open-set mode clustering at inference described in \cref{sec:method:formulation,sec:method:arch}.
+Because the catalogue $\{1,\ldots,M\}$ is shared across windows, batch-wide pooling pulls together embeddings whose ground-truth modes coincide regardless of which physical emitter or which train produced them, and pushes apart embeddings of pulses from different modes.
+Crucially, the loss never references the cardinality $M$ explicitly; it only consumes pairwise label coincidences.
+Embeddings of modes that are held out during training therefore receive no direct gradient signal but still inherit the geometry induced by their neighbours in $\R^{q}$, which is the geometric prerequisite for the open-set mode clustering at inference described in \cref{sec:method:formulation,sec:method:arch}.
 
 \subsection*{Combined objective and use of the projection heads}
 
