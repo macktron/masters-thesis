@@ -45,16 +45,20 @@ and the standardised feature is
 Amplitude enters the pipeline as $\log_{10} A_n$ rather than $A_n$.
 Pulse amplitudes span several orders of magnitude across emitters, ranges, and antenna patterns, and a logarithm compresses that dynamic range so that a few high-power pulses do not dominate the standardised channel.
 
-Time of arrival and the azimuth and lateral components of \gls{aoa}, written $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, are bounded by construction.
-They are min--max scaled to $[0,1]$ against the training-corpus extrema,
+Time of arrival $t_n$ is min--max scaled to $[0,1]$ against the training-corpus extrema,
 \begin{equation}\label{eq:method:minmax}
-  \tilde{u}_n
+  \tilde{t}_n
   =
-  \frac{u_n - u_{\min}}{u_{\max} - u_{\min}},
-  \qquad
-  u \in \{t,\, \theta^{\mathrm{az}},\, \theta^{\mathrm{lat}}\},
+  \frac{t_n - t_{\min}}{t_{\max} - t_{\min}},
 \end{equation}
-with $u_{\min}, u_{\max}$ taken over $\mathcal{P}_{\mathrm{tr}}$.
+with $t_{\min}, t_{\max}$ taken over $\mathcal{P}_{\mathrm{tr}}$.
+The azimuth and lateral components of \gls{aoa}, written $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, are instead rescaled from their known physical intervals to $[0,1]$ by direct linear mapping:
+\begin{equation}\label{eq:method:aoa_rescale}
+  \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
+  \qquad
+  \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi},
+\end{equation}
+since $\theta^{\mathrm{az}}_n \in [0, 2\pi]$ and $\theta^{\mathrm{lat}}_n \in [0, \pi]$ by construction.
 Within every window $w$, the scaled \gls{toa} is then offset by the \gls{toa} of the first pulse in that window,
 \begin{equation}\label{eq:method:toa_offset}
   \hat{t}_n
