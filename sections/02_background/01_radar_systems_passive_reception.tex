@@ -28,15 +28,10 @@ R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
 \end{equation}
 Signal processing techniques such as matched filtering and coherent integration increase detection performance within this range, but no algorithm can resolve targets unambiguously beyond $R_{\mathrm{u}}$ as limited by the physics of pulse timing \parencite{skolnik2008radar}.
 
-\begin{figure}[t]
+\begin{figure}[tbp]
 \centering
-\begin{tikzpicture}[>=Latex, font=\small]
-  \draw[->] (0,0) -- (8.2,0) node[right] {$t$};
-  \draw[thick, blue!70!black] (0.3,0.15) -- (0.3,0.85) node[midway, left] {TX};
-  \draw[thick, orange!80!black] (5.1,0.15) -- (5.1,0.85) node[midway, right] {echo};
-  \draw[<->] (0.3,-0.35) -- (5.1,-0.35) node[midway, below] {$\tau = 2R/c$};
-\end{tikzpicture}
-\caption{Illustration of the time relationship in monostatic radar: a transmission (TX) and its received echo are separated by a delay $\tau$ corresponding to twice the target range divided by the propagation speed, as in \cref{eq:bg:range}.}
+\input{figures/background/monostatic_radar.tex}
+\caption{Monostatic radar geometry and round-trip timing. A co-located transmit/receive (TX/RX) aperture on the left emits a pulse that travels to a target at range $R$, scatters, and returns to the same aperture as an echo. The lower timeline shows the corresponding events: the outgoing TX pulse at $t=0$ and the received echo at $t=\tau$, separated by the round-trip delay $\tau = 2R/c$ from \cref{eq:bg:range}.}
 \label{fig:bg:pulse_echo_timeline}
 \end{figure}
 
