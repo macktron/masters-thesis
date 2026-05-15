@@ -16,13 +16,12 @@
   ]
 
   % --- geometry constants --------------------------------------------
-  \def\Rrange{7.0}      % horizontal separation between radar and target
+  \def\Rrange{7.2}      % horizontal separation between radar and target
   \def\dishX{0.0}
   \def\targetX{\Rrange}
 
   % --- radar dish on the left ----------------------------------------
   \begin{scope}[shift={(\dishX,0)}]
-    % parabolic reflector (filled crescent)
     \fill[blue!12] (-0.05,0.55) .. controls (-0.45,0) .. (-0.05,-0.55)
       -- (0.18,-0.55) .. controls (-0.22,0) .. (0.18,0.55) -- cycle;
     \draw[blue!60!black, thick]
@@ -31,27 +30,23 @@
       (0.18,0.55) .. controls (-0.22,0) .. (0.18,-0.55);
     \draw[blue!60!black, thick] (-0.05,0.55) -- (0.18,0.55);
     \draw[blue!60!black, thick] (-0.05,-0.55) -- (0.18,-0.55);
-    % feed and stand
     \draw[thick] (0.07,-0.55) -- (0.07,-1.0);
     \draw[thick] (-0.25,-1.0) -- (0.40,-1.0);
-    \node[align=center, below, font=\footnotesize] at (0.07,-1.05)
-      {Radar\\co-located TX/RX};
+    \node[above left=-1pt and -2pt, font=\footnotesize]
+      at (-0.05,0.55) {Radar (TX/RX)};
   \end{scope}
 
   % --- aircraft silhouette on the right ------------------------------
   \begin{scope}[shift={(\targetX,0)}]
-    % fuselage
     \draw[thick, fill=gray!25] (-0.55,-0.10) -- (0.55,-0.10)
       -- (0.65,0.02) -- (0.55,0.15) -- (-0.50,0.15) -- (-0.60,0.02) -- cycle;
-    % main wings
     \draw[thick, fill=gray!35] (-0.05,0.15) -- (-0.45,0.55)
       -- (0.20,0.55) -- (0.30,0.15) -- cycle;
     \draw[thick, fill=gray!35] (-0.05,-0.10) -- (-0.45,-0.50)
       -- (0.20,-0.50) -- (0.30,-0.10) -- cycle;
-    % vertical stabilizer
     \draw[thick, fill=gray!35] (0.40,0.15) -- (0.35,0.45)
       -- (0.60,0.45) -- (0.60,0.15) -- cycle;
-    \node[above, font=\footnotesize] at (0,0.65) {Target};
+    \node[above, font=\footnotesize] at (0,0.55) {Target};
   \end{scope}
 
   % --- transmitted pulse (radar -> target) ---------------------------
@@ -64,23 +59,23 @@
   \node[annot, orange!70!black, below]
     at ({(\dishX + \targetX)/2}, -0.10) {echo};
 
-  % --- range arrow ---------------------------------------------------
-  \draw[measure] (\dishX + 0.07,-1.85) -- (\targetX,-1.85);
+  % --- range arrow (kept clear of the dish label) --------------------
+  \draw[measure] (\dishX + 0.45,-1.55) -- (\targetX - 0.65,-1.55);
   \node[annot, fill=white, inner sep=2pt]
-    at ({(\dishX + \targetX)/2}, -1.85) {range $R$};
+    at ({(\dishX + \targetX)/2}, -1.55) {range $R$};
 
   % --- timeline below the scene --------------------------------------
-  \def\tlY{-3.4}
-  \def\txT{1.6}
-  \def\rxT{6.6}
+  \def\tlY{-2.9}
+  \def\txT{1.0}
+  \def\rxT{6.0}
 
-  \draw[->] (\txT - 1.0,\tlY) -- (\Rrange + 0.5,\tlY) node[right] {time $t$};
-  \draw[txstyle, line width=1pt] (\txT,\tlY) -- (\txT,\tlY + 0.65);
-  \node[annot, blue!60!black, above] at (\txT,\tlY + 0.65) {TX};
-  \draw[rxstyle, line width=1pt] (\rxT,\tlY) -- (\rxT,\tlY + 0.65);
-  \node[annot, orange!70!black, above] at (\rxT,\tlY + 0.65) {RX (echo)};
-  \draw[measure] (\txT,\tlY - 0.5) -- (\rxT,\tlY - 0.5);
+  \draw[->] (\txT - 0.8,\tlY) -- (\Rrange + 0.5,\tlY) node[right] {time $t$};
+  \draw[txstyle, line width=1pt] (\txT,\tlY) -- (\txT,\tlY + 0.7);
+  \node[annot, blue!60!black, above] at (\txT,\tlY + 0.7) {TX pulse};
+  \draw[rxstyle, line width=1pt] (\rxT,\tlY) -- (\rxT,\tlY + 0.7);
+  \node[annot, orange!70!black, above] at (\rxT,\tlY + 0.7) {RX echo};
+  \draw[measure] (\txT,\tlY - 0.55) -- (\rxT,\tlY - 0.55);
   \node[annot, fill=white, inner sep=2pt]
-    at ({(\txT + \rxT)/2}, \tlY - 0.5) {$\tau = 2R/c$};
+    at ({(\txT + \rxT)/2}, \tlY - 0.55) {$\tau = 2R/c$};
 
 \end{tikzpicture}
