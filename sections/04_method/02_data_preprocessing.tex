@@ -71,9 +71,3 @@ Within every window $w$, the scaled \gls{toa} is then offset by the \gls{toa} of
 so that the first pulse of every window has $\hat{t} = 0$.
 This removes absolute clock offset while preserving intra-window timing structure; the global min--max step fixes the unit of $\hat{t}$, so $\hat{t}$ differences are comparable across windows.
 The \gls{aoa} channels are not offset because their absolute values, not their increments, are physically meaningful.
-
-\subsection{Augmentations for contrastive views}\label{sec:method:data:aug}
-
-The contrastive objective in \cref{sec:method:loss} consumes two stochastic views of each training window.
-Views combine the deterministic scaling above with pulse-level or window-level perturbations (timing jitter, amplitude scaling, small frequency offsets, pulse dropout) so that the learned invariances cover plausible analog front-end variability on top of the simulator-side noise already present in the exports.
-The exact augmentation set, the sampling ranges, and the mini-batch composition are listed with other hyperparameters in \cref{sec:exp:hparams}.
