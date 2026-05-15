@@ -1,81 +1,148 @@
 \section{Evaluation Metrics}\label{sec:method:metrics}
 
-Let $y_n$ and $\hat{y}_n$ denote reference and predicted cluster indices for pulse $n\in\{1,\ldots,N\}$, as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}, instantiated by $(e_n,\hat{e}_n)$ or $(m_n,\hat{m}_n)$.
-The contingency is $n_{ij}=\sum_{n=1}^N \indicator[y_n=i,\,\hat{y}_n=j]$ with marginals $a_i=\sum_j n_{ij}$ and $b_j=\sum_i n_{ij}$.
+The methods of \cref{sec:method:loss,sec:method:arch} return per-pulse cluster indices $\hat{y}_n$ that have to be compared with reference labels $y_n$.
+Both labellings partition the same index set $\{1,\ldots,N\}$, instantiated by either the emitter pair $(e_n,\hat{e}_n)$ within a window or the mode pair $(m_n,\hat{m}_n)$ across windows, as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}.
+The integers used to name each cluster are arbitrary and may differ between the two labellings, so every metric reported here is invariant to relabelling: only the induced partitions matter, not the symbols themselves.
+This is essential because, by construction, the clustering operator of \cref{eq:method:cluster_decoding} produces window-local integers that bear no fixed relation to the ground-truth catalogue.
 
-\subsection*{Adjusted Rand index}
+All metrics derive from the contingency table
+\[
+  n_{ij}=\sum_{n=1}^N \indicator[y_n=i,\,\hat{y}_n=j],
+\]
+with marginals $a_i=\sum_j n_{ij}$ and $b_j=\sum_i n_{ij}$ counting how many pulses carry true label $i$ or predicted label $j$.
+No single scalar captures every facet of cluster agreement, so we report metrics drawn from three different families --- pair counting, information theory, and entropy-based homogeneity/completeness --- together with a Hungarian-aligned accuracy when the two cardinalities are comparable.
 
-The \gls{ari} \parencite{hubert1985comparing} is
+\subsection*{Pair-counting view: Rand and adjusted Rand}
+
+The most intuitive way to compare two partitions is to look at every \emph{pair} of pulses and ask whether the two labellings agree on a binary question: are these two pulses in the \emph{same} cluster, or in \emph{different} clusters?
+Each unordered pair $\{m,n\}$ falls into one of four categories: same in both, same in $Y$ but different in $\hat{Y}$, different in $Y$ but same in $\hat{Y}$, or different in both.
+The first and last are agreements; the middle two are disagreements.
+A perfectly aligned pair of partitions has only agreements; a random pair has many disagreements.
+
+It is convenient to count pairs that are placed \emph{together} by each partition.
+Writing $S_{Y\hat{Y}}$, $S_Y$, and $S_{\hat{Y}}$ for the numbers of pairs that are together in both partitions, in $Y$, and in $\hat{Y}$ respectively, the contingency table gives
+\begin{equation}\label{eq:method:pair_counts}
+  S_{Y\hat{Y}}=\sum_{i,j}\binom{n_{ij}}{2},\qquad
+  S_Y=\sum_i\binom{a_i}{2},\qquad
+  S_{\hat{Y}}=\sum_j\binom{b_j}{2},
+\end{equation}
+out of $\binom{N}{2}$ total pairs.
+The plain Rand index \parencite{hubert1985comparing} is the fraction of pairs on which the two partitions agree,
+\begin{equation}\label{eq:method:rand}
+  R(Y,\hat{Y})
+  =
+  1 - \frac{S_Y + S_{\hat{Y}} - 2\,S_{Y\hat{Y}}}{\binom{N}{2}}
+  \in[0,1].
+\end{equation}
+
+The Rand index is easy to read but inflated: when most pulses sit in different clusters, the bulk of pairs are correctly judged ``different in both'' simply by chance, so $R$ stays close to one even for poorly aligned partitions.
+The \gls{ari} \parencite{hubert1985comparing} corrects this by subtracting the expected value of $S_{Y\hat{Y}}$ under a permutation null that fixes the cluster sizes $\{a_i\}$ and $\{b_j\}$ but otherwise reassigns pulses uniformly,
+\begin{equation}\label{eq:method:ari_expected}
+  \E[S_{Y\hat{Y}}]
+  =
+  \frac{S_Y\,S_{\hat{Y}}}{\binom{N}{2}}.
+\end{equation}
+Subtracting this expectation from numerator and denominator and rescaling so that perfect agreement gives one yields
 \begin{equation}\label{eq:method:ari}
   \ARI
   =
-  \frac{
-    \displaystyle\sum_{i,j}\binom{n_{ij}}{2}
-    -
-    \bigl[\sum_i\binom{a_i}{2}\bigr]\bigl[\sum_j\binom{b_j}{2}\bigr]\big/\binom{N}{2}
-  }{
-    \displaystyle\frac{1}{2}\Bigl[\sum_i\binom{a_i}{2}+\sum_j\binom{b_j}{2}\Bigr]
-    -
-    \bigl[\sum_i\binom{a_i}{2}\bigr]\bigl[\sum_j\binom{b_j}{2}\bigr]\big/\binom{N}{2}
-  }\,,
-  \qquad \ARI\le 1\,.
-\end{equation}
-Perfect agreement up to relabelling gives $\ARI=1$.
-
-\subsection*{Entropies, mutual information, and normalizations}
-
-Shannon entropies of the marginals are
-\begin{equation}\label{eq:method:entropy_marginals}
-  H(Y)=-\sum_{i:\,a_i>0}\frac{a_i}{N}\log\frac{a_i}{N}\,,
+  \frac{S_{Y\hat{Y}}-\E[S_{Y\hat{Y}}]}{\tfrac{1}{2}\bigl(S_Y+S_{\hat{Y}}\bigr)-\E[S_{Y\hat{Y}}]},
   \qquad
-  H(\hat{Y})=-\sum_{j:\,b_j>0}\frac{b_j}{N}\log\frac{b_j}{N}\,.
+  \ARI\le 1.
 \end{equation}
-The empirical mutual information is \parencite{vinh2010information}
+The numerator is the excess of together-together pairs over chance; the denominator is the largest such excess achievable while preserving the marginals.
+Hence $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, and negative values indicate worse-than-random alignment.
+
+\subsection*{Information-theoretic view: NMI and AMI}
+
+A second viewpoint asks how much knowing one labelling tells us about the other: if $\hat{Y}$ is a deterministic function of $Y$, then announcing $\hat{Y}$ leaves no remaining uncertainty about $Y$, and conversely two independent labellings are uninformative about each other.
+This is exactly what mutual information measures \parencite{vinh2010information}.
+With Shannon entropies of the marginals
+\begin{equation}\label{eq:method:entropy_marginals}
+  H(Y)=-\sum_{i:\,a_i>0}\frac{a_i}{N}\log\frac{a_i}{N},
+  \qquad
+  H(\hat{Y})=-\sum_{j:\,b_j>0}\frac{b_j}{N}\log\frac{b_j}{N},
+\end{equation}
+quantifying the marginal uncertainty of each labelling, the empirical mutual information is
 \begin{equation}\label{eq:method:mi}
   \mathrm{MI}(Y;\hat{Y})
   =
   \sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\,
-  \log\frac{N\,n_{ij}}{a_i b_j}\,,
+  \log\frac{N\,n_{ij}}{a_i b_j},
 \end{equation}
-with $0\log 0=0$.
-A \gls{nmi} score is obtained by dividing $\mathrm{MI}$ by a function of $\{H(Y),H(\hat{Y})\}$; we use the arithmetic-mean denominator \parencite{vinh2010information},
+with the convention $0\log 0=0$.
+$\mathrm{MI}$ is non-negative, zero when $Y$ and $\hat{Y}$ are independent, and equal to either marginal entropy when one labelling determines the other.
+
+The \gls{nmi} bounds $\mathrm{MI}$ to $[0,1]$ by dividing through by a normaliser built from the marginal entropies; we use the arithmetic mean \parencite{vinh2010information},
 \begin{equation}\label{eq:method:nmi}
   \NMI(Y;\hat{Y})
   =
-  \frac{2\,\mathrm{MI}(Y;\hat{Y})}{H(Y)+H(\hat{Y})}\,,
-  \qquad H(Y)+H(\hat{Y})>0\,,
+  \frac{2\,\mathrm{MI}(Y;\hat{Y})}{H(Y)+H(\hat{Y})},
+  \qquad H(Y)+H(\hat{Y})>0,
 \end{equation}
-and set $\NMI=0$ if $H(Y)+H(\hat{Y})=0$.
-Let $\mathbb{E}[\mathrm{MI}]$ be the expectation of $\mathrm{MI}$ under the permutation null that fixes one partition while permuting labels subject to fixed cluster sizes \parencite{vinh2010information}.
-The \gls{ami} is
+and set $\NMI=0$ if both entropies vanish.
+Like the Rand index, $\mathrm{MI}$ has a non-zero baseline expectation, and that expectation grows with the number of clusters; the \gls{ami} \parencite{vinh2010information} performs the analogous chance correction.
+Let $\E[\mathrm{MI}]$ be the expectation of $\mathrm{MI}$ under a permutation null with fixed cluster sizes; then
 \begin{equation}\label{eq:method:ami}
   \AMI(Y;\hat{Y})
   =
-  \frac{\mathrm{MI}(Y;\hat{Y})-\mathbb{E}[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\mathbb{E}[\mathrm{MI}]}\,,
+  \frac{\mathrm{MI}(Y;\hat{Y})-\E[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\E[\mathrm{MI}]},
 \end{equation}
 when the denominator is positive; otherwise $\AMI\equiv 0$.
+$\AMI$ inherits the same range and chance baseline as $\ARI$ but operates on the information-theoretic axis, which makes it less sensitive to differences in cluster size and more sensitive to fine-grained mislabellings.
 
+\subsection*{Homogeneity, completeness, and V-measure}
 
-\subsection*{V-measure}
+A third viewpoint asks two complementary questions about cluster purity: \emph{homogeneity}, ``does each predicted cluster contain only one true class?'', and \emph{completeness}, ``is each true class collected into a single predicted cluster?''.
+Splitting a true class across many predicted clusters preserves homogeneity but destroys completeness; merging several true classes into one predicted cluster preserves completeness but destroys homogeneity.
+Reporting both quantities separately therefore diagnoses whether the encoder oversplits or undermerges.
 
-With conditional entropies
+With the conditional entropies
 \begin{equation}\label{eq:method:cond_ent}
-  H(Y\mid \hat{Y})=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{b_j}\,,
+  H(Y\mid \hat{Y})=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{b_j},
   \qquad
-  H(\hat{Y}\mid Y)=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{a_i}\,,
+  H(\hat{Y}\mid Y)=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{a_i},
 \end{equation}
 homogeneity and completeness are \parencite{rosenberg2007v}
 \begin{equation}\label{eq:method:vmeasure_hc}
-  h = 1-\frac{H(Y\mid \hat{Y})}{H(Y)}\,,\qquad
-  c = 1-\frac{H(\hat{Y}\mid Y)}{H(\hat{Y})}\,,
+  h = 1-\frac{H(Y\mid \hat{Y})}{H(Y)},
+  \qquad
+  c = 1-\frac{H(\hat{Y}\mid Y)}{H(\hat{Y})},
 \end{equation}
 with $h=1$ if $H(Y)=0$ and $c=1$ if $H(\hat{Y})=0$.
-The \gls{vmeasure} is
+The \gls{vmeasure} is the harmonic mean
 \begin{equation}\label{eq:method:vmeasure}
-  \mathrm{V}(Y,\hat{Y})=\frac{2hc}{h+c}\,,\qquad h+c>0\,,
+  \mathrm{V}(Y,\hat{Y})=\frac{2hc}{h+c},
+  \qquad h+c>0,
 \end{equation}
 and $\mathrm{V}=0$ if $h=c=0$.
+The harmonic mean is small whenever either component is small, so a high V-measure requires both homogeneity and completeness to be high simultaneously.
 
-\subsection*{Figures}
+\subsection*{Clustering accuracy with Hungarian alignment}
 
-Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement \cref{eq:method:ari,eq:method:nmi,eq:method:ami,eq:method:acc,eq:method:vmeasure}; protocols and numbers appear in \cref{ch:experiments}.
+The most directly interpretable scalar is the fraction of pulses correctly classified, but the cluster integers are arbitrary so a one-to-one relabelling of $\hat{Y}$ onto $Y$ must be chosen first.
+Among all such relabellings, the one that maximises the number of correct assignments is the optimal solution of a linear assignment problem on the contingency table $\{n_{ij}\}$, which the Hungarian algorithm \parencite{kuhn1955hungarian} solves in polynomial time.
+The \gls{acc} is the resulting fraction,
+\begin{equation}\label{eq:method:acc}
+  \ACC(Y,\hat{Y})
+  =
+  \frac{1}{N}\,
+  \max_{\pi}\sum_{n=1}^{N}
+  \indicator[\,y_n=\pi(\hat{y}_n)\,],
+\end{equation}
+where the maximum is taken over injective maps $\pi$ between predicted and true cluster identifiers; when the two cardinalities differ, the contingency table is zero-padded so that $\pi$ remains injective.
+$\ACC\in[0,1]$, with $\ACC=1$ at perfect recovery up to relabelling.
+Compared with the other metrics, $\ACC$ is the most familiar quantity but the least forgiving when $\hat{K}$ deviates strongly from the true number of clusters, because unmatched predicted clusters then contribute only zeros to the maximum.
+
+\subsection*{What each metric does and does not tell us}
+
+The four metrics agree at the extremes --- all return one at exact recovery and approximately zero at chance --- but they disagree in the middle.
+$\ARI$ summarises the pair structure and is comparable across runs with different cluster counts.
+$\AMI$ and $\NMI$ capture how much information one labelling carries about the other; $\AMI$ is preferable when the number of clusters varies, while $\NMI$ remains a useful reference because it is universally reported.
+Reporting homogeneity and completeness alongside the V-measure separates oversplitting from undermerging, which matters for the open-set mode setting where $\hat{M}>M$ is expected.
+$\ACC$ is reported when $\hat{K}$ and the true number of clusters are comparable; it is the easiest number to communicate but the most fragile when cardinalities diverge.
+We therefore report several scores rather than a single headline metric.
+
+\subsection*{Qualitative inspection}
+
+Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement the quantitative scores of \cref{eq:method:ari,eq:method:nmi,eq:method:ami,eq:method:vmeasure,eq:method:acc}; protocols and numbers appear in \cref{ch:experiments}.
