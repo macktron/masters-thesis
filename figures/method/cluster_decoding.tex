@@ -70,7 +70,7 @@
     \node[hdb] (em_hdb) at (0, -45mm)
       {\gls{hdbscan} per window};
     \node[outblock] (em_out) at (0, -60mm)
-      {Train-local emitter IDs\\$\hat{e}_n \in \{1,\ldots,\hat{K}_{\mathrm{em}}\}$};
+      {Emitter cluster IDs\\$\hat{e}_n \in \{1,\ldots,\hat{K}_{\mathrm{em}}\}$};
 
     \draw[arrow] (em_in) -- (em_scatter);
     \draw[arrow] (em_scatter) -- (em_hdb);
@@ -114,7 +114,7 @@
     \node[hdb] (md_hdb) at (0, -45mm)
       {\gls{hdbscan} per window};
     \node[outblock] (md_out) at (0, -60mm)
-      {Per-window mode cluster IDs\\$\hat{m}_n \in \{1,\ldots,\hat{M}\}$};
+      {Mode cluster IDs\\$\hat{m}_n \in \{1,\ldots,\hat{M}\}$};
 
     \draw[arrow] (md_in) -- (md_scatter);
     \draw[arrow] (md_scatter) -- (md_hdb);

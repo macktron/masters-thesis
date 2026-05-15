@@ -1,14 +1,12 @@
 \section{Baseline Methods}\label{sec:method:baselines}
 
-The baselines isolate the contribution of the dual-branch layout in \cref{sec:method:arch} and of the mode-oriented term $\Loss_{\mathrm{md}}$ in \cref{eq:method:loss_total} relative to a single-stack encoder and to classical clustering without a sequence model.
+The baselines isolate the contribution of the dual-branch layout in \cref{sec:method:arch} and of the mode term $\lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ in \cref{eq:method:loss_total} relative to a single-stack encoder and to classical clustering without a sequence model.
+Final configurations and the full list of comparisons are deferred to \cref{ch:experiments}; this section fixes only the design intent of each.
 
-The first neural baseline removes the emitter and mode branches and replaces them with one stack of eight transformer-encoder layers of the same functional form as the shared trunk (hidden width, head count, and \gls{ffn} expansion match that trunk so the comparison stresses topology and objective rather than a change in per-layer width).
-Token embeddings $\vect{h}^{(0)}_n$ from \cref{eq:method:input_embed} pass through this stack; a single linear head then maps each contextualised token to $\vect{z}_n \in \R^{p}$, using the same output dimension $p$ as the emitter branch in the full model.
-Training minimises only the emitter-oriented contrastive loss $\Loss_{\mathrm{em}}$ in \cref{eq:method:loss_emitter}; $\Loss_{\mathrm{md}}$ and its inter-window structure are omitted, so no auxiliary geometry is trained for operating modes.
-This configuration tests whether one representation, optimised purely for window-level deinterleaving, suffices for both emitter- and mode-level clusterings reported in \cref{ch:experiments}.
+\begin{description}
+  \item[Single-stack transformer.] A flat encoder of $N_{\mathrm{ss}}{=}8$ transformer-encoder layers with the same width, heads, and \gls{ffn} expansion as the trunk in \cref{sec:method:arch}, terminated by one linear head $\R^{d_{\mathrm{model}}}\!\to\!\R^{p}$ and trained on $\Loss_{\mathrm{em}}$ alone. Tests whether a single representation optimised purely for window-level deinterleaving also serves the mode clustering.
 
-The second baseline is \gls{hdbscan} \parencite{mcinnes2017hdbscan}, a hierarchical density-based method that does not estimate a transformer.
-It clusters fixed-length vectors built deterministically from the per-feature scaled \gls{pdw} windows in \cref{sec:method:data}, for example by per-channel summary statistics or a flattened layout of pulses and features; the exact vectorisation is fixed in \cref{ch:experiments}.
-\Gls{hdbscan} separates gains due to learned sequence context from what density-based Euclidean clustering already recovers on hand-specified summaries.
+  \item[\Gls{hdbscan} on fixed window features.] No transformer; \gls{hdbscan} \parencite{mcinnes2017hdbscan} clusters a deterministic vector built from the scaled \glspl{pdw} of a window (vectorisation specified in \cref{ch:experiments}). Separates the gain from learned sequence context from what density clustering already recovers on hand-specified summaries.
 
-Further comparisons---$k$-means on raw window vectors or on autoencoder embeddings, \gls{dec}-style objectives when centroids are used, SwAV-style assignment prediction \parencite{caron2020swav} as an unsupervised-clustering reference, and a fully supervised closed-catalogue classifier upper bound for the modes seen during training---are listed with their configurations in \cref{ch:experiments}; the supervised classifier serves only as an upper bound on closed-set mode discrimination and is not used as the fielded mode predictor, since it cannot accommodate the held-out modulations exercised in the open-set experiments.
+  \item[External references.] $k$-means on raw window vectors and on autoencoder embeddings, \gls{dec}-style objectives, SwAV \parencite{caron2020swav} assignment prediction, and a closed-catalogue supervised classifier as an upper bound on the modes seen during training. The supervised classifier is reported only as a reference ceiling; it cannot accommodate the held-out modulations of the open-set experiments and is not used as the fielded mode predictor.
+\end{description}
