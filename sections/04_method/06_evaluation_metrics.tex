@@ -55,17 +55,6 @@ The \gls{ami} is
 \end{equation}
 when the denominator is positive; otherwise $\AMI\equiv 0$.
 
-\subsection*{Clustering accuracy}
-
-Cluster indices are arbitrary up to a bijection $\phi$ on label symbols.
-The \gls{acc} is the largest agreement after an optimal relabeling,
-\begin{equation}\label{eq:method:acc}
-  \ACC
-  =
-  \frac{1}{N}\max_{\phi \in \Phi}\;\sum_{n=1}^N
-  \indicator\bigl[y_n = \phi(\hat{y}_n)\bigr]\,,
-\end{equation}
-where $\Phi$ is the set of bijections between the active reference labels and the active predicted labels when their counts coincide; if cardinalities differ, the same maximum is computed by the Hungarian (linear-sum assignment) algorithm on the matrix $(n_{ij})$ with cost $-n_{ij}$ \parencite{kuhn1955hungarian}.
 
 \subsection*{V-measure}
 
