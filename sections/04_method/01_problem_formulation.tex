@@ -53,8 +53,8 @@ The parametric model maps $\mat{X}$ to two parallel embedding sequences,
   \quad
   \vect{z}^{\mathrm{md}}_n \in \R^{q}.
 \end{equation}
-The emitter branch $\mat{Z}^{\mathrm{em}}$ is trained so that, within each train, pulses with the same $e_n$ are close in $\R^{p}$ and pulses with different $e_n$ are pushed apart.
-The mode branch $\mat{Z}^{\mathrm{md}}$ is trained analogously against $\{m_n\}$, but with positives and negatives drawn from the entire batch rather than from within a single train.
+The emitter branch $\mat{Z}^{\mathrm{em}}$ is trained so that pulses sharing an emitter are close in $\R^{p}$ and pulses with distinct emitters are pushed apart, and the mode branch $\mat{Z}^{\mathrm{md}}$ is trained analogously against $\{m_n\}$.
+Both branches use the same batch-wide aggregation; the only asymmetry between them is the semantics of their labels, which propagates to the positive sets the loss reads (\cref{sec:method:loss}).
 
 Discrete per-pulse outputs
 \begin{equation}\label{eq:method:emitter_predictor}
@@ -70,5 +70,5 @@ The cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are determined by the cl
 
 \subsection*{Learning objective}
 
-Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form but differ in scope: a within-train term acting on $\mat{Z}^{\mathrm{em}}$ with positives drawn from the same train, and a partially batch-wide term acting on $\mat{Z}^{\mathrm{md}}$ with positives partially drawn from other pulse trains.
+Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form and a common batch-wide aggregation, differing only in which label drives their positive sets: emitter identifiers on $\mat{Z}^{\mathrm{em}}$ and mode labels on $\mat{Z}^{\mathrm{md}}$.
 On a previously unseen train, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.
