@@ -11,8 +11,7 @@ All projection-head outputs of \cref{eq:method:proj_heads} are $\ell_2$-normalis
   s_{ij} \;\coloneqq\; \vect{z}_i^{\top}\vect{z}_j \;\in\; [-1,1],
 \end{equation}
 and a fixed temperature $\tau > 0$ rescales it inside the loss;
-Smaller $\tau$ concentrates the gradient on the hardest negatives, while larger $\tau$ stabilizes early optimization, since the magnitude of the gradient is inversely proportional to $\tau$:
-$\|\nabla \Loss_{\mathrm{SC}}\| \propto \frac{1}{\tau}$
+Smaller $\tau$ concentrates the gradient on the hardest negatives, while larger $\tau$ stabilizes early optimization, since $\|\nabla \Loss_{\mathrm{SC}}\| \propto \frac{1}{\tau}$
 \parencite{khosla2020supcon}.
 Both branches use $\tau = 0.2$, the value commonly chosen for normalised contrastive features \parencite{chen2020simclr,khosla2020supcon}.
 
