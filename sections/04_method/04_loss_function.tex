@@ -2,7 +2,7 @@
 
 The training objective is a sum of two \emph{supervised contrastive} \parencite{khosla2020supcon} terms with the same functional form, both aggregated over the whole mini-batch.
 The two terms differ only in which label drives the positive set: an emitter identifier on the emitter branch, and the global mode label of \cref{sec:method:formulation} on the mode branch.
-Routing the mode branch through a contrastive loss rather than a closed-catalogue softmax keeps the inference pipeline of \cref{eq:method:cluster_decoding} open to modulations absent from training; the post-hoc clustering operator contributes no gradients and is not part of the objective. And then embeddings for each PDW, or the encodings (before final projection), could probably be use as input to a know emitter library with softmax heads. This could also potentially enable transfer learning.
+Routing the mode branch through a contrastive loss rather than a closed-catalogue softmax keeps the inference pipeline of \cref{eq:method:cluster_decoding} open to modulations absent from training; the post-hoc clustering operator contributes no gradients and is not part of the objective. And then embeddings for each PDW, or the encodings (before final projection), could probably be use as input to a know emitter library with softmax heads. This could also potentially enable transfer learning of custom classification heads from the same base model.
 
 \subsection*{Supervised contrastive kernel}
 
