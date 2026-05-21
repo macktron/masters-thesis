@@ -11,7 +11,7 @@ All projection-head outputs of \cref{eq:method:proj_heads} are $\ell_2$-normalis
   s_{ij} \;\coloneqq\; \vect{z}_i^{\top}\vect{z}_j \;\in\; [-1,1],
 \end{equation}
 and a fixed temperature $\tau > 0$ rescales it inside the loss;
-. Smaller $\tau$ penalize negatives harder, larger $\tau$ stabilises early optimisation \parencite{chen2020simclr}.
+. Smaller $\tau$ penalize negatives more, while larger $\tau$ stabilises early optimisation \parencite{chen2020simclr}.
 Both branches use $\tau = 0.2$, the value commonly chosen for normalised contrastive features \parencite{chen2020simclr,khosla2020supcon}.
 
 For an anchor set $I$ with embeddings $\{\vect{z}_i\}_{i \in I}$, write the candidate set $A(i) = I \setminus \{i\}$ and the positive subset $P(i) \subseteq A(i)$ defined by label coincidence.
