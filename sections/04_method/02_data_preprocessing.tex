@@ -22,6 +22,14 @@ Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$,
 Training uses $s = L/2$, so consecutive windows overlap by half their length; this increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
 Validation and test windows use $s = L$ so that metrics are not inflated by near-duplicate windows.
 The trailing remainder shorter than $L$ is dropped.
+\Cref{fig:method:windowing} sketches the resulting segmentation for the training-time stride.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/windowing.tex}
+  \caption{Sliding-window segmentation of a pulse train as defined in \cref{eq:method:windowing}, drawn for the training-time stride $s = L/2$. Successive windows $\mat{X}^{(w)}$ advance by $s$ pulses, so they overlap by $L - s = L/2$. Dashed guides project window boundaries down onto the pulse train. Pulses past the last window of length~$L$ form a trailing remainder that is dropped during training and evaluation. Validation and test use $s = L$, giving abutting non-overlapping windows; the dropped remainder remains shorter than $L$ by construction.}
+  \label{fig:method:windowing}
+\end{figure}
 
 At inference, the same fixed-length contract approximates a rolling window over a live pulse stream: a receiver buffers the most recent $L$ pulses, applies the trained encoder, advances by $s$, and repeats.
 Training-time windows are therefore representative of the operational reasoning unit, not just a memory convenience.
