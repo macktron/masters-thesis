@@ -2,8 +2,10 @@
 % Schematic of the fixed-length sliding-window segmentation defined in
 % \cref{eq:method:windowing} and used in \cref{sec:method:data:window}.
 % A pulse train of N pulses is cut into windows of L pulses with stride
-% s, shown here for the training-time choice s = L/2 (50% overlap). The
-% trailing portion of length < L is dropped. Loaded from
+% s, where 0 < s <= L. The trailing portion of length < L is dropped.
+% The figure is drawn with s = L/2 for legibility, but the construction
+% applies to any stride in that range (training uses s = L/2 and
+% validation/test use s = L). Loaded from
 % sections/04_method/02_data_preprocessing.tex via \input{...}.
 % =====================================================================
 \begin{tikzpicture}[
@@ -37,9 +39,11 @@
   ]
 
   % ---- geometry ----
+  % The stride s is unrestricted in 0 < s <= L; here it is set to L/2
+  % purely for visual clarity.
   \def\Lwin{4.8}      % L (window length) in plot units
-  \def\Sstride{2.4}   % s = L/2 (training stride)
-  \def\Ntot{13.4}     % total visible train length
+  \def\Sstride{2.4}   % s, drawn at L/2 for legibility
+  \def\Ntot{14.0}     % total visible train length
   \def\barH{0.45}     % pulse-train bar height
   \def\dy{0.85}       % vertical step between consecutive windows
   \def\yzero{0.40}    % y-coord of Window 1 bottom edge
@@ -52,11 +56,14 @@
   \node[anchor=east, font=\scriptsize] at (-0.05, -\barH/2) {$\vect{x}_1$};
   \node[anchor=west, font=\scriptsize] at (\Ntot+0.05, -\barH/2) {$\vect{x}_N$};
 
-  % dropped tail overlay (starts at 4s, i.e. just past the last full window)
-  \fill[drophatch] (4*\Sstride, -\barH) rectangle (\Ntot, 0);
-  \draw[line width=0.5pt, draw=black!65] (4*\Sstride, -\barH) rectangle (\Ntot, 0);
+  % dropped tail overlay: starts at the right edge of the last window
+  % (x = 3s + L), which is where any further pulse falls outside every
+  % complete length-L window.
+  \pgfmathsetmacro{\xtail}{3*\Sstride+\Lwin}
+  \fill[drophatch] (\xtail, -\barH) rectangle (\Ntot, 0);
+  \draw[line width=0.5pt, draw=black!65] (\xtail, -\barH) rectangle (\Ntot, 0);
   \node[font=\scriptsize, anchor=north]
-       at ({(4*\Sstride+\Ntot)/2}, -\barH-0.02)
+       at ({(\xtail+\Ntot)/2}, -\barH-0.02)
        {remainder $<L$ (dropped)};
 
   % ---- windows (staircase, 50\% overlap) ----
@@ -69,11 +76,13 @@
   \node[window, win4, minimum width=\Lwin cm, anchor=south west]
        (w4) at (3*\Sstride,   \yzero+3*\dy)  {$\mat{X}^{(4)}$: pulses $1+3s,\ldots,L+3s$};
 
-  % vertical guides from window edges down to the train bar
-  \foreach \xst in {0, \Sstride, 2*\Sstride, 3*\Sstride, 4*\Sstride} {
+  % vertical guides from window edges down to the train bar:
+  %   - left edge of each window (4 guides at 0, s, 2s, 3s)
+  %   - right edge of the last window (= boundary with the remainder)
+  \foreach \xst in {0, \Sstride, 2*\Sstride, 3*\Sstride} {
     \draw[edgeguide] (\xst, 0) -- (\xst, \yzero);
   }
-  \draw[edgeguide] (\Lwin, 0) -- (\Lwin, \yzero+\dy);
+  \draw[edgeguide] (\xtail, 0) -- (\xtail, \yzero+3*\dy);
 
   % ---- dimension arrows ----
   % L (window length): above Window 4
@@ -85,11 +94,13 @@
                   {$L = 1024$ pulses}
              (3*\Sstride+\Lwin, \yL);
 
-  % s (stride): in the gap between the train bar and Window 1
+  % s (stride): in the gap between the train bar and Window 1.
+  % Labelled simply "s" because the figure illustrates an arbitrary
+  % stride with 0 < s <= L; the drawing uses L/2 for legibility.
   \pgfmathsetmacro{\ys}{0.18}
   \draw[dim] (0, \ys) --
              node[above=-1pt, font=\scriptsize, fill=white, inner sep=1pt]
-                  {$s = L/2$}
+                  {$s$}
              (\Sstride, \ys);
 
 \end{tikzpicture}

@@ -22,12 +22,12 @@ Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$,
 Training uses $s = L/2$, so consecutive windows overlap by half their length; this increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
 Validation and test windows use $s = L$ so that metrics are not inflated by near-duplicate windows.
 The trailing remainder shorter than $L$ is dropped.
-\Cref{fig:method:windowing} sketches the resulting segmentation for the training-time stride.
+\Cref{fig:method:windowing} sketches the resulting segmentation.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/windowing.tex}
-  \caption{Sliding-window segmentation of a pulse train as defined in \cref{eq:method:windowing}, drawn for the training-time stride $s = L/2$. Successive windows $\mat{X}^{(w)}$ advance by $s$ pulses, so they overlap by $L - s = L/2$. Dashed guides project window boundaries down onto the pulse train. Pulses past the last window of length~$L$ form a trailing remainder that is dropped during training and evaluation. Validation and test use $s = L$, giving abutting non-overlapping windows; the dropped remainder remains shorter than $L$ by construction.}
+  \caption{Sliding-window segmentation of a pulse train as defined in \cref{eq:method:windowing}. The construction is valid for any stride $0 < s \le L$; the figure uses $s = L/2$ for legibility. Successive windows $\mat{X}^{(w)}$ advance by $s$ pulses and therefore overlap by $L - s$. Dashed guides project window boundaries down onto the pulse train. Pulses past the right edge of the last window of length~$L$ form a trailing remainder of length~$<L$ that is dropped during training and evaluation. Training uses $s = L/2$ and validation/test use $s = L$, the latter giving abutting non-overlapping windows.}
   \label{fig:method:windowing}
 \end{figure}
 

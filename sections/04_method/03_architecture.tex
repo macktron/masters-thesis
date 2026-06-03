@@ -50,28 +50,21 @@ The mode space is assigned the higher dimensionality because, conditional on emi
 
 \subsection*{From continuous embeddings to discrete partitions}
 
-The projection heads in \cref{eq:method:proj_heads} produce continuous vectors; the per-pulse outputs in \cref{eq:method:emitter_predictor,eq:method:mode_predictor} are discrete.
-At inference time, each branch's $L$-token embedding sequence is therefore decoded by a fixed clustering operator,
+The projection heads in \cref{eq:method:proj_heads} produce continuous vectors, whereas the per-pulse outputs in \cref{eq:method:emitter_predictor,eq:method:mode_predictor} are discrete.
+At inference time, each branch's $L$-token embedding sequence is therefore decoded independently and per window by a fixed clustering operator,
 \begin{equation}\label{eq:method:cluster_decoding}
-  (\hat{e}_1,\ldots,\hat{e}_L) = \mathrm{HDBSCAN}\!\bigl(\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L}\bigr),
+  (\hat{e}_1,\ldots,\hat{e}_L) = \mathrm{DBSCAN}\!\bigl(\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L}\bigr),
   \quad
-  (\hat{m}_1,\ldots,\hat{m}_L) = \mathrm{HDBSCAN}\!\bigl(\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^{L}\bigr),
+  (\hat{m}_1,\ldots,\hat{m}_L) = \mathrm{DBSCAN}\!\bigl(\{\vect{z}^{\mathrm{md}}_n\}_{n=1}^{L}\bigr),
 \end{equation}
 with cardinalities $\hat{K}_{\mathrm{em}},\hat{M} \in \N$ inferred from the data (\cref{fig:method:cluster_decoding}).
-The operator contributes no gradients; the trunk and branch weights are fitted solely against the contrastive objective of \cref{sec:method:loss}.
+\Gls{dbscan} \parencite{ester1996density} groups embeddings by local density at a fixed Euclidean radius $\varepsilon = 0.4$ and minimum neighbourhood count $\mathrm{minPts} = 5$, assigning sparser points to a noise category.
+Clustering per window matches the train-local supervision scope of the emitter branch and keeps the runtime linear in window length; cross-window alignment of mode embeddings is instead supplied by the batch-wide contrastive term of \cref{sec:method:loss} and resolved by the permutation-invariant metrics of \cref{sec:method:metrics}.
+The operator contributes no gradients, and the trunk, branch, and projection-head weights together form the parameter vector $\bm{\theta}$ optimised by the loss in \cref{sec:method:loss}.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/cluster_decoding.tex}
-  \caption{Inference-time decoding of branch embeddings into per-pulse cluster indices via \cref{eq:method:cluster_decoding}. Dots are pulse embeddings and dashed ellipses are \gls{hdbscan} clusters in one window. The pipeline is identical on both branches and the integer outputs are local to each clustering instance; they acquire their interpretation from the supervision scope of \cref{sec:method:formulation}, which differs between the two branches.}
+  \caption{Inference-time decoding of branch embeddings into per-pulse cluster indices via \cref{eq:method:cluster_decoding}. Dots are pulse embeddings and dashed ellipses are \gls{dbscan} clusters in one window. The pipeline is identical on both branches and the integer outputs are local to each clustering instance; they acquire their interpretation from the supervision scope of \cref{sec:method:formulation}, which differs between the two branches.}
   \label{fig:method:cluster_decoding}
 \end{figure}
-
-\Gls{hdbscan} \parencite{campello2015hierarchical,mcinnes2017hdbscan} reads off a flat clustering from a hierarchy of density estimates, retaining the groups that persist as coherent peaks and assigning the remainder to an explicit noise category; this replaces the single global density threshold of DBSCAN \parencite{ester1996density} with the hierarchical view, removing one tuning dimension.
-
-Both pipelines emit window-local integers; only their relation to ground truth differs.
-Emitter symbols $e_n$ are train-local in \cref{sec:method:formulation}, so window-local indices match the supervision scope directly.
-Mode symbols $m_n \in \{1,\ldots,M\}$ are global, and the cross-window geometric alignment that makes $\hat{m}_n$ informative comes from the batch-wide contrastive term in \cref{sec:method:loss}: pulses sharing a catalogue mode occupy a common region of $\R^{q}$, although the integer assigned to that region varies between windows.
-Catalogue-level mode identity is therefore deferred to the permutation-invariant metrics of \cref{sec:method:metrics}, and no prior on $\hat{M}$ is imposed, allowing $\hat{M} > M$ for the open-set behaviour exercised in \cref{ch:experiments}.
-
-The trunk, branch, and projection-head weights together form the parameter vector $\bm{\theta}$ optimised by the loss in \cref{sec:method:loss}.
