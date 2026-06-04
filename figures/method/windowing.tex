@@ -48,25 +48,22 @@
   \def\dy{0.85}       % vertical step between consecutive windows
   \def\yzero{0.40}    % y-coord of Window 1 bottom edge
 
-  % ---- pulse train (bottom row) ----
-  \fill[trainticks] (0, -\barH) rectangle (\Ntot, 0);
-  \draw[train, fill=none] (0, -\barH) rectangle (\Ntot, 0);
+  % ---- pulse train base (without the dropped-tail overlay) ----
+  \coordinate (trainTL) at (0, 0);
+  \coordinate (trainTR) at (\Ntot, 0);
+  \coordinate (trainBR) at (\Ntot, -\barH);
+  \fill[trainticks] (0, -\barH) rectangle (trainTR);
+  \draw[train, fill=none] (0, -\barH) rectangle (trainTR);
 
   % first / last pulse labels
   \node[anchor=east, font=\scriptsize] at (-0.05, -\barH/2) {$\vect{x}_1$};
   \node[anchor=west, font=\scriptsize] at (\Ntot+0.05, -\barH/2) {$\vect{x}_N$};
 
-  % dropped tail overlay: starts at the right edge of the last window
-  % (x = 3s + L), which is where any further pulse falls outside every
-  % complete length-L window.
-  \pgfmathsetmacro{\xtail}{3*\Sstride+\Lwin}
-  \fill[drophatch] (\xtail, -\barH) rectangle (\Ntot, 0);
-  \draw[line width=0.5pt, draw=black!65] (\xtail, -\barH) rectangle (\Ntot, 0);
-  \node[font=\scriptsize, anchor=north]
-       at ({(\xtail+\Ntot)/2}, -\barH-0.02)
-       {remainder $<L$ (dropped)};
-
-  % ---- windows (staircase, 50\% overlap) ----
+  % ---- windows (staircase) ----
+  % Placed before the dropped-tail overlay so that the remainder can be
+  % anchored geometrically to Window 4's south-east corner. This makes
+  % the alignment between the last window's right edge and the start of
+  % the dropped remainder immediate from the code.
   \node[window, win1, minimum width=\Lwin cm, anchor=south west]
        (w1) at (0,            \yzero)        {$\mat{X}^{(1)}$: pulses $1,\ldots,L$};
   \node[window, win2, minimum width=\Lwin cm, anchor=south west]
@@ -76,13 +73,25 @@
   \node[window, win4, minimum width=\Lwin cm, anchor=south west]
        (w4) at (3*\Sstride,   \yzero+3*\dy)  {$\mat{X}^{(4)}$: pulses $1+3s,\ldots,L+3s$};
 
+  % ---- dropped tail overlay (anchored to Window 4's right edge) ----
+  % (w4.south east |- trainTL) is the point (w4.east.x, 0) on the train
+  % top, so the hatched rectangle starts exactly where the last window
+  % stops covering the train.
+  \coordinate (tailTL) at (w4.south east |- trainTL);
+  \coordinate (tailBL) at (w4.south east |- trainBR);
+  \fill[drophatch] (tailTL) rectangle (trainBR);
+  \draw[line width=0.5pt, draw=black!65] (tailTL) rectangle (trainBR);
+  \node[font=\scriptsize, anchor=north]
+       at ($(tailBL)!0.5!(trainBR)$)
+       {remainder $<L$ (dropped)};
+
   % vertical guides from window edges down to the train bar:
   %   - left edge of each window (4 guides at 0, s, 2s, 3s)
   %   - right edge of the last window (= boundary with the remainder)
   \foreach \xst in {0, \Sstride, 2*\Sstride, 3*\Sstride} {
     \draw[edgeguide] (\xst, 0) -- (\xst, \yzero);
   }
-  \draw[edgeguide] (\xtail, 0) -- (\xtail, \yzero+3*\dy);
+  \draw[edgeguide] (tailTL) -- (w4.south east);
 
   % ---- dimension arrows ----
   % L (window length): above Window 4
