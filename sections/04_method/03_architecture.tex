@@ -1,6 +1,6 @@
 \section{Transformer Encoder Architecture}\label{sec:method:arch}
 
-The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches; the overall layout is shown in \cref{fig:method:arch}.
+The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches for mode clustering and deinterleaving. The overall layout is shown in \cref{fig:method:arch}.
 This structure mirrors the dual-embedding formulation introduced in \cref{sec:method:formulation}: the trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings.
 
 \begin{figure}[tbp]

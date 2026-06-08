@@ -8,7 +8,7 @@ Each exported pulse carries the continuous fields used here together with the tw
 
 \subsection{Windowing}\label{sec:method:data:window}
 
-Self-attention computes an $L \times L$ compatibility matrix at each layer, so the computational and memory cost of a forward pass grows quadratically with the window length $L$, i.e., $\mathcal{O}(L^2)$. Because a pulse train may contain millions of pulses, processing an entire train at once is infeasible with standard self-attention due to prohibitive memory requirements. While recent work on transformers proposes sub-quadratic attention variants to address this, the present thesis restricts itself to evaluating the baseline (plain) attention mechanism without architectural modifications.
+Self-attention computes an $L \times L$ compatibility matrix at each layer, so the computational and memory cost of a forward pass grows quadratically with the window length $L$, i.e., $\mathcal{O}(L^2)$. Because a pulse train may contain millions of pulses, processing an entire train at once is infeasible with standard self-attention due to prohibitive memory requirements. Recent work proposes sub-quadratic attention variants to address this cost \parencite{tay2022efficient}, but such variants typically approximate or otherwise restrict the full softmax attention map and, on long-sequence benchmarks, have not been shown to consistently outperform plain self-attention in modelling quality \parencite{tay2021lra}; the present thesis therefore restricts itself to evaluating the baseline (plain) attention mechanism without architectural modifications.
 
 The encoder therefore operates on fixed-length windows of $L = 1024$ pulses.
 Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$, the $w$th window is
@@ -67,18 +67,6 @@ The azimuth and lateral components of \gls{aoa}, written $\theta^{\mathrm{az}}_n
   \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi},
 \end{equation}
 since $\theta^{\mathrm{az}}_n \in [0, 2\pi]$ and $\theta^{\mathrm{lat}}_n \in [0, \pi]$ by construction.
-
-Within every window $w$, the scaled \gls{toa} is then offset by the \gls{toa} of the first pulse in that window,
-\begin{equation}\label{eq:method:toa_offset}
-  \hat{t}_n
-  =
-  \tilde{t}_n - \tilde{t}_{1 + (w-1)s},
-  \qquad
-  n \in \{1 + (w-1)s,\,\ldots,\, L + (w-1)s\},
-\end{equation}
-so that the first pulse of every window has $\hat{t} = 0$.
-This removes absolute clock offset while preserving intra-window timing structure; the global min--max step fixes the unit of $\hat{t}$, so $\hat{t}$ differences are comparable across windows.
-The \gls{aoa} channels are not offset because their absolute values, not their increments, are physically meaningful.
 
 \subsection{Labels}\label{sec:method:data:labels}
 
