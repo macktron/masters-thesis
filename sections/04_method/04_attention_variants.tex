@@ -38,15 +38,46 @@ This generalises the fixed bias of \cref{eq:method:attn_bias} and is the edge-fe
 \subsection*{Rotary positional encoding}
 
 The two bias variants encode \emph{which} pulses are related; the third encodes \emph{where} a pulse sits in the sequence.
-\Gls{rope} \parencite{su2024roformer} rotates each query and key by an angle proportional to its position before the dot product of \cref{eq:method:attn_base} is taken.
-Because the rotation of a pair composes into a single rotation by their position difference, the resulting logit depends only on the relative separation $i - j$,
+\Gls{rope} \parencite{su2024roformer} injects position not as an additive signal but as a phase: it rotates each query and key by an angle proportional to its position before the dot product of \cref{eq:method:attn_base} is taken, so that the per-head dimension $d_k$ (assumed even) is treated as $d_k/2$ independent two-dimensional planes.
+On each plane a rotation is the orthogonal matrix
+\begin{equation}\label{eq:method:rope_2d}
+  \mat{\Omega}(\phi) =
+  \begin{bmatrix}
+    \cos\phi & -\sin\phi \\
+    \sin\phi & \phantom{-}\cos\phi
+  \end{bmatrix},
+  \qquad
+  \mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi),
+\end{equation}
+the latter identity expressing that composing two planar rotations yields a single rotation by their angular difference.
+For a pulse at position $i$, \gls{rope} assembles these planar rotations into a block-diagonal matrix whose $m$-th block rotates the $m$-th plane by $i\theta_m$,
+\begin{equation}\label{eq:method:rope_block}
+  \mat{R}_i = \diag\!\bigl(\mat{\Omega}(i\theta_1),\,\mat{\Omega}(i\theta_2),\,\ldots,\,\mat{\Omega}(i\theta_{d_k/2})\bigr),
+  \qquad
+  \theta_m = b^{-2(m-1)/d_k},\quad m = 1,\ldots,\tfrac{d_k}{2},
+\end{equation}
+with a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}). The geometric progression of angular frequencies $\theta_m$ mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: low-index planes rotate quickly and resolve fine separations, high-index planes rotate slowly and capture coarse ones.
+Each $\mat{R}_i$ is orthogonal, so $\mat{R}_i^{\top} = \mat{R}_i^{-1} = \mat{R}_{-i}$ and, by \cref{eq:method:rope_2d} applied block-wise, $\mat{R}_i^{\top}\mat{R}_j = \mat{R}_{j-i}$.
+
+Applying the rotation to the query and key and forming their inner product therefore yields a logit that depends only on the relative separation $j - i$,
 \begin{equation}\label{eq:method:rope}
   \tilde{\vect{q}}_i = \mat{R}_i\,\vect{q}_i,
   \qquad
   \tilde{\vect{k}}_j = \mat{R}_j\,\vect{k}_j,
   \qquad
-  \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j = \vect{q}_i^{\top}\mat{R}_{j-i}\,\vect{k}_j,
+  \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j
+    = \vect{q}_i^{\top}\mat{R}_i^{\top}\mat{R}_j\,\vect{k}_j
+    = \vect{q}_i^{\top}\mat{R}_{j-i}\,\vect{k}_j,
 \end{equation}
-where $\mat{R}_i$ is a fixed block-diagonal rotation matrix for position $i$.
+even though each token is rotated by its absolute position. \Cref{fig:method:rope} illustrates this on a single plane: incrementing the position fans a vector around the circle by a fixed angle (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the position gap alone (right).
+
 This supplies an explicit notion of pulse ordering and separation, complementing rather than replacing the bias terms: the attention bias encodes radar-specific pulse relationships, while \gls{rope} encodes temporal ordering.
+Because the rotation angle $i\theta_m$ is well defined for any real argument, the integer index $i$ can be replaced by a continuous coordinate such as the normalised \gls{toa}, in which case the relative phase $\mat{R}_{j-i}$ becomes a function of the physical time gap between two pulses rather than of their ordinal distance—a natural fit for the irregularly sampled pulse trains of \cref{sec:method:data}.
 It also revisits the choice of \cref{sec:method:arch} to omit a positional encoding and rely on the \gls{toa} feature alone, testing whether explicit relative position adds information beyond it.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/rope_rotation.tex}
+  \caption{Geometry of \gls{rope} on one of the $d_k/2$ two-dimensional planes of a head. \emph{Left:} increasing the position index $i$ rotates a query vector $\vect{q}$ by a fixed increment $\theta_m$ per step (\cref{eq:method:rope_block}), so absolute position is encoded as an absolute phase. \emph{Right:} the angle enclosed between a rotated query $\tilde{\vect{q}}_i$ and a rotated key $\tilde{\vect{k}}_j$ equals the content angle plus $(j-i)\theta_m$; since the inner product depends only on this enclosed angle, the attention logit is a function of the relative position $j-i$ (\cref{eq:method:rope}).}
+  \label{fig:method:rope}
+\end{figure}

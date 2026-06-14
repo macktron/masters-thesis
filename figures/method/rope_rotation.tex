@@ -1,0 +1,87 @@
+% =====================================================================
+% Geometry of rotary positional encoding (\gls{rope}) on a single
+% two-dimensional plane of an attention head.  Left panel: a query
+% vector is rotated by a fixed angular increment $\theta_m$ for each
+% increment of the position index, so absolute position maps to an
+% absolute phase (\cref{eq:method:rope_block}).  Right panel: the angle
+% enclosed between a rotated query and a rotated key is the content
+% angle plus $(j-i)\theta_m$, so the inner product---and hence the
+% attention logit---depends only on the relative position $j-i$
+% (\cref{eq:method:rope}).  Loaded from
+% sections/04_method/04_attention_variants.tex via \input{...}.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    >=Latex,
+    axis/.style={->, gray!60, thin},
+    guide/.style={gray!35, thin},
+    qvec/.style={->, thick, color=blue!70!black},
+    kvec/.style={->, thick, color=red!70!black},
+    angarc/.style={->, thin, color=black!75},
+  ]
+
+  % =================== LEFT PANEL: absolute rotation ===================
+  \begin{scope}[xshift=0mm]
+    \def\Rad{16mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (0, 19mm)
+      {Rotation by position};
+
+    % axes and reference circle
+    \draw[axis] (-19mm, 0) -- (19mm, 0);
+    \draw[axis] (0, -6mm) -- (0, 19mm);
+    \draw[guide] (0, 0) circle (\Rad);
+
+    % fan of rotated query vectors: base angle 10deg, increment 24deg
+    \def\base{10}
+    \def\inc{24}
+    \foreach \i/\sh in {0/30, 1/50, 2/70, 3/90} {
+      \pgfmathsetmacro{\ang}{\base + \i*\inc}
+      \draw[qvec, color=blue!\sh!black] (0, 0) -- (\ang:\Rad);
+    }
+
+    % labels for first and last vector
+    \node[color=blue!30!black, font=\scriptsize, anchor=west]
+      at (\base:\Rad) {$\vect{q}=\tilde{\vect{q}}_0$};
+    \pgfmathsetmacro{\last}{\base + 3*\inc}
+    \node[color=blue!90!black, font=\scriptsize, anchor=south]
+      at (\last:\Rad) {$\tilde{\vect{q}}_3=\mat{R}_3\vect{q}$};
+
+    % angular increment arc between i=1 and i=2
+    \pgfmathsetmacro{\aone}{\base + \inc}
+    \pgfmathsetmacro{\atwo}{\base + 2*\inc}
+    \draw[angarc] (\aone:9mm) arc (\aone:\atwo:9mm);
+    \pgfmathsetmacro{\amid}{\base + 1.5*\inc}
+    \node[font=\scriptsize] at (\amid:11.5mm) {$\theta_m$};
+  \end{scope}
+
+  % =================== RIGHT PANEL: relative phase ===================
+  \begin{scope}[xshift=62mm]
+    \def\Rad{16mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (0, 19mm)
+      {Relative phase};
+
+    % axes and reference circle
+    \draw[axis] (-19mm, 0) -- (19mm, 0);
+    \draw[axis] (0, -6mm) -- (0, 19mm);
+    \draw[guide] (0, 0) circle (\Rad);
+
+    \def\qang{18}
+    \def\kang{96}
+
+    % rotated query and key
+    \draw[qvec] (0, 0) -- (\qang:\Rad);
+    \draw[kvec] (0, 0) -- (\kang:\Rad);
+
+    \node[color=blue!70!black, font=\scriptsize, anchor=west]
+      at (\qang:\Rad) {$\tilde{\vect{q}}_i$};
+    \node[color=red!70!black, font=\scriptsize, anchor=south east]
+      at (\kang:\Rad) {$\tilde{\vect{k}}_j$};
+
+    % enclosed angle arc
+    \draw[angarc] (\qang:10mm) arc (\qang:\kang:10mm);
+    \pgfmathsetmacro{\mid}{(\qang + \kang)/2}
+    \node[font=\scriptsize, anchor=south west] at (\mid:11mm)
+      {$\varphi + (j{-}i)\theta_m$};
+  \end{scope}
+
+\end{tikzpicture}
