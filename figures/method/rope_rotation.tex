@@ -23,17 +23,17 @@
   % =================== LEFT PANEL: absolute rotation ===================
   \begin{scope}[xshift=0mm]
     \def\Rad{16mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (0, 19mm)
+    \node[font=\footnotesize\bfseries, anchor=south] at (0, 21mm)
       {Rotation by position};
 
     % axes and reference circle
     \draw[axis] (-19mm, 0) -- (19mm, 0);
-    \draw[axis] (0, -6mm) -- (0, 19mm);
+    \draw[axis] (0, -6mm) -- (0, 20mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % fan of rotated query vectors: base angle 10deg, increment 24deg
-    \def\base{10}
-    \def\inc{24}
+    % fan of rotated query vectors: base angle 8deg, increment 20deg
+    \def\base{8}
+    \def\inc{20}
     \foreach \i/\sh in {0/30, 1/50, 2/70, 3/90} {
       \pgfmathsetmacro{\ang}{\base + \i*\inc}
       \draw[qvec, color=blue!\sh!black] (0, 0) -- (\ang:\Rad);
@@ -43,7 +43,7 @@
     \node[color=blue!30!black, font=\scriptsize, anchor=west]
       at (\base:\Rad) {$\vect{q}=\tilde{\vect{q}}_0$};
     \pgfmathsetmacro{\last}{\base + 3*\inc}
-    \node[color=blue!90!black, font=\scriptsize, anchor=south]
+    \node[color=blue!90!black, font=\scriptsize, anchor=south west]
       at (\last:\Rad) {$\tilde{\vect{q}}_3=\mat{R}_3\vect{q}$};
 
     % angular increment arc between i=1 and i=2
@@ -57,12 +57,12 @@
   % =================== RIGHT PANEL: relative phase ===================
   \begin{scope}[xshift=62mm]
     \def\Rad{16mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (0, 19mm)
+    \node[font=\footnotesize\bfseries, anchor=south] at (0, 21mm)
       {Relative phase};
 
     % axes and reference circle
     \draw[axis] (-19mm, 0) -- (19mm, 0);
-    \draw[axis] (0, -6mm) -- (0, 19mm);
+    \draw[axis] (0, -6mm) -- (0, 20mm);
     \draw[guide] (0, 0) circle (\Rad);
 
     \def\qang{18}
