@@ -30,8 +30,8 @@ For each recording these labels induce two partitions of the index set $\{1,\ldo
   \qquad
   \ell \in \{1,\ldots,M\}.
 \end{equation}
-Fixing a recording and suppressing the superscript, the sets $\mathcal{E}_k$ form a partition of $\{1,\ldots,N\}$ with $\mathcal{E}_k \cap \mathcal{E}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K_{\mathrm{em}}} \mathcal{E}_k = \{1,\ldots,N\}$; every cell is non-empty by construction, because $K_{\mathrm{em}}$ counts only the emitters that actually appear in the recording.
-The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single recording typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
+
+For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive over the emitters. That is, $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K^{(s)}_{\mathrm{em}}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Every cell is non-empty by construction, because $K^{(s)}_{\mathrm{em}}$ counts only the emitters that actually appear in the recording. The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single recording typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
 Mode coverage is therefore a property of a batch of recordings rather than of any individual recording.
 The first partition is defined only within a single recording, while the second is comparable across recordings.
 The two partitions are coupled: restricted to a fixed emitter $k$, the set $\{\, m_n : n \in \mathcal{E}_k \,\}$ is in general non-singleton, so $(m_n)_{n \in \mathcal{E}_k}$ may hop between several catalogue entries.
