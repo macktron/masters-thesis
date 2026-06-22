@@ -16,7 +16,7 @@ When the recording is fixed or clear from context we suppress the superscript an
 \subsection*{Labels and induced partitions}
 
 Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
-The emitter count $K^{(s)}_{\mathrm{em}}$ is fixed per recording but varies between recordings, since different recordings can have different number of emitters present. The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all recordings, so $m^{(s)}_n = \ell$ refers to the same mode regardless of which recording the pulse comes from; the catalogue size $M$ therefore carries no superscript.
+The emitter count $K^{(s)}_{\mathrm{em}}$ is fixed per recording but varies between recordings, since different recordings can have different number of emitters present. The mode symbol is drawn from a finite global catalogue of size $M$ that is shared across all recordings; the catalogue size $M$ therefore carries no superscript.
 However, in real-world scenarios, the actual number of distinct modes present is not fixed or known in advance, and our architecture does not require $M$ as an input or impose a closed-set assumption.
 
 For each recording these labels induce two partitions of the index set $\{1,\ldots,N_s\}$,
