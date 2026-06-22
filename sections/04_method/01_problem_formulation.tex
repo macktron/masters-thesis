@@ -2,20 +2,20 @@
 
 \subsection*{Input}
 
-A \emph{pulse train} is a finite, time-ordered sequence of \glspl{pdw}
+A \emph{received pulse stream} is a finite, time-ordered sequence of \glspl{pdw}
 \[
   \mat{X} = (\vect{x}_1,\ldots,\vect{x}_N),
   \qquad
   \vect{x}_n \in \R^{d},
 \]
 where each $\vect{x}_n$ encodes the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angle of arrival).
-The length $N$ varies between trains.
+The length $N$ varies between streams.
 
 \subsection*{Labels and induced partitions}
 
 Each pulse $n \in \{1,\ldots,N\}$ carries two labels: an emitter identity $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$ and an operating mode $m_n \in \{1,\ldots,M\}$.
-The emitter symbol is unique only \emph{within the current train}: the same integer in a different train indexes an unrelated emitter, and $K_{\mathrm{em}}$ varies between trains.
-The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all trains, so $m_n = \ell$ refers to the same mode regardless of which train the pulse comes from.
+The emitter symbol is unique only \emph{within the current stream}: the same integer in a different stream indexes an unrelated emitter, and $K_{\mathrm{em}}$ varies between streams.
+The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all streams, so $m_n = \ell$ refers to the same mode regardless of which stream the pulse comes from.
 However, in real-world scenarios, the actual number of distinct modes present is not fixed or known in advance, and our architecture does not require $M$ as an input or impose a closed-set assumption.
 
 These labels induce two partitions of the index set $\{1,\ldots,N\}$,
@@ -29,17 +29,17 @@ These labels induce two partitions of the index set $\{1,\ldots,N\}$,
   \qquad
   \ell \in \{1,\ldots,M\}.
 \end{equation}
-The sets $\mathcal{E}_k$ form a partition of $\{1,\ldots,N\}$ with $\mathcal{E}_k \cap \mathcal{E}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K_{\mathrm{em}}} \mathcal{E}_k = \{1,\ldots,N\}$; every cell is non-empty by construction, because $K_{\mathrm{em}}$ counts only the emitters that actually appear in the current train.
-The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single train typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
-Mode coverage is therefore a property of a batch of trains rather than of any individual train.
-The first partition is defined only within a single train, while the second is comparable across trains.
+The sets $\mathcal{E}_k$ form a partition of $\{1,\ldots,N\}$ with $\mathcal{E}_k \cap \mathcal{E}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K_{\mathrm{em}}} \mathcal{E}_k = \{1,\ldots,N\}$; every cell is non-empty by construction, because $K_{\mathrm{em}}$ counts only the emitters that actually appear in the current stream.
+The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single stream typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
+Mode coverage is therefore a property of a batch of streams rather than of any individual stream.
+The first partition is defined only within a single stream, while the second is comparable across streams.
 The two partitions are coupled: restricted to a fixed emitter $k$, the set $\{\, m_n : n \in \mathcal{E}_k \,\}$ is in general non-singleton, so $(m_n)_{n \in \mathcal{E}_k}$ may hop between several catalogue entries.
-\Cref{fig:method:partitions} illustrates the two induced partitions on a toy pulse train of $N = 9$ pulses, with the dual labelling rendered as a fill colour for the emitter index and a border style for the mode index.
+\Cref{fig:method:partitions} illustrates the two induced partitions on a toy received pulse stream of $N = 9$ pulses, with the dual labelling rendered as a fill colour for the emitter index and a border style for the mode index.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/partitions.tex}
-  \caption{The two label-induced partitions of a single pulse train. Each pulse $\vect{x}_n$ carries two labels: an emitter identity $e_n$ (encoded as fill colour) and an operating mode $m_n$ (encoded as border style: solid, dashed, or dotted). The same index set $\{1,\ldots,N\}$ is partitioned in two distinct ways, by the emitter labelling (\cref{eq:method:emitter_partition}) and by the mode labelling (\cref{eq:method:mode_partition}). Within each emitter subset the modes are in general mixed, and within each mode subset the emitters are in general mixed, reflecting the coupling between the two labellings.}
+  \caption{The two label-induced partitions of a single received pulse stream. Each pulse $\vect{x}_n$ carries two labels: an emitter identity $e_n$ (encoded as fill colour) and an operating mode $m_n$ (encoded as border style: solid, dashed, or dotted). The same index set $\{1,\ldots,N\}$ is partitioned in two distinct ways, by the emitter labelling (\cref{eq:method:emitter_partition}) and by the mode labelling (\cref{eq:method:mode_partition}). Within each emitter subset the modes are in general mixed, and within each mode subset the emitters are in general mixed, reflecting the coupling between the two labellings.}
   \label{fig:method:partitions}
 \end{figure}
 
@@ -67,10 +67,10 @@ Discrete per-pulse outputs
   \hat{m}_n \in \{1,\ldots,\hat{M}\},
   \qquad n \in \{1,\ldots,N\},
 \end{equation}
-are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}$ within each train and $\{\vect{z}^{\mathrm{md}}_n\}$ across trains.
+are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}$ within each stream and $\{\vect{z}^{\mathrm{md}}_n\}$ across streams.
 The cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are determined by the clustering rather than fixed in advance; in particular $\hat{M}$ may exceed $M$ when modulation types absent from training are encountered at inference.
 
 \subsection*{Learning objective}
 
-Given a labelled collection of pulse trains, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form and a common batch-wide aggregation, differing only in which label drives their positive sets: emitter identifiers on $\mat{Z}^{\mathrm{em}}$ and mode labels on $\mat{Z}^{\mathrm{md}}$.
-On a previously unseen train, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.
+Given a labelled collection of received pulse streams, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form and a common batch-wide aggregation, differing only in which label drives their positive sets: emitter identifiers on $\mat{Z}^{\mathrm{em}}$ and mode labels on $\mat{Z}^{\mathrm{md}}$.
+On a previously unseen stream, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.

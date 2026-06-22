@@ -5,7 +5,7 @@ The simulator supplies time-ordered pulse records together with ground-truth lab
 Receiver-side degradations (dropped pulses, spurious detections, parameter jitter) are produced inside the simulator rather than injected afterwards (\cref{sec:method:data}); the tables below state which simulator regime is active for each run.
 Operational \gls{elint} recordings are not included, which sidesteps distribution shift and disclosure constraints while still exercising mixture traffic, mode changes within emitters, and variable train density.
 
-Each \emph{scenario} is one simulated timeline: a sequence of \glspl{pdw} whose length and the number of concurrent emitters vary across draws so that the encoder sees both sparse and crowded electromagnetic pictures.
+Each \emph{scenario} is one simulated timeline: a sequence of \glspl{pdw} whose length and the number of concurrent emitters vary across draws so that the encoder sees both sparse and crowded electromagnetic pictures, with the resulting separability summarised by the scenario difficulty score of \cref{sec:exp:datasets:difficulty}.
 Scenarios are disjointly assigned to training, validation, and test partitions before any windowing; all normalisation statistics in \cref{sec:method:data} are fit on the training partition only and applied unchanged to validation and test pulses.
 Training windows use stride $L/2$ with $L = 1024$ pulses, whereas validation and test windows use stride $L$, so the effective number of windows per scenario differs by split even when raw pulse counts are similar.
 
@@ -40,3 +40,49 @@ When the simulator regime adds dropped or spurious pulses (\cref{sec:method:data
 This mirrors the reporting practice in earlier Saab-hosted simulator studies, which often include illustrative emitter tracks alongside tables \parencite{jonsson2023supcon}.
 \cref{sec:exp:qualitative} complements the brief sanity checks here with embedding-space visualizations and other qualitative diagnostics once model checkpoints are available.
 % TODO: add \texttt{figures/experiments/corpus\_examples.pdf} (e.g.\ example windows by emitter/mode) and reference with \cref{fig:exp:corpus_examples}.
+
+\subsection{Scenario difficulty}\label{sec:exp:datasets:difficulty}
+
+Aggregate counts say how much data a scenario contains but not how hard it is to deinterleave.
+Two emitters become hard to separate when their pulses look alike, either because their modulation patterns coincide or because they share the same region of the sky over time.
+We therefore summarise each scenario with an overlap score that is large when its emitters are easily confused, so that results in \cref{sec:exp:results} can be read against a continuous measure of difficulty rather than against scenario identity alone.
+
+All terms reuse one tool.
+For a per-pulse quantity $x$ and emitter $i$ (with pulse set $\mathcal{E}_i$ as in \cref{eq:method:emitter_partition} and $n_i = |\mathcal{E}_i|$), let $p_i^x(b)$ be the additively smoothed, normalised histogram of $x$ over bins $b$.
+The Bhattacharyya coefficient \parencite{bhattacharyya1943measure} measures how much two such histograms coincide,
+\begin{equation}\label{eq:exp:bc}
+  BC_{ij}^x = \sum_b \sqrt{\,p_i^x(b)\,p_j^x(b)\,} \in [0,1],
+\end{equation}
+equal to $1$ for identical distributions and $0$ when their supports are disjoint.
+A scenario-level score aggregates the pairwise coefficients with a weight that favours pairs backed by many pulses,
+\begin{equation}\label{eq:exp:agg}
+  D_x = \sum_{i<j} w_{ij}\,BC_{ij}^x,
+  \qquad
+  w_{ij} = \frac{n_i n_j}{\sum_{a<b} n_a n_b},
+\end{equation}
+so that $D_x \in [0,1]$ inherits the same ``$0$ separated, $1$ overlapping'' reading as \cref{eq:exp:bc}.
+
+\paragraph{Modulation-pattern overlap.}
+The first score applies this tool to the modulation channels $x \in \{\mathrm{PRI}, \mathrm{PW}, f\}$, where $f$ and $\mathrm{PW}$ are the carrier frequency and pulse width of \cref{sec:method:data} and the \gls{pri} is the time gap $\mathrm{PRI}_n = t_n - t_{n-1}$ between consecutive pulses of one emitter.
+The three channels are combined into a single modulation term
+\[
+  D_{\mathrm{mod}} = \beta_{\mathrm{PRI}}\,D_{\mathrm{PRI}} + \beta_{\mathrm{PW}}\,D_{\mathrm{PW}} + \beta_f\,D_f,
+  \qquad
+  \beta_{\mathrm{PRI}} + \beta_{\mathrm{PW}} + \beta_f = 1,
+\]
+so that $D_{\mathrm{mod}} \approx 0$ marks emitters with distinct parameter signatures and $D_{\mathrm{mod}} \approx 1$ marks emitters whose \gls{pri}, pulse width, and frequency distributions all coincide.
+
+\paragraph{Physical overlap.}
+The second score asks how often emitters occupy the same direction.
+Because the receiver--emitter geometry drifts during a scenario, the \gls{aoa} histogram of \cref{eq:exp:bc} is built on the angle pair $(\theta^{\mathrm{az}}, \theta^{\mathrm{lat}})$ of \cref{eq:method:aoa_rescale} within short time slices and the coefficient is averaged over the slices spanning $[0,T]$, giving a time-resolved overlap $O_{ij}^{\mathrm{AoA}}$ that is then aggregated as in \cref{eq:exp:agg} into $D_{\mathrm{AoA}}$.
+A value near $0$ means the emitters trace well-separated angular tracks, whereas a value near $1$ means their tracks coincide for most of the timeline.
+
+We also keep an optional amplitude term $D_A$, formed exactly like $D_{\mathrm{AoA}}$ but on the amplitude $\log_{10} A$ of \cref{sec:method:data}, separate from the angular term because received amplitude is environment-dependent and less reliable as a separation cue.
+Whether $D_A$ adds information beyond $D_{\mathrm{AoA}}$ will be assessed in \cref{ch:experiments}.
+
+The terms combine into a single difficulty score
+\[
+  D = \lambda_{\mathrm{AoA}}\,D_{\mathrm{AoA}} + \lambda_A\,D_A + \lambda_{\mathrm{mod}}\,D_{\mathrm{mod}},
+\]
+with non-negative weights that sum to one; higher $D$ indicates harder deinterleaving.
+% TODO: report per-split distributions of $D$ (and its components) in \cref{sec:exp:results} once the simulator export is frozen, and fix the weights $\beta$, $\lambda$ used.
