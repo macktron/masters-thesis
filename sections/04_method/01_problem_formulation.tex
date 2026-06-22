@@ -2,37 +2,39 @@
 
 \subsection*{Input}
 
-A \emph{received pulse stream} is a finite, time-ordered sequence of \glspl{pdw}
+The data consist of $S$ recordings indexed by $s \in \{1,\ldots,S\}$.
+The \emph{received pulse stream} of recording $s$ is a finite, time-ordered sequence of \glspl{pdw}
 \[
-  \mat{X} = (\vect{x}_1,\ldots,\vect{x}_N),
+  \mat{X}^{(s)} = (\vect{x}^{(s)}_1,\ldots,\vect{x}^{(s)}_{N_s}),
   \qquad
-  \vect{x}_n \in \R^{d},
+  \vect{x}^{(s)}_n \in \R^{d},
 \]
-where each $\vect{x}_n$ encodes the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angles of arrival).
-The length $N$ varies between streams.
+where each $\vect{x}^{(s)}_n$ encodes the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angles of arrival).
+The length $N_s$ varies between recordings.
+When the recording is fixed or clear from context we suppress the superscript and write $\mat{X}$, $N$, and $\vect{x}_n$, and likewise for the labels and partitions defined below.
 
 \subsection*{Labels and induced partitions}
 
-Each pulse $n \in \{1,\ldots,N\}$ carries two labels: an emitter identity $e_n \in \{1,\ldots,K_{\mathrm{em}}\}$ and an operating mode $m_n \in \{1,\ldots,M\}$.
-The emitter symbol is unique only \emph{within the current stream}: the same integer in a different stream indexes an unrelated emitter, and $K_{\mathrm{em}}$ varies between streams.
-The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all streams, so $m_n = \ell$ refers to the same mode regardless of which stream the pulse comes from.
+Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
+The emitter symbol is unique only \emph{within its recording}: the same integer in a different recording indexes an unrelated emitter, and the emitter count $K^{(s)}_{\mathrm{em}}$ is fixed per recording but varies between recordings.
+The mode symbol is drawn from a finite \emph{global} catalogue of size $M$ that is shared across all recordings, so $m^{(s)}_n = \ell$ refers to the same mode regardless of which recording the pulse comes from; the catalogue size $M$ therefore carries no superscript.
 However, in real-world scenarios, the actual number of distinct modes present is not fixed or known in advance, and our architecture does not require $M$ as an input or impose a closed-set assumption.
 
-These labels induce two partitions of the index set $\{1,\ldots,N\}$,
+For each recording these labels induce two partitions of the index set $\{1,\ldots,N_s\}$,
 \begin{equation}\label{eq:method:emitter_partition}
-  \mathcal{E}_k = \{\, n : e_n = k \,\},
+  \mathcal{E}^{(s)}_k = \{\, n : e^{(s)}_n = k \,\},
   \qquad
-  k \in \{1,\ldots,K_{\mathrm{em}}\},
+  k \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\},
 \end{equation}
 \begin{equation}\label{eq:method:mode_partition}
-  \mathcal{M}_\ell = \{\, n : m_n = \ell \,\},
+  \mathcal{M}^{(s)}_\ell = \{\, n : m^{(s)}_n = \ell \,\},
   \qquad
   \ell \in \{1,\ldots,M\}.
 \end{equation}
-The sets $\mathcal{E}_k$ form a partition of $\{1,\ldots,N\}$ with $\mathcal{E}_k \cap \mathcal{E}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K_{\mathrm{em}}} \mathcal{E}_k = \{1,\ldots,N\}$; every cell is non-empty by construction, because $K_{\mathrm{em}}$ counts only the emitters that actually appear in the current stream.
-The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single stream typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
-Mode coverage is therefore a property of a batch of streams rather than of any individual stream.
-The first partition is defined only within a single stream, while the second is comparable across streams.
+Fixing a recording and suppressing the superscript, the sets $\mathcal{E}_k$ form a partition of $\{1,\ldots,N\}$ with $\mathcal{E}_k \cap \mathcal{E}_{k'} = \varnothing$ for $k \ne k'$ and $\bigcup_{k=1}^{K_{\mathrm{em}}} \mathcal{E}_k = \{1,\ldots,N\}$; every cell is non-empty by construction, because $K_{\mathrm{em}}$ counts only the emitters that actually appear in the recording.
+The sets $\mathcal{M}_\ell$ are likewise pairwise disjoint and satisfy $\bigcup_{\ell=1}^{M} \mathcal{M}_\ell = \{1,\ldots,N\}$, but their indexing runs over the entire global mode catalogue: a single recording typically realises only a subset of $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any mode $\ell$ absent from $\{m_1,\ldots,m_N\}$.
+Mode coverage is therefore a property of a batch of recordings rather than of any individual recording.
+The first partition is defined only within a single recording, while the second is comparable across recordings.
 The two partitions are coupled: restricted to a fixed emitter $k$, the set $\{\, m_n : n \in \mathcal{E}_k \,\}$ is in general non-singleton, so $(m_n)_{n \in \mathcal{E}_k}$ may hop between several catalogue entries.
 \Cref{fig:method:partitions} illustrates the two induced partitions on a toy received pulse stream of $N = 9$ pulses, with the dual labelling rendered as a fill colour for the emitter index and a border style for the mode index.
 
