@@ -12,7 +12,7 @@ This structure mirrors the dual-embedding formulation introduced in \cref{sec:me
 
 \subsection*{Input embedding}
 
-Each \gls{pdw} vector $\vect{x}_n \in \R^{d}$, normalised as described in \cref{sec:method:data}, is mapped to a token embedding through an affine projection
+Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of \cref{sec:method:data} and, optionally, the engineered timing features of \cref{sec:method:features}, is mapped to a token embedding through an affine projection
 \begin{equation}\label{eq:method:input_embed}
   \vect{h}^{(0)}_n = \mat{W}_{\mathrm{in}}\vect{x}_n + \vect{b}_{\mathrm{in}},
   \qquad

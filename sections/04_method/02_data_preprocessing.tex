@@ -5,6 +5,7 @@ Pulse trains are produced by Saab's OpenModesty scenario simulator, the same too
 OpenModesty specifies flight paths, emitter placements, and operating-mode schedules, then emits and intercepts pulses one at a time.
 Receiver-side imperfections (dropped pulses, spurious detections, parameter jitter) are produced inside the simulator and are already present in the exported pulse records, so no separate noise injection is applied downstream.
 Each exported pulse carries the continuous fields used here together with the two discrete labels defined in \cref{sec:method:formulation}.
+Optional hand-crafted timing features derived from \gls{toa} are defined separately in \cref{sec:method:features}; when they are disabled, the pipeline below operates on the base \gls{pdw} channels alone.
 
 \subsection{Windowing}\label{sec:method:data:window}
 
