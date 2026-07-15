@@ -1,12 +1,12 @@
 % =====================================================================
 % Geometry of rotary positional encoding (\gls{rope}) on a single
 % two-dimensional plane of an attention head.  Left panel: a query
-% vector is rotated by a fixed angular increment $\theta_m$ for each
-% increment of the position index, so absolute position maps to an
-% absolute phase (\cref{eq:method:rope_block}).  Right panel: the angle
-% enclosed between a rotated query and a rotated key is the content
-% angle plus $(j-i)\theta_m$, so the inner product---and hence the
-% attention logit---depends only on the relative position $j-i$
+% vector is rotated at a fixed angular rate $\theta_m$ as its coordinate
+% $p$ increases, so the absolute coordinate maps to an absolute phase
+% (\cref{eq:method:rope_block}).  Right panel: the angle enclosed
+% between a rotated query and a rotated key is the content angle plus
+% $(p_j-p_i)\theta_m$, so the inner product---and hence the attention
+% logit---depends only on the coordinate difference $p_j-p_i$
 % (\cref{eq:method:rope}).  Loaded from
 % sections/04_method/04_attention_variants.tex via \input{...}.
 % =====================================================================
@@ -41,10 +41,10 @@
 
     % labels for first and last vector
     \node[color=blue!30!black, font=\scriptsize, anchor=west]
-      at (\base:\Rad) {$\vect{q}=\tilde{\vect{q}}_0$};
+      at (\base:\Rad) {$\vect{q}=\mat{R}(0)\,\vect{q}$};
     \pgfmathsetmacro{\last}{\base + 3*\inc}
     \node[color=blue!90!black, font=\scriptsize, anchor=south west]
-      at (\last:\Rad) {$\tilde{\vect{q}}_3=\mat{R}_3\vect{q}$};
+      at (\last:\Rad) {$\mat{R}(3)\,\vect{q}$};
 
     % angular increment arc between i=1 and i=2
     \pgfmathsetmacro{\aone}{\base + \inc}
@@ -81,7 +81,7 @@
     \draw[angarc] (\qang:10mm) arc (\qang:\kang:10mm);
     \pgfmathsetmacro{\mid}{(\qang + \kang)/2}
     \node[font=\scriptsize, anchor=south west] at (\mid:11mm)
-      {$\varphi + (j{-}i)\theta_m$};
+      {$\varphi + (p_j{-}p_i)\theta_m$};
   \end{scope}
 
 \end{tikzpicture}
