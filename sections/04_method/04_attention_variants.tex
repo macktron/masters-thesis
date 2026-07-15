@@ -28,9 +28,20 @@ The construction mirrors the relative-position and content-independent biases us
 
 \subsection*{Rotary positional encoding}
 
-The bias variant encodes \emph{which} pulses are related; the second variant encodes \emph{where} a pulse lies along one or more physical axes.
-\Gls{rope} \parencite{su2024roformer} assigns each pulse a scalar coordinate $p_i$—in the original formulation simply the token index, $p_i = i$—and encodes it as a phase: the query and key of pulse $i$ are rotated by angles proportional to $p_i$ before the dot product of \cref{eq:method:attn_base} is taken.
-To do so, the $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimensional planes, and the $m$-th plane is rotated by the angle $p_i\theta_m$ using the planar rotation matrix
+The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
+Following \textcite{su2024roformer}, let the query and key of a pulse be functions of both its hidden representation $\vect{h}_i$ entering the attention sub-layer and a scalar coordinate $p_i$ attached to the pulse, and require that their inner product depend on the coordinates only through their difference,
+\begin{equation}\label{eq:method:rope_goal}
+  \vect{q}_i = f_q(\vect{h}_i, p_i),
+  \qquad
+  \vect{k}_j = f_k(\vect{h}_j, p_j),
+  \qquad
+  \vect{q}_i^{\top}\vect{k}_j = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
+\end{equation}
+In the original formulation the coordinate is the token index, $p_i = i$.
+We instead attach raw pulse parameters, so that the difference $p_j - p_i$ is a physical quantity—the time gap or the angular separation between two pulses—rather than an ordinal distance; this suits the irregularly sampled pulse trains of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
+
+\Gls{rope} satisfies \cref{eq:method:rope_goal} by encoding the coordinate as a phase.
+The $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimensional planes, and the $m$-th plane is rotated by the angle $p\theta_m$ using the planar rotation matrix
 \begin{equation}\label{eq:method:rope_2d}
   \mat{\Omega}(\phi) =
   \begin{bmatrix}
@@ -46,27 +57,29 @@ Collecting the per-plane rotations into a single block-diagonal matrix gives
 \end{equation}
 with a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}).
 The geometric progression of angular frequencies $\theta_m$ mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: fast-rotating planes resolve fine coordinate differences, slow-rotating planes capture coarse ones.
-
-The key property of this construction is that composing two planar rotations subtracts their angles, $\mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi)$, so block-wise $\mat{R}(p_i)^{\top}\mat{R}(p_j) = \mat{R}(p_j - p_i)$.
-The attention logit between the rotated query and key therefore depends only on the coordinate \emph{difference},
-\begin{equation}\label{eq:method:rope}
-  \tilde{\vect{q}}_i = \mat{R}(p_i)\,\vect{q}_i,
+The query and key functions are then the usual linear projections followed by this rotation,
+\begin{equation}\label{eq:method:rope_map}
+  f_q(\vect{h}_i, p_i) = \mat{R}(p_i)\,\mat{W}_q\vect{h}_i,
   \qquad
-  \tilde{\vect{k}}_j = \mat{R}(p_j)\,\vect{k}_j,
-  \qquad
-  \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j
-    = \vect{q}_i^{\top}\mat{R}(p_j - p_i)\,\vect{k}_j,
+  f_k(\vect{h}_j, p_j) = \mat{R}(p_j)\,\mat{W}_k\vect{h}_j,
 \end{equation}
-even though each pulse is rotated by its absolute coordinate. \Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the coordinate gap alone (right).
+written $\tilde{\vect{q}}_i$ and $\tilde{\vect{k}}_j$ below.
 
-Nothing in this construction requires the coordinate to be an integer sequence position: the angle $p\theta_m$ in \cref{eq:method:rope_block} is well defined for any real $p$.
-We therefore drive the rotations with raw pulse parameters rather than ordinal positions.
-Setting $p_i$ to the \gls{toa} $t_i$ makes the relative phase in \cref{eq:method:rope} a function of the physical time gap $t_j - t_i$ between two pulses rather than of their ordinal distance—a natural fit for the irregularly sampled pulse trains of \cref{sec:method:data}.
-Several coordinates can be encoded simultaneously by partitioning the $d_k/2$ planes into groups and driving each group with a different feature—here \gls{toa} on one group and \gls{aoa} on another—just as two-dimensional \gls{rope} for vision transformers assigns the two image axes to disjoint frequency groups \parencite{heo2024ropevit}.
-The \gls{aoa} is a particularly natural candidate: it is itself an angle, so encoding it as a phase preserves its periodic structure.
+That this construction meets the design goal follows from one property of planar rotations: composing two of them subtracts their angles, $\mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi)$, hence block-wise $\mat{R}(p_i)^{\top}\mat{R}(p_j) = \mat{R}(p_j - p_i)$ and
+\begin{equation}\label{eq:method:rope}
+  \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j
+    = (\mat{W}_q\vect{h}_i)^{\top}\,\mat{R}(p_j - p_i)\,(\mat{W}_k\vect{h}_j),
+\end{equation}
+which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is rotated by its absolute coordinate, yet the logit sees only the difference.
+\Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the coordinate gap alone (right).
 
-This variant supplies an explicit relative encoding of time and direction, complementing rather than replacing the bias term: the bias variant injects pairwise relationships additively into the logits, while \gls{rope} embeds coordinate differences in the geometry of the queries and keys.
-It also revisits the choice of \cref{sec:method:arch} to omit a positional encoding and rely on \gls{toa} and \gls{aoa} as plain input features, testing whether an explicit relative encoding of these coordinates adds information beyond their presence in the input.
+The coordinates we investigate are the \gls{toa} $t_n$ and the two \gls{aoa} components $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, normalised as in \cref{sec:method:data}.
+A layer driven by a single coordinate rotates all $d_k/2$ planes of every head by it; several coordinates are combined by splitting the per-head dimension into disjoint slices and rotating each slice by its own coordinate with its own frequency ladder, as in the multi-axis \gls{rope} used for vision transformers \parencite{heo2024ropevit}.
+Concretely, the shared trunk of \cref{sec:method:arch} and the mode branch are rotated by \gls{toa} alone, whereas the deinterleaving branch splits each head into three slices rotated by $t_n$, $\theta^{\mathrm{az}}_n$, and $\theta^{\mathrm{lat}}_n$ respectively.
+This asymmetry follows the semantics of the two outputs: within a window, pulses from one emitter arrive from a nearly constant direction, so small relative \gls{aoa} phases are a strong deinterleaving cue, whereas an operating mode is a property of the temporal emission pattern and may be observed from any direction, so the mode branch keeps time as its only coordinate.
+The \gls{aoa} components are especially natural here: they are themselves angles, so the phase encoding preserves their periodic structure.
+
+This variant complements rather than replaces the bias term—the bias injects pairwise relationships additively into the logits, while \gls{rope} embeds coordinate differences in the geometry of the queries and keys—and it revisits the choice of \cref{sec:method:arch} to rely on \gls{toa} and \gls{aoa} as plain input features, testing whether an explicit relative encoding adds information beyond their presence in the input.
 
 \begin{figure}[tbp]
   \centering
