@@ -14,9 +14,9 @@ Throughout, we write the attention logits of a single head over a window of $L$ 
 where $\vect{q}_i$ and $\vect{k}_j$ are the query and key of pulses $i$ and $j$ and $d_k$ is the per-head dimension.
 The attention weights are the row-wise softmax of $\mat{A}$, which then mixes the value vectors.
 
-\subsection*{Basic attention bias}
+\subsection*{Physical attention bias}
 
-The first variant adds a handcrafted pairwise bias to the logits.
+The first variant adds a handcrafted pairwise bias to the logits, computed from the physical parameters of each pulse pair.
 For each physical feature $f$ of interest, a fixed term $B^{(f)}_{ij}$ is computed from the values of pulses $i$ and $j$, and the terms are superposed with learnable scalar coefficients,
 \begin{equation}\label{eq:method:attn_bias}
   A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}} + \sum_{f} \lambda_f\, B^{(f)}_{ij},
