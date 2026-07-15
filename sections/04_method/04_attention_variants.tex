@@ -74,12 +74,42 @@ which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is 
 \Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the coordinate gap alone (right).
 
 The coordinates we investigate are the \gls{toa} $t_n$ and the two \gls{aoa} components $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, normalised as in \cref{sec:method:data}.
-A layer driven by a single coordinate rotates all $d_k/2$ planes of every head by it; several coordinates are combined by splitting the per-head dimension into disjoint slices and rotating each slice by its own coordinate with its own frequency ladder, as in the multi-axis \gls{rope} used for vision transformers \parencite{heo2024ropevit}.
-Concretely, the shared trunk of \cref{sec:method:arch} and the mode branch are rotated by \gls{toa} alone, whereas the deinterleaving branch splits each head into three slices rotated by $t_n$, $\theta^{\mathrm{az}}_n$, and $\theta^{\mathrm{lat}}_n$ respectively.
-This asymmetry follows the semantics of the two outputs: within a window, pulses from one emitter arrive from a nearly constant direction, so small relative \gls{aoa} phases are a strong deinterleaving cue, whereas an operating mode is a property of the temporal emission pattern and may be observed from any direction, so the mode branch keeps time as its only coordinate.
-The \gls{aoa} components are especially natural here: they are themselves angles, so the phase encoding preserves their periodic structure.
+The shared trunk of \cref{sec:method:arch} and the mode branch use a single coordinate: every head rotates all of its $d_k/2$ planes by the \gls{toa}, applying $\mat{R}(t_n)$ of \cref{eq:method:rope_block} directly.
+The \gls{aoa} is deliberately excluded there, because an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of the direction from which it is observed; rotating the mode branch by arrival angles would inject nuisance variation into an embedding that should be invariant to geometry.
+
+For the deinterleaving branch, by contrast, direction is a strong cue: within a window, pulses from one emitter arrive from a nearly constant direction.
+This branch therefore encodes all three coordinates at once by partitioning the $d_k/2$ planes of each head into three disjoint slices and rotating each slice by its own coordinate, in the manner of the multi-axis \gls{rope} used for vision transformers \parencite{heo2024ropevit},
+\begin{equation}\label{eq:method:rope_sliced}
+  \mat{R}^{\mathrm{em}}_n =
+  \diag\!\bigl(
+    \mat{R}^{(1)}(t_n),\;
+    \mat{R}^{(2)}(\theta^{\mathrm{az}}_n),\;
+    \mat{R}^{(3)}(\theta^{\mathrm{lat}}_n)
+  \bigr),
+\end{equation}
+where slice $g$ comprises $c_g$ planes with $c_1 + c_2 + c_3 = d_k/2$, and $\mat{R}^{(g)}$ stacks $c_g$ planar rotations with its own frequency ladder exactly as in \cref{eq:method:rope_block}.
+Because the slices occupy disjoint dimensions of the query and key, the logit of \cref{eq:method:rope} splits into a sum of per-coordinate relative terms,
+\begin{equation}\label{eq:method:rope_sliced_logit}
+\begin{split}
+  \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j
+    ={}& \vect{q}_i^{(1)\top}\,\mat{R}^{(1)}(t_j - t_i)\,\vect{k}_j^{(1)} \\
+    &+ \vect{q}_i^{(2)\top}\,\mat{R}^{(2)}\bigl(\theta^{\mathrm{az}}_j - \theta^{\mathrm{az}}_i\bigr)\,\vect{k}_j^{(2)}
+     + \vect{q}_i^{(3)\top}\,\mat{R}^{(3)}\bigl(\theta^{\mathrm{lat}}_j - \theta^{\mathrm{lat}}_i\bigr)\,\vect{k}_j^{(3)},
+\end{split}
+\end{equation}
+with $\vect{q}^{(g)}_i$ and $\vect{k}^{(g)}_j$ the sub-vectors of the unrotated query and key in slice $g$.
+The first term compares pulses by their time gap and the remaining two by their angular separation in each \gls{aoa} component, so time and direction contribute independent, additively superposed relative phases to the same attention logit.
+\Cref{fig:method:rope_slicing} contrasts the two layouts.
+The \gls{aoa} components are especially natural in this role: they are themselves angles, so the phase encoding preserves their periodic structure.
 
 This variant complements rather than replaces the bias term—the bias injects pairwise relationships additively into the logits, while \gls{rope} embeds coordinate differences in the geometry of the queries and keys—and it revisits the choice of \cref{sec:method:arch} to rely on \gls{toa} and \gls{aoa} as plain input features, testing whether an explicit relative encoding adds information beyond their presence in the input.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/rope_slicing.tex}
+  \caption{Allocation of the $d_k/2$ rotation planes of one attention head to physical coordinates. In the shared trunk and the mode branch (top), every plane is rotated by the \gls{toa} $t_n$ down its frequency ladder (\cref{eq:method:rope_block}); the \gls{aoa} is excluded because the mode embedding should be invariant to viewing geometry. In the deinterleaving branch (bottom), the planes are partitioned into three disjoint slices of sizes $c_1$, $c_2$, and $c_3$, rotated by $t_n$, $\theta^{\mathrm{az}}_n$, and $\theta^{\mathrm{lat}}_n$ respectively (\cref{eq:method:rope_sliced}), so that the attention logit decomposes into the per-coordinate relative terms of \cref{eq:method:rope_sliced_logit}.}
+  \label{fig:method:rope_slicing}
+\end{figure}
 
 \begin{figure}[tbp]
   \centering
