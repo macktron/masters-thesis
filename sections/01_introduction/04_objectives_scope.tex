@@ -16,6 +16,6 @@ No operational \gls{elint} recordings are used, so the conclusions are not valid
 
 The focus is offline or batch analysis of recorded streams rather than hard real-time implementation on embedded hardware, and we do not address operational emitter naming against classified libraries.
 Because the self-attention mechanism of the transformer scales quadratically with sequence length, recorded scenarios are split into bounded windows that are processed individually (\cref{sec:method:data:window}); conclusions therefore concern representation quality and clustering agreement on such windows rather than end-to-end tracking performance over arbitrarily long horizons.
-Extensions to online operation and to library-based identification are discussed in \cref{ch:discussion} but are not implemented.
+Extensions to online operation and to library-based identification are discussed in \cref{sec:disc:limitations,sec:disc:implications} but are not implemented.
 
-Finally, generalization to unseen operating modes is probed only within the simulator: held-out-modulation experiments (\cref{ch:experiments}) exclude selected modulation types from training, but the excluded types are still drawn from the same simulation environment, so no claim is made about arbitrary novel waveforms.
+Finally, generalization to unseen operating modes is probed only within the simulator: held-out-modulation experiments (\cref{sec:exp:datasets}) exclude selected modulation types from training, but the excluded types are still drawn from the same simulation environment, so no claim is made about arbitrary novel waveforms.
