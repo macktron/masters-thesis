@@ -1,6 +1,6 @@
 \section{Attention Variants}\label{sec:method:attention}
 
-The encoder of \cref{sec:method:arch} uses standard self-attention, which treats a window as an unordered set of tokens and lets every pulse attend to every other pulse purely through learned query--key compatibility.
+The encoder of \cref{sec:method:arch} uses standard self-attention, which treats a window as an unordered set of tokens and lets every pulse attend to every other pulse purely through learned query--key compatibility, including time of arrival.
 The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} entry of each \gls{pdw}.
 A radar pulse train, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, or have a similar pulse width are far more likely to originate from the same emitter or mode than an arbitrary pair.
 This section describes three variants of the attention mechanism that make such structure explicit. Each is evaluated as a drop-in replacement for the \gls{mha} sub-layers of \cref{sec:method:arch}; their relative merit is reported in \cref{ch:experiments}.
