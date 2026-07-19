@@ -2,7 +2,8 @@
 
 The training objective is a sum of two \emph{supervised contrastive} \parencite{khosla2020supcon} terms with the same functional form, both aggregated over the whole mini-batch.
 The two terms differ only in which label drives the positive set: an emitter identifier on the emitter branch, and the global mode label of \cref{sec:method:formulation} on the mode branch.
-Routing the mode branch through a contrastive loss rather than a closed-catalogue softmax keeps the inference pipeline of \cref{eq:method:cluster_decoding} open to modulations absent from training; the post-hoc clustering operator contributes no gradients and is not part of the objective. And then embeddings for each PDW, or the encodings (before final projection), could probably be use as input to a know emitter library with softmax heads. This could also potentially enable transfer learning of custom classification heads from the same base model.
+Routing the mode branch through a contrastive loss rather than a closed-catalogue softmax keeps the inference pipeline of \cref{eq:method:cluster_decoding} open to modulations absent from training; the post-hoc clustering operator contributes no gradients and is not part of the objective.
+A further consequence of this design is that the pre-projection encodings remain general-purpose features: supervised classification heads (for example, against a library of known emitters) can later be attached to the same base model without retraining the encoder.
 
 \subsection*{Supervised contrastive kernel}
 
@@ -28,31 +29,11 @@ where $I^{+} = \{i \in I : P(i) \neq \emptyset\}$ and $\Loss_{\mathrm{SC}} = 0$ 
 Anchors outside $I^{+}$ contribute only as negatives.
 The denominator runs over every candidate in $A(i)$, so unrelated samples exert repulsive pressure and the encoder cannot collapse to a constant map \parencite{chen2020simclr}.
 
-\subsection*{Branch-specific aggregation}
+\subsection*{Branch losses and total objective}
 
-The two branches feed \cref{eq:method:supcon} with the same batch-wide index set
-\begin{equation}\label{eq:method:batch_index}
-  I \;=\; \{1,\ldots,B\}\!\times\!\{1,\ldots,L\},
-\end{equation}
-pooled over the $B$ windows of a mini-batch, and differ only in the labels they consume.
-Let $\vect{z}^{\mathrm{em}}_{b,n}$ and $\vect{z}^{\mathrm{md}}_{b,n}$ denote the projection outputs at position $n \in \{1,\ldots,L\}$ in window $b \in \{1,\ldots,B\}$, with emitter label $e_{b,n}$ and mode label $m_{b,n}$.
-Emitter identifiers are train-local in \cref{sec:method:formulation} and are taken to be globally unique within a mini-batch by pairing the train-local integer with the originating pulse-train identifier, so that $e_{b',n'} = e_{b,n}$ iff the two pulses come from the same physical emitter.
-The two positive sets are
-\begin{equation}\label{eq:method:positive_sets}
-  P^{\mathrm{em}}_{b,n} = \{(b',n') \in I\setminus\{(b,n)\} : e_{b',n'} = e_{b,n}\},
-  \qquad
-  P^{\mathrm{md}}_{b,n} = \{(b',n') \in I\setminus\{(b,n)\} : m_{b',n'} = m_{b,n}\},
-\end{equation}
-and the two branch losses are
-\begin{align}
-  \Loss_{\mathrm{em}} &\;=\; \Loss_{\mathrm{SC}}\!\bigl(I,\, \{P^{\mathrm{em}}_{b,n}\}\bigr),
-    \label{eq:method:loss_emitter}\\
-  \Loss_{\mathrm{md}} &\;=\; \Loss_{\mathrm{SC}}\!\bigl(I,\, \{P^{\mathrm{md}}_{b,n}\}\bigr).
-    \label{eq:method:loss_mode}
-\end{align}
-Both losses are therefore standard SupCon \parencite{khosla2020supcon} aggregated over the whole batch.
-Because the loss only consumes pairwise label coincidences, neither the emitter count $K_{\mathrm{em}}$ nor the catalogue size $M$ appears in \cref{eq:method:supcon}, and modes held out at training time still inherit useful geometry from their neighbours in $\R^{q}$.
-The total training objective is
+Both branches apply \cref{eq:method:supcon} to the same anchor set, namely all $B \times L$ pulses of a mini-batch pooled across windows, and differ only in the label that defines the positive sets: two pulses are positives on the emitter branch when they originate from the same physical emitter, and on the mode branch when they carry the same global mode label.
+Since emitter identifiers are train-local in \cref{sec:method:formulation}, they are made unique within a mini-batch by pairing each identifier with its originating pulse-train.
+Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses on the emitter and mode projections, the total training objective is
 \begin{equation}\label{eq:method:loss_total}
   \Loss \;=\; \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},
   \qquad \lambda_{\mathrm{md}} > 0,

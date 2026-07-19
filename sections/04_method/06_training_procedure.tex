@@ -6,7 +6,19 @@ Unless \cref{sec:exp:hparams} specifies otherwise, the implementation follows th
 
 The learning rate follows a cosine decay from a peak value down to a small floor over the course of training, which keeps step sizes comparatively large while the loss landscape is coarse and shrinks them during the final refinement phase.
 Peak learning rate, weight decay, batch size, number of passes over the training windows, and the exact step counting convention (per epoch versus global step) are hyperparameters and are listed in \cref{tab:exp:hparams_main}.
-At the start of each epoch, training windows are shuffled so that consecutive mini-batches are not ordered by scenario; any fixed random seeds, data-loader worker counts, and reproducibility settings used in the reported runs are stated in \cref{sec:exp:setup,sec:exp:hparams}.
+
+\subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}
+
+Mini-batches are not formed by shuffling the pooled training windows uniformly at random.
+Two properties of the data pipeline argue against uniform shuffling.
+First, the overlapping segmentation of \cref{sec:method:data:window} is intended to expose the encoder to the same pulse patterns at different positions within a window, but the contrastive objective of \cref{sec:method:loss} can only exploit these shifted views if they co-occur in a mini-batch; under uniform shuffling over a corpus of many variable-length scenarios, two windows from the same scenario rarely meet.
+Second, emitter identifiers are train-local (\cref{sec:method:formulation}), so cross-window positives for the emitter branch exist only between windows drawn from the same pulse train; a batch of windows from mutually distinct scenarios would reduce the emitter term to purely within-window contrasts.
+
+A custom batch sampler therefore mines windows from the same scenario into each batch.
+Scenarios are drawn at random, and for each drawn scenario a fixed number of its windows---including overlapping neighbours that view the same pulses at shifted positions---are sampled into the batch, so that every mini-batch consists of a few scenario groups rather than $B$ unrelated windows.
+Within a group, the emitter branch obtains cross-window positives for the same physical emitter, the mode branch obtains same-mode positives observed at different window offsets, and windows from the remaining groups supply the cross-scenario negatives (and cross-scenario mode positives) that the batch-wide aggregation of \cref{sec:method:loss} relies on.
+The number of scenario groups per batch and of windows per group are hyperparameters listed in \cref{tab:exp:hparams_main}.
+Group membership is re-drawn every epoch so that, over training, each window is contrasted against many different companion windows; any fixed random seeds, data-loader worker counts, and reproducibility settings used in the reported runs are stated in \cref{sec:exp:setup,sec:exp:hparams}.
 
 Dropout inside the transformer blocks of \cref{sec:method:arch} follows the usual pattern of stochastic attention and feed-forward masks; dropout rates belong to the same hyperparameter table.
 Training can be stopped early when a validation score computed on held-out windows (for example the smoothed mini-batch loss or an auxiliary clustering criterion) fails to improve for a fixed patience measured in epochs, in which case the best checkpoint prior to stagnation is retained; patience, validation metric, and checkpoint policy are also recorded in \cref{tab:exp:hparams_main}.

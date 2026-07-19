@@ -20,7 +20,12 @@ Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$,
   \qquad
   w \in \Bigl\{1,\ldots,\bigl\lfloor (N - L)/s \bigr\rfloor + 1\Bigr\}.
 \end{equation}
-Training uses $s = L/2$, so consecutive windows overlap by half their length; this increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
+Because scenarios are simulated with varying durations, the train length $N$ and hence the number of windows differ from one scenario to the next; each pulse train simply contributes as many windows as \cref{eq:method:windowing} yields.
+Training uses $s = L/2$, so consecutive windows overlap by half their length.
+This overlap serves two purposes.
+First, it increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
+Second, every pulse away from the edges of a train reappears in the next window at a different offset, so the encoder repeatedly observes the same local pulse pattern at different positions inside the window; this discourages representations that depend on where a pattern happens to fall relative to the window boundaries.
+This positional benefit is only realised if overlapping windows from the same scenario actually meet inside a mini-batch, where the contrastive loss of \cref{sec:method:loss} can relate the shifted views of the same pulses; mini-batch assembly therefore cannot shuffle windows uniformly across scenarios, and a scenario-aware batch sampler is introduced in \cref{sec:method:training}.
 Validation and test windows use $s = L$ so that metrics are not inflated by near-duplicate windows.
 The trailing remainder shorter than $L$ is dropped.
 \Cref{fig:method:windowing} sketches the resulting segmentation.
