@@ -15,12 +15,14 @@ When working with a single or arbitrary recording, the superscript can be droppe
 \subsection*{Labels and induced partitions}
 
 Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
-The emitter count $K^{(s)}_{\mathrm{em}}$ varies between recordings, but dosen't exceed 20 in our experiments. 
+The emitter count $K^{(s)}_{\mathrm{em}}$ varies between recordings, but dosen't exceed 20 in our experiments. This is just a id for a emitter in a scenario and is this only unique within a recording. 
 
 
 Mode label is fixed since it is drawn from a finite global catalogue of size $M$ that is shared across all recordings. However each recoding does't not nessessality contain all modes, and our objective is clustering not classification which makes exact label prediction redundant, so in practive we have a $M^{(s)} \le M$.
 
+Howeven note that $M^{(s)}$ dosensät need to be smaller then $K^{(s)}$, and ofsten isen't, becase a single emitter can mode switch, taht is switch between different modes.
 
+These labels seems simmilar but captures complatly different dynamics, emitter labels cares more about local patterns capturing if the pulses could belong to the saem emitter. For example say we only have the time of arriabal and angle of arrival, if the anlge of arrival is rotated 180 degreees between two pulses, and still have same time of arrival, we can say very confidently that they belong to different emitters, but this dosen't mean that the modes are the same, since two emitters can have the same mode in a given time.  
 
 
 However, in real-world scenarios, the actual number of distinct modes present is not fixed or known in advance, and our architecture does not require $M$ as an input or impose a closed-set assumption.
@@ -40,7 +42,7 @@ For each recording these labels induce two partitions of the index set $\{1,\ldo
   \ell \in \{1,\ldots,M\}.
 \end{equation}
 
-For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive: $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$ for $k \ne k'$, and $\bigcup_{k=1}^{K^{(s)}_{\mathrm{em}}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Each cell is non-empty, since $K^{(s)}_{\mathrm{em}}$ counts only emitters actually present in the recording. In contrast, the sets $\mathcal{M}_\ell$ are mutually exclusive but not necessarily collectively exhaustive: a recording may only realize a subset of modes from the global catalogue $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any absent mode $\ell$. Mode coverage is thus not guaranteed or expected in recordings.
+For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive: $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$ $\forall$, $k \ne k'$, and $\bigcup_{k=1}^{K^{(s)}_{\mathrm{em}}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Each cell is non-empty, since $K^{(s)}_{\mathrm{em}}$ counts only emitters actually present in the recording. In contrast, the sets $\mathcal{M}_\ell$ are mutually exclusive but not necessarily collectively exhaustive: a recording may only realize a subset of modes from the global catalogue $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any absent mode $\ell$. Mode coverage is thus not guaranteed or expected in recordings.
 
 \begin{figure}[tbp]
   \centering
