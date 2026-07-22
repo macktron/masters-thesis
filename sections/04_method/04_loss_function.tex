@@ -51,7 +51,7 @@ and the two branch losses are
     \label{eq:method:loss_mode}
 \end{align}
 Both losses are therefore standard SupCon \parencite{khosla2020supcon} aggregated over the whole batch.
-Because the loss only consumes pairwise label coincidences, neither the emitter count $K_{\mathrm{em}}$ nor the catalogue size $M$ appears in \cref{eq:method:supcon}, and modes held out at training time still inherit useful geometry from their neighbours in $\R^{q}$.
+Because the loss only consumes pairwise label coincidences, neither the emitter count $K$ nor the catalogue size $M$ appears in \cref{eq:method:supcon}, and modes held out at training time still inherit useful geometry from their neighbours in $\R^{q}$.
 The total training objective is
 \begin{equation}\label{eq:method:loss_total}
   \Loss \;=\; \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},

@@ -14,10 +14,10 @@ When working with a single or arbitrary recording, the superscript can be droppe
 
 \subsection*{Labels and induced partitions}
 
-Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
-The emitter count $K^{(s)}_{\mathrm{em}}$ may vary between recordings, and each emitter identifier is meaningful only within its recording. Consequently, identical emitter labels in two different recordings do not imply that the pulses originate from the same physical emitter.
+Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
+The emitter count $K^{(s)}$ may vary between recordings, and each emitter identifier is meaningful only within its recording. Consequently, identical emitter labels in two different recordings do not imply that the pulses originate from the same physical emitter.
 
-Mode labels, by contrast, are drawn from a finite global catalogue of size $M$ shared across all recordings. A given recording generally contains only a subset of this catalogue; denoting the number of modes present by $M^{(s)}$ gives $M^{(s)} \leq M$. There is no fixed ordering between $M^{(s)}$ and $K^{(s)}_{\mathrm{em}}$: one emitter may switch between several modes, while several emitters may operate in the same mode.
+Mode labels, by contrast, are drawn from a finite global catalogue of size $M$ shared across all recordings. A given recording generally contains only a subset of this catalogue; denoting the number of modes present by $M^{(s)}$ gives $M^{(s)} \leq M$. There is no fixed ordering between $M^{(s)}$ and $K^{(s)}$: one emitter may switch between several modes, while several emitters may operate in the same mode.
 
 The two label types therefore encode distinct relationships between pulses. Emitter identity concerns whether pulses can originate from the same physical source, for which measurements such as \gls{toa} and \gls{aoa} provide association cues. Operating mode instead describes the signal behavior of that source and may be shared by physically distinct emitters. At inference, the numbers of emitters and modes present are unknown; the proposed method therefore obtains both outputs by clustering and does not require $M$ as an input or impose a closed-set mode prediction.
 
@@ -26,7 +26,7 @@ For each recording these labels induce two partitions of the index set $\{1,\ldo
 \begin{equation}\label{eq:method:emitter_partition}
   \mathcal{E}^{(s)}_k = \{\, n : e^{(s)}_n = k \,\},
   \qquad
-  k \in \{1,\ldots,K^{(s)}_{\mathrm{em}}\},
+  k \in \{1,\ldots,K^{(s)}\},
 \end{equation}
 \begin{equation}\label{eq:method:mode_partition}
   \mathcal{M}^{(s)}_\ell = \{\, n : m^{(s)}_n = \ell \,\},
@@ -34,7 +34,7 @@ For each recording these labels induce two partitions of the index set $\{1,\ldo
   \ell \in \{1,\ldots,M\}.
 \end{equation}
 
-For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive: $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$,  $\forall k \ne k'$, and $\bigcup_{k=1}^{K^{(s)}_{\mathrm{em}}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Each cell is non-empty, since $K^{(s)}_{\mathrm{em}}$ counts only emitters actually present in the recording. In contrast, the sets $\mathcal{M}_\ell$ are mutually exclusive but not necessarily collectively exhaustive: a recording may only realize a subset of modes from the global catalogue $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any absent mode $\ell$. Mode coverage is thus not guaranteed or expected in recordings.
+For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive: $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$,  $\forall k \ne k'$, and $\bigcup_{k=1}^{K^{(s)}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Each cell is non-empty, since $K^{(s)}$ counts only emitters actually present in the recording. In contrast, the sets $\mathcal{M}_\ell$ are mutually exclusive but not necessarily collectively exhaustive: a recording may only realize a subset of modes from the global catalogue $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any absent mode $\ell$. Mode coverage is thus not guaranteed or expected in recordings.
 
 \begin{figure}[tbp]
   \centering
@@ -66,7 +66,7 @@ Both branches use the same batch-wide aggregation; the only asymmetry between th
 
 Discrete per-pulse outputs
 \begin{equation}\label{eq:method:emitter_predictor}
-  \hat{e}_n \in \{1,\ldots,\hat{K}_{\mathrm{em}}\},
+  \hat{e}_n \in \{1,\ldots,\hat{K}\},
   \qquad n \in \{1,\ldots,N\},
 \end{equation}
 \begin{equation}\label{eq:method:mode_predictor}
@@ -74,7 +74,7 @@ Discrete per-pulse outputs
   \qquad n \in \{1,\ldots,N\},
 \end{equation}
 are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}$ within each stream and $\{\vect{z}^{\mathrm{md}}_n\}$ across streams.
-The cardinalities $\hat{K}_{\mathrm{em}}$ and $\hat{M}$ are determined by the clustering rather than fixed in advance; in particular $\hat{M}$ may exceed $M$ when modulation types absent from training are encountered at inference.
+The cardinalities $\hat{K}$ and $\hat{M}$ are determined by the clustering rather than fixed in advance; in particular $\hat{M}$ may exceed $M$ when modulation types absent from training are encountered at inference.
 
 \subsection*{Learning objective}
 
