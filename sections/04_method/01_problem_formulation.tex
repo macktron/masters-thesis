@@ -20,7 +20,7 @@ The emitter count $K^{(s)}_{\mathrm{em}}$ varies between recordings, but dosen't
 
 Mode label is fixed since it is drawn from a finite global catalogue of size $M$ that is shared across all recordings. However each recoding does't not nessessality contain all modes, and our objective is clustering not classification which makes exact label prediction redundant, so in practive we have a $M^{(s)} \le M$.
 
-Howeven note that $M^{(s)}$ dosensät need to be smaller then $K^{(s)}$, and ofsten isen't, becase a single emitter can mode switch, taht is switch between different modes.
+Howeven note that $M^{(s)}$ dosen't need to be smaller then $K^{(s)}$, most likely it's larger, becase a single emitter can mode switch, that is switch between different modes.
 
 These labels seems simmilar but captures complatly different dynamics, emitter labels cares more about local patterns capturing if the pulses could belong to the saem emitter. For example say we only have the time of arriabal and angle of arrival, if the anlge of arrival is rotated 180 degreees between two pulses, and still have same time of arrival, we can say very confidently that they belong to different emitters, but this dosen't mean that the modes are the same, since two emitters can have the same mode in a given time.  
 
@@ -48,6 +48,12 @@ For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and co
   \caption{Each pulse $\vect{x}_n$ is assigned both an emitter label $e_n$ (color) and a mode label $m_n$ (border style). These two labellings yield distinct partitions of the pulse index set (\cref{eq:method:emitter_partition,eq:method:mode_partition}).}
   \label{fig:method:partitions}
 \end{figure}
+
+\subsection*{Clustering objective}
+
+Our obejctive is thus to find a clustering that cerates new sets of E and M (mathemetical), that is the same etc.
+
+
 
 \subsection*{Dual embeddings and discrete outputs}
 
