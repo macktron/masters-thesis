@@ -10,7 +10,7 @@ Optional timing features are then computed as described in \cref{sec:method:feat
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
-Scaling statistics are estimated across all pulse trains in the training split and applied unchanged to validation and test data.
+Standardization statistics are estimated across all pulse trains in the training split and applied unchanged to validation and test data.
 Carrier frequency, pulse width, and log-amplitude are standardized per feature as
 \begin{equation}\label{eq:method:standardize}
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
@@ -18,15 +18,16 @@ Carrier frequency, pulse width, and log-amplitude are standardized per feature a
 Here $\mu_g$ and $\sigma_g$ are the corresponding training-set mean and standard deviation, and amplitude is log-transformed to reduce its dynamic range.
 Absolute \gls{toa} per recording and the two \gls{aoa} components are mapped to $[0,1]$:
 \begin{equation}\label{eq:method:minmax}
-  \tilde{t}_n
+  \tilde{t}^{(s)}_n
   =
-  \frac{t_n - t_{\min}}{t_{\max} - t_{\min}},
+  \frac{t^{(s)}_n - t^{(s)}_{\min}}{t^{(s)}_{\max} - t^{(s)}_{\min}},
   \qquad
   \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
   \qquad
   \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi}.
 \end{equation}
-Corpus-wide rather than per-train scaling preserves absolute parameter ranges that may distinguish operating modes across pulse trains.
+Here $t^{(s)}_{\min}$ and $t^{(s)}_{\max}$ are the minimum and maximum \gls{toa} within recording $s$.
+Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across pulse trains.
 
 \subsection{Windowing}\label{sec:method:data:window}
 
