@@ -1,28 +1,27 @@
 \section{Problem Formulation}\label{sec:method:formulation}
 
-\subsection*{Input}
+\subsection*{Observed input}
 
-The data consist of $S$ recordings indexed by $s \in \{1,\ldots,S\}$.
-The \emph{received pulse stream} of recording $s$ is a finite, time-ordered sequence of \glspl{pdw}
+The data consist of $S$ pulse trains indexed by $s \in \{1,\ldots,S\}$.
+Pulse train $s$ is observed as a finite, time-ordered sequence of \glspl{pdw}
 \[
   \mat{X}^{(s)} = (\vect{x}^{(s)}_1,\ldots,\vect{x}^{(s)}_{N_s}),
   \qquad
   \vect{x}^{(s)}_n \in \R^{d},
 \]
-where each $\vect{x}^{(s)}_n \in \R^{d}$ contains the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angles of arrival), and the length $N_s$ varies between recordings.
-When working with a single or arbitrary recording, the superscript can be dropped.
+where each $\vect{x}^{(s)}_n$ contains the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angles of arrival), and the length $N_s$ varies between pulse trains.
+The encoder operates on fixed-length windows extracted from these trains as described in \cref{sec:method:data:window}.
+When considering one train or window, the superscript is omitted.
 
-\subsection*{Labels and induced partitions}
+\subsection*{Labels and target partitions}
 
-Each pulse $n \in \{1,\ldots,N_s\}$ of recording $s$ carries two labels: an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
-The emitter count $K^{(s)}$ may vary between recordings, and each emitter identifier is meaningful only within its recording.
+Each pulse $n \in \{1,\ldots,N_s\}$ carries an emitter identity $e^{(s)}_n \in \{1,\ldots,K^{(s)}\}$ and an operating mode $m^{(s)}_n \in \{1,\ldots,M\}$.
+The emitter count $K^{(s)}$ may vary between pulse trains, and each emitter identifier is meaningful only within its train.
+Mode labels, by contrast, are drawn from a finite catalogue of size $M$ shared across all pulse trains.
+A train generally contains only $M^{(s)} \leq M$ of these modes.
+The two labels describe different relations: one emitter may switch between several modes, and the same mode may occur on several emitters.
 
-Mode labels, by contrast, are drawn from a finite global catalogue of size $M$ shared across all recordings. A given recording generally contains only a subset of this catalogue; denoting the number of modes present by $M^{(s)}$ gives $M^{(s)} \leq M$. There is no fixed ordering between $M^{(s)}$ and $K^{(s)}$: one emitter may switch between several modes, while several emitters may operate in the same mode.
-
-The two label types therefore encode distinct relationships between pulses. Emitter identity concerns whether pulses can originate from the same physical source, for which measurements such as \gls{toa} and \gls{aoa} provide association cues. Operating mode instead describes the signal behavior of that source and may be shared by physically distinct emitters. At inference, the numbers of emitters and modes present are unknown; the proposed method therefore obtains both outputs by clustering and does not require $M$ as an input or impose a closed-set mode prediction.
-
-
-For each recording these labels induce two partitions of the index set $\{1,\ldots,N_s\}$,
+For pulse train $s$, the labels induce emitter and mode cells on the pulse-index set,
 \begin{equation}\label{eq:method:emitter_partition}
   \mathcal{E}^{(s)}_k = \{\, n : e^{(s)}_n = k \,\},
   \qquad
@@ -33,8 +32,9 @@ For each recording these labels induce two partitions of the index set $\{1,\ldo
   \qquad
   \ell \in \{1,\ldots,M\}.
 \end{equation}
-
-For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and collectively exhaustive: $\mathcal{E}^{(s)}_k \cap \mathcal{E}^{(s)}_{k'} = \varnothing$,  $\forall k \ne k'$, and $\bigcup_{k=1}^{K^{(s)}} \mathcal{E}^{(s)}_k = \{1,\ldots,N_s\}$. Each cell is non-empty, since $K^{(s)}$ counts only emitters actually present in the recording. In contrast, the sets $\mathcal{M}_\ell$ are mutually exclusive but not necessarily collectively exhaustive: a recording may only realize a subset of modes from the global catalogue $\{1,\ldots,M\}$, so $\mathcal{M}_\ell = \varnothing$ for any absent mode $\ell$. Mode coverage is thus not guaranteed or expected in recordings.
+The emitter cells are non-empty and partition $\{1,\ldots,N_s\}$.
+The mode cells are also disjoint, but $\mathcal{M}^{(s)}_\ell$ is empty when mode $\ell$ is absent from the train; the non-empty mode cells form the corresponding partition.
+Recovering the emitter partition is the deinterleaving task, whereas recovering the mode partition groups pulses by signal behavior irrespective of physical source.
 
 \begin{figure}[tbp]
   \centering
@@ -43,40 +43,56 @@ For each recording, the sets $\mathcal{E}^{(s)}_k$ are mutually exclusive and co
   \label{fig:method:partitions}
 \end{figure}
 
-\subsection*{Clustering objective}
+\subsection*{Dual embedding model}
 
-Our obejctive is thus to find a clustering that cerates new sets of E and M (mathemetical), that is the same etc.
-
-
-
-\subsection*{Dual embeddings and discrete outputs}
-
-The parametric model maps $\mat{X}$ to two parallel embedding sequences,
+For an input window $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_L)$, the parametric encoder produces two embedding sequences,
 \begin{equation}\label{eq:method:dual_embeddings}
-  \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_N),
+  \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_L),
   \quad
   \vect{z}^{\mathrm{em}}_n \in \R^{p},
   \qquad
-  \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_N),
+  \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_L),
   \quad
   \vect{z}^{\mathrm{md}}_n \in \R^{q}.
 \end{equation}
-The emitter branch $\mat{Z}^{\mathrm{em}}$ is trained so that pulses sharing an emitter are close in $\R^{p}$ and pulses with distinct emitters are pushed apart, and the mode branch $\mat{Z}^{\mathrm{md}}$ is trained analogously against $\{m_n\}$.
-Both branches use the same batch-wide aggregation; the only asymmetry between them is the semantics of their labels, which propagates to the positive sets the loss reads (\cref{sec:method:loss}).
+The emitter branch represents similarity by physical source, while the mode branch represents similarity by operating mode.
+Their detailed architecture is given in \cref{sec:method:arch}.
 
-Discrete per-pulse outputs
+\subsection*{Clustering objective}
+
+At inference, only the window $\mat{X}$ is observed; its labels and the numbers of groups present are unknown.
+Each embedding sequence is clustered independently to obtain the per-pulse assignments
 \begin{equation}\label{eq:method:emitter_predictor}
   \hat{e}_n \in \{1,\ldots,\hat{K}\},
-  \qquad n \in \{1,\ldots,N\},
+  \qquad n \in \{1,\ldots,L\},
 \end{equation}
 \begin{equation}\label{eq:method:mode_predictor}
   \hat{m}_n \in \{1,\ldots,\hat{M}\},
-  \qquad n \in \{1,\ldots,N\},
+  \qquad n \in \{1,\ldots,L\},
 \end{equation}
-are obtained \emph{post hoc} by clustering $\{\vect{z}^{\mathrm{em}}_n\}$ within each stream and $\{\vect{z}^{\mathrm{md}}_n\}$ across streams.
-The cardinalities $\hat{K}$ and $\hat{M}$ are determined by the clustering rather than fixed in advance; in particular $\hat{M}$ may exceed $M$ when modulation types absent from training are encountered at inference.
+where $\hat{K}$ and $\hat{M}$ are inferred by the clustering operator.
+These assignments induce the estimated partitions
+\begin{equation}\label{eq:method:estimated_partitions}
+  \widehat{\mathcal{E}}_k
+  =
+  \{\,n : \hat{e}_n = k\,\},
+  \quad k \in \{1,\ldots,\hat{K}\},
+  \qquad
+  \widehat{\mathcal{M}}_\ell
+  =
+  \{\,n : \hat{m}_n = \ell\,\},
+  \quad \ell \in \{1,\ldots,\hat{M}\}.
+\end{equation}
+The joint clustering objective is to recover, within each window, the restrictions of both ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to that window, up to independent permutations of their cluster indices.
+The cluster symbols themselves carry no meaning; agreement depends only on which pulses are grouped together.
+
+Both branches are decoded per window, as formalized in \cref{eq:method:cluster_decoding}.
+Emitter identities are therefore interpreted only within the pulse train from which the window was drawn, and the predicted cluster symbols are local to the window.
+Mode clusters are also produced locally, but their embedding geometry is made comparable across pulse trains through globally shared mode supervision during training.
+Neither $\hat{K}$ nor $\hat{M}$ is supplied to the model, and $\hat{M}$ is not constrained by the training catalogue size $M$; this permits clusters corresponding to modulation types not observed during training.
 
 \subsection*{Learning objective}
 
-Given a labelled collection of received pulse streams, the goal is to fit the parameters of the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}}, \mat{Z}^{\mathrm{md}})$ by minimising a sum of two supervised metric-learning losses that share their functional form and a common batch-wide aggregation, differing only in which label drives their positive sets: emitter identifiers on $\mat{Z}^{\mathrm{em}}$ and mode labels on $\mat{Z}^{\mathrm{md}}$.
-On a previously unseen stream, the inference task is to recover the partitions of \cref{eq:method:emitter_partition,eq:method:mode_partition} up to relabelling of the cluster symbols.
+Training uses the labelled pulse trains to fit the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}},\mat{Z}^{\mathrm{md}})$.
+The total objective is the sum of two supervised contrastive losses with the same functional form: emitter labels define positive pairs for $\mat{Z}^{\mathrm{em}}$, while globally shared mode labels define positive pairs for $\mat{Z}^{\mathrm{md}}$.
+The complete loss is specified in \cref{sec:method:loss}; the post-hoc clustering step is not part of that optimization.
