@@ -10,37 +10,23 @@ Optional timing features are then computed as described in \cref{sec:method:feat
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
-Let $\mathcal{P}_{\mathrm{tr}}$ denote the multiset of all pulses in the training split, pooled across pulse trains.
-All scaling statistics are estimated on $\mathcal{P}_{\mathrm{tr}}$ and applied unchanged to validation and test data.
-Pooling across pulse trains preserves the absolute parameter ranges used to compare operating modes globally; fitting each train separately would remove this information.
-
-For each parameter $g \in \{f,\,\mathrm{PW},\,\log_{10} A\}$, the training-set mean and variance are
-\begin{equation}\label{eq:method:standardize_stats}
-  \mu_g = \frac{1}{\lvert\mathcal{P}_{\mathrm{tr}}\rvert}
-  \sum_{n \in \mathcal{P}_{\mathrm{tr}}} g_n,
-  \qquad
-  \sigma_g^2 = \frac{1}{\lvert\mathcal{P}_{\mathrm{tr}}\rvert}
-  \sum_{n \in \mathcal{P}_{\mathrm{tr}}} (g_n - \mu_g)^2,
-\end{equation}
-and the standardized value is
+Scaling statistics are estimated across all pulse trains in the training split and applied unchanged to validation and test data.
+Carrier frequency, pulse width, and log-amplitude are standardized per feature as
 \begin{equation}\label{eq:method:standardize}
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
 \end{equation}
-Amplitude is transformed as $\log_{10} A_n$ before standardization to reduce its dynamic range.
-
-Time of arrival $t_n$ is min--max scaled using the training-corpus extrema,
+Here $\mu_g$ and $\sigma_g$ are the corresponding training-set mean and standard deviation, and amplitude is log-transformed to reduce its dynamic range.
+Absolute \gls{toa} per recording and the two \gls{aoa} components are mapped to $[0,1]$:
 \begin{equation}\label{eq:method:minmax}
   \tilde{t}_n
   =
   \frac{t_n - t_{\min}}{t_{\max} - t_{\min}},
-\end{equation}
-whereas the two \gls{aoa} components are mapped from their physical intervals to $[0,1]$:
-\begin{equation}\label{eq:method:aoa_rescale}
+  \qquad
   \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
   \qquad
   \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi}.
 \end{equation}
-Here $\theta^{\mathrm{az}}_n \in [0,2\pi]$ and $\theta^{\mathrm{lat}}_n \in [0,\pi]$.
+Corpus-wide rather than per-train scaling preserves absolute parameter ranges that may distinguish operating modes across pulse trains.
 
 \subsection{Windowing}\label{sec:method:data:window}
 
@@ -60,10 +46,13 @@ Given a pulse train $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, win
 The number of windows therefore varies with the pulse-train length.
 Any trailing segment shorter than $L$ is dropped.
 
-Training uses $s=L/2$, so adjacent windows overlap by half their length.
-This exposes pulse patterns at different window offsets and reduces sensitivity to boundaries that coincide with mode transitions.
-The scenario-aware sampler in \cref{sec:method:training:sampler} places related windows in the same mini-batch so that the contrastive loss can use these repeated views.
-Validation and test use $s=L$ to avoid evaluating overlapping copies of the same pulses.
+During training, choosing $s<L$ produces overlapping windows and therefore more training samples.
+A smaller stride improves coverage of sparse emitters and modes and reduces sensitivity to window boundaries, but it also repeats more of the same \glspl{pdw}, increasing computation and correlation between samples.
+The scenario-aware sampler in \cref{sec:method:training:sampler} allows the contrastive loss to use these repeated views.
+Advancing the window by a small stride resembles streaming inference because outputs can be refreshed as new pulses arrive, although it is not online learning because the model parameters remain fixed.
+
+Validation and test use $s=L$, yielding non-overlapping windows that are processed entirely offline.
+Streaming inference and online model adaptation are left to future work (\cref{sec:concl:future}).
 
 \begin{figure}[tbp]
   \centering

@@ -70,7 +70,7 @@ and the augmented pulse vector fed to the encoder is
     & \text{with feature engineering},
   \end{cases}
 \end{equation}
-where $\tilde{\vect{f}}_n$ applies the same training-corpus $z$-score standardisation of \cref{eq:method:standardize,eq:method:standardize_stats} to each coordinate of $\vect{f}_n$, with means and variances estimated on all retained training pulses ($n \ge 65$ after burn-in) and applied unchanged to validation and test pulses.
+where $\tilde{\vect{f}}_n$ applies the training-corpus standardization of \cref{eq:method:standardize} to each coordinate of $\vect{f}_n$, with means and variances estimated on all retained training pulses ($n \ge 65$ after burn-in) and applied unchanged to validation and test pulses.
 The input dimension is therefore $d = d_{\mathrm{base}}$ in the baseline setting and $d = d_{\mathrm{base}} + d_{\mathrm{fe}} = 13$ when engineered timing features are enabled; the affine input embedding of \cref{eq:method:input_embed} is instantiated with the matching column count in each case.
 
 \subsection{Experimental comparison}\label{sec:method:features:ablation}
