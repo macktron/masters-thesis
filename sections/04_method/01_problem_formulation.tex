@@ -43,25 +43,10 @@ Recovering the emitter partition is the deinterleaving task, whereas recovering 
   \label{fig:method:partitions}
 \end{figure}
 
-\subsection*{Dual embedding model}
-
-For an input $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_L)$, the parametric encoder produces two embedding sequences,
-\begin{equation}\label{eq:method:dual_embeddings}
-  \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_L),
-  \quad
-  \vect{z}^{\mathrm{em}}_n \in \R^{p},
-  \qquad
-  \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_L),
-  \quad
-  \vect{z}^{\mathrm{md}}_n \in \R^{q}.
-\end{equation}
-The emitter branch represents similarity by physical source, while the mode branch represents similarity by operating mode.
-Their detailed architecture is given in \cref{sec:method:arch}.
-
 \subsection*{Clustering objective}
 
 At inference, only the window $\mat{X}$ is observed; its labels and the numbers of groups present are unknown.
-Each embedding sequence is clustered independently to obtain the per-pulse assignments
+The task is to obtain two per-pulse assignments,
 \begin{equation}\label{eq:method:emitter_predictor}
   \hat{e}_n \in \{1,\ldots,\hat{K}\},
   \qquad n \in \{1,\ldots,L\},
@@ -86,13 +71,12 @@ These assignments induce the estimated partitions
 The joint clustering objective is to recover, within each window, the restrictions of both ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to that window, up to independent permutations of their cluster indices.
 The cluster symbols themselves carry no meaning; agreement depends only on which pulses are grouped together.
 
-Both branches are decoded per window, as formalized in \cref{eq:method:cluster_decoding}.
-Emitter identities are therefore interpreted only within the pulse train from which the window was drawn, and the predicted cluster symbols are local to the window.
-Mode clusters are also produced locally, but their embedding geometry is made comparable across pulse trains through globally shared mode supervision during training.
-Neither $\hat{K}$ nor $\hat{M}$ is supplied to the model, and $\hat{M}$ is not constrained by the training catalogue size $M$; this permits clusters corresponding to modulation types not observed during training.
+Both assignments are produced per window, so their predicted cluster symbols are local to that window.
+Emitter identities are additionally meaningful only within the pulse train from which the window was drawn.
+Neither $\hat{K}$ nor $\hat{M}$ is assumed known, and $\hat{M}$ is not constrained by the training catalogue size $M$; this permits clusters corresponding to modulation types not observed during training.
 
 \subsection*{Learning objective}
 
-Training uses the labelled pulse trains to fit the map $\mat{X} \mapsto (\mat{Z}^{\mathrm{em}},\mat{Z}^{\mathrm{md}})$.
-The total objective is the sum of two supervised contrastive losses with the same functional form: emitter labels define positive pairs for $\mat{Z}^{\mathrm{em}}$, while globally shared mode labels define positive pairs for $\mat{Z}^{\mathrm{md}}$.
-The complete loss is specified in \cref{sec:method:loss}; the post-hoc clustering step is not part of that optimization.
+The proposed method realizes this objective with a shared encoder and two embedding branches, one for emitter identity and one for operating mode.
+Training uses the labelled pulse trains and two supervised contrastive losses with the same functional form; train-local emitter labels supervise one branch, while globally shared mode labels make the other branch comparable across pulse trains.
+The losses are specified in \cref{sec:method:loss}, and the architecture and post-hoc clustering procedure are described in \cref{sec:method:arch}.

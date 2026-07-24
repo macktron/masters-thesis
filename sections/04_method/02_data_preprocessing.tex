@@ -1,81 +1,77 @@
 \section{Data Representation and Preprocessing}\label{sec:method:data}
 
-Operational \gls{elint} recordings are scarce and sensitive, so all training and evaluation data are synthetic.
-Pulse trains are produced by Saab's OpenModesty scenario simulator, the same tool used by earlier KTH degree projects on radar pulse data \parencite{jonsson2023supcon}.
-OpenModesty specifies flight paths, emitter placements, and operating-mode schedules, then emits and intercepts pulses one at a time.
-Receiver-side imperfections (dropped pulses, spurious detections, parameter jitter) are produced inside the simulator and are already present in the exported pulse records, so no separate noise injection is applied downstream.
-Each exported pulse carries the continuous fields used here together with the two discrete labels defined in \cref{sec:method:formulation}.
-Optional hand-crafted timing features derived from \gls{toa} are defined separately in \cref{sec:method:features}; when they are disabled, the pipeline below operates on the base \gls{pdw} channels alone.
+All training and evaluation data are synthetic because operational \gls{elint} recordings are scarce and sensitive.
+A scenario simulator generates time-ordered \gls{pdw} recordings with varying numbers of emitters and operating modes \parencite{jonsson2023supcon}.
+Each pulse contains the measured parameters and per-pulse labels defined in \cref{sec:method:formulation}.
+The composition of the resulting corpus is reported in \cref{sec:exp:datasets}.
 
-\subsection{Windowing}\label{sec:method:data:window}
-
-Self-attention computes an $L \times L$ compatibility matrix at each layer, so the computational and memory cost of a forward pass grows quadratically with the window length $L$, i.e., $\mathcal{O}(L^2)$. Because a pulse train may contain millions of pulses, processing an entire train at once is infeasible with standard self-attention due to prohibitive memory requirements. Recent work proposes sub-quadratic attention variants to address this cost \parencite{tay2022efficient}, but such variants typically approximate or otherwise restrict the full softmax attention map and, on long-sequence benchmarks, have not been shown to consistently outperform plain self-attention in modelling quality \parencite{tay2021lra}; the present thesis therefore restricts itself to evaluating the baseline (plain) attention mechanism without architectural modifications.
-
-The encoder therefore operates on fixed-length windows of $L = 1024$ pulses.
-Given a pulse train $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ and a stride $s$, the $w$th window is
-\begin{equation}\label{eq:method:windowing}
-  \mat{X}^{(w)}
-  =
-  \bigl(\vect{x}_{1 + (w-1)s},\,\ldots,\,\vect{x}_{L + (w-1)s}\bigr),
-  \qquad
-  w \in \Bigl\{1,\ldots,\bigl\lfloor (N - L)/s \bigr\rfloor + 1\Bigr\}.
-\end{equation}
-Because scenarios are simulated with varying durations, the train length $N$ and hence the number of windows differ from one scenario to the next; each pulse train simply contributes as many windows as \cref{eq:method:windowing} yields.
-Training uses $s = L/2$, so consecutive windows overlap by half their length.
-This overlap serves two purposes.
-First, it increases the number of training views per scenario and reduces sensitivity to alignment with mode transitions.
-Second, every pulse away from the edges of a train reappears in the next window at a different offset, so the encoder repeatedly observes the same local pulse pattern at different positions inside the window; this discourages representations that depend on where a pattern happens to fall relative to the window boundaries.
-This positional benefit is only realised if overlapping windows from the same scenario actually meet inside a mini-batch, where the contrastive loss of \cref{sec:method:loss} can relate the shifted views of the same pulses; mini-batch assembly therefore cannot shuffle windows uniformly across scenarios, and a scenario-aware batch sampler is introduced in \cref{sec:method:training}.
-Validation and test windows use $s = L$ so that metrics are not inflated by near-duplicate windows.
-The trailing remainder shorter than $L$ is dropped.
-\Cref{fig:method:windowing} sketches the resulting segmentation.
-
-\begin{figure}[tbp]
-  \centering
-  \input{figures/method/windowing.tex}
-  \caption{Sliding-window segmentation of a pulse train as defined in \cref{eq:method:windowing}. The construction is valid for any stride $0 < s \le L$; the figure uses $s = L/2$ for legibility. Successive windows $\mat{X}^{(w)}$ advance by $s$ pulses and therefore overlap by $L - s$. Dashed guides project window boundaries down onto the pulse train. Pulses past the right edge of the last window of length~$L$ form a trailing remainder of length~$<L$ that is dropped during training and evaluation. Training uses $s = L/2$ and validation/test use $s = L$, the latter giving abutting non-overlapping windows.}
-  \label{fig:method:windowing}
-\end{figure}
-
-At inference, the same fixed-length contract approximates a rolling window over a live pulse stream: a receiver buffers the most recent $L$ pulses, applies the trained encoder, advances by $s$, and repeats.
-Training-time windows are therefore representative of the operational reasoning unit, not just a memory convenience.
+Preprocessing first scales the measured pulse parameters using statistics from the training split.
+Optional timing features are then computed as described in \cref{sec:method:features}, after which each pulse train is divided into fixed-length windows.
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
 Let $\mathcal{P}_{\mathrm{tr}}$ denote the multiset of all pulses in the training split, pooled across pulse trains.
-All scaling statistics are estimated on $\mathcal{P}_{\mathrm{tr}}$ and applied unchanged to validation and test pulses.
-A per-train fit would normalise out absolute parameter ranges and thereby sharpen contrasts that help intra-train deinterleaving, but operating-mode signatures are defined by those same absolute ranges and are comparable across trains by construction (\cref{sec:method:formulation}); pooling statistics keeps the cross-train scale information that the mode branch relies on, at the price of a softer per-train normalisation for the emitter branch.
+All scaling statistics are estimated on $\mathcal{P}_{\mathrm{tr}}$ and applied unchanged to validation and test data.
+Pooling across pulse trains preserves the absolute parameter ranges used to compare operating modes globally; fitting each train separately would remove this information.
 
-For each pulse parameter $g \in \{f,\, \mathrm{PW},\, \log_{10} A\}$, the empirical mean and standard deviation on $\mathcal{P}_{\mathrm{tr}}$ are
+For each parameter $g \in \{f,\,\mathrm{PW},\,\log_{10} A\}$, the training-set mean and variance are
 \begin{equation}\label{eq:method:standardize_stats}
-  \mu_g = \frac{1}{|\mathcal{P}_{\mathrm{tr}}|} \sum_{n \in \mathcal{P}_{\mathrm{tr}}} g_n,
+  \mu_g = \frac{1}{\lvert\mathcal{P}_{\mathrm{tr}}\rvert}
+  \sum_{n \in \mathcal{P}_{\mathrm{tr}}} g_n,
   \qquad
-  \sigma_g^2 = \frac{1}{|\mathcal{P}_{\mathrm{tr}}|} \sum_{n \in \mathcal{P}_{\mathrm{tr}}} (g_n - \mu_g)^2,
+  \sigma_g^2 = \frac{1}{\lvert\mathcal{P}_{\mathrm{tr}}\rvert}
+  \sum_{n \in \mathcal{P}_{\mathrm{tr}}} (g_n - \mu_g)^2,
 \end{equation}
-and the standardised feature is
+and the standardized value is
 \begin{equation}\label{eq:method:standardize}
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
 \end{equation}
-Amplitude enters the pipeline as $\log_{10} A_n$ rather than $A_n$.
-Pulse amplitudes span several orders of magnitude across emitters, ranges, and antenna patterns, and a logarithm compresses that dynamic range so that a few high-power pulses do not dominate the standardised channel.
+Amplitude is transformed as $\log_{10} A_n$ before standardization to reduce its dynamic range.
 
-Time of arrival $t_n$ is min--max scaled to $[0,1]$ against the training-corpus extrema,
+Time of arrival $t_n$ is min--max scaled using the training-corpus extrema,
 \begin{equation}\label{eq:method:minmax}
   \tilde{t}_n
   =
   \frac{t_n - t_{\min}}{t_{\max} - t_{\min}},
 \end{equation}
-with $t_{\min}, t_{\max}$ taken over $\mathcal{P}_{\mathrm{tr}}$.
-The azimuth and lateral components of \gls{aoa}, written $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, are instead rescaled from their known physical intervals to $[0,1]$ by direct linear mapping:
+whereas the two \gls{aoa} components are mapped from their physical intervals to $[0,1]$:
 \begin{equation}\label{eq:method:aoa_rescale}
   \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
   \qquad
-  \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi},
+  \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi}.
 \end{equation}
-since $\theta^{\mathrm{az}}_n \in [0, 2\pi]$ and $\theta^{\mathrm{lat}}_n \in [0, \pi]$ by construction.
+Here $\theta^{\mathrm{az}}_n \in [0,2\pi]$ and $\theta^{\mathrm{lat}}_n \in [0,\pi]$.
 
-\subsection{Labels}\label{sec:method:data:labels}
+\subsection{Windowing}\label{sec:method:data:window}
 
-Each pulse is assigned three labels: a train-local emitter identifier, a global operating mode label, and a pulse train ID. Only the emitter and mode labels are used during training; the pulse train ID is included solely for evaluating clustering metrics.
+Standard self-attention has time and memory complexity $\mathcal{O}(L^2)$ for a window of $L$ pulses.
+Because a complete pulse train may contain millions of pulses, the encoder processes fixed-length windows rather than entire trains.
+The value of $L$ is reported with the experimental hyperparameters in \cref{tab:exp:hparams_main}.
 
-All labels are cast to numeric values for consistency and ease of processing.
+Given a pulse train $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, window $w$ is
+\begin{equation}\label{eq:method:windowing}
+  \mat{X}^{(w)}
+  =
+  \bigl(\vect{x}_{1+(w-1)s},\ldots,\vect{x}_{L+(w-1)s}\bigr),
+  \qquad
+  w \in
+  \left\{1,\ldots,\left\lfloor\frac{N-L}{s}\right\rfloor+1\right\}.
+\end{equation}
+The number of windows therefore varies with the pulse-train length.
+Any trailing segment shorter than $L$ is dropped.
+
+Training uses $s=L/2$, so adjacent windows overlap by half their length.
+This exposes pulse patterns at different window offsets and reduces sensitivity to boundaries that coincide with mode transitions.
+The scenario-aware sampler in \cref{sec:method:training:sampler} places related windows in the same mini-batch so that the contrastive loss can use these repeated views.
+Validation and test use $s=L$ to avoid evaluating overlapping copies of the same pulses.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/method/windowing.tex}
+  \caption{Sliding-window segmentation of a pulse train. Successive windows of length $L$ advance by stride $s$ and overlap by $L-s$ pulses. A trailing segment shorter than $L$ is dropped.}
+  \label{fig:method:windowing}
+\end{figure}
+
+Each window retains the emitter label, mode label, and pulse-train identifier associated with every pulse.
+The emitter and mode labels supervise their respective branches and provide evaluation targets.
+The pulse-train identifier is not an encoder input or prediction target; it is used to keep train-local emitter identifiers distinct and to form scenario-aware mini-batches.

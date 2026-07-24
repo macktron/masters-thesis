@@ -1,7 +1,7 @@
 \section{Transformer Encoder Architecture}\label{sec:method:arch}
 
 The encoder $\Enc$ takes the form of a transformer-encoder backbone \parencite{vaswani2017attention} with a shared trunk followed by two task-specific branches for mode clustering and deinterleaving. The overall layout is shown in \cref{fig:method:arch}.
-This structure mirrors the dual-embedding formulation introduced in \cref{sec:method:formulation}: the trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings.
+The trunk produces a single contextualised representation of the input window, which the branches specialise into emitter-oriented and mode-oriented embeddings for the two clustering tasks defined in \cref{sec:method:formulation}.
 
 \begin{figure}[tbp]
   \centering
@@ -31,7 +31,7 @@ Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}
 
 \subsection*{Task-specific branches}
 
-The trunk output feeds two parallel branches that do not share parameters, producing the dual embeddings of \cref{eq:method:dual_embeddings}.
+The trunk output feeds two parallel branches that do not share parameters.
 Each branch begins with an affine projection that reduces the hidden width from $d_{\mathrm{model}} = 256$ to $d_{\mathrm{br}} = 128$, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
 Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (again with per-head dimension $32$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
 The reduced width and depth reflect a deliberate asymmetry: the trunk is intended to carry the heavy lifting of contextual mixing, while the branches only need to specialise the representation to either emitter identity or operating mode.
@@ -46,6 +46,12 @@ Each branch terminates in a linear projection head that maps every token to its 
   \vect{z}^{\mathrm{md}}_n = \mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}},
 \end{equation}
 with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
+Collecting the per-pulse outputs gives the two embedding sequences
+\begin{equation}\label{eq:method:dual_embeddings}
+  \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_L),
+  \qquad
+  \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_L).
+\end{equation}
 The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
 
 \subsection*{From continuous embeddings to discrete partitions}
