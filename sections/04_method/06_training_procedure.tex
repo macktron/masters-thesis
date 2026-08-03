@@ -1,27 +1,25 @@
 \section{Training Procedure}\label{sec:method:training}
 
-The parameter vector $\bm{\theta}$ attached to the maps in \cref{eq:method:input_embed,eq:method:proj_heads} is estimated by minimising the training objective $\Loss$ in \cref{eq:method:loss_total} on mini-batches of windows.
-Gradients are obtained by reverse-mode automatic differentiation and used in an adaptive first-order optimiser of the Adam family \parencite{kingma2014adam}.
-Unless \cref{sec:exp:hparams} specifies otherwise, the implementation follows the default moment decay rates $(\beta_1,\beta_2) = (0.9,0.999)$, stabiliser $\epsilon = 10^{-8}$, and bias-corrected running estimates of the first and second moments described by \textcite{kingma2014adam}, as exposed by the PyTorch optimiser interface.
-
-The learning rate follows a cosine decay from a peak value down to a small floor over the course of training, which keeps step sizes comparatively large while the loss landscape is coarse and shrinks them during the final refinement phase.
-Peak learning rate, weight decay, batch size, number of passes over the training windows, and the exact step counting convention (per epoch versus global step) are hyperparameters and are listed in \cref{tab:exp:hparams_main}.
+Parameters $\bm{\theta}$ are estimated by minimising $\Loss$
+(\cref{eq:method:loss_total}) with Adam \parencite{kingma2014adam}
+and a cosine learning-rate schedule.
+Peak learning rate, weight decay, epoch count, dropout, and related
+settings are listed in \cref{tab:exp:hparams_main}.
 
 \subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}
 
-Mini-batches are not formed by shuffling the pooled training windows uniformly at random.
-Two properties of the data pipeline argue against uniform shuffling.
-First, the overlapping segmentation of \cref{sec:method:data:window} is intended to expose the encoder to the same pulse patterns at different positions within a window, but the contrastive objective of \cref{sec:method:loss} can only exploit these shifted views if they co-occur in a mini-batch; under uniform shuffling over a corpus of many variable-length scenarios, two windows from the same scenario rarely meet.
-Second, emitter identifiers are train-local (\cref{sec:method:formulation}), so cross-window positives for the emitter branch exist only between windows drawn from the same pulse train; a batch of windows from mutually distinct scenarios would reduce the emitter term to purely within-window contrasts.
-
-A custom batch sampler therefore mines windows from the same scenario into each batch.
-Scenarios are drawn at random, and for each drawn scenario a fixed number of its windows---including overlapping neighbours that view the same pulses at shifted positions---are sampled into the batch, so that every mini-batch consists of a few scenario groups rather than $B$ unrelated windows.
-Within a group, the emitter branch obtains cross-window positives for the same physical emitter, the mode branch obtains same-mode positives observed at different window offsets, and windows from the remaining groups supply the cross-scenario negatives (and cross-scenario mode positives) that the batch-wide aggregation of \cref{sec:method:loss} relies on.
-The number of scenario groups per batch and of windows per group are hyperparameters listed in \cref{tab:exp:hparams_main}.
-Group membership is re-drawn every epoch so that, over training, each window is contrasted against many different companion windows; any fixed random seeds, data-loader worker counts, and reproducibility settings used in the reported runs are stated in \cref{sec:exp:setup,sec:exp:hparams}.
-
-Dropout inside the transformer blocks of \cref{sec:method:arch} follows the usual pattern of stochastic attention and feed-forward masks; dropout rates belong to the same hyperparameter table.
-Training can be stopped early when a validation score computed on held-out windows (for example the smoothed mini-batch loss or an auxiliary clustering criterion) fails to improve for a fixed patience measured in epochs, in which case the best checkpoint prior to stagnation is retained; patience, validation metric, and checkpoint policy are also recorded in \cref{tab:exp:hparams_main}.
-
-The mode-branch weight $\lambda_{\mathrm{md}}$ may be held small during an initial warm-up segment so that the trunk first learns coarse emitter geometry from the within-train supervised contrastive term in \cref{sec:method:loss} before the batch-wide mode-contrastive gradients dominate; whether such a ramp is used, and its length, is part of the same configuration table.
-Multi-phase schedules, such as representation pretraining followed by joint fine-tuning, are compatible with the same tooling; if they are employed, the phases and their objectives are stated in \cref{sec:exp:hparams}.
+Mini-batches are not formed by uniform shuffling of the pooled windows.
+Overlapping windows from \cref{sec:method:data:window} must co-occur
+in a batch to act as shifted views under the contrastive objective, and
+emitter identifiers are train-local
+(\cref{sec:method:formulation}), so cross-window emitter positives
+exist only within a scenario.
+Each mini-batch is therefore assembled from a small number of
+scenarios, each contributing several (possibly overlapping) windows.
+Within a scenario group the emitter branch obtains cross-window
+positives; across groups the mode branch obtains batch-wide
+negatives and cross-scenario mode positives as required by
+\cref{sec:method:loss}.
+The number of groups and windows per group, together with any
+$\lambda_{\mathrm{md}}$ warm-up or early-stopping policy, are
+recorded in \cref{tab:exp:hparams_main}.
