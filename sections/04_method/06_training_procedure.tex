@@ -1,9 +1,8 @@
 \section{Training Procedure}\label{sec:method:training}
 
 Parameters $\bm{\theta}$ are estimated by minimising $\Loss$
-(\cref{eq:method:loss_total}) with Adam \parencite{kingma2014adam}
-and a cosine learning-rate schedule.
-Peak learning rate, weight decay, epoch count, dropout, and related
+(\cref{eq:method:loss_total}) with Adam \parencite{kingma2014adam}.
+Learning rate, weight decay, epoch count, dropout, and related
 settings are listed in \cref{tab:exp:hparams_main}.
 
 \subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}
