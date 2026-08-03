@@ -3,7 +3,7 @@
 This section connects the quantitative tables in \cref{sec:exp:results} and the qualitative material in \cref{sec:exp:qualitative} to the modeling choices in \cref{ch:method}.
 The goal is not to restate individual scores, but to explain \emph{which} mechanisms plausibly drive the observed ranking of methods and ablations.
 
-When emitter-level \gls{nmi} or \gls{ari} lag while mode-level scores are stronger, a natural hypothesis is that the encoder prioritizes intra-window structure tied to waveform parameters (which modes share) before it fully exploits slower cues that separate physical platforms across mixed traffic.
+When emitter-level \gls{ami} or \gls{ari} lag while mode-level scores are stronger, a natural hypothesis is that the encoder prioritizes intra-window structure tied to waveform parameters (which modes share) before it fully exploits slower cues that separate physical platforms across mixed traffic.
 Conversely, if emitter scores dominate but mode partitions collapse, the dual-head coupling or the mode contrastive term may be underweighted relative to the emitter branch, or certain modes may be too short-lived inside length-$L$ windows to support stable clusters.
 
 The dropped and spurious-pulse regimes produced by the simulator (\cref{sec:method:data}) interact with self-attention in two ways: they perturb local timing patterns that define modes, and they change which pulses co-occur inside a window, which can confuse any window-level emitter summary.

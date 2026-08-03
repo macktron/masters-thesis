@@ -15,7 +15,7 @@ Describe the proposed approach in enough detail that another researcher could re
 - `03_architecture.tex` — The transformer encoder: input embedding layer, positional encoding (and any custom variant for irregular TOA), number of layers, heads, hidden dim, output projection head(s). Include a schematic figure in `figures/method/architecture.pdf`.
 - `04_loss_function.tex` — Loss design. Likely one of: (a) contrastive (InfoNCE) + clustering head with KL/sharpening (DEC-style), (b) two-head SwAV-like with separate emitter/mode prototypes, (c) hierarchical contrastive loss. Write the loss equation and label it.
 - `05_training_procedure.tex` — Optimizer, learning rate schedule, batch size, number of epochs, pretraining vs. fine-tuning phases, target distribution updates if DEC-style, warm-up of clustering loss weight.
-- `06_evaluation_metrics.tex` — Define NMI, ARI, clustering accuracy (with Hungarian alignment), purity. Use the `\NMI`, `\ARI`, `\ACC` macros. Explain *why* each metric is used and what it can and cannot tell us.
+- `06_evaluation_metrics.tex` — Define AMI, ARI, clustering accuracy (with Hungarian alignment), V-measure. Use the `\AMI`, `\ARI`, `\ACC` macros. Explain *why* each metric is used and what it can and cannot tell us.
 - `07_baselines.tex` — Baselines to compare against. Examples: k-means on raw PDWs, k-means on autoencoder embeddings, DEC, SwAV, a supervised classifier as an upper bound. Justify each.
 
 ## Style notes

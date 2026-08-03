@@ -53,7 +53,7 @@ Subtracting this expectation from numerator and denominator and rescaling so tha
 The numerator is the excess of together-together pairs over chance; the denominator is the largest such excess achievable while preserving the marginals.
 Hence $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, and negative values indicate worse-than-random alignment.
 
-\subsection*{Information-theoretic view: NMI and AMI}
+\subsection*{Information-theoretic view: adjusted mutual information}
 
 A second viewpoint asks how much knowing one labelling tells us about the other: if $\hat{Y}$ is a deterministic function of $Y$, then announcing $\hat{Y}$ leaves no remaining uncertainty about $Y$, and conversely two independent labellings are uninformative about each other.
 This is exactly what mutual information measures \parencite{vinh2010information}.
@@ -73,22 +73,15 @@ quantifying the marginal uncertainty of each labelling, the empirical mutual inf
 with the convention $0\log 0=0$.
 $\mathrm{MI}$ is non-negative, zero when $Y$ and $\hat{Y}$ are independent, and equal to either marginal entropy when one labelling determines the other.
 
-The \gls{nmi} bounds $\mathrm{MI}$ to $[0,1]$ by dividing through by a normaliser built from the marginal entropies; we use the arithmetic mean \parencite{vinh2010information},
-\begin{equation}\label{eq:method:nmi}
-  \NMI(Y;\hat{Y})
-  =
-  \frac{2\,\mathrm{MI}(Y;\hat{Y})}{H(Y)+H(\hat{Y})},
-  \qquad H(Y)+H(\hat{Y})>0,
-\end{equation}
-and set $\NMI=0$ if both entropies vanish.
-Like the Rand index, $\mathrm{MI}$ has a non-zero baseline expectation, and that expectation grows with the number of clusters; the \gls{ami} \parencite{vinh2010information} performs the analogous chance correction.
-Let $\E[\mathrm{MI}]$ be the expectation of $\mathrm{MI}$ under a permutation null with fixed cluster sizes; then
+Like the Rand index, $\mathrm{MI}$ has a non-zero baseline expectation, and that expectation grows with the number of clusters.
+The \gls{ami} \parencite{vinh2010information} performs the analogous chance correction: it subtracts the expected mutual information under a permutation null that fixes the cluster sizes $\{a_i\}$ and $\{b_j\}$, then rescales by the average of the marginal entropies,
 \begin{equation}\label{eq:method:ami}
   \AMI(Y;\hat{Y})
   =
   \frac{\mathrm{MI}(Y;\hat{Y})-\E[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\E[\mathrm{MI}]},
 \end{equation}
 when the denominator is positive; otherwise $\AMI\equiv 0$.
+Hence $\AMI=1$ at exact recovery up to relabelling, $\AMI\approx 0$ at chance, and negative values indicate worse-than-random alignment.
 $\AMI$ inherits the same range and chance baseline as $\ARI$ but operates on the information-theoretic axis, which makes it less sensitive to differences in cluster size and more sensitive to fine-grained mislabellings.
 
 \subsection*{Homogeneity, completeness, and V-measure}
@@ -138,11 +131,11 @@ Compared with the other metrics, $\ACC$ is the most familiar quantity but the le
 
 The four metrics agree at the extremes --- all return one at exact recovery and approximately zero at chance --- but they disagree in the middle.
 $\ARI$ summarises the pair structure and is comparable across runs with different cluster counts.
-$\AMI$ and $\NMI$ capture how much information one labelling carries about the other; $\AMI$ is preferable when the number of clusters varies, while $\NMI$ remains a useful reference because it is universally reported.
+$\AMI$ captures how much information one labelling carries about the other and remains comparable when the number of clusters varies.
 Reporting homogeneity and completeness alongside the V-measure separates oversplitting from undermerging, which matters for the open-set mode setting where $\hat{M}>M$ is expected.
 $\ACC$ is reported when $\hat{K}$ and the true number of clusters are comparable; it is the easiest number to communicate but the most fragile when cardinalities diverge.
 We therefore report several scores rather than a single headline metric.
 
 \subsection*{Qualitative inspection}
 
-Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement the quantitative scores of \cref{eq:method:ari,eq:method:nmi,eq:method:ami,eq:method:vmeasure,eq:method:acc}; protocols and numbers appear in \cref{ch:experiments}.
+Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement the quantitative scores of \cref{eq:method:ari,eq:method:ami,eq:method:vmeasure,eq:method:acc}; protocols and numbers appear in \cref{ch:experiments}.
