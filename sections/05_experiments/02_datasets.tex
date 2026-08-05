@@ -10,25 +10,27 @@ Scenarios are disjointly assigned to training, validation, and test partitions b
 Training windows use stride $L/2$ with $L = 1024$ pulses, whereas validation and test windows use stride $L$, so the effective number of windows per scenario differs by split even when raw pulse counts are similar.
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
-The mode column counts distinct global mode symbols that appear anywhere in the corresponding split; it represents the training-time catalogue size $M$ in \cref{sec:method:formulation} for the training split, while validation and test splits may exercise additional modulation variants when held-out-mode experiments are active in \cref{ch:experiments}.
-The emitter column counts the union of train-local emitter symbols, summed across scenarios in the split: because emitter identifiers are unique only within a pulse train (\cref{sec:method:formulation}), this number describes total emitter incidence rather than a global set, and the within-window clustering at inference operates on the train-local sub-counts.
-Scenario design and traffic rules also skew how often each emitter and each mode is exercised, so aggregate pulse counts need not match intuitive ``balanced'' priors even when the simulator exposes many labels.
+The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
+The emitter column reports the number of unique train-local emitter symbols per scenario: because emitter identifiers are unique only within a pulse train (\cref{sec:method:formulation}), these figures describe scenario-level emitter incidence rather than membership in a global set, and the within-window clustering at inference operates on the corresponding train-local sub-counts.
+The number of unique emitters per scenario ranges from 1 to 23 and the number of unique modes per scenario from 1 to 7 in every split, so the three partitions are statistically homogeneous in this respect.
+The global mode catalogue comprises $M = 7$ operating modes (\cref{sec:method:formulation}), all of which are exercised in each split; additional modulation variants enter only when held-out-mode experiments are active in \cref{ch:experiments}.
+
+Scenario design and traffic rules skew how often each emitter and each mode is exercised, so aggregate pulse counts need not match intuitive ``balanced'' priors even when the simulator exposes many labels.
 Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data}), rare combinations of emitter, mode, and interleaving pattern can be missing from individual windows or represented by only a handful of pulses, which limits what any single forward pass can evidence about those labels.
-The numeric entries are placeholders until the final export from the simulator pipeline is frozen; the intended reporting convention is scenarios for volume, pulses for aggregate exposure, and distinct labels for emitter and mode coverage.
 
 \begin{table}[t]
   \centering
-  \caption{Synthetic scenario corpus used for training and evaluation. Dashes mark quantities still being reconciled with the export manifest.}
+  \caption{Synthetic scenario corpus used for training and evaluation. Per-scenario quantities are reported as mean $\pm$ standard deviation over the scenarios in each split.}
   \label{tab:exp:datasets}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
-    Split & Scenarios & Pulses (approx.) & Distinct emitters & Distinct modes \\
+    & & \multicolumn{3}{c}{Per scenario (mean $\pm$ std)} \\
+    \cmidrule(l){3-5}
+    Split & Scenarios & Pulses & Emitters & Modes \\
     \midrule
-    Train & --- & --- & --- & --- \\
-    Validation & --- & --- & --- & --- \\
-    Test & --- & --- & --- & --- \\
-    \midrule
-    All & --- & --- & --- & --- \\
+    Train & 1461 & $9480 \pm 1690$ & $8.80 \pm 4.33$ & $4.33 \pm 1.40$ \\
+    Validation & 245 & $9180 \pm 2240$ & $8.59 \pm 4.41$ & $4.28 \pm 1.57$ \\
+    Test & 244 & $9670 \pm 1270$ & $8.93 \pm 4.56$ & $4.39 \pm 1.49$ \\
     \bottomrule
   \end{tabular}
 \end{table}
