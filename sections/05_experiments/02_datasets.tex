@@ -13,9 +13,9 @@ The training split contains 1461 scenarios and roughly 13.8 million pulses in to
 The emitter column counts the distinct emitters active in each scenario.
 Emitter identifiers are meaningful only within their own scenario (\cref{sec:method:formulation}), so these figures describe how many emitters each scenario contains rather than membership in some global emitter set; at inference, the within-window clustering accordingly never has to separate more emitters than the enclosing scenario contains.
 The number of unique emitters per scenario ranges from 1 to 23 and the number of unique modes per scenario from 1 to 7 in every split, so the three partitions are statistically homogeneous in this respect.
-The global mode catalogue comprises $M = 7$ operating modes (\cref{sec:method:formulation}), all of which are exercised in each split; additional modulation variants enter only when held-out-mode experiments are active in \cref{ch:experiments}.
+The global mode catalogue comprises $M = 7$ operating modes (\cref{sec:method:formulation}), all of which are exercised in each split.
 
-Scenario design and traffic rules skew how often each emitter and each mode is exercised, so aggregate pulse counts need not match intuitive ``balanced'' priors even when the simulator exposes many labels.
+The numbers of emitters and assigned modes per scenario are sampled uniformly; however, the resulting pulse counts per emitter and mode are highly imbalanced due to variation in mode behavior. For instance, scanning modes typically generate far fewer pulses than lock-on modes, and some modes differ by more than an order of magnitude in their base PRI. As a result, the number of pulses (\glspl{pdw}) per emitter or mode is not balanced either within a scenario or across the corpus.
 Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data}), rare combinations of emitter, mode, and interleaving pattern can be missing from individual windows or represented by only a handful of pulses, which limits what any single forward pass can evidence about those labels.
 
 \begin{table}[t]
