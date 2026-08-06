@@ -52,14 +52,14 @@ Recovering the emitter partition is the deinterleaving task, whereas recovering 
 \subsection*{Estimation objective}
 
 At inference, only the window $\mat{X}$ is observed; the label pairs in \cref{eq:method:label_pair} and the numbers of groups present are unknown.
-The task is to estimate for every pulse a label pair
+The task is to estimate a label pair for every pulse,
 \begin{equation}\label{eq:method:estimated_label_pair}
   \hat{\vect{y}}_n = \bigl(\hat{e}_n,\, \hat{m}_n\bigr)
   \in \{1,\ldots,\hat{K}\} \times \{1,\ldots,\hat{M}\},
   \qquad n \in \{1,\ldots,L\},
 \end{equation}
-where the cardinalities $\hat{K}$ and $\hat{M}$ must themselves be estimated from the window.
-The coordinates of these estimates induce the estimated partitions
+where the counts $\hat{K}$ and $\hat{M}$ are also estimated from the window.
+These estimates induce the partitions
 \begin{equation}\label{eq:method:estimated_partitions}
   \widehat{\mathcal{E}}_k
   =
@@ -71,12 +71,12 @@ The coordinates of these estimates induce the estimated partitions
   \{\,n : \hat{m}_n = \ell\,\},
   \quad \ell \in \{1,\ldots,\hat{M}\}.
 \end{equation}
-The estimate $\hat{\vect{y}}_n$ approximates $\vect{y}_n$ not elementwise but through these partitions: the objective is to recover, within each window, the restrictions of both ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to that window, up to independent permutations of the cluster indices of each coordinate.
-The estimated symbols themselves carry no meaning; agreement depends only on which pulses are grouped together, and is quantified by the permutation-invariant partition-similarity metrics defined in \cref{sec:method:metrics}.
+Elementwise agreement between $\hat{\vect{y}}_n$ and $\vect{y}_n$ is not required, because cluster indices are arbitrary.
+The objective is instead that, within each window, the partitions in \cref{eq:method:estimated_partitions} match the restrictions of the ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition}, up to independent permutations of the indices in each coordinate.
+Agreement is measured with the permutation-invariant metrics of \cref{sec:method:metrics}.
 
-Both coordinates of $\hat{\vect{y}}_n$ are produced per window, so their symbols are local to that window.
-Emitter identities are additionally meaningful only within the recording from which the window was drawn.
-Neither $\hat{K}$ nor $\hat{M}$ is assumed known, and $\hat{M}$ is not constrained by the training catalogue size $M$; this permits clusters corresponding to modulation types not observed during training.
+Both estimates are local to the window, and emitter identities are meaningful only within the recording from which the window was drawn.
+Neither $\hat{K}$ nor $\hat{M}$ is assumed known; in particular, $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
 
-The proposed method realizes this estimation with a shared encoder and two embedding branches, one per coordinate of $\hat{\vect{y}}_n$: recording-local emitter labels supervise one branch, while globally shared mode labels make the other branch comparable across recordings.
-The supervised contrastive losses are specified in \cref{sec:method:loss}, and the architecture, together with the post-hoc step that turns embeddings into the discrete estimates, is described in \cref{sec:method:arch}.
+The proposed method estimates $\hat{\vect{y}}_n$ with a shared encoder and two embedding branches: recording-local emitter labels supervise one branch, and globally shared mode labels make the other comparable across recordings.
+The losses are specified in \cref{sec:method:loss}, and the architecture and decoding step in \cref{sec:method:arch}.
