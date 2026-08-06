@@ -56,7 +56,7 @@ The mode space is assigned the higher dimensionality because, conditional on emi
 
 \subsection*{From continuous embeddings to discrete partitions}
 
-The projection heads in \cref{eq:method:proj_heads} produce continuous vectors, whereas the per-pulse outputs in \cref{eq:method:emitter_predictor,eq:method:mode_predictor} are discrete.
+The projection heads in \cref{eq:method:proj_heads} produce continuous vectors, whereas the per-pulse outputs in \cref{eq:method:estimated_label_pair} are discrete.
 At inference time, each branch's $L$-token embedding sequence is therefore decoded independently and per window by a fixed clustering operator,
 \begin{equation}\label{eq:method:cluster_decoding}
   (\hat{e}_1,\ldots,\hat{e}_L) = \mathrm{DBSCAN}\!\bigl(\{\vect{z}^{\mathrm{em}}_n\}_{n=1}^{L}\bigr),

@@ -20,8 +20,14 @@ The emitter count $K^{(s)}$ may vary between recordings, and each emitter identi
 Mode labels, by contrast, are drawn from a finite catalogue of size $M$ shared across all recordings.
 A recording generally contains only $M^{(s)} \leq M$ of these modes.
 The two labels describe different relations: one emitter may switch between several modes, and the same mode may occur on several emitters.
+The two labels of a pulse are collected into the ground-truth label pair
+\begin{equation}\label{eq:method:label_pair}
+  \vect{y}^{(s)}_n = \bigl(e^{(s)}_n,\, m^{(s)}_n\bigr)
+  \in \{1,\ldots,K^{(s)}\} \times \{1,\ldots,M\},
+\end{equation}
+which constitutes the complete per-pulse annotation of recording $s$.
 
-For recording $s$, the labels induce emitter and mode cells on the pulse-index set,
+For recording $s$, the coordinates of $\vect{y}^{(s)}_n$ induce emitter and mode cells on the pulse-index set,
 \begin{equation}\label{eq:method:emitter_partition}
   \mathcal{E}^{(s)}_k = \{\, n : e^{(s)}_n = k \,\},
   \qquad
@@ -43,20 +49,17 @@ Recovering the emitter partition is the deinterleaving task, whereas recovering 
   \label{fig:method:partitions}
 \end{figure}
 
-\subsection*{Clustering objective}
+\subsection*{Estimation objective}
 
-At inference, only the window $\mat{X}$ is observed; its labels and the numbers of groups present are unknown.
-The task is to obtain two per-pulse assignments,
-\begin{equation}\label{eq:method:emitter_predictor}
-  \hat{e}_n \in \{1,\ldots,\hat{K}\},
+At inference, only the window $\mat{X}$ is observed; the label pairs in \cref{eq:method:label_pair} and the numbers of groups present are unknown.
+The task is to estimate for every pulse a label pair
+\begin{equation}\label{eq:method:estimated_label_pair}
+  \hat{\vect{y}}_n = \bigl(\hat{e}_n,\, \hat{m}_n\bigr)
+  \in \{1,\ldots,\hat{K}\} \times \{1,\ldots,\hat{M}\},
   \qquad n \in \{1,\ldots,L\},
 \end{equation}
-\begin{equation}\label{eq:method:mode_predictor}
-  \hat{m}_n \in \{1,\ldots,\hat{M}\},
-  \qquad n \in \{1,\ldots,L\},
-\end{equation}
-where $\hat{K}$ and $\hat{M}$ are inferred by the clustering operator.
-These assignments induce the estimated partitions
+where the cardinalities $\hat{K}$ and $\hat{M}$ must themselves be estimated from the window.
+The coordinates of these estimates induce the estimated partitions
 \begin{equation}\label{eq:method:estimated_partitions}
   \widehat{\mathcal{E}}_k
   =
@@ -68,15 +71,12 @@ These assignments induce the estimated partitions
   \{\,n : \hat{m}_n = \ell\,\},
   \quad \ell \in \{1,\ldots,\hat{M}\}.
 \end{equation}
-The joint clustering objective is to recover, within each window, the restrictions of both ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to that window, up to independent permutations of their cluster indices.
-The cluster symbols themselves carry no meaning; agreement depends only on which pulses are grouped together.
+The estimate $\hat{\vect{y}}_n$ approximates $\vect{y}_n$ not elementwise but through these partitions: the objective is to recover, within each window, the restrictions of both ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to that window, up to independent permutations of the cluster indices of each coordinate.
+The estimated symbols themselves carry no meaning; agreement depends only on which pulses are grouped together, and is quantified by the permutation-invariant partition-similarity metrics defined in \cref{sec:method:metrics}.
 
-Both assignments are produced per window, so their predicted cluster symbols are local to that window.
+Both coordinates of $\hat{\vect{y}}_n$ are produced per window, so their symbols are local to that window.
 Emitter identities are additionally meaningful only within the recording from which the window was drawn.
 Neither $\hat{K}$ nor $\hat{M}$ is assumed known, and $\hat{M}$ is not constrained by the training catalogue size $M$; this permits clusters corresponding to modulation types not observed during training.
 
-\subsection*{Learning objective}
-
-The proposed method realizes this objective with a shared encoder and two embedding branches, one for emitter identity and one for operating mode.
-Training uses the labelled recordings and two supervised contrastive losses with the same functional form; recording-local emitter labels supervise one branch, while globally shared mode labels make the other branch comparable across recordings.
-The losses are specified in \cref{sec:method:loss}, and the architecture and post-hoc clustering procedure are described in \cref{sec:method:arch}.
+The proposed method realizes this estimation with a shared encoder and two embedding branches, one per coordinate of $\hat{\vect{y}}_n$: recording-local emitter labels supervise one branch, while globally shared mode labels make the other branch comparable across recordings.
+The supervised contrastive losses are specified in \cref{sec:method:loss}, and the architecture, together with the post-hoc step that turns embeddings into the discrete estimates, is described in \cref{sec:method:arch}.
