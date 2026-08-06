@@ -5,8 +5,15 @@ A scenario simulator generates time-ordered \gls{pdw} recordings with varying nu
 Each pulse contains the measured parameters and per-pulse labels defined in \cref{sec:method:formulation}.
 The composition of the resulting corpus is reported in \cref{sec:exp:datasets}.
 
-Preprocessing first scales the measured pulse parameters using statistics from the training split.
-Optional timing features are then computed as described in \cref{sec:method:features}, after which each pulse train is divided into fixed-length windows.
+Preprocessing first standardizes carrier frequency, pulse width, and log-amplitude using statistics from the training split and rescales the two \gls{aoa} components.
+Each pulse train is then divided into fixed-length windows.
+Absolute \gls{toa} is finally min--max mapped inside each window, so that the timing feature seen by the encoder depends only on pulses that co-occur in the same attention context.
+The encoder input is therefore the $d = 6$-dimensional vector of scaled carrier frequency, pulse width, log-amplitude, window-local \gls{toa}, and the two \gls{aoa} components.
+
+No hand-crafted timing features are appended to this vector.
+Preliminary experiments augmented each pulse with lagged timing features, namely its instantaneous $\Delta\mathrm{TOA}$ together with rolling means and standard deviations of $\Delta\mathrm{TOA}$ over several look-back widths, to expose the local \gls{pri} structure explicitly; this configuration consistently degraded both emitter and mode clustering relative to the plain \gls{pdw} input.
+A plausible explanation is that such look-back statistics summarize only the pulses preceding each position and mix contributions from all interleaved emitters, so under the pulse-count imbalance of the corpus (\cref{sec:exp:datasets}) they are dominated by the densest emitters and carry little signal for rare ones, whereas unmasked self-attention (\cref{sec:method:arch}) can relate each pulse to every other pulse in the window and recover inter-arrival structure per emitter.
+Letting the encoder learn timing structure implicitly also avoids committing to a fixed set of summary statistics, which keeps the representation free to adapt to interleaving patterns and \gls{pri} schedules that differ from those seen during training.
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
@@ -16,18 +23,14 @@ Carrier frequency, pulse width, and log-amplitude are standardized per feature a
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
 \end{equation}
 Here $\mu_g$ and $\sigma_g$ are the corresponding training-set mean and standard deviation, and amplitude is log-transformed to reduce its dynamic range.
-Absolute \gls{toa} per recording and the two \gls{aoa} components are mapped to $[0,1]$:
-\begin{equation}\label{eq:method:minmax}
-  \tilde{t}^{(s)}_n
-  =
-  \frac{t^{(s)}_n - t^{(s)}_{\min}}{t^{(s)}_{\max} - t^{(s)}_{\min}},
-  \qquad
+The two \gls{aoa} components are mapped to $[0,1]$ by a fixed angular rescaling that does not depend on the training corpus,
+\begin{equation}\label{eq:method:aoa_scale}
   \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
   \qquad
   \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi}.
 \end{equation}
-Here $t^{(s)}_{\min}$ and $t^{(s)}_{\max}$ are the minimum and maximum \gls{toa} within recording $s$.
 Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across pulse trains.
+Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
 
 \subsection{Windowing}\label{sec:method:data:window}
 
@@ -65,3 +68,13 @@ Streaming inference and online model adaptation are left to future work (\cref{s
 Each window retains the emitter label, mode label, and pulse-train identifier associated with every pulse.
 The emitter and mode labels supervise their respective branches and provide evaluation targets.
 The pulse-train identifier is not an encoder input or prediction target; it is used to keep train-local emitter identifiers distinct and to form scenario-aware mini-batches.
+
+After windowing, absolute \gls{toa} is min--max mapped to $[0,1]$ using only the $L$ pulses inside the current window:
+\begin{equation}\label{eq:method:minmax}
+  \tilde{t}^{(w)}_i
+  =
+  \frac{t^{(w)}_i - t^{(w)}_{\min}}{t^{(w)}_{\max} - t^{(w)}_{\min}},
+\end{equation}
+where $t^{(w)}_{\min}$ and $t^{(w)}_{\max}$ are the minimum and maximum physical \gls{toa} among the pulses of window $w$, and $i$ indexes positions within that window.
+The encoder never observes pulses outside the window it processes, so recording-level extrema would inject timing information unavailable inside the attention context (and unavailable to a streaming receiver that buffers only the current window).
+Per-window mapping keeps the \gls{toa} channel self-contained; when training uses $s < L$, the same physical pulse may receive different normalized values in overlapping windows, which is the intended behaviour for a window-local feature.

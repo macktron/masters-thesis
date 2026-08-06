@@ -12,7 +12,7 @@ The trunk produces a single contextualised representation of the input window, w
 
 \subsection*{Input embedding}
 
-Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of \cref{sec:method:data} and, optionally, the engineered timing features of \cref{sec:method:features}, is mapped to a token embedding through an affine projection
+Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of \cref{sec:method:data}, is mapped to a token embedding through an affine projection
 \begin{equation}\label{eq:method:input_embed}
   \vect{h}^{(0)}_n = \mat{W}_{\mathrm{in}}\vect{x}_n + \vect{b}_{\mathrm{in}},
   \qquad
