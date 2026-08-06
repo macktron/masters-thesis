@@ -5,7 +5,7 @@
 The work pursues objectives that operationalize the research questions in \cref{sec:intro:rq}.
 First, we specify and implement a transformer-style encoder that ingests bounded windows of \glspl{pdw} from interleaved pulse streams and maps them to a dual embedding (\cref{sec:method:formulation}), together with a post-hoc clustering stage applied independently to the emitter and the mode branches.
 We then study how performance depends on practical limits on context length, mixture density, and noise, reporting agreement with the ground-truth simulator partitions using standard scores such as \gls{ami} and \gls{ari} (\cref{ch:experiments}).
-Second, we formulate at least one joint training objective that couples a within-train supervised contrastive term for emitter identity with a batch-wide supervised contrastive term over the global mode labels, and compare it against a matched baseline trained primarily for deinterleaving or representation quality without that coupling, holding architecture capacity and data conditions as constant as feasible (\cref{ch:method,ch:experiments}).
+Second, we formulate at least one joint training objective that couples a within-recording supervised contrastive term for emitter identity with a batch-wide supervised contrastive term over the global mode labels, and compare it against a matched baseline trained primarily for deinterleaving or representation quality without that coupling, holding architecture capacity and data conditions as constant as feasible (\cref{ch:method,ch:experiments}).
 
 \subsection{Delimitations}\label{sec:intro:delimitations}
 

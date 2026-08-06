@@ -6,7 +6,7 @@ Each pulse contains the measured parameters and per-pulse labels defined in \cre
 The composition of the resulting corpus is reported in \cref{sec:exp:datasets}.
 
 Preprocessing first standardizes carrier frequency, pulse width, and log-amplitude using statistics from the training split and converts the measured \gls{aoa} into Euclidean direction components.
-Each pulse train is then divided into fixed-length windows.
+Each recording is then divided into fixed-length windows.
 Absolute \gls{toa} is finally min--max mapped inside each window, so that the timing feature seen by the encoder depends only on pulses that co-occur in the same attention context.
 The encoder input is therefore the $d = 7$-dimensional vector of scaled carrier frequency, pulse width, log-amplitude, window-local \gls{toa}, and the three incidence-direction components.
 
@@ -17,7 +17,7 @@ Letting the encoder learn timing structure implicitly also avoids committing to 
 
 \subsection{Per-feature scaling}\label{sec:method:data:norm}
 
-Standardization statistics are estimated across all pulse trains in the training split and applied unchanged to validation and test data.
+Standardization statistics are estimated across all recordings in the training split and applied unchanged to validation and test data.
 Carrier frequency, pulse width, and log-amplitude are standardized per feature as
 \begin{equation}\label{eq:method:standardize}
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
@@ -47,16 +47,16 @@ Neither map depends on the training corpus.
 The Cartesian representation avoids the wrap-around discontinuity of a rescaled angle, which places azimuths near $0$ and $2\pi$ at opposite ends of the feature range although they describe nearly the same direction.
 This matters especially for the attention variants of \cref{sec:method:attention}, whose pairwise bias and rotary encoding both act on coordinate differences: differences of direction components respect the geometry of the sphere, whereas differences of raw angles do not.
 
-Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across pulse trains.
+Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across recordings.
 Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
 
 \subsection{Windowing}\label{sec:method:data:window}
 
 Standard self-attention has time and memory complexity $\mathcal{O}(L^2)$ for a window of $L$ pulses.
-Because a complete pulse train may contain millions of pulses, the encoder processes fixed-length windows rather than entire trains.
+Because a complete recording may contain millions of pulses, the encoder processes fixed-length windows rather than entire recordings.
 The value of $L$ is reported with the experimental hyperparameters in \cref{tab:exp:hparams_main}.
 
-Given a pulse train $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, window $w$ is
+Given a recording $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, window $w$ is
 \begin{equation}\label{eq:method:windowing}
   \mat{X}^{(w)}
   =
@@ -65,7 +65,7 @@ Given a pulse train $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, win
   w \in
   \left\{1,\ldots,\left\lfloor\frac{N-L}{s}\right\rfloor+1\right\}.
 \end{equation}
-The number of windows therefore varies with the pulse-train length.
+The number of windows therefore varies with the recording length.
 Any trailing segment shorter than $L$ is dropped.
 
 During training, choosing $s<L$ produces overlapping windows and therefore more training samples.
@@ -79,13 +79,13 @@ Streaming inference and online model adaptation are left to future work (\cref{s
 \begin{figure}[tbp]
   \centering
   \input{figures/method/windowing.tex}
-  \caption{Sliding-window segmentation of a pulse train. Successive windows of length $L$ advance by stride $s$ and overlap by $L-s$ pulses. A trailing segment shorter than $L$ is dropped.}
+  \caption{Sliding-window segmentation of a recording. Successive windows of length $L$ advance by stride $s$ and overlap by $L-s$ pulses. A trailing segment shorter than $L$ is dropped.}
   \label{fig:method:windowing}
 \end{figure}
 
-Each window retains the emitter label, mode label, and pulse-train identifier associated with every pulse.
+Each window retains the emitter label, mode label, and recording identifier associated with every pulse.
 The emitter and mode labels supervise their respective branches and provide evaluation targets.
-The pulse-train identifier is not an encoder input or prediction target; it is used to keep train-local emitter identifiers distinct and to form scenario-aware mini-batches.
+The recording identifier is not an encoder input or prediction target; it is used to keep recording-local emitter identifiers distinct and to form scenario-aware mini-batches.
 
 After windowing, absolute \gls{toa} is min--max mapped to $[0,1]$ using only the $L$ pulses inside the current window:
 \begin{equation}\label{eq:method:minmax}

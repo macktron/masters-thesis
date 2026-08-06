@@ -10,7 +10,7 @@ settings are listed in \cref{tab:exp:hparams_main}.
 Mini-batches are not formed by uniform shuffling of the pooled windows.
 Overlapping windows from \cref{sec:method:data:window} must co-occur
 in a batch to act as shifted views under the contrastive objective, and
-emitter identifiers are train-local
+emitter identifiers are recording-local
 (\cref{sec:method:formulation}), so cross-window emitter positives
 exist only within a scenario.
 Each mini-batch is therefore assembled from a small number of

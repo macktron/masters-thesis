@@ -65,7 +65,7 @@ At inference time, each branch's $L$-token embedding sequence is therefore decod
 \end{equation}
 with cardinalities $\hat{K},\hat{M} \in \N$ inferred from the data (\cref{fig:method:cluster_decoding}).
 \Gls{dbscan} \parencite{ester1996density} groups embeddings by local density at a fixed Euclidean radius $\varepsilon = 0.4$ and minimum neighbourhood count $\mathrm{minPts} = 5$, assigning sparser points to a noise category.
-Clustering per window matches the train-local supervision scope of the emitter branch and keeps the runtime linear in window length; cross-window alignment of mode embeddings is instead supplied by the batch-wide contrastive term of \cref{sec:method:loss} and resolved by the permutation-invariant metrics of \cref{sec:method:metrics}.
+Clustering per window matches the recording-local supervision scope of the emitter branch and keeps the runtime linear in window length; cross-window alignment of mode embeddings is instead supplied by the batch-wide contrastive term of \cref{sec:method:loss} and resolved by the permutation-invariant metrics of \cref{sec:method:metrics}.
 The operator contributes no gradients, and the trunk, branch, and projection-head weights together form the parameter vector $\bm{\theta}$ optimised by the loss in \cref{sec:method:loss}.
 
 \begin{figure}[tbp]

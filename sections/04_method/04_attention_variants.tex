@@ -2,7 +2,7 @@
 
 The encoder of \cref{sec:method:arch} uses standard self-attention, which treats a window as an unordered set of tokens and lets every pulse attend to every other pulse purely through learned query--key compatibility.
 The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} entry of each \gls{pdw}.
-A radar pulse train, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, or have a similar pulse width are far more likely to originate from the same emitter or mode than an arbitrary pair.
+A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, or have a similar pulse width are far more likely to originate from the same emitter or mode than an arbitrary pair.
 This section describes two variants of the attention mechanism that make such structure explicit. Each is evaluated as a drop-in replacement for the \gls{mha} sub-layers of \cref{sec:method:arch}; their relative merit is reported in \cref{ch:experiments}.
 
 Throughout, we write the attention logits of a single head over a window of $L$ pulses as
@@ -43,7 +43,7 @@ Following \textcite{su2024roformer}, let the query and key of a pulse be functio
   \vect{q}_i^{\top}\vect{k}_j = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
 \end{equation}
 In the original formulation the coordinate is the token index, $p_i = i$.
-We instead attach raw pulse parameters, so that the difference $p_j - p_i$ is a physical quantity—the time gap or the difference in a direction component between two pulses—rather than an ordinal distance; this suits the irregularly sampled pulse trains of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
+We instead attach raw pulse parameters, so that the difference $p_j - p_i$ is a physical quantity—the time gap or the difference in a direction component between two pulses—rather than an ordinal distance; this suits the irregularly sampled recordings of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
 
 \Gls{rope} satisfies \cref{eq:method:rope_goal} by encoding the coordinate as a phase.
 The $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimensional planes, and the $m$-th plane is rotated by the angle $p\theta_m$ using the planar rotation matrix

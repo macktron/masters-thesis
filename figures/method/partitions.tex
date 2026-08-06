@@ -1,10 +1,10 @@
 % =====================================================================
-% Schematic of the two label-induced partitions of a single pulse train
+% Schematic of the two label-induced partitions of a single recording
 % used in \cref{sec:method:formulation}.  Each \gls{pdw} carries two
 % labels: an emitter identity (encoded by fill colour) and an operating
 % mode (encoded by border style: solid, dashed, dotted).  These two
 % labellings induce two distinct partitions of the same index set:
-% the emitter partition $\{\mathcal{E}_k\}$ (within-train) and the mode
+% the emitter partition $\{\mathcal{E}_k\}$ (within-recording) and the mode
 % partition $\{\mathcal{M}_\ell\}$ (defined relative to a global mode
 % catalogue).  Loaded from
 % sections/04_method/01_problem_formulation.tex via \input{...}.
@@ -32,7 +32,7 @@
   \def\xlab{-1.4}  % x of the right edge of all left-hand row labels
 
   % ------------------------------------------------------------------
-  % Top row: input pulse train.
+  % Top row: input recording.
   % Per-pulse labels used throughout the figure:
   %   x1: em1,A   x2: em2,A   x3: em1,B   x4: em3,A   x5: em2,B
   %   x6: em3,C   x7: em1,C   x8: em1,A   x9: em2,C
@@ -61,7 +61,7 @@
   \node[font=\Large] (split) at (4*\dx, -1.0) {$\Downarrow$};
 
   % ------------------------------------------------------------------
-  % Emitter partition (within-train).
+  % Emitter partition (within-recording).
   %   E1 (blue):  x1, x3, x7, x8
   %   E2 (red):   x2, x5, x9
   %   E3 (green): x4, x6

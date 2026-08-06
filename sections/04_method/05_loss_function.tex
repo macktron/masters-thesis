@@ -32,7 +32,7 @@ The denominator runs over every candidate in $A(i)$, so unrelated samples exert 
 \subsection*{Branch losses and total objective}
 
 Both branches apply \cref{eq:method:supcon} to the same anchor set, namely all $B \times L$ pulses of a mini-batch pooled across windows, and differ only in the label that defines the positive sets: two pulses are positives on the emitter branch when they originate from the same physical emitter, and on the mode branch when they carry the same global mode label.
-Since emitter identifiers are train-local in \cref{sec:method:formulation}, they are made unique within a mini-batch by pairing each identifier with its originating pulse-train.
+Since emitter identifiers are recording-local in \cref{sec:method:formulation}, they are made unique within a mini-batch by pairing each identifier with its originating recording.
 Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses on the emitter and mode projections, the total training objective is
 \begin{equation}\label{eq:method:loss_total}
   \Loss \;=\; \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},

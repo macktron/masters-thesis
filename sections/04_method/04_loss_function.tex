@@ -36,7 +36,7 @@ The two branches feed \cref{eq:method:supcon} with the same batch-wide index set
 \end{equation}
 pooled over the $B$ windows of a mini-batch, and differ only in the labels they consume.
 Let $\vect{z}^{\mathrm{em}}_{b,n}$ and $\vect{z}^{\mathrm{md}}_{b,n}$ denote the projection outputs at position $n \in \{1,\ldots,L\}$ in window $b \in \{1,\ldots,B\}$, with emitter label $e_{b,n}$ and mode label $m_{b,n}$.
-Emitter identifiers are train-local in \cref{sec:method:formulation} and are taken to be globally unique within a mini-batch by pairing the train-local integer with the originating pulse-train identifier, so that $e_{b',n'} = e_{b,n}$ iff the two pulses come from the same physical emitter.
+Emitter identifiers are recording-local in \cref{sec:method:formulation} and are taken to be globally unique within a mini-batch by pairing the recording-local integer with the originating recording identifier, so that $e_{b',n'} = e_{b,n}$ iff the two pulses come from the same physical emitter.
 The two positive sets are
 \begin{equation}\label{eq:method:positive_sets}
   P^{\mathrm{em}}_{b,n} = \{(b',n') \in I\setminus\{(b,n)\} : e_{b',n'} = e_{b,n}\},

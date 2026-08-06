@@ -78,7 +78,7 @@ where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $
   \label{fig:bg:pdw}
 \end{figure}
 
-A sequence of such pulses, indexed by order of arrival $(\vect{x}_1, \vect{x}_2, \ldots)$, forms what is called a \emph{pulse train}. For pulses that come from a single transmitter operating in a stable mode, the intervals between arrivals ($\tau_n = t_n - t_{n-1}$, for $n \ge 2$) are usually regular or follow a set schedule. This interval is called the pulse repetition interval (\gls{pri}); its inverse, the pulse repetition frequency (\gls{prf}), describes how often pulses are sent:
+A sequence of such pulses emitted by a single transmitter, indexed by order of arrival $(\vect{x}_1, \vect{x}_2, \ldots)$, forms what is called a \emph{pulse train}. When the transmitter operates in a stable mode, the intervals between arrivals ($\tau_n = t_n - t_{n-1}$, for $n \ge 2$) are usually regular or follow a set schedule. This interval is called the pulse repetition interval (\gls{pri}); its inverse, the pulse repetition frequency (\gls{prf}), describes how often pulses are sent:
 \begin{equation}\label{eq:bg:pdw_pri}
   \tau_n = t_n - t_{n-1}, \qquad n \ge 2.
 \end{equation}
@@ -86,7 +86,7 @@ While simple systems use a fixed interval, more complex transmitters may change 
 
 Each measured descriptor is thus a function of both the true (but unknown) properties of the transmitting source and the effects of noise, measurement error, and possible missing data. Very weak pulses may be missed, and noise or spurious events may be incorrectly identified as pulses.
 
-Finally, rather than carrying forward the full raw signal, the system represents each pulse only by its measured properties in the form of a time-ordered sequence of \glspl{pdw}. This sequence $(\vect{x}_1,\ldots,\vect{x}_T)$—sometimes called the pulse train—is the main input to later processing and learning algorithms. Each $\vect{x}_n$ is a compact summary of one pulse, and the order reflects the timeline of arrivals, replacing the need for direct inspection of the original sampled voltage trace.
+Finally, rather than carrying forward the full raw signal, the system represents each pulse only by its measured properties in the form of a time-ordered sequence of \glspl{pdw}. This sequence $(\vect{x}_1,\ldots,\vect{x}_T)$—referred to in this thesis as a \emph{recording}, since it generally interleaves the pulse trains of several transmitters—is the main input to later processing and learning algorithms. Each $\vect{x}_n$ is a compact summary of one pulse, and the order reflects the timeline of arrivals, replacing the need for direct inspection of the original sampled voltage trace.
 
 \subsection{Physical sources and transmit schedules}\label{sec:bg:emitters}
 
