@@ -16,15 +16,19 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 
 \subsection*{Physical attention bias}
 
-The first variant adds a handcrafted pairwise bias to the logits, computed from the physical parameters of each pulse pair.
-For each physical feature $f$ of interest, a fixed term $B^{(f)}_{ij}$ is computed from the values of pulses $i$ and $j$, and the terms are superposed with learnable scalar coefficients,
+The first variant adds a pairwise bias to the logits, computed from the physical parameters of each pulse pair.
+The bias is built from the absolute pairwise differences of four coordinates: the \gls{toa} $t_n$ and the three incidence-direction components $u^{x}_n$, $u^{y}_n$, and $u^{z}_n$ of \cref{eq:method:aoa_cart}.
+For each coordinate $f$, the delta matrix $B^{(f)}_{ij} = |f_i - f_j|$ is superposed on the logits with a learnable scalar coefficient,
 \begin{equation}\label{eq:method:attn_bias}
   A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}} + \sum_{f} \lambda_f\, B^{(f)}_{ij},
+  \qquad
+  f \in \{t,\, u^{x},\, u^{y},\, u^{z}\}.
 \end{equation}
-where each coefficient $\lambda_f$ is learned per head jointly with the rest of the network.
-The features of primary interest are the \gls{toa} and the arrival direction: $B^{(f)}_{ij}$ is a fixed function of the time separation $|t_i - t_j|$ or of the direction separation $\lVert\vect{u}_i - \vect{u}_j\rVert$ between the unit direction vectors of \cref{eq:method:aoa_cart}, chosen so that pulses close in time or arriving from similar directions receive a larger value.
-The chordal distance $\lVert\vect{u}_i - \vect{u}_j\rVert$ is monotone in the angle enclosed between the two directions and is unaffected by azimuth wrap-around, unlike a difference of raw angles (\cref{sec:method:data:norm}).
-This pushes attention towards physically related pairs before any learning takes place, while the coefficients $\lambda_f$ let the model weight each cue—or suppress it entirely—during training instead of committing to hand-tuned relative strengths.
+Each coefficient $\lambda_f$ is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block—throughout the shared trunk and both branches—carries its own set of four coefficients.
+No kernel shape is imposed on the bias: a negative $\lambda_f$ pushes attention towards pulses that are close in that coordinate, a positive one towards distant pulses, and $\lambda_f = 0$ removes the cue entirely, so the model chooses the sign and strength of each cue during training instead of committing to a hand-tuned prior.
+Using component-wise direction deltas rather than differences of raw angles also avoids the azimuth wrap-around problem noted in \cref{sec:method:data:norm}.
+Because the coefficients are learned independently in each part of the network, the branches are free to allocate the cues differently; one may expect the deinterleaving branch to lean more heavily on the direction deltas—pulses from one emitter arrive from a nearly constant direction—while the shared trunk and the mode branch, whose target should be invariant to viewing geometry, suppress them.
+Whether this allocation emerges is examined in \cref{ch:experiments}.
 The construction mirrors the relative-position and content-independent biases used in language and graph transformers \parencite{shaw2018relative,ying2021graphormer}, specialised here to pulse parameters rather than token indices.
 
 \subsection*{Rotary positional encoding}
