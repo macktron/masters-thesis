@@ -46,7 +46,8 @@ Neither map depends on the training corpus.
 
 The Cartesian representation is chosen because angular coordinates are periodic and a scalar feature channel cannot express this: azimuths just below $2\pi$ and just above $0$ describe nearly the same incidence direction, yet a direct rescaling of the angle places them at opposite ends of the feature range, creating a spurious discontinuity.
 The direction components of \cref{eq:method:aoa_cart} are free of this wrap-around, since nearby directions on the sphere always receive nearby coordinates.
-The same argument applies with greater force to the relative attention encodings of \cref{sec:method:attention}, which act on coordinate \emph{differences}: a difference of rescaled azimuths does not respect the identification of $0$ with $2\pi$, whereas differences of direction components remain faithful to the underlying geometry.
+The same argument applies with greater force to the attention variants of \cref{sec:method:attention}, both of which act on coordinate \emph{differences}: the physical attention bias compares pulses through pairwise separations, and the rotary encoding turns coordinate differences into relative phases.
+A difference of rescaled azimuths does not respect the identification of $0$ with $2\pi$, so both mechanisms would treat pulses arriving from nearly the same direction as maximally separated, whereas differences of direction components remain faithful to the underlying geometry.
 
 Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across pulse trains.
 Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
