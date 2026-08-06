@@ -22,7 +22,8 @@ For each physical feature $f$ of interest, a fixed term $B^{(f)}_{ij}$ is comput
   A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}} + \sum_{f} \lambda_f\, B^{(f)}_{ij},
 \end{equation}
 where each coefficient $\lambda_f$ is learned per head jointly with the rest of the network.
-The features of primary interest are the \gls{toa} and the two \gls{aoa} components: $B^{(f)}_{ij}$ is a fixed function of the time separation $|t_i - t_j|$ or of the angular separations $|\theta^{\mathrm{az}}_i - \theta^{\mathrm{az}}_j|$ and $|\theta^{\mathrm{lat}}_i - \theta^{\mathrm{lat}}_j|$, chosen so that pulses close in time or arriving from similar directions receive a larger value.
+The features of primary interest are the \gls{toa} and the arrival direction: $B^{(f)}_{ij}$ is a fixed function of the time separation $|t_i - t_j|$ or of the direction separation $\lVert\vect{u}_i - \vect{u}_j\rVert$ between the unit direction vectors of \cref{eq:method:aoa_cart}, chosen so that pulses close in time or arriving from similar directions receive a larger value.
+The chordal distance $\lVert\vect{u}_i - \vect{u}_j\rVert$ is monotone in the angle enclosed between the two directions and is unaffected by azimuth wrap-around, unlike a difference of raw angles (\cref{sec:method:data:norm}).
 This pushes attention towards physically related pairs before any learning takes place, while the coefficients $\lambda_f$ let the model weight each cue—or suppress it entirely—during training instead of committing to hand-tuned relative strengths.
 The construction mirrors the relative-position and content-independent biases used in language and graph transformers \parencite{shaw2018relative,ying2021graphormer}, specialised here to pulse parameters rather than token indices.
 
@@ -38,7 +39,7 @@ Following \textcite{su2024roformer}, let the query and key of a pulse be functio
   \vect{q}_i^{\top}\vect{k}_j = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
 \end{equation}
 In the original formulation the coordinate is the token index, $p_i = i$.
-We instead attach raw pulse parameters, so that the difference $p_j - p_i$ is a physical quantity—the time gap or the angular separation between two pulses—rather than an ordinal distance; this suits the irregularly sampled pulse trains of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
+We instead attach raw pulse parameters, so that the difference $p_j - p_i$ is a physical quantity—the time gap or the difference in a direction component between two pulses—rather than an ordinal distance; this suits the irregularly sampled pulse trains of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
 
 \Gls{rope} satisfies \cref{eq:method:rope_goal} by encoding the coordinate as a phase.
 The $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimensional planes, and the $m$-th plane is rotated by the angle $p\theta_m$ using the planar rotation matrix
@@ -73,41 +74,43 @@ That this construction meets the design goal follows from one property of planar
 which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is rotated by its absolute coordinate, yet the logit sees only the difference.
 \Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the coordinate gap alone (right).
 
-The coordinates we investigate are the \gls{toa} $t_n$ and the two \gls{aoa} components $\theta^{\mathrm{az}}_n$ and $\theta^{\mathrm{lat}}_n$, normalised as in \cref{sec:method:data}.
+The coordinates we investigate are the \gls{toa} $t_n$ and the three incidence-direction components $u^{x}_n$, $u^{y}_n$, and $u^{z}_n$ of \cref{eq:method:aoa_cart}, normalised as in \cref{sec:method:data}.
 The shared trunk of \cref{sec:method:arch} and the mode branch use a single coordinate: every head rotates all of its $d_k/2$ planes by the \gls{toa}, applying $\mat{R}(t_n)$ of \cref{eq:method:rope_block} directly.
-The \gls{aoa} is deliberately excluded there, because an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of the direction from which it is observed; rotating the mode branch by arrival angles would inject nuisance variation into an embedding that should be invariant to geometry.
+The arrival direction is deliberately excluded there, because an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of the direction from which it is observed; rotating the mode branch by the arrival direction would inject nuisance variation into an embedding that should be invariant to geometry.
 
 For the deinterleaving branch, by contrast, direction is a strong cue: within a window, pulses from one emitter arrive from a nearly constant direction.
-This branch therefore encodes all three coordinates at once by partitioning the $d_k/2$ planes of each head into three disjoint slices and rotating each slice by its own coordinate, in the manner of the multi-axis \gls{rope} used for vision transformers \parencite{heo2024ropevit},
+This branch therefore encodes all four coordinates at once by partitioning the $d_k/2$ planes of each head into four disjoint slices and rotating each slice by its own coordinate, in the manner of the multi-axis \gls{rope} used for vision transformers \parencite{heo2024ropevit},
 \begin{equation}\label{eq:method:rope_sliced}
   \mat{R}^{\mathrm{em}}_n =
   \diag\!\bigl(
     \mat{R}^{(1)}(t_n),\;
-    \mat{R}^{(2)}(\theta^{\mathrm{az}}_n),\;
-    \mat{R}^{(3)}(\theta^{\mathrm{lat}}_n)
+    \mat{R}^{(2)}(u^{x}_n),\;
+    \mat{R}^{(3)}(u^{y}_n),\;
+    \mat{R}^{(4)}(u^{z}_n)
   \bigr),
 \end{equation}
-where slice $g$ comprises $c_g$ planes with $c_1 + c_2 + c_3 = d_k/2$, and $\mat{R}^{(g)}$ stacks $c_g$ planar rotations with its own frequency ladder exactly as in \cref{eq:method:rope_block}.
+where slice $g$ comprises $c_g$ planes with $c_1 + c_2 + c_3 + c_4 = d_k/2$, and $\mat{R}^{(g)}$ stacks $c_g$ planar rotations with its own frequency ladder exactly as in \cref{eq:method:rope_block}.
 Because the slices occupy disjoint dimensions of the query and key, the logit of \cref{eq:method:rope} splits into a sum of per-coordinate relative terms,
 \begin{equation}\label{eq:method:rope_sliced_logit}
 \begin{split}
   \tilde{\vect{q}}_i^{\top}\tilde{\vect{k}}_j
-    ={}& \vect{q}_i^{(1)\top}\,\mat{R}^{(1)}(t_j - t_i)\,\vect{k}_j^{(1)} \\
-    &+ \vect{q}_i^{(2)\top}\,\mat{R}^{(2)}\bigl(\theta^{\mathrm{az}}_j - \theta^{\mathrm{az}}_i\bigr)\,\vect{k}_j^{(2)}
-     + \vect{q}_i^{(3)\top}\,\mat{R}^{(3)}\bigl(\theta^{\mathrm{lat}}_j - \theta^{\mathrm{lat}}_i\bigr)\,\vect{k}_j^{(3)},
+    ={}& \vect{q}_i^{(1)\top}\,\mat{R}^{(1)}(t_j - t_i)\,\vect{k}_j^{(1)}
+     + \vect{q}_i^{(2)\top}\,\mat{R}^{(2)}\bigl(u^{x}_j - u^{x}_i\bigr)\,\vect{k}_j^{(2)} \\
+    &+ \vect{q}_i^{(3)\top}\,\mat{R}^{(3)}\bigl(u^{y}_j - u^{y}_i\bigr)\,\vect{k}_j^{(3)}
+     + \vect{q}_i^{(4)\top}\,\mat{R}^{(4)}\bigl(u^{z}_j - u^{z}_i\bigr)\,\vect{k}_j^{(4)},
 \end{split}
 \end{equation}
 with $\vect{q}^{(g)}_i$ and $\vect{k}^{(g)}_j$ the sub-vectors of the unrotated query and key in slice $g$.
-The first term compares pulses by their time gap and the remaining two by their angular separation in each \gls{aoa} component, so time and direction contribute independent, additively superposed relative phases to the same attention logit.
+The first term compares pulses by their time gap and the remaining three by the difference in each direction component, so time and direction contribute independent, additively superposed relative phases to the same attention logit.
 \Cref{fig:method:rope_slicing} contrasts the two layouts.
-The \gls{aoa} components are especially natural in this role: they are themselves angles, so the phase encoding preserves their periodic structure.
+The Cartesian direction components of \cref{eq:method:aoa_cart} matter particularly in this role: because \gls{rope} turns coordinate \emph{differences} into relative phases, rotating by a rescaled azimuth would ignore the identification of $0$ with $2\pi$, so two pulses arriving from nearly the same direction could receive an almost maximal relative phase; differences of direction components instead vary continuously over the sphere.
 
-This variant complements rather than replaces the bias term—the bias injects pairwise relationships additively into the logits, while \gls{rope} embeds coordinate differences in the geometry of the queries and keys—and it revisits the choice of \cref{sec:method:arch} to rely on \gls{toa} and \gls{aoa} as plain input features, testing whether an explicit relative encoding adds information beyond their presence in the input.
+This variant complements rather than replaces the bias term—the bias injects pairwise relationships additively into the logits, while \gls{rope} embeds coordinate differences in the geometry of the queries and keys—and it revisits the choice of \cref{sec:method:arch} to rely on \gls{toa} and the arrival direction as plain input features, testing whether an explicit relative encoding adds information beyond their presence in the input.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/rope_slicing.tex}
-  \caption{Allocation of the $d_k/2$ rotation planes of one attention head to physical coordinates. In the shared trunk and the mode branch (top), every plane is rotated by the \gls{toa} $t_n$ down its frequency ladder (\cref{eq:method:rope_block}); the \gls{aoa} is excluded because the mode embedding should be invariant to viewing geometry. In the deinterleaving branch (bottom), the planes are partitioned into three disjoint slices of sizes $c_1$, $c_2$, and $c_3$, rotated by $t_n$, $\theta^{\mathrm{az}}_n$, and $\theta^{\mathrm{lat}}_n$ respectively (\cref{eq:method:rope_sliced}), so that the attention logit decomposes into the per-coordinate relative terms of \cref{eq:method:rope_sliced_logit}.}
+  \caption{Allocation of the $d_k/2$ rotation planes of one attention head to physical coordinates. In the shared trunk and the mode branch (top), every plane is rotated by the \gls{toa} $t_n$ down its frequency ladder (\cref{eq:method:rope_block}); the arrival direction is excluded because the mode embedding should be invariant to viewing geometry. In the deinterleaving branch (bottom), the planes are partitioned into four disjoint slices of sizes $c_1$ through $c_4$, rotated by $t_n$, $u^{x}_n$, $u^{y}_n$, and $u^{z}_n$ respectively (\cref{eq:method:rope_sliced}), so that the attention logit decomposes into the per-coordinate relative terms of \cref{eq:method:rope_sliced_logit}.}
   \label{fig:method:rope_slicing}
 \end{figure}
 

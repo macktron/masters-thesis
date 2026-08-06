@@ -5,10 +5,10 @@ A scenario simulator generates time-ordered \gls{pdw} recordings with varying nu
 Each pulse contains the measured parameters and per-pulse labels defined in \cref{sec:method:formulation}.
 The composition of the resulting corpus is reported in \cref{sec:exp:datasets}.
 
-Preprocessing first standardizes carrier frequency, pulse width, and log-amplitude using statistics from the training split and rescales the two \gls{aoa} components.
+Preprocessing first standardizes carrier frequency, pulse width, and log-amplitude using statistics from the training split and converts the measured \gls{aoa} into Euclidean direction components.
 Each pulse train is then divided into fixed-length windows.
 Absolute \gls{toa} is finally min--max mapped inside each window, so that the timing feature seen by the encoder depends only on pulses that co-occur in the same attention context.
-The encoder input is therefore the $d = 6$-dimensional vector of scaled carrier frequency, pulse width, log-amplitude, window-local \gls{toa}, and the two \gls{aoa} components.
+The encoder input is therefore the $d = 7$-dimensional vector of scaled carrier frequency, pulse width, log-amplitude, window-local \gls{toa}, and the three incidence-direction components.
 
 No hand-crafted timing features are appended to this vector.
 Preliminary experiments augmented each pulse with lagged timing features, namely its instantaneous $\Delta\mathrm{TOA}$ together with rolling means and standard deviations of $\Delta\mathrm{TOA}$ over several look-back widths, to expose the local \gls{pri} structure explicitly; this configuration consistently degraded both emitter and mode clustering relative to the plain \gls{pdw} input.
@@ -23,12 +23,31 @@ Carrier frequency, pulse width, and log-amplitude are standardized per feature a
   \tilde{g}_n = \frac{g_n - \mu_g}{\sigma_g}.
 \end{equation}
 Here $\mu_g$ and $\sigma_g$ are the corresponding training-set mean and standard deviation, and amplitude is log-transformed to reduce its dynamic range.
-The two \gls{aoa} components are mapped to $[0,1]$ by a fixed angular rescaling that does not depend on the training corpus,
-\begin{equation}\label{eq:method:aoa_scale}
-  \tilde{\theta}^{\mathrm{az}}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi},
-  \qquad
-  \tilde{\theta}^{\mathrm{lat}}_n = \frac{\theta^{\mathrm{lat}}_n}{\pi}.
+The measured \gls{aoa} consists of an azimuth $\theta^{\mathrm{az}}_n$ and a latitude $\theta^{\mathrm{lat}}_n$, which together specify the incidence direction of the pulse on the unit sphere.
+Rather than feeding these angles to the encoder directly, each pair is converted to the Euclidean unit direction vector
+\begin{equation}\label{eq:method:aoa_cart}
+  \vect{u}_n
+  =
+  \bigl(u^{x}_n,\, u^{y}_n,\, u^{z}_n\bigr)^{\top}
+  =
+  \bigl(
+    \cos\theta^{\mathrm{lat}}_n \cos\theta^{\mathrm{az}}_n,\;
+    \cos\theta^{\mathrm{lat}}_n \sin\theta^{\mathrm{az}}_n,\;
+    \sin\theta^{\mathrm{lat}}_n
+  \bigr)^{\top},
 \end{equation}
+whose components lie in $[-1,1]$ and are mapped to $[0,1]$ by the fixed affine rescaling
+\begin{equation}\label{eq:method:aoa_scale}
+  \tilde{u}^{c}_n = \frac{u^{c}_n + 1}{2},
+  \qquad
+  c \in \{x, y, z\}.
+\end{equation}
+Neither map depends on the training corpus.
+
+The Cartesian representation is chosen because angular coordinates are periodic and a scalar feature channel cannot express this: azimuths just below $2\pi$ and just above $0$ describe nearly the same incidence direction, yet a direct rescaling of the angle places them at opposite ends of the feature range, creating a spurious discontinuity.
+The direction components of \cref{eq:method:aoa_cart} are free of this wrap-around, since nearby directions on the sphere always receive nearby coordinates.
+The same argument applies with greater force to the relative attention encodings of \cref{sec:method:attention}, which act on coordinate \emph{differences}: a difference of rescaled azimuths does not respect the identification of $0$ with $2\pi$, whereas differences of direction components remain faithful to the underlying geometry.
+
 Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across pulse trains.
 Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
 
