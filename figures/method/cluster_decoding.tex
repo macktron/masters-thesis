@@ -9,7 +9,10 @@
 % pipelines are structurally identical; the asymmetry between the two
 % branches lives in the training loss (within-window vs. batch-wide
 % supervised contrastive) and in the semantic load of the integer
-% indices, not in the inference pipeline.  Loaded from
+% indices, not in the inference pipeline.  The scatter panels show the
+% same number of samples (18) but deliberately different partitions
+% (3 emitter clusters vs. 2 mode clusters) to emphasize that the two
+% clusterings need not coincide.  Loaded from
 % sections/04_method/03_architecture.tex via \input{...}.
 % =====================================================================
 \begin{tikzpicture}[
@@ -87,29 +90,22 @@
 
     \node[scatterbox] (md_scatter) at (0, -22mm) {};
 
-    % Cluster A
+    % Cluster A (9 samples; the mode partition is coarser than the
+    % emitter partition: same number of samples, fewer clusters)
     \draw[contour, color=blue!70!black]
-      ($(md_scatter.center)+(-13mm, 4mm)$) ellipse [x radius=6mm, y radius=4mm];
-    \foreach \x/\y in {-15/5, -13/6, -12/3, -10/5, -14/2, -11/4}
+      ($(md_scatter.center)+(-10mm, 3mm)$) ellipse [x radius=7mm, y radius=4mm];
+    \foreach \x/\y in {-15/3, -13/5, -11/2, -9/4, -7/3, -12/3.5, -10/1.5, -6/2, -8/5}
       \node[pt, color=blue!70!black] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
     \node[font=\scriptsize, color=blue!70!black]
-      at ($(md_scatter.center)+(-13mm, 10mm)$) {$\hat{m}{=}1$};
+      at ($(md_scatter.center)+(-10mm, 9mm)$) {$\hat{m}{=}1$};
 
-    % Cluster B
+    % Cluster B (9 samples)
     \draw[contour, color=red!70!black]
-      ($(md_scatter.center)+(11mm, 3mm)$) ellipse [x radius=6mm, y radius=4mm];
-    \foreach \x/\y in {8/2, 10/4, 12/2, 14/3, 11/1, 13/4}
+      ($(md_scatter.center)+(9mm, -6mm)$) ellipse [x radius=7mm, y radius=4mm];
+    \foreach \x/\y in {4/-6, 6/-4, 7/-7, 9/-5, 11/-7, 13/-5, 10/-8, 12/-6.5, 8/-5.5}
       \node[pt, color=red!70!black] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
     \node[font=\scriptsize, color=red!70!black]
-      at ($(md_scatter.center)+(11mm, 9mm)$) {$\hat{m}{=}2$};
-
-    % Cluster C
-    \draw[contour, color=green!45!black]
-      ($(md_scatter.center)+(-2mm, -8mm)$) ellipse [x radius=7mm, y radius=4mm];
-    \foreach \x/\y in {-5/-7, -3/-9, 0/-8, 2/-7, -1/-10, 3/-9}
-      \node[pt, color=green!45!black] at ($(md_scatter.center)+(\x mm, \y mm)$) {};
-    \node[font=\scriptsize, color=green!45!black]
-      at ($(md_scatter.center)+(-2mm, -13mm)$) {$\hat{m}{=}3$};
+      at ($(md_scatter.center)+(9mm, -12mm)$) {$\hat{m}{=}2$};
 
     \node[hdb] (md_hdb) at (0, -45mm)
       {\gls{dbscan} per window};
