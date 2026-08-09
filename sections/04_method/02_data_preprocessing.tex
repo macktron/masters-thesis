@@ -56,30 +56,31 @@ Standard self-attention has time and memory complexity $\mathcal{O}(L^2)$ for a 
 Because a complete recording may contain millions of pulses, the encoder processes fixed-length windows rather than entire recordings.
 The value of $L$ is reported with the experimental hyperparameters in \cref{tab:exp:hparams_main}.
 
-Given a recording $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $s$, window $w$ is
+Given a recording $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $\delta$, window $w$ is
 \begin{equation}\label{eq:method:windowing}
   \mat{X}^{(w)}
   =
-  \bigl(\vect{x}_{1+(w-1)s},\ldots,\vect{x}_{L+(w-1)s}\bigr),
+  \bigl(\vect{x}_{1+(w-1)\delta},\ldots,\vect{x}_{L+(w-1)\delta}\bigr),
   \qquad
   w \in
-  \left\{1,\ldots,\left\lfloor\frac{N-L}{s}\right\rfloor+1\right\}.
+  \left\{1,\ldots,\left\lfloor\frac{N-L}{\delta}\right\rfloor+1\right\}.
 \end{equation}
+The superscript $(w)$ indexes windows within one recording, whereas $(s)$ indexes recordings and is suppressed here.
 The number of windows therefore varies with the recording length.
 Any trailing segment shorter than $L$ is dropped.
 
-During training, choosing $s<L$ produces overlapping windows and therefore more training samples.
+During training, choosing $\delta<L$ produces overlapping windows and therefore more training samples.
 A smaller stride improves coverage of sparse emitters and modes and reduces sensitivity to window boundaries, but it also repeats more of the same \glspl{pdw}, increasing computation and correlation between samples.
 The scenario-aware sampler in \cref{sec:method:training:sampler} allows the contrastive loss to use these repeated views.
 Advancing the window by a small stride resembles streaming inference because outputs can be refreshed as new pulses arrive, although it is not online learning because the model parameters remain fixed.
 
-Validation and test use $s=L$, yielding non-overlapping windows that are processed entirely offline.
+Validation and test use $\delta=L$, yielding non-overlapping windows that are processed entirely offline.
 Streaming inference and online model adaptation are left to future work (\cref{sec:concl:future}).
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/windowing.tex}
-  \caption{Sliding-window segmentation of a recording. Successive windows of length $L$ advance by stride $s$ and overlap by $L-s$ pulses. A trailing segment shorter than $L$ is dropped.}
+  \caption{Sliding-window segmentation of a recording. Successive windows of length $L$ advance by stride $\delta$ and overlap by $L-\delta$ pulses. A trailing segment shorter than $L$ is dropped.}
   \label{fig:method:windowing}
 \end{figure}
 

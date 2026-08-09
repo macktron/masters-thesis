@@ -10,18 +10,20 @@ Describe the proposed approach in enough detail that another researcher could re
 
 ## Subsection contracts
 
-- `01_problem_formulation.tex` — Formal problem statement using mathematical notation. Define the input space (a sequence of PDW vectors, $\setX \subset \R^{N \times d}$), the latent space ($\setZ \subset \R^{e}$), the two target clusterings (emitter and mode), and the joint clustering objective. Be precise about what is observed and what is latent.
-- `02_data_preprocessing.tex` — Per-feature normalization, encoding of categorical PDW fields, sequence segmentation strategy (fixed-window vs. variable-length), padding/masking. Augmentations used for contrastive learning (jitter, dropout of pulses, parameter perturbation).
-- `03_architecture.tex` — The transformer encoder: input embedding layer, positional encoding (and any custom variant for irregular TOA), number of layers, heads, hidden dim, output projection head(s). Include a schematic figure in `figures/method/architecture.pdf`.
-- `04_loss_function.tex` — Loss design. Likely one of: (a) contrastive (InfoNCE) + clustering head with KL/sharpening (DEC-style), (b) two-head SwAV-like with separate emitter/mode prototypes, (c) hierarchical contrastive loss. Write the loss equation and label it.
-- `05_training_procedure.tex` — Optimizer, learning rate schedule, batch size, number of epochs, pretraining vs. fine-tuning phases, target distribution updates if DEC-style, warm-up of clustering loss weight.
-- `06_evaluation_metrics.tex` — Define AMI, ARI, clustering accuracy (with Hungarian alignment), V-measure. Use the `\AMI`, `\ARI`, `\ACC` macros. Explain *why* each metric is used and what it can and cannot tell us.
-- `07_baselines.tex` — Baselines to compare against. Examples: k-means on raw PDWs, k-means on autoencoder embeddings, DEC, SwAV, a supervised classifier as an upper bound. Justify each.
+- `01_problem_formulation.tex` — Recording-level problem statement. Defines the observed recordings $\mat{X}^{(s)}$, the ground-truth label pairs $\vect{y}_n = (e_n, m_n)$, the two target partitions (emitter and mode), and the estimation objective: recover both partitions of a generic observed pulse sequence up to independent relabelling per coordinate. Windowing and clustering are *method* choices and are only forward-referenced here, never assumed by the problem statement.
+- `02_data_preprocessing.tex` — Per-feature scaling, AoA-to-direction conversion, windowing (window length $L$, stride $\delta$, window superscript $(w)$), and per-window TOA min--max mapping.
+- `03_architecture.tex` — The transformer encoder: input embedding, shared trunk, two task-specific branches, projection heads, and the DBSCAN decoding step that turns embeddings into discrete estimates. Schematic figures live in `figures/method/`.
+- `04_attention_variants.tex` — Attention variants for irregular TOA (pairwise bias, rotary encoding) acting on coordinate differences.
+- `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the total objective.
+- `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
+- `07_evaluation_metrics.tex` — Define AMI, ARI, clustering accuracy (with Hungarian alignment), V-measure. Use the `\AMI`, `\ARI`, `\ACC` macros. Explain *why* each metric is used and what it can and cannot tell us.
+- `08_baselines.tex` — Baselines to compare against, with justification for each.
 
 ## Style notes
 
 - Equations: every important equation gets a `\label{eq:method:...}` and is referenced via `\cref{eq:method:...}`.
 - Variable naming: $\vect{x}_i$ for a single pulse, $\mat{X} \in \R^{N \times d}$ for a sequence, $\vect{z}_i = \Enc(\vect{x}_i)$ for the embedding, $\vect{c}_k$ for cluster centers/prototypes.
+- Reserved index symbols: $s$ is the recording index, $w$ the window index, $\delta$ the windowing stride, $L$ the window length, $N$ ($N_s$) the recording length. Do not reuse these letters for anything else in this chapter.
 - Algorithm pseudocode is welcome — use the `algorithm` / `algpseudocode` environments already loaded in `preamble.tex`. Label as `alg:method:...`.
 - Place the architecture figure and any training-pipeline diagrams in `figures/method/`.
 - Do **not** mention specific datasets or hyperparameter values here — those go in Chapter 5.

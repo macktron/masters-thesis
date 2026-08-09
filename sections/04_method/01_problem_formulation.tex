@@ -11,7 +11,7 @@ Recording $s$ is observed as a finite, time-ordered sequence of \glspl{pdw}
 \]
 where each $\vect{x}^{(s)}_n$ contains the measured parameters of one pulse (carrier frequency, amplitude, pulse width, time of arrival, and angles of arrival), and the length $N_s$ varies between recordings.
 The encoder operates on fixed-length windows extracted from these recordings as described in \cref{sec:method:data:window}.
-When considering one recording or window, the superscript is omitted.
+When a single recording is considered, the superscript is omitted.
 
 \subsection*{Labels and target partitions}
 
@@ -51,14 +51,14 @@ Recovering the emitter partition is the deinterleaving task, whereas recovering 
 
 \subsection*{Estimation objective}
 
-At inference, only the window $\mat{X}$ is observed; the label pairs in \cref{eq:method:label_pair} and the numbers of groups present are unknown.
+At inference, a time-ordered pulse sequence $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ is observed; the label pairs in \cref{eq:method:label_pair} and the numbers of groups present are unknown.
 The task is to estimate a label pair for every pulse,
 \begin{equation}\label{eq:method:estimated_label_pair}
   \hat{\vect{y}}_n = \bigl(\hat{e}_n,\, \hat{m}_n\bigr)
   \in \{1,\ldots,\hat{K}\} \times \{1,\ldots,\hat{M}\},
-  \qquad n \in \{1,\ldots,L\},
+  \qquad n \in \{1,\ldots,N\},
 \end{equation}
-where the counts $\hat{K}$ and $\hat{M}$ are also estimated from the window.
+where the counts $\hat{K}$ and $\hat{M}$ are also estimated from the observed sequence.
 These estimates induce the partitions
 \begin{equation}\label{eq:method:estimated_partitions}
   \widehat{\mathcal{E}}_k
@@ -72,11 +72,12 @@ These estimates induce the partitions
   \quad \ell \in \{1,\ldots,\hat{M}\}.
 \end{equation}
 Elementwise agreement between $\hat{\vect{y}}_n$ and $\vect{y}_n$ is not required, because cluster indices are arbitrary.
-The objective is instead that, within each window, the partitions in \cref{eq:method:estimated_partitions} match the restrictions of the ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition}, up to independent permutations of the indices in each coordinate.
+The objective is instead that the partitions in \cref{eq:method:estimated_partitions} match the restrictions of the ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to the observed sequence, up to independent permutations of the indices in each coordinate.
 Agreement is measured with the permutation-invariant metrics of \cref{sec:method:metrics}.
 
-Both estimates are local to the window, and emitter identities are meaningful only within the recording from which the window was drawn.
+Emitter identities are meaningful only within the recording from which the observed sequence was drawn.
 Neither $\hat{K}$ nor $\hat{M}$ is assumed known; in particular, $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
+The method instantiates this objective on fixed-length windows extracted from each recording (\cref{sec:method:data:window}), a computational choice forced by the quadratic cost of self-attention; estimated symbols are therefore local to a window and are not linked across windows.
 
 The proposed method estimates $\hat{\vect{y}}_n$ with a shared encoder and two embedding branches: recording-local emitter labels supervise one branch, and globally shared mode labels make the other comparable across recordings.
 The losses are specified in \cref{sec:method:loss}, and the architecture and decoding step in \cref{sec:method:arch}.

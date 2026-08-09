@@ -2,10 +2,10 @@
 % Schematic of the fixed-length sliding-window segmentation defined in
 % \cref{eq:method:windowing} and used in \cref{sec:method:data:window}.
 % A recording of N pulses is cut into windows of L pulses with stride
-% s, where 0 < s <= L. The trailing portion of length < L is dropped.
-% The figure is drawn with s = L/2 for legibility, but the construction
-% applies to any stride in that range (training uses s = L/2 and
-% validation/test use s = L). Loaded from
+% delta, where 0 < delta <= L. The trailing portion of length < L is
+% dropped. The figure is drawn with delta = L/2 for legibility, but the
+% construction applies to any stride in that range (validation/test use
+% delta = L). Loaded from
 % sections/04_method/02_data_preprocessing.tex via \input{...}.
 % =====================================================================
 \begin{tikzpicture}[
@@ -25,7 +25,7 @@
       rectangle, rounded corners=1.5pt,
       inner sep=2pt,
       minimum height=6mm,
-      font=\footnotesize,
+      font=\scriptsize,
     },
     win1/.style={fill=blue!17,    draw=blue!65!black},
     win2/.style={fill=orange!22,  draw=orange!75!black},
@@ -39,10 +39,10 @@
   ]
 
   % ---- geometry ----
-  % The stride s is unrestricted in 0 < s <= L; here it is set to L/2
-  % purely for visual clarity.
+  % The stride delta is unrestricted in 0 < delta <= L; here it is set
+  % to L/2 purely for visual clarity.
   \def\Lwin{4.8}      % L (window length) in plot units
-  \def\Sstride{2.4}   % s, drawn at L/2 for legibility
+  \def\Sstride{2.4}   % delta, drawn at L/2 for legibility
   \def\Ntot{14.0}     % total visible train length
   \def\barH{0.45}     % pulse-train bar height
   \def\dy{0.85}       % vertical step between consecutive windows
@@ -65,13 +65,13 @@
   % the alignment between the last window's right edge and the start of
   % the dropped remainder immediate from the code.
   \node[window, win1, minimum width=\Lwin cm, anchor=south west]
-       (w1) at (0,            \yzero)        {$\mat{X}^{(1)}$: pulses $1,\ldots,L$};
+       (w1) at (0,            \yzero)        {window $\mat{X}^{(1)}$: pulses $1,\ldots,L$};
   \node[window, win2, minimum width=\Lwin cm, anchor=south west]
-       (w2) at (\Sstride,     \yzero+\dy)    {$\mat{X}^{(2)}$: pulses $1+s,\ldots,L+s$};
+       (w2) at (\Sstride,     \yzero+\dy)    {window $\mat{X}^{(2)}$: pulses $1+\delta,\ldots,L+\delta$};
   \node[window, win3, minimum width=\Lwin cm, anchor=south west]
-       (w3) at (2*\Sstride,   \yzero+2*\dy)  {$\mat{X}^{(3)}$: pulses $1+2s,\ldots,L+2s$};
+       (w3) at (2*\Sstride,   \yzero+2*\dy)  {window $\mat{X}^{(3)}$: pulses $1+2\delta,\ldots,L+2\delta$};
   \node[window, win4, minimum width=\Lwin cm, anchor=south west]
-       (w4) at (3*\Sstride,   \yzero+3*\dy)  {$\mat{X}^{(4)}$: pulses $1+3s,\ldots,L+3s$};
+       (w4) at (3*\Sstride,   \yzero+3*\dy)  {window $\mat{X}^{(4)}$: pulses $1+3\delta,\ldots,L+3\delta$};
 
   % ---- dropped tail overlay (anchored to Window 4's right edge) ----
   % (w4.south east |- trainTL) is the point (w4.east.x, 0) on the train
@@ -103,13 +103,13 @@
                   {$L = 1024$ pulses}
              (3*\Sstride+\Lwin, \yL);
 
-  % s (stride): in the gap between the train bar and Window 1.
-  % Labelled simply "s" because the figure illustrates an arbitrary
-  % stride with 0 < s <= L; the drawing uses L/2 for legibility.
+  % delta (stride): in the gap between the train bar and Window 1.
+  % Labelled simply "delta" because the figure illustrates an arbitrary
+  % stride with 0 < delta <= L; the drawing uses L/2 for legibility.
   \pgfmathsetmacro{\ys}{0.18}
   \draw[dim] (0, \ys) --
              node[above=-1pt, font=\scriptsize, fill=white, inner sep=1pt]
-                  {$s$}
+                  {$\delta$}
              (\Sstride, \ys);
 
 \end{tikzpicture}
