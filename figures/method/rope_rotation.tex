@@ -1,9 +1,8 @@
 % =====================================================================
 % Geometry of RoPE on one 2D plane of an attention head.
-% Left: projected query q is rotated by R(p) for two nearby physical
-% coordinates (e.g. window-normalised TOA), with a modest phase
-% gamma*p*theta_m (\cref{eq:method:rope_block}).
-% Right: after both query and key are rotated, their enclosed angle
+% Left: projected query q is rotated by R(p) through a modest absolute
+% phase gamma*p*theta_m (\cref{eq:method:rope_block}).
+% Right: after both query and key are rotated, the enclosed angle
 % (and hence the inner product) depends only on the coordinate
 % difference (\cref{eq:method:rope}).
 % Loaded from sections/04_method/04_attention_variants.tex via \input.
@@ -12,87 +11,83 @@
     font=\small,
     >=Latex,
     axis/.style={->, gray!55, thin},
-    guide/.style={gray!30, thin},
-    qraw/.style={->, thick, densely dashed, color=black!50},
+    guide/.style={gray!28, thin},
+    qraw/.style={->, thick, densely dashed, color=black!45},
     qvec/.style={->, very thick, color=blue!70!black},
-    kraw/.style={->, thick, densely dashed, color=red!45!black},
+    kraw/.style={->, thick, densely dashed, color=red!40!black},
     kvec/.style={->, very thick, color=red!70!black},
-    angarc/.style={->, thin, color=black!70},
-    steparrow/.style={->, thick, color=black!55},
+    angarc/.style={->, thin, color=black!65},
   ]
 
-  % =================== LEFT PANEL: apply R(p) to the projected query ====
+  % =================== LEFT PANEL: apply R(p) ===========================
   \begin{scope}[xshift=0mm]
-    \def\Rad{17mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (0, 22mm)
+    \def\Rad{18mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (0.5*\Rad, 23mm)
       {Apply $\mat{R}(p)$ to the projected query};
 
-    \draw[axis] (-20mm, 0) -- (21mm, 0);
-    \draw[axis] (0, -7mm) -- (0, 20mm);
+    \draw[axis] (-20mm, 0) -- (22mm, 0);
+    \draw[axis] (0, -8mm) -- (0, 21mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % modest angles: content at 20°, then +12° and +22° of phase
-    \def\qbase{20}
-    \def\aone{32}   % R(p_i) q : small absolute phase
-    \def\atwo{42}   % R(p_j) q : slightly larger
+    % gentle fan: content at 28°, then +10° and +18° of phase only
+    \def\qbase{28}
+    \def\aone{38}
+    \def\atwo{46}
 
-    % unrotated projected query
     \draw[qraw] (0, 0) -- (\qbase:\Rad);
     \node[color=black!50, font=\scriptsize, anchor=north west]
       at (\qbase:\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
 
-    % two gently rotated copies (nearby physical coordinates)
-    \draw[qvec, color=blue!55!black] (0, 0) -- (\aone:\Rad);
+    \draw[qvec, color=blue!50!black] (0, 0) -- (\aone:\Rad);
     \draw[qvec] (0, 0) -- (\atwo:\Rad);
 
-    \node[color=blue!55!black, font=\scriptsize, anchor=west]
-      at (\aone:\Rad) {$\tilde{\vect{q}}(p_i)$};
+    \node[color=blue!50!black, font=\scriptsize, anchor=west]
+      at (\aone:\Rad) {$\mat{R}(p_i)\,\vect{q}$};
     \node[color=blue!70!black, font=\scriptsize, anchor=south west]
-      at (\atwo:\Rad) {$\tilde{\vect{q}}(p_j)$};
+      at (\atwo:\Rad) {$\mat{R}(p_j)\,\vect{q}$};
 
-    % phase arc for the smaller rotation only
-    \draw[angarc] (\qbase:8.5mm) arc (\qbase:\aone:8.5mm);
-    \node[font=\scriptsize, anchor=west] at ({(\qbase+\aone)/2}:10mm)
-      {$\gamma p_i\theta_m$};
+    % small absolute-phase arc (first step only)
+    \draw[angarc] (\qbase:9mm) arc (\qbase:\aone:9mm);
+    \node[font=\scriptsize, anchor=west]
+      at ({(\qbase+\aone)/2}:10.5mm) {$\gamma p_i\theta_m$};
 
-    % annotation: what the diagram depicts
-    \node[font=\scriptsize, anchor=north, align=center, text=black!65]
-      at (0, -8mm)
-      {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$\\[-1pt]
-       nearby $p$ $\Rightarrow$ small relative phase};
+    % tiny tick for the second step
+    \draw[angarc, color=black!40] (\aone:7mm) arc (\aone:\atwo:7mm);
+
+    \node[font=\scriptsize, anchor=north, align=center, text=black!60]
+      at (0, -9mm)
+      {same content $\vect{q}$; different physical $p$\\[-1pt]
+       $\Rightarrow$ different absolute phase};
   \end{scope}
 
-  % =================== RIGHT PANEL: relative phase / inner product ======
-  \begin{scope}[xshift=68mm]
-    \def\Rad{17mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (0, 22mm)
+  % =================== RIGHT PANEL: relative phase ======================
+  \begin{scope}[xshift=70mm]
+    \def\Rad{18mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (0.5*\Rad, 23mm)
       {Inner product sees only $p_j-p_i$};
 
-    \draw[axis] (-20mm, 0) -- (21mm, 0);
-    \draw[axis] (0, -7mm) -- (0, 20mm);
+    \draw[axis] (-20mm, 0) -- (22mm, 0);
+    \draw[axis] (0, -8mm) -- (0, 21mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % content angle between unrotated q and k (faint)
-    \def\qrawang{18}
-    \def\krawang{38}   % content angle φ = 20°
-    % after relative rotation by gamma*(p_j-p_i)*theta_m ≈ 14°
-    \def\qang{18}
-    \def\kang{52}
+    % content (unrotated) pair: angle φ = 16°
+    \def\qrawang{22}
+    \def\krawang{38}
+    % after RoPE: both moved, relative extra phase ≈ 12°
+    \def\qang{30}
+    \def\kang{58}
 
-    % faint unrotated pair (content-only geometry)
     \draw[qraw] (0, 0) -- (\qrawang:\Rad);
     \draw[kraw] (0, 0) -- (\krawang:\Rad);
-    \node[color=black!45, font=\scriptsize, anchor=north west]
-      at (\qrawang:0.92*\Rad) {$\vect{q}_i$};
+    \node[color=black!45, font=\scriptsize, anchor=north east]
+      at (\qrawang:0.98*\Rad) {$\vect{q}_i$};
     \node[color=red!40!black, font=\scriptsize, anchor=south east]
-      at (\krawang:0.95*\Rad) {$\vect{k}_j$};
+      at (\krawang:0.98*\Rad) {$\vect{k}_j$};
 
-    % content-angle arc
-    \draw[angarc, color=black!40] (\qrawang:6.5mm) arc (\qrawang:\krawang:6.5mm);
-    \node[font=\scriptsize, color=black!50, anchor=west]
-      at ({(\qrawang+\krawang)/2}:7.5mm) {$\varphi$};
+    \draw[angarc, color=black!40] (\qrawang:6mm) arc (\qrawang:\krawang:6mm);
+    \node[font=\scriptsize, color=black!50, anchor=south]
+      at ({(\qrawang+\krawang)/2}:7.2mm) {$\varphi$};
 
-    % bold rotated pair
     \draw[qvec] (0, 0) -- (\qang:\Rad);
     \draw[kvec] (0, 0) -- (\kang:\Rad);
     \node[color=blue!70!black, font=\scriptsize, anchor=west]
@@ -100,14 +95,13 @@
     \node[color=red!70!black, font=\scriptsize, anchor=south west]
       at (\kang:\Rad) {$\tilde{\vect{k}}_j$};
 
-    % relative-phase arc between rotated vectors
-    \draw[angarc] (\qang:11mm) arc (\qang:\kang:11mm);
+    \draw[angarc] (\qang:11.5mm) arc (\qang:\kang:11.5mm);
     \node[font=\scriptsize, anchor=south west]
-      at ({(\qang+\kang)/2}:12.2mm)
+      at ({(\qang+\kang)/2}:12.8mm)
       {$\varphi{+}\gamma(p_j{-}p_i)\theta_m$};
 
-    \node[font=\scriptsize, anchor=north, align=center, text=black!65]
-      at (0, -8mm)
+    \node[font=\scriptsize, anchor=north, align=center, text=black!60]
+      at (0, -9mm)
       {$\langle\tilde{\vect{q}}_i,\tilde{\vect{k}}_j\rangle
         =\vect{q}_i^{\top}\mat{R}(p_j{-}p_i)\,\vect{k}_j$};
   \end{scope}
