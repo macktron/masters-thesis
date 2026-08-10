@@ -75,8 +75,7 @@ with cardinalities $\hat{K},\hat{M} \in \N$ inferred from the data (\cref{fig:me
 The radius $\varepsilon$ is selected by a grid search over $\varepsilon \in \{0.1, 0.2, 0.3, 0.4, 0.5\}$ on the validation set, separately for each branch, using the clustering metrics of \cref{sec:method:metrics}; the selected values are reported in \cref{ch:experiments}.
 The neighbourhood count is fixed at $\mathrm{minPts} = 5$, following its use in prior work on embedding-based deinterleaving \parencite{gunn2025deinterleaving}.
 With these settings the noise category remained marginal on the validation set---empty for most windows and almost never exceeding ten pulses per window---so no further treatment of noise-labelled pulses was deemed necessary.
-Clustering per window matches the recording-local supervision scope of the emitter branch and keeps the runtime linear in window length; cross-window alignment of mode embeddings is instead supplied by the batch-wide contrastive term of \cref{sec:method:loss} and resolved by the permutation-invariant metrics of \cref{sec:method:metrics}.
-The operator contributes no gradients, and the trunk, branch, and projection-head weights together form the parameter vector $\bm{\theta}$ optimised by the loss in \cref{sec:method:loss}.
+The clustering operator is applied only at inference and contributes no gradients; the trainable parameters $\bm{\theta}$ comprise the trunk, branch, and projection-head weights and are optimised by the loss of \cref{sec:method:loss}.
 
 \begin{figure}[tbp]
   \centering
