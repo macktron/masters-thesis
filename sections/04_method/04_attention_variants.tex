@@ -64,8 +64,8 @@ Collecting the per-plane rotations into a single block-diagonal matrix and writi
     0 & 0 & 0 & 0 & \cdots & \sin\gamma p\theta_{d_k/2} & \phantom{-}\cos\gamma p\theta_{d_k/2}
   \end{bmatrix},
 \end{equation}
-that is, $\mat{R}(p) = \diag\!\bigl(\mat{\Omega}(\gamma p\theta_1),\,\ldots,\,\mat{\Omega}(\gamma p\theta_{d_k/2})\bigr)$, with angular frequencies $\theta_m = b^{-2(m-1)/d_k}$ for a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}).
-The geometric progression of angular frequencies $\theta_m$ mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: fast-rotating planes resolve fine coordinate differences, slow-rotating planes capture coarse ones.
+that is, $\mat{R}(p) = \diag\!\bigl(\mat{\Omega}(\gamma p\theta_1),\,\ldots,\,\mat{\Omega}(\gamma p\theta_{d_k/2})\bigr)$ in the notation of \cref{eq:method:rope_2d}.
+The angular frequencies $\theta_m = b^{-2(m-1)/d_k}$, with a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}), form a geometric progression that mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: fast-rotating planes resolve fine coordinate differences, slow-rotating planes capture coarse ones.
 The scale $\gamma$ multiplies every frequency of the ladder uniformly and therefore sets how much relative phase one unit of coordinate difference produces.
 In the original formulation no such factor is needed, because token indices advance in steps of exactly one; our coordinates are normalised physical quantities whose typical gaps differ between the \gls{toa} and the direction components, so we treat $\gamma$ as a hyperparameter and set it separately for each coordinate $f \in \{t,\, u^{x},\, u^{y},\, u^{z}\}$: $\gamma_t$ for the \gls{toa} and $\gamma_{u^x}$, $\gamma_{u^y}$, and $\gamma_{u^z}$ for the three incidence-direction components.
 The values used are reported in \cref{ch:experiments}; the dependence of $\mat{R}$ on $\gamma$ is left implicit in the notation, and each use below states which scale applies.
