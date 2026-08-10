@@ -16,7 +16,7 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 
 \subsection*{Physical attention bias}
 
-The first variant adds a pairwise bias to the logits, computed from the physical parameters of each pulse pair.
+The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
 The bias is built from the absolute pairwise differences of four coordinates: the \gls{toa} $t_n$ and the three incidence-direction components $u^{x}_n$, $u^{y}_n$, and $u^{z}_n$ of \cref{eq:method:aoa_cart}.
 For each coordinate $f$, the delta matrix $B^{(f)}_{ij} = |f_i - f_j|$ is superposed on the logits with a learnable scalar coefficient,
 \begin{equation}\label{eq:method:attn_bias}
