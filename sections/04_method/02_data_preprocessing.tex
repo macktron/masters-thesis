@@ -96,5 +96,4 @@ After windowing, absolute \gls{toa} is min--max mapped to $[0,1]$ using only the
   \frac{t^{(w)}_i - t^{(w)}_{\min}}{t^{(w)}_{\max} - t^{(w)}_{\min}},
 \end{equation}
 where $t^{(w)}_{\min}$ and $t^{(w)}_{\max}$ are the minimum and maximum \gls{toa} among the pulses of window $w$, and $i$ indexes positions within that window.
-The encoder never observes pulses outside the window it processes, so recording-level extrema would inject timing information unavailable inside the attention context (and unavailable to a streaming receiver that buffers only the current window).
 Per-window mapping keeps the \gls{toa} channel self-contained; when training uses $\delta < L$, the same physical pulse may receive different normalized values in overlapping windows, which is the intended behaviour for a window-local feature.
