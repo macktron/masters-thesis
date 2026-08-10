@@ -34,7 +34,23 @@ The construction mirrors the relative-position and content-independent biases us
 \subsection*{Rotary positional encoding}
 
 The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
-Following \textcite{su2024roformer}, let the query and key of a pulse be functions $\vect{q}_i = f_q(\vect{h}_i, p_i)$ and $\vect{k}_j = f_k(\vect{h}_j, p_j)$ of both its hidden representation $\vect{h}_i$ entering the attention sub-layer and a scalar coordinate $p_i$ attached to the pulse, and require that their inner product depend on the coordinates only through their difference,
+In the vanilla self-attention of \cref{eq:method:attn_base}, the query and key of pulse $i$ are obtained by linear projection of the hidden representation $\vect{h}_i$ that enters the attention sub-layer,
+\begin{equation}\label{eq:method:qk_proj}
+  \vect{q}_i = \mat{W}_q\vect{h}_i,
+  \qquad
+  \vect{k}_i = \mat{W}_k\vect{h}_i,
+\end{equation}
+with learnable matrices $\mat{W}_q, \mat{W}_k \in \R^{d_k \times d_{\mathrm{model}}}$ shared across positions in the head.
+The attention logit is then simply their inner product,
+\begin{equation}\label{eq:method:attn_dot}
+  \bigl\langle \vect{q}_i,\, \vect{k}_j \bigr\rangle
+  = \vect{q}_i^{\top}\vect{k}_j
+  = (\mat{W}_q\vect{h}_i)^{\top}(\mat{W}_k\vect{h}_j),
+\end{equation}
+which depends on content alone: no coordinate of either pulse appears in \cref{eq:method:attn_dot}.
+
+\Gls{rope} leaves the projections of \cref{eq:method:qk_proj} unchanged and instead rotates the resulting vectors by a phase that depends on a scalar coordinate $p$ attached to each pulse.
+Following \textcite{su2024roformer}, the query and key become functions $\vect{q}_i = f_q(\vect{h}_i, p_i)$ and $\vect{k}_j = f_k(\vect{h}_j, p_j)$ of both the hidden representation and that coordinate, and their inner product is required to depend on the coordinates only through their difference,
 \begin{equation}\label{eq:method:rope_goal}
   \bigl\langle f_q(\vect{h}_i, p_i),\, f_k(\vect{h}_j, p_j) \bigr\rangle
   = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
@@ -69,20 +85,22 @@ The angular frequencies $\theta_m = b^{-2(m-1)/d_k}$, with a fixed base $b$ (we 
 The scale $\gamma$ multiplies every frequency of the ladder uniformly and therefore sets how much relative phase one unit of coordinate difference produces.
 In the original formulation no such factor is needed, because token indices advance in steps of exactly one; our coordinates are normalised physical quantities whose typical gaps differ between the \gls{toa} and the direction components, so we treat $\gamma$ as a hyperparameter and set it separately for each coordinate $f \in \{t,\, u^{x},\, u^{y}\}$: $\gamma_t$ for the \gls{toa} and $\gamma_{u^x}$ and $\gamma_{u^y}$ for the two horizontal direction components.
 The values used are reported in \cref{ch:experiments}; the dependence of $\mat{R}$ on $\gamma$ is left implicit in the notation, and each use below states which scale applies.
-The query and key functions are then the usual linear projections followed by this rotation,
+Applying $\mat{R}(p)$ after the projections of \cref{eq:method:qk_proj} yields the query and key functions
 \begin{equation}\label{eq:method:rope_map}
-  f_q(\vect{h}_i, p_i) = \mat{R}(p_i)\,\mat{W}_q\vect{h}_i,
+  f_q(\vect{h}_i, p_i) = \mat{R}(p_i)\,\vect{q}_i = \mat{R}(p_i)\,\mat{W}_q\vect{h}_i,
   \qquad
-  f_k(\vect{h}_j, p_j) = \mat{R}(p_j)\,\mat{W}_k\vect{h}_j,
+  f_k(\vect{h}_j, p_j) = \mat{R}(p_j)\,\vect{k}_j = \mat{R}(p_j)\,\mat{W}_k\vect{h}_j,
 \end{equation}
-written $\tilde{\vect{q}}_i$ and $\tilde{\vect{k}}_j$ below.
+written $\tilde{\vect{q}}_i$ and $\tilde{\vect{k}}_j$ below; without the rotation, \cref{eq:method:rope_map} reduces to the vanilla case of \cref{eq:method:attn_dot}.
 
 That this construction meets the design goal follows from one property of planar rotations: composing two of them subtracts their angles, $\mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi)$, hence block-wise $\mat{R}(p_i)^{\top}\mat{R}(p_j) = \mat{R}(p_j - p_i)$ and
 \begin{equation}\label{eq:method:rope}
   \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
+    = \vect{q}_i^{\top}\,\mat{R}(p_j - p_i)\,\vect{k}_j
     = (\mat{W}_q\vect{h}_i)^{\top}\,\mat{R}(p_j - p_i)\,(\mat{W}_k\vect{h}_j),
 \end{equation}
 which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is rotated by its absolute coordinate, yet the logit sees only the difference.
+Setting $\mat{R}(p) = \mat{I}$ recovers the content-only inner product of \cref{eq:method:attn_dot}.
 \Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key—and hence their dot product—is set by the coordinate gap alone (right).
 
 The coordinates we investigate are the \gls{toa} $t_n$ and the two horizontal direction components $u^{x}_n$ and $u^{y}_n$ of \cref{eq:method:aoa_cart}, normalised as in \cref{sec:method:data}.
