@@ -8,8 +8,8 @@
 % =====================================================================
 \begin{tikzpicture}[
     font=\small,
-    plane/.style={draw=black!55, thin, minimum width=18mm, minimum height=7.5mm,
-                  inner sep=0.5pt, outer sep=0pt, align=center},
+    plane/.style={draw=black!55, thin, minimum width=19.5mm, minimum height=8mm,
+                  inner sep=1pt, outer sep=0pt, align=center},
     toaplane/.style={plane, fill=blue!18},
     uxplane/.style={plane, fill=red!18},
     uyplane/.style={plane, fill=orange!28},
@@ -18,7 +18,7 @@
     bracelabel/.style={font=\footnotesize, anchor=north},
   ]
 
-  \def\W{18mm}
+  \def\W{19.5mm}
   \def\NP{6}
 
   % =================== TOP STRIP: trunk and mode branch =================
@@ -26,12 +26,14 @@
   \foreach \m in {1,...,\NP} {
     \node[toaplane] (t\m) at ({(\m-0.5)*\W}, 0) {};
   }
-  \node[font=\scriptsize] at (t1) {$\Omega(\gamma_t t_n\theta_1)$};
+  \node[font=\scriptsize] at (t1)
+    {\scalebox{0.92}{$\Omega(\gamma_t t_n\theta_1)$}};
   \node[font=\scriptsize] at (t2) {$\cdots$};
   \node[font=\scriptsize] at (t3) {$\cdots$};
   \node[font=\scriptsize] at (t4) {$\cdots$};
   \node[font=\scriptsize] at (t5) {$\cdots$};
-  \node[font=\scriptsize] at (t6) {$\Omega(\gamma_t t_n\theta_{d_k/2})$};
+  \node[font=\scriptsize] at (t6)
+    {\scalebox{0.92}{$\Omega(\gamma_t t_n\theta_{d_k/2})$}};
 
   \draw[slicebrace] (0, -4.5mm) -- ({\NP*\W}, -4.5mm);
   \node[bracelabel] at ({\NP*\W/2}, -7mm)
@@ -46,12 +48,16 @@
     \foreach \m in {4,...,6} {
       \node[uyplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \node[font=\scriptsize] at (b1) {$\Omega(\gamma_{u^x}u^{x}_n\theta_1)$};
+    \node[font=\scriptsize] at (b1)
+      {\scalebox{0.82}{$\Omega(\gamma_{u^x}u^{x}_n\theta_1)$}};
     \node[font=\scriptsize] at (b2) {$\cdots$};
-    \node[font=\scriptsize] at (b3) {$\Omega(\gamma_{u^x}u^{x}_n\theta_{d_k/4})$};
-    \node[font=\scriptsize] at (b4) {$\Omega(\gamma_{u^y}u^{y}_n\theta_1)$};
+    \node[font=\scriptsize] at (b3)
+      {\scalebox{0.82}{$\Omega(\gamma_{u^x}u^{x}_n\theta_{d_k/4})$}};
+    \node[font=\scriptsize] at (b4)
+      {\scalebox{0.82}{$\Omega(\gamma_{u^y}u^{y}_n\theta_1)$}};
     \node[font=\scriptsize] at (b5) {$\cdots$};
-    \node[font=\scriptsize] at (b6) {$\Omega(\gamma_{u^y}u^{y}_n\theta_{d_k/4})$};
+    \node[font=\scriptsize] at (b6)
+      {\scalebox{0.82}{$\Omega(\gamma_{u^y}u^{y}_n\theta_{d_k/4})$}};
 
     \draw[slicebrace] (0, -4.5mm) -- ({3*\W}, -4.5mm);
     \node[bracelabel] at ({1.5*\W}, -7mm)
