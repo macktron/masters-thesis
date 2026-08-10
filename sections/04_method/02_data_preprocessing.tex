@@ -87,9 +87,6 @@ Streaming inference and online model adaptation are left to future work (\cref{s
 Each window retains the emitter label, mode label, and recording identifier associated with every pulse.
 The emitter and mode labels supervise their respective branches and provide evaluation targets. This makes the model and also evaluation dependent on the selected window length L, why a fixed L is used in this thesis.
 
-
-The recording identifier is not an encoder input or prediction target; it is used to keep recording-local emitter identifiers distinct and to form scenario-aware mini-batches.
-
 After windowing, absolute \gls{toa} is min--max mapped to $[0,1]$ using only the $L$ pulses inside the current window:
 \begin{equation}\label{eq:method:minmax}
   \tilde{t}^{(w)}_i
