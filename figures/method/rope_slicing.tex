@@ -1,16 +1,16 @@
 % =====================================================================
-% Allocation of the d_k/2 rotation planes of one attention head to
-% physical coordinates, including the per-coordinate scales gamma.
-% Top strip: trunk and mode branch --- every plane rotated by TOA t_n
-% with scale gamma_t (\cref{eq:method:rope_block}).
-% Bottom strip: deinterleaving branch --- even split into two slices
-% of d_k/4 planes, rotated by u^x_n and u^y_n with scales gamma_{u^x}
-% and gamma_{u^y} (\cref{eq:method:rope_sliced}).
+% Allocation of the d_k/2 rotation planes of one attention head.
+% Per-coordinate scale gamma is shown once per slice (above the bar);
+% cells list the plane frequencies only, so the long Omega(...) notation
+% does not have to squeeze into every box.
+% Top: trunk/mode --- all planes by TOA with gamma_t.
+% Bottom: deinterleaving --- even split u^x / u^y with gamma_{u^x},
+% gamma_{u^y}.
 % Loaded from sections/04_method/04_attention_variants.tex via \input.
 % =====================================================================
 \begin{tikzpicture}[
     font=\small,
-    plane/.style={draw=black!55, thin, minimum width=28mm, minimum height=9mm,
+    plane/.style={draw=black!55, thin, minimum width=26mm, minimum height=8mm,
                   inner sep=1pt, outer sep=0pt, align=center},
     toaplane/.style={plane, fill=blue!18},
     uxplane/.style={plane, fill=red!18},
@@ -18,52 +18,57 @@
     rowlabel/.style={font=\footnotesize, anchor=east, align=right},
     slicebrace/.style={decorate, decoration={brace, mirror, amplitude=4pt}, thick},
     bracelabel/.style={font=\footnotesize, anchor=north},
+    header/.style={font=\footnotesize, anchor=south},
     celltxt/.style={font=\scriptsize},
   ]
 
-  \def\W{28mm}
+  \def\W{26mm}
   \def\NP{4}
 
-  % =================== TOP STRIP: trunk and mode branch =================
+  % =================== TOP STRIP ========================================
   \node[rowlabel] at (-2mm, 0) {trunk and\\mode branch};
+
+  \node[header] at ({2*\W}, 6.2mm)
+    {$\mat{R}(t_n)=\diag\!\bigl(\mat{\Omega}(\gamma_t t_n\theta_m)\bigr)_{m=1}^{d_k/2}$};
+
   \foreach \m in {1,...,\NP} {
     \node[toaplane] (t\m) at ({(\m-0.5)*\W}, 0) {};
   }
-  \node[celltxt] at (t1)
-    {\shortstack{$\mat{\Omega}($\\$\gamma_t t_n\theta_1)$}};
-  \node[celltxt] at (t2) {$\cdots$};
+  \node[celltxt] at (t1) {$\theta_1$};
+  \node[celltxt] at (t2) {$\theta_2$};
   \node[celltxt] at (t3) {$\cdots$};
-  \node[celltxt] at (t4)
-    {\shortstack{$\mat{\Omega}($\\$\gamma_t t_n\theta_{d_k/2})$}};
+  \node[celltxt] at (t4) {$\theta_{d_k/2}$};
 
-  \draw[slicebrace] (0, -5.2mm) -- ({\NP*\W}, -5.2mm);
-  \node[bracelabel] at ({\NP*\W/2}, -7.8mm)
-    {all $d_k/2$ planes: coordinate $t_n$, scale $\gamma_t$};
+  \draw[slicebrace] (0, -4.8mm) -- ({\NP*\W}, -4.8mm);
+  \node[bracelabel] at ({\NP*\W/2}, -7.2mm)
+    {all $d_k/2$ planes rotated by \gls{toa} $t_n$ with scale $\gamma_t$};
 
-  % ============== BOTTOM STRIP: deinterleaving branch ====================
-  \begin{scope}[yshift=-28mm]
+  % =================== BOTTOM STRIP =====================================
+  \begin{scope}[yshift=-30mm]
     \node[rowlabel] at (-2mm, 0) {deinterleaving\\branch};
+
+    \node[header] at ({1*\W}, 6.2mm)
+      {$\mat{R}^{(x)}(u^{x}_n)$:~$\gamma_{u^x}u^{x}_n\theta_m$};
+    \node[header] at ({3*\W}, 6.2mm)
+      {$\mat{R}^{(y)}(u^{y}_n)$:~$\gamma_{u^y}u^{y}_n\theta_m$};
+
     \foreach \m in {1,2} {
       \node[uxplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
     \foreach \m in {3,4} {
       \node[uyplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \node[celltxt] at (b1)
-      {\shortstack{$\mat{\Omega}($\\$\gamma_{u^x} u^{x}_n\theta_1)$}};
-    \node[celltxt] at (b2)
-      {\shortstack{$\mat{\Omega}($\\$\gamma_{u^x} u^{x}_n\theta_{d_k/4})$}};
-    \node[celltxt] at (b3)
-      {\shortstack{$\mat{\Omega}($\\$\gamma_{u^y} u^{y}_n\theta_1)$}};
-    \node[celltxt] at (b4)
-      {\shortstack{$\mat{\Omega}($\\$\gamma_{u^y} u^{y}_n\theta_{d_k/4})$}};
+    \node[celltxt] at (b1) {$\theta_1$};
+    \node[celltxt] at (b2) {$\theta_{d_k/4}$};
+    \node[celltxt] at (b3) {$\theta_1$};
+    \node[celltxt] at (b4) {$\theta_{d_k/4}$};
 
-    \draw[slicebrace] (0, -5.2mm) -- ({2*\W}, -5.2mm);
-    \node[bracelabel] at ({1*\W}, -7.8mm)
+    \draw[slicebrace] (0, -4.8mm) -- ({2*\W}, -4.8mm);
+    \node[bracelabel] at ({1*\W}, -7.2mm)
       {$d_k/4$ planes: $u^{x}_n$, scale $\gamma_{u^x}$};
 
-    \draw[slicebrace] ({2*\W}, -5.2mm) -- ({4*\W}, -5.2mm);
-    \node[bracelabel] at ({3*\W}, -7.8mm)
+    \draw[slicebrace] ({2*\W}, -4.8mm) -- ({4*\W}, -4.8mm);
+    \node[bracelabel] at ({3*\W}, -7.2mm)
       {$d_k/4$ planes: $u^{y}_n$, scale $\gamma_{u^y}$};
   \end{scope}
 
