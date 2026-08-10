@@ -3,8 +3,8 @@
 % physical coordinates.  Top strip: in the shared trunk and the mode
 % branch every plane is rotated by the TOA t_n
 % (\cref{eq:method:rope_block}).  Bottom strip: in the deinterleaving
-% branch the planes are partitioned into four disjoint slices, rotated
-% by t_n and the direction components u^x_n, u^y_n, u^z_n respectively
+% branch the planes are split evenly into two slices of d_k/4 planes,
+% rotated by the horizontal direction components u^x_n and u^y_n
 % (\cref{eq:method:rope_sliced}).  Loaded from
 % sections/04_method/04_attention_variants.tex via \input{...}.
 % =====================================================================
@@ -15,7 +15,6 @@
     toaplane/.style={plane, fill=blue!18},
     uxplane/.style={plane, fill=red!18},
     uyplane/.style={plane, fill=orange!30},
-    uzplane/.style={plane, fill=green!25!gray!30},
     rowlabel/.style={font=\footnotesize, anchor=east},
     slicebrace/.style={decorate, decoration={brace, mirror, amplitude=4pt}, thick},
     bracelabel/.style={font=\footnotesize, anchor=north},
@@ -45,42 +44,28 @@
   % ============== BOTTOM STRIP: deinterleaving branch ====================
   \begin{scope}[yshift=-26mm]
     \node[rowlabel] at (-3mm, 0) {\shortstack[r]{deinterleaving\\branch}};
-    \foreach \m in {1,2} {
-      \node[toaplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
-    }
-    \foreach \m in {3,4} {
+    \foreach \m in {1,...,4} {
       \node[uxplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \foreach \m in {5,6} {
+    \foreach \m in {5,...,8} {
       \node[uyplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \foreach \m in {7,8} {
-      \node[uzplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
-    }
-    \node[font=\scriptsize] at (b1) {$\mat{\Omega}(t_n\theta_1)$};
-    \node[font=\scriptsize] at (b2) {$\mat{\Omega}(t_n\theta_{c_1})$};
-    \node[font=\scriptsize] at (b3) {$\mat{\Omega}(u^{x}_n\theta_1)$};
-    \node[font=\scriptsize] at (b4) {$\mat{\Omega}(u^{x}_n\theta_{c_2})$};
+    \node[font=\scriptsize] at (b1) {$\mat{\Omega}(u^{x}_n\theta_1)$};
+    \node[font=\scriptsize] at (b2) {$\mat{\Omega}(u^{x}_n\theta_2)$};
+    \node[font=\scriptsize] at (b3) {$\cdots$};
+    \node[font=\scriptsize] at (b4) {$\mat{\Omega}(u^{x}_n\theta_{d_k/4})$};
     \node[font=\scriptsize] at (b5) {$\mat{\Omega}(u^{y}_n\theta_1)$};
-    \node[font=\scriptsize] at (b6) {$\mat{\Omega}(u^{y}_n\theta_{c_3})$};
-    \node[font=\scriptsize] at (b7) {$\mat{\Omega}(u^{z}_n\theta_1)$};
-    \node[font=\scriptsize] at (b8) {$\mat{\Omega}(u^{z}_n\theta_{c_4})$};
+    \node[font=\scriptsize] at (b6) {$\mat{\Omega}(u^{y}_n\theta_2)$};
+    \node[font=\scriptsize] at (b7) {$\cdots$};
+    \node[font=\scriptsize] at (b8) {$\mat{\Omega}(u^{y}_n\theta_{d_k/4})$};
 
-    \draw[slicebrace] (0, -4.2mm) -- ({2*\W}, -4.2mm);
-    \node[bracelabel] at ({1*\W}, -6.8mm)
-      {$c_1$ planes: $t_n$};
+    \draw[slicebrace] (0, -4.2mm) -- ({4*\W}, -4.2mm);
+    \node[bracelabel] at ({2*\W}, -6.8mm)
+      {$d_k/4$ planes: $u^{x}_n$};
 
-    \draw[slicebrace] ({2*\W}, -4.2mm) -- ({4*\W}, -4.2mm);
-    \node[bracelabel] at ({3*\W}, -6.8mm)
-      {$c_2$ planes: $u^{x}_n$};
-
-    \draw[slicebrace] ({4*\W}, -4.2mm) -- ({6*\W}, -4.2mm);
-    \node[bracelabel] at ({5*\W}, -6.8mm)
-      {$c_3$ planes: $u^{y}_n$};
-
-    \draw[slicebrace] ({6*\W}, -4.2mm) -- ({8*\W}, -4.2mm);
-    \node[bracelabel] at ({7*\W}, -6.8mm)
-      {$c_4$ planes: $u^{z}_n$};
+    \draw[slicebrace] ({4*\W}, -4.2mm) -- ({8*\W}, -4.2mm);
+    \node[bracelabel] at ({6*\W}, -6.8mm)
+      {$d_k/4$ planes: $u^{y}_n$};
   \end{scope}
 
 \end{tikzpicture}
