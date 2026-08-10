@@ -75,7 +75,6 @@ Elementwise agreement between $\hat{\vect{y}}_n$ and $\vect{y}_n$ is not require
 The objective is instead that the partitions in \cref{eq:method:estimated_partitions} match the restrictions of the ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to the observed sequence, up to independent permutations of the indices in each coordinate.
 Agreement is measured with the permutation-invariant metrics of \cref{sec:method:metrics}.
 
-Emitter identities are meaningful only within the recording from which the observed sequence was drawn.
 Neither $\hat{K}$ nor $\hat{M}$ is assumed known; in particular, $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
 The method instantiates this objective on fixed-length windows extracted from each recording (\cref{sec:method:data:window}), a computational choice forced by the quadratic cost of self-attention; estimated symbols are therefore local to a window and are not linked across windows.
 
