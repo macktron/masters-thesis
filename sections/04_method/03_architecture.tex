@@ -33,8 +33,9 @@ Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}
 \subsection*{Task-specific branches}
 
 The trunk output feeds two parallel branches that do not share parameters.
-Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, mapping $\R^{256} \to \R^{256}$ to decouple the branch representation from the shared trunk output, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied. This affince porjection enables different model dimension of the trunk and branchesl
-The branches retain the trunk width $d_{\mathrm{br}} = 256$; within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (per-head dimension $64$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
+Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
+The projection decouples the branch representation from the shared trunk output and, more generally, allows the branch width to differ from the trunk width; here the branches retain $d_{\mathrm{br}} = 256$, so the projection maps $\R^{256} \to \R^{256}$.
+Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (per-head dimension $64$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
 The reduced depth and \gls{ffn} width reflect a deliberate asymmetry: the trunk is intended to carry the heavy lifting of contextual mixing, while the branches only need to specialise the representation to either emitter identity or operating mode.
 Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{256}$.
 
