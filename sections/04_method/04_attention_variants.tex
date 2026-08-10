@@ -17,14 +17,15 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 \subsection*{Physical attention bias}
 
 The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
-The bias is built from the absolute pairwise differences of four coordinates: the \gls{toa} $t_n$ and the three incidence-direction components $u^{x}_n$, $u^{y}_n$, and $u^{z}_n$ of \cref{eq:method:aoa_cart}.
+The bias is built from the absolute pairwise differences of three coordinates: the \gls{toa} $t_n$ and the two horizontal incidence-direction components $u^{x}_n$ and $u^{y}_n$ of \cref{eq:method:aoa_cart}.
+As in the rotary variant below, the vertical component $u^{z}_n$ is omitted because the latitude estimate is the one most corrupted by ground reflections and similar multipath effects.
 For each coordinate $f$, the delta matrix $B^{(f)}_{ij} = |f_i - f_j|$ is superposed on the logits with a learnable scalar coefficient,
 \begin{equation}\label{eq:method:attn_bias}
   A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}} + \sum_{f} \lambda_f\, B^{(f)}_{ij},
   \qquad
-  f \in \{t,\, u^{x},\, u^{y},\, u^{z}\}.
+  f \in \{t,\, u^{x},\, u^{y}\}.
 \end{equation}
-Each coefficient $\lambda_f$ is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block—throughout the shared trunk and both branches—carries its own set of four coefficients.
+Each coefficient $\lambda_f$ is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block—throughout the shared trunk and both branches—carries its own set of three coefficients.
 No kernel shape is imposed on the bias: a negative $\lambda_f$ pushes attention towards pulses that are close in that coordinate, a positive one towards distant pulses, and $\lambda_f = 0$ removes the cue entirely, so the model chooses the sign and strength of each cue during training instead of committing to a hand-tuned prior.
 Using component-wise direction deltas rather than differences of raw angles also avoids the azimuth wrap-around problem noted in \cref{sec:method:data:norm}.
 Because the coefficients are learned independently in each part of the network, the branches are free to allocate the cues differently; one may expect the deinterleaving branch to lean more heavily on the direction deltas—pulses from one emitter arrive from a nearly constant direction—while the shared trunk and the mode branch, whose target should be invariant to viewing geometry, suppress them.
@@ -67,9 +68,20 @@ The $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimen
     \sin\phi & \phantom{-}\cos\phi
   \end{bmatrix}.
 \end{equation}
-Collecting the per-plane rotations into a single block-diagonal matrix and writing it out in full gives
+Collecting the per-plane rotations into a single block-diagonal matrix gives
 \begin{equation}\label{eq:method:rope_block}
+  \mat{R}(p)
+  = \diag\!\bigl(
+      \mat{\Omega}(\gamma p\theta_1),\,
+      \mat{\Omega}(\gamma p\theta_2),\,
+      \ldots,\,
+      \mat{\Omega}(\gamma p\theta_{d_k/2})
+    \bigr)
+\end{equation}
+in the notation of \cref{eq:method:rope_2d}, or written out entry-wise,
+\[
   \mat{R}(p) =
+  {\scriptsize
   \begin{bmatrix}
     \cos\gamma p\theta_1 & -\sin\gamma p\theta_1 & 0 & 0 & \cdots & 0 & 0 \\
     \sin\gamma p\theta_1 & \phantom{-}\cos\gamma p\theta_1 & 0 & 0 & \cdots & 0 & 0 \\
@@ -78,9 +90,8 @@ Collecting the per-plane rotations into a single block-diagonal matrix and writi
     \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
     0 & 0 & 0 & 0 & \cdots & \cos\gamma p\theta_{d_k/2} & -\sin\gamma p\theta_{d_k/2} \\
     0 & 0 & 0 & 0 & \cdots & \sin\gamma p\theta_{d_k/2} & \phantom{-}\cos\gamma p\theta_{d_k/2}
-  \end{bmatrix},
-\end{equation}
-that is, $\mat{R}(p) = \diag\!\bigl(\mat{\Omega}(\gamma p\theta_1),\,\ldots,\,\mat{\Omega}(\gamma p\theta_{d_k/2})\bigr)$ in the notation of \cref{eq:method:rope_2d}.
+  \end{bmatrix}.}
+\]
 The angular frequencies $\theta_m = b^{-2(m-1)/d_k}$, with a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}), form a geometric progression that mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: fast-rotating planes resolve fine coordinate differences, slow-rotating planes capture coarse ones.
 The scale $\gamma$ multiplies every frequency of the ladder uniformly and therefore sets how much relative phase one unit of coordinate difference produces.
 In the original formulation no such factor is needed, because token indices advance in steps of exactly one; our coordinates are normalised physical quantities whose typical gaps differ between the \gls{toa} and the direction components, so we treat $\gamma$ as a hyperparameter and set it separately for each coordinate $f \in \{t,\, u^{x},\, u^{y}\}$: $\gamma_t$ for the \gls{toa} and $\gamma_{u^x}$ and $\gamma_{u^y}$ for the two horizontal direction components.
