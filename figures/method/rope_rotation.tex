@@ -14,88 +14,87 @@
     qvec/.style={->, very thick, color=blue!70!black},
     kraw/.style={->, thick, densely dashed, color=red!45!black},
     kvec/.style={->, very thick, color=red!70!black},
-    angarc/.style={->, thin, color=black!65},
+    angarc/.style={->, thin, color=black!70},
   ]
 
   % =================== LEFT PANEL =======================================
   \begin{scope}[xshift=0mm]
-    \def\Rad{19mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (4mm, 28mm)
+    \def\Rad{18mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (3mm, 30mm)
       {Apply $\mat{R}(p)$ to the projected query};
 
-    \draw[axis] (-22mm, 0) -- (26mm, 0);
-    \draw[axis] (0, -12mm) -- (0, 26mm);
+    \draw[axis] (-20mm, 0) -- (24mm, 0);
+    \draw[axis] (0, -11mm) -- (0, 24mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % ~35° rotation: easy to see, still not a half-turn
-    \def\qbase{18}
-    \def\arot{53}
+    % ~35° absolute phase
+    \def\qbase{15}
+    \def\arot{50}
 
     \draw[qraw] (0, 0) -- (\qbase:\Rad);
     \node[color=black!55, font=\scriptsize, anchor=north west]
-      at (\qbase:1.22*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
+      at (\qbase:1.25*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
 
     \draw[qvec] (0, 0) -- (\arot:\Rad);
     \node[color=blue!70!black, font=\scriptsize, anchor=south west]
-      at (\arot:1.22*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
+      at (\arot:1.25*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
 
-    \draw[angarc] (\qbase:8mm) arc (\qbase:\arot:8mm);
-    \draw[gray!50, thin]
-      ({(\qbase+\arot)/2}:8mm) -- ({(\qbase+\arot)/2}:1.28*\Rad);
-    \node[font=\scriptsize, anchor=west]
-      at ({(\qbase+\arot)/2}:1.32*\Rad) {$\gamma p\theta_m$};
+    \draw[angarc] (\qbase:7.5mm) arc (\qbase:\arot:7.5mm);
+    \draw[gray!55, thin]
+      ({(\qbase+\arot)/2}:7.5mm) -- (1.35*\Rad, 0.55*\Rad);
+    \node[font=\scriptsize, anchor=west] at (1.38*\Rad, 0.55*\Rad)
+      {$\gamma p\theta_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
-      at (3mm, -13mm)
+      at (2mm, -12mm)
       {projection first, then a planar rotation\\[-1pt]
        by the physical coordinate $p$};
   \end{scope}
 
   % =================== RIGHT PANEL ======================================
-  \begin{scope}[xshift=78mm]
-    \def\Rad{19mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (4mm, 28mm)
+  \begin{scope}[xshift=76mm]
+    \def\Rad{18mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (3mm, 30mm)
       {Inner product sees only $p_j-p_i$};
 
-    \draw[axis] (-22mm, 0) -- (26mm, 0);
-    \draw[axis] (0, -12mm) -- (0, 26mm);
+    \draw[axis] (-20mm, 0) -- (24mm, 0);
+    \draw[axis] (0, -11mm) -- (0, 24mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % Keep unrotated k and rotated q from coinciding:
-    % content φ = 20°, relative phase = 25°.
-    \def\qrawang{12}
-    \def\krawang{32}
-    \def\qang{42}
-    \def\kang{87}
+    % content φ = 20°; relative phase = 28°; vectors well separated
+    \def\qrawang{10}
+    \def\krawang{30}
+    \def\qang{45}
+    \def\kang{93}
 
     \draw[qraw] (0, 0) -- (\qrawang:\Rad);
     \draw[kraw] (0, 0) -- (\krawang:\Rad);
     \node[color=black!50, font=\scriptsize, anchor=north west]
-      at (\qrawang:1.2*\Rad) {$\vect{q}_i$};
+      at (\qrawang:1.28*\Rad) {$\vect{q}_i$};
     \node[color=red!45!black, font=\scriptsize, anchor=east]
-      at (\krawang:1.22*\Rad) {$\vect{k}_j$};
+      at (\krawang:1.3*\Rad) {$\vect{k}_j$};
 
-    \draw[angarc, color=black!45] (\qrawang:5.5mm) arc (\qrawang:\krawang:5.5mm);
+    \draw[angarc, color=black!45] (\qrawang:5mm) arc (\qrawang:\krawang:5mm);
     \node[font=\scriptsize, color=black!55, anchor=west]
-      at ({(\qrawang+\krawang)/2}:6.8mm) {$\varphi$};
+      at ({(\qrawang+\krawang)/2}:6.2mm) {$\varphi$};
 
     \draw[qvec] (0, 0) -- (\qang:\Rad);
     \draw[kvec] (0, 0) -- (\kang:\Rad);
     \node[color=blue!70!black, font=\scriptsize, anchor=west]
-      at (\qang:1.2*\Rad) {$\tilde{\vect{q}}_i$};
-    \node[color=red!70!black, font=\scriptsize, anchor=south]
-      at (\kang:1.22*\Rad) {$\tilde{\vect{k}}_j$};
+      at (\qang:1.28*\Rad) {$\tilde{\vect{q}}_i$};
+    \node[color=red!70!black, font=\scriptsize, anchor=east]
+      at (\kang:1.28*\Rad) {$\tilde{\vect{k}}_j$};
 
-    % Outer arc; label parked above the figure, linked by a leader
-    \draw[angarc] (\qang:12mm) arc (\qang:\kang:12mm);
-    \coordinate (relmid) at ({(\qang+\kang)/2}:12mm);
-    \coordinate (rellbl) at (0mm, 1.55*\Rad);
-    \draw[gray!50, thin] (relmid) -- (rellbl);
-    \node[font=\scriptsize, anchor=south] at (rellbl)
+    % Outer arc; long label to the RIGHT of the circle (not on top of the title)
+    \draw[angarc] (\qang:11mm) arc (\qang:\kang:11mm);
+    \coordinate (relmid) at ({(\qang+\kang)/2}:11mm);
+    \coordinate (rellbl) at (1.55*\Rad, 0.85*\Rad);
+    \draw[gray!55, thin] (relmid) -- (rellbl);
+    \node[font=\scriptsize, anchor=west, align=left] at (rellbl)
       {$\varphi+\gamma(p_j-p_i)\theta_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
-      at (3mm, -13mm)
+      at (2mm, -12mm)
       {$\langle\tilde{\vect{q}}_i,\tilde{\vect{k}}_j\rangle
         =\vect{q}_i^{\top}\mat{R}(p_j-p_i)\,\vect{k}_j$};
   \end{scope}
