@@ -19,8 +19,9 @@ Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of 
   \vect{h}^{(0)}_n \in \R^{d_{\mathrm{model}}},
 \end{equation}
 where $\mat{W}_{\mathrm{in}} \in \R^{d_{\mathrm{model}} \times d}$ and $d_{\mathrm{model}}$ is the trunk width specified below.
-No positional encoding is added to $\vect{h}^{(0)}_n$.
+In the baseline configuration of the encoder, no positional encoding is added to $\vect{h}^{(0)}_n$.
 The temporal ordering of pulses is already carried by the \gls{toa} entry of $\vect{x}_n$, which makes a separate position signal redundant; consistent with this argument, \textcite{gunn2025deinterleaving} report that adding sinusoidal or learnable positional encodings to a transformer deinterleaver yields a small but reproducible drop in performance, attributed to the resulting redundancy with the \gls{toa} feature.
+Whether an explicit \emph{relative} encoding of time and arrival direction nevertheless adds information beyond their presence as input features is revisited in \cref{sec:method:attention}, where a pairwise attention bias and a rotary positional encoding acting on physical coordinate differences are evaluated as drop-in modifications of this architecture.
 
 \subsection*{Shared trunk}
 
