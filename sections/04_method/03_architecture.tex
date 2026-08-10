@@ -6,7 +6,7 @@ The trunk produces a single contextualised representation of the input window, w
 \begin{figure}[tbp]
   \centering
   \input{figures/method/architecture.tex}
-  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an input embedding, processed by a shared trunk of $6$ transformer-encoder layers, and then split into two parallel branches with their own $256\!\to\!128$ projection and $2$ encoder layers. Branch outputs are mapped by linear projection heads to the emitter embedding space $\R^{8}$ and the mode embedding space $\R^{16}$.}
+  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an affine input embedding, processed by a shared trunk of $6$ transformer-encoder layers, and then split into two parallel branches, each with its own affine $256\!\to\!256$ projection and $2$ encoder layers. Branch outputs are mapped by affine projection heads to the $64$-dimensional emitter and mode embedding spaces and $\ell_2$-normalized over the embedding dimension. The input embedding, branch projections, and projection heads are all affine maps of the same form.}
   \label{fig:method:arch}
 \end{figure}
 
@@ -32,27 +32,31 @@ Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}
 \subsection*{Task-specific branches}
 
 The trunk output feeds two parallel branches that do not share parameters.
-Each branch begins with an affine projection that reduces the hidden width from $d_{\mathrm{model}} = 256$ to $d_{\mathrm{br}} = 128$, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
-Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (again with per-head dimension $32$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
-The reduced width and depth reflect a deliberate asymmetry: the trunk is intended to carry the heavy lifting of contextual mixing, while the branches only need to specialise the representation to either emitter identity or operating mode.
-Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{128}$.
+Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, mapping $\R^{256} \to \R^{256}$ to decouple the branch representation from the shared trunk output, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
+The branches retain the trunk width $d_{\mathrm{br}} = 256$; within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (per-head dimension $64$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 1024$.
+The reduced depth and \gls{ffn} width reflect a deliberate asymmetry: the trunk is intended to carry the heavy lifting of contextual mixing, while the branches only need to specialise the representation to either emitter identity or operating mode.
+Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{256}$.
 
 \subsection*{Projection heads}
 
-Each branch terminates in a linear projection head that maps every token to its respective embedding space,
+Each branch terminates in an affine projection head---of the same form as the input embedding \cref{eq:method:input_embed}---that maps every token to its respective embedding space, followed by $\ell_2$ normalization over the embedding dimension,
 \begin{equation}\label{eq:method:proj_heads}
-  \vect{z}^{\mathrm{em}}_n = \mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}},
+  \vect{z}^{\mathrm{em}}_n
+  = \frac{\mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}}}
+         {\bigl\lVert \mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}} \bigr\rVert_2},
   \qquad
-  \vect{z}^{\mathrm{md}}_n = \mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}},
+  \vect{z}^{\mathrm{md}}_n
+  = \frac{\mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}}}
+         {\bigl\lVert \mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}} \bigr\rVert_2},
 \end{equation}
-with $\vect{z}^{\mathrm{em}}_n \in \R^{p}$ and $\vect{z}^{\mathrm{md}}_n \in \R^{q}$ for $p = 8$ and $q = 16$.
+with $\vect{z}^{\mathrm{em}}_n, \vect{z}^{\mathrm{md}}_n \in \R^{p}$ for a common embedding dimension $p = 64$.
 Collecting the per-pulse outputs gives the two embedding sequences
 \begin{equation}\label{eq:method:dual_embeddings}
   \mat{Z}^{\mathrm{em}} = (\vect{z}^{\mathrm{em}}_1,\ldots,\vect{z}^{\mathrm{em}}_L),
   \qquad
   \mat{Z}^{\mathrm{md}} = (\vect{z}^{\mathrm{md}}_1,\ldots,\vect{z}^{\mathrm{md}}_L).
 \end{equation}
-The mode space is assigned the higher dimensionality because, conditional on emitter identity, mode structure is expected to require a richer geometry to separate subtle waveform regimes, whereas emitter membership induces a coarser partition over the same pulses and is well served by a more compact embedding.
+The normalization constrains both embedding sequences to the unit sphere in $\R^{64}$, so cluster structure is expressed through angular separation rather than vector magnitude; this is the geometry assumed by the cosine-similarity contrastive objective of \cref{sec:method:loss}.
 
 \subsection*{From continuous embeddings to discrete partitions}
 

@@ -7,7 +7,7 @@ A further consequence of this design is that the pre-projection encodings remain
 
 \subsection*{Supervised contrastive kernel}
 
-All projection-head outputs of \cref{eq:method:proj_heads} are $\ell_2$-normalised, so that the cosine similarity reduces to the inner product
+The projection-head outputs of \cref{eq:method:proj_heads} are unit-norm by construction, so that the cosine similarity reduces to the inner product
 \begin{equation}\label{eq:method:sim}
   s_{ij} \;\coloneqq\; \vect{z}_i^{\top}\vect{z}_j \;\in\; [-1,1],
 \end{equation}
