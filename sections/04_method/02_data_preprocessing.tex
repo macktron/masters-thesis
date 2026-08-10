@@ -7,7 +7,7 @@ The composition of the resulting corpus is reported in \cref{sec:exp:datasets}.
 
 Preprocessing first standardizes carrier frequency, pulse width, and log-amplitude using statistics from the training split and converts the measured \gls{aoa} into Euclidean direction components.
 Each recording is then divided into fixed-length windows.
-Absolute \gls{toa} is finally min--max mapped inside each window, so that the timing feature seen by the encoder depends only on pulses that co-occur in the same attention context.
+Absolute \gls{toa} is finally min--max mapped inside each window, so that the timing feature seen by the encoder depends only on pulses that co-occur in the same attention context to avoid overfitting on specific scenarios.
 The encoder input is therefore the $d = 7$-dimensional vector of scaled carrier frequency, pulse width, log-amplitude, window-local \gls{toa}, and the three incidence-direction components.
 
 No hand-crafted timing features are appended to this vector.
