@@ -85,13 +85,12 @@
     \node[color=red!70!black, font=\scriptsize, anchor=south, inner sep=1.5pt]
       at (\kang:1.08*\Rad) {$\tilde{\vect{k}}_j$};
 
-    % Outer arc; long label to the RIGHT of the circle (not on top of the title)
+    % Outer arc; label radially outward from the arc midpoint (avoids crossing q̃_i)
     \draw[angarc] (\qang:11mm) arc (\qang:\kang:11mm);
-    \coordinate (relmid) at ({(\qang+\kang)/2}:11mm);
-    \coordinate (rellbl) at (1.55*\Rad, 0.85*\Rad);
-    \draw[gray!55, thin] (relmid) -- (rellbl);
-    \node[font=\scriptsize, anchor=west, align=left] at (rellbl)
-      {$\varphi+\gamma(p_j-p_i)\theta_m$};
+    \pgfmathsetmacro{\relang}{(\qang+\kang)/2}
+    \draw[gray!55, thin] (\relang:11mm) -- (\relang:1.38*\Rad);
+    \node[font=\scriptsize, anchor=south west, inner sep=1.5pt]
+      at (\relang:1.4*\Rad) {$\varphi+\gamma(p_j-p_i)\theta_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
       at (2mm, -12mm)
