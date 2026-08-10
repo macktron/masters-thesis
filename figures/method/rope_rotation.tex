@@ -32,12 +32,12 @@
     \def\arot{50}
 
     \draw[qraw] (0, 0) -- (\qbase:\Rad);
-    \node[color=black!55, font=\scriptsize, anchor=north west]
-      at (\qbase:1.25*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
+    \node[color=black!55, font=\scriptsize, anchor=west, inner sep=1.5pt]
+      at (\qbase:1.08*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
 
     \draw[qvec] (0, 0) -- (\arot:\Rad);
-    \node[color=blue!70!black, font=\scriptsize, anchor=south west]
-      at (\arot:1.25*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
+    \node[color=blue!70!black, font=\scriptsize, anchor=south west, inner sep=1.5pt]
+      at (\arot:1.08*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
 
     \draw[angarc] (\qbase:7.5mm) arc (\qbase:\arot:7.5mm);
     \draw[gray!55, thin]
@@ -69,10 +69,10 @@
 
     \draw[qraw] (0, 0) -- (\qrawang:\Rad);
     \draw[kraw] (0, 0) -- (\krawang:\Rad);
-    \node[color=black!50, font=\scriptsize, anchor=north west]
-      at (\qrawang:1.28*\Rad) {$\vect{q}_i$};
-    \node[color=red!45!black, font=\scriptsize, anchor=east]
-      at (\krawang:1.3*\Rad) {$\vect{k}_j$};
+    \node[color=black!50, font=\scriptsize, anchor=west, inner sep=1.5pt]
+      at (\qrawang:1.08*\Rad) {$\vect{q}_i$};
+    \node[color=red!45!black, font=\scriptsize, anchor=south west, inner sep=1.5pt]
+      at (\krawang:1.08*\Rad) {$\vect{k}_j$};
 
     \draw[angarc, color=black!45] (\qrawang:5mm) arc (\qrawang:\krawang:5mm);
     \node[font=\scriptsize, color=black!55, anchor=west]
@@ -80,10 +80,10 @@
 
     \draw[qvec] (0, 0) -- (\qang:\Rad);
     \draw[kvec] (0, 0) -- (\kang:\Rad);
-    \node[color=blue!70!black, font=\scriptsize, anchor=west]
-      at (\qang:1.28*\Rad) {$\tilde{\vect{q}}_i$};
-    \node[color=red!70!black, font=\scriptsize, anchor=east]
-      at (\kang:1.28*\Rad) {$\tilde{\vect{k}}_j$};
+    \node[color=blue!70!black, font=\scriptsize, anchor=south west, inner sep=1.5pt]
+      at (\qang:1.08*\Rad) {$\tilde{\vect{q}}_i$};
+    \node[color=red!70!black, font=\scriptsize, anchor=south, inner sep=1.5pt]
+      at (\kang:1.08*\Rad) {$\tilde{\vect{k}}_j$};
 
     % Outer arc; long label to the RIGHT of the circle (not on top of the title)
     \draw[angarc] (\qang:11mm) arc (\qang:\kang:11mm);
