@@ -43,9 +43,9 @@
 
   \coordinate (fork) at ($(trunk.north)+(0,5mm)$);
 
-  \node[affine] (proj_em) at ($(fork)+(-25mm, 9mm)$)
+  \node[affine] (proj_em) at ($(fork)+(-32mm, 9mm)$)
     {Affine projection\\$\R^{256}\!\to\!\R^{256}$};
-  \node[affine] (proj_md) at ($(fork)+( 25mm, 9mm)$)
+  \node[affine] (proj_md) at ($(fork)+( 32mm, 9mm)$)
     {Affine projection\\$\R^{256}\!\to\!\R^{256}$};
 
   \node[branch, above=of proj_em] (br_em)
@@ -59,12 +59,12 @@
 
   \node[affine, above=of br_em] (head_em)
     {Projection head\\
-     $\mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}}$
-     \;:\; $\R^{256}\!\to\!\R^{64}$};
+     $\mat{W}_{\mathrm{em}}\vect{h}^{\mathrm{em}}_n + \vect{b}_{\mathrm{em}}$\\
+     $\R^{256}\!\to\!\R^{64}$};
   \node[affine, above=of br_md] (head_md)
     {Projection head\\
-     $\mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}}$
-     \;:\; $\R^{256}\!\to\!\R^{64}$};
+     $\mat{W}_{\mathrm{md}}\vect{h}^{\mathrm{md}}_n + \vect{b}_{\mathrm{md}}$\\
+     $\R^{256}\!\to\!\R^{64}$};
 
   \node[norm, above=of head_em] (norm_em)
     {$\ell_2$ normalization};
