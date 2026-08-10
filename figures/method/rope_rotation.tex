@@ -1,13 +1,14 @@
 % =====================================================================
 % Geometry of rotary positional encoding (\gls{rope}) on a single
-% two-dimensional plane of an attention head.  Left panel: a query
-% vector is rotated at a fixed angular rate $\theta_m$ as its coordinate
-% $p$ increases, so the absolute coordinate maps to an absolute phase
-% (\cref{eq:method:rope_block}).  Right panel: the angle enclosed
-% between a rotated query and a rotated key is the content angle plus
-% $(p_j-p_i)\theta_m$, so the inner product---and hence the attention
-% logit---depends only on the coordinate difference $p_j-p_i$
-% (\cref{eq:method:rope}).  Loaded from
+% two-dimensional plane of an attention head.  Left panel: the
+% projected query q (dashed) is rotated by the window-normalised TOA
+% of its pulse at the fixed rate gamma*theta_m, so irregularly spaced
+% arrival times t_1 < t_2 < t_3 map to correspondingly irregular
+% absolute phases (\cref{eq:method:rope_block}).  Right panel: the
+% angle enclosed between a rotated query and a rotated key is the
+% content angle plus gamma*(p_j-p_i)*theta_m, so the inner product---
+% and hence the attention logit---depends only on the coordinate
+% difference (\cref{eq:method:rope}).  Loaded from
 % sections/04_method/04_attention_variants.tex via \input{...}.
 % =====================================================================
 \begin{tikzpicture}[
@@ -20,38 +21,43 @@
     angarc/.style={->, thin, color=black!75},
   ]
 
-  % =================== LEFT PANEL: absolute rotation ===================
+  % =================== LEFT PANEL: rotation by coordinate ===============
   \begin{scope}[xshift=0mm]
     \def\Rad{16mm}
     \node[font=\footnotesize\bfseries, anchor=south] at (0, 21mm)
-      {Rotation by position};
+      {Rotation by coordinate};
 
     % axes and reference circle
     \draw[axis] (-19mm, 0) -- (19mm, 0);
     \draw[axis] (0, -6mm) -- (0, 20mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % fan of rotated query vectors: base angle 8deg, increment 20deg
-    \def\base{8}
-    \def\inc{20}
-    \foreach \i/\sh in {0/30, 1/50, 2/70, 3/90} {
-      \pgfmathsetmacro{\ang}{\base + \i*\inc}
+    \def\qbase{10}   % content angle of the projected query
+    \def\rate{40}    % gamma*theta_m in degrees per unit of coordinate
+
+    % unrotated projected query
+    \draw[qvec, dashed, color=black!55] (0, 0) -- (\qbase:\Rad);
+    \node[color=black!55, font=\scriptsize, anchor=west]
+      at (\qbase:\Rad) {$\vect{q}$};
+
+    % rotations by irregularly spaced window-normalised TOA values
+    % t_1 = 0.20, t_2 = 0.45, t_3 = 0.90
+    \foreach \t/\sh in {0.20/45, 0.45/70, 0.90/95} {
+      \pgfmathsetmacro{\ang}{\qbase + \t*\rate}
       \draw[qvec, color=blue!\sh!black] (0, 0) -- (\ang:\Rad);
     }
+    \pgfmathsetmacro{\aone}{\qbase + 0.20*\rate}
+    \node[color=blue!45!black, font=\scriptsize, anchor=west]
+      at (\aone:\Rad) {$\mat{R}(t_1)\,\vect{q}$};
+    \pgfmathsetmacro{\athree}{\qbase + 0.90*\rate}
+    \node[color=blue!95!black, font=\scriptsize, anchor=south west]
+      at (\athree:\Rad) {$\mat{R}(t_3)\,\vect{q}$};
 
-    % labels for first and last vector
-    \node[color=blue!30!black, font=\scriptsize, anchor=west]
-      at (\base:\Rad) {$\vect{q}=\mat{R}(0)\,\vect{q}$};
-    \pgfmathsetmacro{\last}{\base + 3*\inc}
-    \node[color=blue!90!black, font=\scriptsize, anchor=south west]
-      at (\last:\Rad) {$\mat{R}(3)\,\vect{q}$};
-
-    % angular increment arc between i=1 and i=2
-    \pgfmathsetmacro{\aone}{\base + \inc}
-    \pgfmathsetmacro{\atwo}{\base + 2*\inc}
-    \draw[angarc] (\aone:9mm) arc (\aone:\atwo:9mm);
-    \pgfmathsetmacro{\amid}{\base + 1.5*\inc}
-    \node[font=\scriptsize] at (\amid:11.5mm) {$\theta_m$};
+    % absolute phase of the first rotation
+    \draw[angarc] (\qbase:9mm) arc (\qbase:\aone:9mm);
+    \pgfmathsetmacro{\amid}{(\qbase + \aone)/2}
+    \node[font=\scriptsize, anchor=west] at (\amid:10.5mm)
+      {$\gamma t_1\theta_m$};
   \end{scope}
 
   % =================== RIGHT PANEL: relative phase ===================
@@ -65,8 +71,8 @@
     \draw[axis] (0, -6mm) -- (0, 20mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    \def\qang{18}
-    \def\kang{96}
+    \def\qang{16}
+    \def\kang{68}
 
     % rotated query and key
     \draw[qvec] (0, 0) -- (\qang:\Rad);
@@ -81,7 +87,7 @@
     \draw[angarc] (\qang:10mm) arc (\qang:\kang:10mm);
     \pgfmathsetmacro{\mid}{(\qang + \kang)/2}
     \node[font=\scriptsize, anchor=south west] at (\mid:11mm)
-      {$\varphi + (p_j{-}p_i)\theta_m$};
+      {$\varphi + \gamma(p_j{-}p_i)\theta_m$};
   \end{scope}
 
 \end{tikzpicture}
