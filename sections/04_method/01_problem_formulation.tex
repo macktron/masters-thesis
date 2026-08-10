@@ -79,5 +79,5 @@ Emitter identities are meaningful only within the recording from which the obser
 Neither $\hat{K}$ nor $\hat{M}$ is assumed known; in particular, $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
 The method instantiates this objective on fixed-length windows extracted from each recording (\cref{sec:method:data:window}), a computational choice forced by the quadratic cost of self-attention; estimated symbols are therefore local to a window and are not linked across windows.
 
-The proposed method estimates $\hat{\vect{y}}_n$ with a shared encoder and two separate encdoing and embedding branches: recording-local emitter labels supervise one branch, and globally shared mode labels make the other comparable across recordings.
+The proposed method estimates $\hat{\vect{y}}_n$ with a shared encoder and two separate encoding and embedding branches: recording-local emitter labels supervise one branch, and globally shared mode labels make the other comparable across recordings.
 The losses are specified in \cref{sec:method:loss}, and the architecture and decoding step in \cref{sec:method:arch}.
