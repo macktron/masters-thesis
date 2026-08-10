@@ -1,74 +1,64 @@
 % =====================================================================
 % Allocation of the d_k/2 rotation planes of one attention head.
-% Per-coordinate scale gamma is shown once per slice (above the bar);
-% cells list the plane frequencies only, so the long Omega(...) notation
-% does not have to squeeze into every box.
-% Top: trunk/mode --- all planes by TOA with gamma_t.
-% Bottom: deinterleaving --- even split u^x / u^y with gamma_{u^x},
-% gamma_{u^y}.
+% Top: trunk/mode --- all planes by TOA with scale gamma_t.
+% Bottom: deinterleaving --- even split u^x / u^y (three cells each,
+% first / dots / last) with scales gamma_{u^x}, gamma_{u^y}.
+% Cell labels are single-line (no shortstack) so Omega(...) does not wrap.
 % Loaded from sections/04_method/04_attention_variants.tex via \input.
 % =====================================================================
 \begin{tikzpicture}[
     font=\small,
-    plane/.style={draw=black!55, thin, minimum width=26mm, minimum height=8mm,
-                  inner sep=1pt, outer sep=0pt, align=center},
+    plane/.style={draw=black!55, thin, minimum width=18mm, minimum height=7.5mm,
+                  inner sep=0.5pt, outer sep=0pt, align=center},
     toaplane/.style={plane, fill=blue!18},
     uxplane/.style={plane, fill=red!18},
     uyplane/.style={plane, fill=orange!28},
     rowlabel/.style={font=\footnotesize, anchor=east, align=right},
     slicebrace/.style={decorate, decoration={brace, mirror, amplitude=4pt}, thick},
     bracelabel/.style={font=\footnotesize, anchor=north},
-    header/.style={font=\footnotesize, anchor=south},
-    celltxt/.style={font=\scriptsize},
   ]
 
-  \def\W{26mm}
-  \def\NP{4}
+  \def\W{18mm}
+  \def\NP{6}
 
-  % =================== TOP STRIP ========================================
+  % =================== TOP STRIP: trunk and mode branch =================
   \node[rowlabel] at (-2mm, 0) {trunk and\\mode branch};
-
-  \node[header] at ({2*\W}, 6.2mm)
-    {$\mat{R}(t_n)=\diag\!\bigl(\mat{\Omega}(\gamma_t t_n\theta_m)\bigr)_{m=1}^{d_k/2}$};
-
   \foreach \m in {1,...,\NP} {
     \node[toaplane] (t\m) at ({(\m-0.5)*\W}, 0) {};
   }
-  \node[celltxt] at (t1) {$\theta_1$};
-  \node[celltxt] at (t2) {$\theta_2$};
-  \node[celltxt] at (t3) {$\cdots$};
-  \node[celltxt] at (t4) {$\theta_{d_k/2}$};
+  \node[font=\scriptsize] at (t1) {$\Omega(\gamma_t t_n\theta_1)$};
+  \node[font=\scriptsize] at (t2) {$\cdots$};
+  \node[font=\scriptsize] at (t3) {$\cdots$};
+  \node[font=\scriptsize] at (t4) {$\cdots$};
+  \node[font=\scriptsize] at (t5) {$\cdots$};
+  \node[font=\scriptsize] at (t6) {$\Omega(\gamma_t t_n\theta_{d_k/2})$};
 
-  \draw[slicebrace] (0, -4.8mm) -- ({\NP*\W}, -4.8mm);
-  \node[bracelabel] at ({\NP*\W/2}, -7.2mm)
-    {all $d_k/2$ planes rotated by \gls{toa} $t_n$ with scale $\gamma_t$};
+  \draw[slicebrace] (0, -4.5mm) -- ({\NP*\W}, -4.5mm);
+  \node[bracelabel] at ({\NP*\W/2}, -7mm)
+    {all $d_k/2$ planes: coordinate $t_n$, scale $\gamma_t$};
 
-  % =================== BOTTOM STRIP =====================================
-  \begin{scope}[yshift=-30mm]
+  % ============== BOTTOM STRIP: deinterleaving branch ====================
+  \begin{scope}[yshift=-26mm]
     \node[rowlabel] at (-2mm, 0) {deinterleaving\\branch};
-
-    \node[header] at ({1*\W}, 6.2mm)
-      {$\mat{R}^{(x)}(u^{x}_n)$:~$\gamma_{u^x}u^{x}_n\theta_m$};
-    \node[header] at ({3*\W}, 6.2mm)
-      {$\mat{R}^{(y)}(u^{y}_n)$:~$\gamma_{u^y}u^{y}_n\theta_m$};
-
-    \foreach \m in {1,2} {
+    \foreach \m in {1,...,3} {
       \node[uxplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \foreach \m in {3,4} {
+    \foreach \m in {4,...,6} {
       \node[uyplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
-    \node[celltxt] at (b1) {$\theta_1$};
-    \node[celltxt] at (b2) {$\theta_{d_k/4}$};
-    \node[celltxt] at (b3) {$\theta_1$};
-    \node[celltxt] at (b4) {$\theta_{d_k/4}$};
+    \node[font=\scriptsize] at (b1) {$\Omega(\gamma_{u^x}u^{x}_n\theta_1)$};
+    \node[font=\scriptsize] at (b2) {$\cdots$};
+    \node[font=\scriptsize] at (b3) {$\Omega(\gamma_{u^x}u^{x}_n\theta_{d_k/4})$};
+    \node[font=\scriptsize] at (b4) {$\Omega(\gamma_{u^y}u^{y}_n\theta_1)$};
+    \node[font=\scriptsize] at (b5) {$\cdots$};
+    \node[font=\scriptsize] at (b6) {$\Omega(\gamma_{u^y}u^{y}_n\theta_{d_k/4})$};
 
-    \draw[slicebrace] (0, -4.8mm) -- ({2*\W}, -4.8mm);
-    \node[bracelabel] at ({1*\W}, -7.2mm)
+    \draw[slicebrace] (0, -4.5mm) -- ({3*\W}, -4.5mm);
+    \node[bracelabel] at ({1.5*\W}, -7mm)
       {$d_k/4$ planes: $u^{x}_n$, scale $\gamma_{u^x}$};
 
-    \draw[slicebrace] ({2*\W}, -4.8mm) -- ({4*\W}, -4.8mm);
-    \node[bracelabel] at ({3*\W}, -7.2mm)
+    \draw[slicebrace] ({3*\W}, -4.5mm) -- ({6*\W}, -4.5mm);
+    \node[bracelabel] at ({4.5*\W}, -7mm)
       {$d_k/4$ planes: $u^{y}_n$, scale $\gamma_{u^y}$};
   \end{scope}
 
