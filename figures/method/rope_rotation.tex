@@ -1,9 +1,8 @@
 % =====================================================================
 % Geometry of RoPE on one 2D plane of an attention head.
 % Left: absolute phase applied to the projected query.
-% Right: content angle phi (dashed) vs. RoPE-modified enclosed angle;
-% the inner product depends only on the coordinate difference.
-% Labels sit outside the unit circle to avoid overlap.
+% Right: content angle phi (dashed) vs. RoPE-modified enclosed angle.
+% Labels sit outside the unit circle; angles are large enough to read.
 % Loaded from sections/04_method/04_attention_variants.tex via \input.
 % =====================================================================
 \begin{tikzpicture}[
@@ -20,84 +19,83 @@
 
   % =================== LEFT PANEL =======================================
   \begin{scope}[xshift=0mm]
-    \def\Rad{18mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (3mm, 26mm)
+    \def\Rad{19mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (4mm, 28mm)
       {Apply $\mat{R}(p)$ to the projected query};
 
-    \draw[axis] (-21mm, 0) -- (24mm, 0);
-    \draw[axis] (0, -10mm) -- (0, 24mm);
+    \draw[axis] (-22mm, 0) -- (26mm, 0);
+    \draw[axis] (0, -12mm) -- (0, 26mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % clearly visible rotation (~28°)
-    \def\qbase{22}
-    \def\arot{50}
+    % ~35° rotation: easy to see, still not a half-turn
+    \def\qbase{18}
+    \def\arot{53}
 
     \draw[qraw] (0, 0) -- (\qbase:\Rad);
     \node[color=black!55, font=\scriptsize, anchor=north west]
-      at (\qbase:1.18*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
+      at (\qbase:1.22*\Rad) {$\vect{q}=\mat{W}_q\vect{h}$};
 
     \draw[qvec] (0, 0) -- (\arot:\Rad);
     \node[color=blue!70!black, font=\scriptsize, anchor=south west]
-      at (\arot:1.18*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
+      at (\arot:1.22*\Rad) {$\tilde{\vect{q}}=\mat{R}(p)\,\vect{q}$};
 
-    % arc inside the circle; label outside with a short leader
-    \draw[angarc] (\qbase:9mm) arc (\qbase:\arot:9mm);
-    \draw[gray!55, thin]
-      ({(\qbase+\arot)/2}:9mm) -- ({(\qbase+\arot)/2}:1.22*\Rad);
+    \draw[angarc] (\qbase:8mm) arc (\qbase:\arot:8mm);
+    \draw[gray!50, thin]
+      ({(\qbase+\arot)/2}:8mm) -- ({(\qbase+\arot)/2}:1.28*\Rad);
     \node[font=\scriptsize, anchor=west]
-      at ({(\qbase+\arot)/2}:1.25*\Rad) {$\gamma p\theta_m$};
+      at ({(\qbase+\arot)/2}:1.32*\Rad) {$\gamma p\theta_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
-      at (2mm, -11mm)
+      at (3mm, -13mm)
       {projection first, then a planar rotation\\[-1pt]
        by the physical coordinate $p$};
   \end{scope}
 
   % =================== RIGHT PANEL ======================================
-  \begin{scope}[xshift=72mm]
-    \def\Rad{18mm}
-    \node[font=\footnotesize\bfseries, anchor=south] at (3mm, 26mm)
+  \begin{scope}[xshift=78mm]
+    \def\Rad{19mm}
+    \node[font=\footnotesize\bfseries, anchor=south] at (4mm, 28mm)
       {Inner product sees only $p_j-p_i$};
 
-    \draw[axis] (-21mm, 0) -- (24mm, 0);
-    \draw[axis] (0, -10mm) -- (0, 24mm);
+    \draw[axis] (-22mm, 0) -- (26mm, 0);
+    \draw[axis] (0, -12mm) -- (0, 26mm);
     \draw[guide] (0, 0) circle (\Rad);
 
-    % content angle φ ≈ 18°; relative phase ≈ 22° (readable gap)
-    \def\qrawang{18}
-    \def\krawang{36}
-    \def\qang{32}
-    \def\kang{72}
+    % Keep unrotated k and rotated q from coinciding:
+    % content φ = 20°, relative phase = 25°.
+    \def\qrawang{12}
+    \def\krawang{32}
+    \def\qang{42}
+    \def\kang{87}
 
     \draw[qraw] (0, 0) -- (\qrawang:\Rad);
     \draw[kraw] (0, 0) -- (\krawang:\Rad);
-    \node[color=black!50, font=\scriptsize, anchor=north east]
-      at (\qrawang:1.16*\Rad) {$\vect{q}_i$};
-    \node[color=red!45!black, font=\scriptsize, anchor=west]
-      at (\krawang:1.16*\Rad) {$\vect{k}_j$};
+    \node[color=black!50, font=\scriptsize, anchor=north west]
+      at (\qrawang:1.2*\Rad) {$\vect{q}_i$};
+    \node[color=red!45!black, font=\scriptsize, anchor=east]
+      at (\krawang:1.22*\Rad) {$\vect{k}_j$};
 
-    % small content-angle arc + label inside, near the origin
-    \draw[angarc, color=black!45] (\qrawang:6mm) arc (\qrawang:\krawang:6mm);
+    \draw[angarc, color=black!45] (\qrawang:5.5mm) arc (\qrawang:\krawang:5.5mm);
     \node[font=\scriptsize, color=black!55, anchor=west]
-      at ({(\qrawang+\krawang)/2}:7.2mm) {$\varphi$};
+      at ({(\qrawang+\krawang)/2}:6.8mm) {$\varphi$};
 
     \draw[qvec] (0, 0) -- (\qang:\Rad);
     \draw[kvec] (0, 0) -- (\kang:\Rad);
-    \node[color=blue!70!black, font=\scriptsize, anchor=south east]
-      at (\qang:1.16*\Rad) {$\tilde{\vect{q}}_i$};
-    \node[color=red!70!black, font=\scriptsize, anchor=south west]
-      at (\kang:1.18*\Rad) {$\tilde{\vect{k}}_j$};
+    \node[color=blue!70!black, font=\scriptsize, anchor=west]
+      at (\qang:1.2*\Rad) {$\tilde{\vect{q}}_i$};
+    \node[color=red!70!black, font=\scriptsize, anchor=south]
+      at (\kang:1.22*\Rad) {$\tilde{\vect{k}}_j$};
 
-    % relative-phase arc; long label kept fully outside the circle
-    \draw[angarc] (\qang:11mm) arc (\qang:\kang:11mm);
-    \coordinate (relmid) at ({(\qang+\kang)/2}:11mm);
-    \coordinate (rellbl) at (1.55*\Rad, 1.05*\Rad);
-    \draw[gray!55, thin] (relmid) -- (rellbl);
-    \node[font=\scriptsize, anchor=west, align=left] at (rellbl)
+    % Outer arc; label parked above the figure, linked by a leader
+    \draw[angarc] (\qang:12mm) arc (\qang:\kang:12mm);
+    \coordinate (relmid) at ({(\qang+\kang)/2}:12mm);
+    \coordinate (rellbl) at (0mm, 1.55*\Rad);
+    \draw[gray!50, thin] (relmid) -- (rellbl);
+    \node[font=\scriptsize, anchor=south] at (rellbl)
       {$\varphi+\gamma(p_j-p_i)\theta_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
-      at (2mm, -11mm)
+      at (3mm, -13mm)
       {$\langle\tilde{\vect{q}}_i,\tilde{\vect{k}}_j\rangle
         =\vect{q}_i^{\top}\mat{R}(p_j-p_i)\,\vect{k}_j$};
   \end{scope}
