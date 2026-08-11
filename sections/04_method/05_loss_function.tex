@@ -14,7 +14,7 @@ The projection-head outputs of \cref{eq:method:proj_heads} are unit-norm by cons
 and a fixed temperature $\tau > 0$ rescales it inside the loss;
 Smaller $\tau$ concentrates the gradient on the hardest negatives, while larger $\tau$ stabilizes early optimization, since $\|\nabla \Loss_{\mathrm{SC}}\| \propto \frac{1}{\tau}$
 \parencite{khosla2020supcon}.
-Both branches use $\tau = 0.2$, the value commonly chosen for normalised contrastive features \parencite{chen2020simclr,khosla2020supcon}.
+Both branches use $\tau = 0.5$, the value suggested in the original supervised contrastive formulation \parencite{khosla2020supcon}.
 
 For an anchor set $I$ with embeddings $\{\vect{z}_i\}_{i \in I}$, write the candidate set $A(i) = I \setminus \{i\}$ and the positive subset $P(i) \subseteq A(i)$ defined by label coincidence.
 The supervised contrastive contribution \parencite{khosla2020supcon} is
