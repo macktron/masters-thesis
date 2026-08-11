@@ -29,7 +29,7 @@ Context: ELINT / ESM applications, where mixtures and previously unseen emitters
 - **Tone:** formal academic. Avoid contractions, hype, and filler phrases ("In recent years ...").
 - **References:** IEEE style (`biblatex` `style=ieee`). Cite with `\parencite{key}` mid-sentence and `\textcite{key}` when the author is the subject. Add new entries to `thesis.bib`.
 - **Acronyms:** add to `glossary.tex` and use `\gls{label}` on first use (this prints the long form automatically). Subsequent uses can be `\gls{label}` (short form) or the literal acronym. Common ones are already defined: `ml`, `dl`, `cnn`, `bert`, `mha`, `radar`, `elint`, `pdw`, `prf`, `ami`, `ari`.
-- **Notation:** see the custom macros at the bottom of `preamble.tex`. Use `\vect{x}` for vectors, `\mat{A}` for matrices, `\Loss` for loss, `\Enc` for the encoder, `\AMI`/`\ARI`/`\ACC` for metrics. Do **not** introduce parallel notation.
+- **Notation:** see the custom macros at the bottom of `preamble.tex`. Use `\vect{x}` for vectors, `\mat{A}` for matrices, `\Loss` for loss, `\Enc` for the encoder, `\AMI`/`\ARI` for metrics. Do **not** introduce parallel notation.
 - **Equations:** use `\[ ... \]` for display math, `equation`/`align` (with `\label` and `\cref`) when referenced.
 - **Cross-references:** always `\cref{...}` from `cleveref` (already loaded). Labels follow the pattern `ch:`, `sec:`, `eq:`, `fig:`, `tab:`, `alg:`.
 - **Figures:** put assets in `figures/<chapter>/` and reference with `\includegraphics{<chapter>/<name>}` (the `\graphicspath` is already configured).

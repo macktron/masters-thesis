@@ -10,7 +10,7 @@ All metrics derive from the contingency table
   n_{ij}=\sum_{n=1}^N \indicator[y_n=i,\,\hat{y}_n=j],
 \]
 with marginals $a_i=\sum_j n_{ij}$ and $b_j=\sum_i n_{ij}$ counting how many pulses carry true label $i$ or predicted label $j$.
-No single scalar captures every facet of cluster agreement, so we report metrics drawn from three different families --- pair counting, information theory, and entropy-based homogeneity/completeness --- together with a Hungarian-aligned accuracy when the two cardinalities are comparable.
+No single scalar captures every facet of cluster agreement, so we report metrics drawn from three different families --- pair counting, information theory, and entropy-based homogeneity/completeness.
 
 \subsection*{Pair-counting view: Rand and adjusted Rand}
 
@@ -111,31 +111,14 @@ The \gls{vmeasure} is the harmonic mean
 and $\mathrm{V}=0$ if $h=c=0$.
 The harmonic mean is small whenever either component is small, so a high V-measure requires both homogeneity and completeness to be high simultaneously.
 
-\subsection*{Clustering accuracy with Hungarian alignment}
-
-The most directly interpretable scalar is the fraction of pulses correctly classified, but the cluster integers are arbitrary so a one-to-one relabelling of $\hat{Y}$ onto $Y$ must be chosen first.
-Among all such relabellings, the one that maximises the number of correct assignments is the optimal solution of a linear assignment problem on the contingency table $\{n_{ij}\}$, which the Hungarian algorithm \parencite{kuhn1955hungarian} solves in polynomial time.
-The \gls{acc} is the resulting fraction,
-\begin{equation}\label{eq:method:acc}
-  \ACC(Y,\hat{Y})
-  =
-  \frac{1}{N}\,
-  \max_{\pi}\sum_{n=1}^{N}
-  \indicator[\,y_n=\pi(\hat{y}_n)\,],
-\end{equation}
-where the maximum is taken over injective maps $\pi$ between predicted and true cluster identifiers; when the two cardinalities differ, the contingency table is zero-padded so that $\pi$ remains injective.
-$\ACC\in[0,1]$, with $\ACC=1$ at perfect recovery up to relabelling.
-Compared with the other metrics, $\ACC$ is the most familiar quantity but the least forgiving when $\hat{K}$ deviates strongly from the true number of clusters, because unmatched predicted clusters then contribute only zeros to the maximum.
-
 \subsection*{What each metric does and does not tell us}
 
-The four metrics agree at the extremes --- all return one at exact recovery and approximately zero at chance --- but they disagree in the middle.
+The three families agree at the extremes --- all return one at exact recovery and approximately zero at chance --- but they disagree in the middle.
 $\ARI$ summarises the pair structure and is comparable across runs with different cluster counts.
 $\AMI$ captures how much information one labelling carries about the other and remains comparable when the number of clusters varies.
 Reporting homogeneity and completeness alongside the V-measure separates oversplitting from undermerging, which matters for the open-set mode setting where $\hat{M}>M$ is expected.
-$\ACC$ is reported when $\hat{K}$ and the true number of clusters are comparable; it is the easiest number to communicate but the most fragile when cardinalities diverge.
 We therefore report several scores rather than a single headline metric.
 
 \subsection*{Qualitative inspection}
 
-Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement the quantitative scores of \cref{eq:method:ari,eq:method:ami,eq:method:vmeasure,eq:method:acc}; protocols and numbers appear in \cref{ch:experiments}.
+Two-dimensional projections of $\{\vect{z}^{\mathrm{em}}_n\}$ and $\{\vect{z}^{\mathrm{md}}_n\}$ coloured by $(e_n,m_n)$ complement the quantitative scores of \cref{eq:method:ari,eq:method:ami,eq:method:vmeasure}; protocols and numbers appear in \cref{ch:experiments}.

@@ -16,7 +16,7 @@ Describe the proposed approach in enough detail that another researcher could re
 - `04_attention_variants.tex` — Attention variants for irregular TOA (pairwise bias, rotary encoding) acting on coordinate differences.
 - `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the total objective.
 - `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
-- `07_evaluation_metrics.tex` — Define AMI, ARI, clustering accuracy (with Hungarian alignment), V-measure. Use the `\AMI`, `\ARI`, `\ACC` macros. Explain *why* each metric is used and what it can and cannot tell us.
+- `07_evaluation_metrics.tex` — Define AMI, ARI, and V-measure (with homogeneity/completeness). Use the `\AMI`, `\ARI` macros. Explain *why* each metric is used and what it can and cannot tell us.
 - `08_baselines.tex` — Baselines to compare against, with justification for each.
 
 ## Style notes

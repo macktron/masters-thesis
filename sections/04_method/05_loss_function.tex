@@ -11,38 +11,42 @@ The projection-head outputs of \cref{eq:method:proj_heads} are unit-norm by cons
 \begin{equation}\label{eq:method:sim}
   s_{ij} \;\coloneqq\; \vect{z}_i^{\top}\vect{z}_j \;\in\; [-1,1],
 \end{equation}
-and a fixed temperature $\tau > 0$ rescales it inside the loss;
+and a fixed temperature $\tau > 0$ rescales it inside the loss.
 Smaller $\tau$ concentrates the gradient on the hardest negatives, while larger $\tau$ stabilizes early optimization, since $\|\nabla \Loss_{\mathrm{SC}}\| \propto \frac{1}{\tau}$
 \parencite{khosla2020supcon}.
 Both branches use $\tau = 0.5$, the value suggested in the original supervised contrastive formulation \parencite{khosla2020supcon}.
 
-For an anchor set $I$ with embeddings $\{\vect{z}_i\}_{i \in I}$, write the candidate set $A(i) = I \setminus \{i\}$ and the positive subset $P(i) \subseteq A(i)$ defined by label coincidence.
-The supervised contrastive contribution \parencite{khosla2020supcon} is
+Let a mini-batch consist of $B$ windows of length $L$, and write $\mathcal{B}$ for the set of all $B \times L$ pulse embeddings pooled across those windows.
+How the windows are chosen is controlled by the scenario-aware sampler of \cref{sec:method:training:sampler}.
+For each pulse $i \in \mathcal{B}$, write the candidate set $A(i) = \mathcal{B} \setminus \{i\}$ and the positive subset $P(i) \subseteq A(i)$ defined by label coincidence.
+The supervised contrastive contribution \parencite{khosla2020supcon} is then
 \begin{equation}\label{eq:method:supcon}
-  \Loss_{\mathrm{SC}}\!\bigl(I, \{P(i)\}\bigr)
+  \Loss_{\mathrm{SC}}
   \;=\;
-  -\sum_{i \in I^{+}} \frac{1}{\lvert P(i) \rvert}
+  -\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i) \rvert}
   \sum_{p \in P(i)}
   \log \frac{\exp(s_{ip}/\tau)}{\sum_{a \in A(i)} \exp(s_{ia}/\tau)},
 \end{equation}
-where $I^{+} = \{i \in I : P(i) \neq \emptyset\}$ and $\Loss_{\mathrm{SC}} = 0$ when $I^{+} = \emptyset$.
-Anchors outside $I^{+}$ contribute only as negatives.
-The denominator runs over every candidate in $A(i)$, so unrelated samples exert repulsive pressure and the encoder cannot collapse to a constant map \parencite{chen2020simclr}.
+where $\mathcal{B}^{+} = \{i \in \mathcal{B} : P(i) \neq \emptyset\}$ and $\Loss_{\mathrm{SC}} = 0$ when $\mathcal{B}^{+} = \emptyset$.
+Pulses outside $\mathcal{B}^{+}$ contribute only as negatives.
+The denominator runs over every other pulse in the batch, so unrelated samples exert repulsive pressure and the encoder cannot collapse to a constant map \parencite{chen2020simclr}.
 
 \subsection*{Branch losses and total objective}
 
-Both branches apply \cref{eq:method:supcon} to the same anchor set, namely all $B \times L$ pulses of a mini-batch pooled across windows, and differ only in the label that defines the positive sets: two pulses are positives on the emitter branch when they originate from the same physical emitter, and on the mode branch when they carry the same global mode label.
+Both branches apply \cref{eq:method:supcon} to the same batch embeddings and differ only in the label that defines the positive sets: two pulses are positives on the emitter branch when they originate from the same physical emitter, and on the mode branch when they carry the same global mode label.
 Since emitter identifiers are recording-local in \cref{sec:method:formulation}, they are made unique within a mini-batch by pairing each identifier with its originating recording.
 Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses on the emitter and mode projections, the total training objective is
 \begin{equation}\label{eq:method:loss_total}
   \Loss \;=\; \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},
-  \qquad \lambda_{\mathrm{md}} > 0,
+  \qquad \lambda_{\mathrm{md}} = 1,
 \end{equation}
-with $\lambda_{\mathrm{md}}$ reported in \cref{ch:experiments}.
+so the two branches carry equal weight.
+Tuning $\lambda_{\mathrm{md}}$ could improve the trade-off between the tasks, but is not evaluated in this thesis.
+
 \subsection*{Probabilistic interpretation}
 
 The kernel \cref{eq:method:supcon} admits a Gibbs--Boltzmann reading that clarifies the role of every factor.
-For each anchor $i \in I^{+}$, define the categorical distribution over its candidates
+For each pulse $i \in \mathcal{B}^{+}$, define the categorical distribution over its candidates
 \begin{equation}\label{eq:method:boltzmann}
   P_{\bm{\theta}}(a \mid i) \;=\; \frac{\exp(s_{ia}/\tau)}{Z_i},
   \qquad
@@ -50,11 +54,11 @@ For each anchor $i \in I^{+}$, define the categorical distribution over its cand
   \qquad a \in A(i),
 \end{equation}
 which is exactly the Boltzmann distribution with energy $-s_{ia}$ and temperature $\tau$ on the configuration space $A(i)$.
-Substituting \cref{eq:method:boltzmann} into \cref{eq:method:supcon} yields the per-anchor cross-entropy between the empirical positive distribution (uniform on $P(i)$) and the model $P_{\bm{\theta}}(\cdot \mid i)$,
+Substituting \cref{eq:method:boltzmann} into \cref{eq:method:supcon} yields the per-pulse cross-entropy between the empirical positive distribution (uniform on $P(i)$) and the model $P_{\bm{\theta}}(\cdot \mid i)$,
 \begin{equation}\label{eq:method:supcon_logp}
   \Loss_{\mathrm{SC}}
   \;=\;
-  -\sum_{i \in I^{+}} \frac{1}{\lvert P(i)\rvert}
+  -\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert}
   \sum_{p \in P(i)} \log P_{\bm{\theta}}(p \mid i),
 \end{equation}
 that is, minus the average log-evidence the encoder assigns to the positives, exactly as a maximum-likelihood estimator would treat $P(i)$ as a sample of observations drawn from the latent positive class.
@@ -63,12 +67,12 @@ Applying $\log(x/y) = \log x - \log y$ to \cref{eq:method:supcon} separates the 
 \begin{equation}\label{eq:method:supcon_split}
   \Loss_{\mathrm{SC}}
   \;=\;
-  \underbrace{\sum_{i \in I^{+}} \log Z_i}_{\text{log-partition (repulsion)}}
+  \underbrace{\sum_{i \in \mathcal{B}^{+}} \log Z_i}_{\text{log-partition (repulsion)}}
   \;-\;
-  \underbrace{\sum_{i \in I^{+}} \frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \frac{s_{ip}}{\tau}}_{\text{mean positive similarity (attraction)}}.
+  \underbrace{\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \frac{s_{ip}}{\tau}}_{\text{mean positive similarity (attraction)}}.
 \end{equation}
 The first term is monotone in similarities to every candidate, with $\partial \log Z_i / \partial s_{ia} = P_{\bm{\theta}}(a\mid i)/\tau$, so the gradient automatically concentrates on the hardest negatives---those whose Boltzmann weight under \cref{eq:method:boltzmann} is largest despite carrying a different label.
-The second term rewards alignment of each anchor with its positives, with each positive contributing $1/(\tau\lvert P(i)\rvert)$ to the gradient.
+The second term rewards alignment of each pulse with its positives, with each positive contributing $1/(\tau\lvert P(i)\rvert)$ to the gradient.
 
 The prefactor $1/\lvert P(i)\rvert$ turns the inner sum of log-probabilities into an arithmetic mean, equivalently into the log of a geometric mean,
 \begin{equation}\label{eq:method:supcon_geomean}
@@ -77,4 +81,4 @@ The prefactor $1/\lvert P(i)\rvert$ turns the inner sum of log-probabilities int
   -\log\!\left(\,\prod_{p \in P(i)} P_{\bm{\theta}}(p \mid i)\right)^{\!1/\lvert P(i)\rvert}.
 \end{equation}
 Without the prefactor, the inner sum equals the log-likelihood of $\lvert P(i)\rvert$ conditionally independent observations of the latent positive class, and the loss would scale extensively with the number of available positives.
-Dividing by $\lvert P(i)\rvert$ replaces this product by its geometric mean, so an anchor's contribution becomes intensive in the size of its positive set; this is what allows the same kernel to remain well-behaved across the two branches, where $\lvert P(i)\rvert$ ranges from a handful (emitter contrasts inside one window) to many hundreds (mode contrasts pooled over the batch).
+Dividing by $\lvert P(i)\rvert$ replaces this product by its geometric mean, so a pulse's contribution becomes intensive in the size of its positive set; this is what allows the same kernel to remain well-behaved across the two branches, where $\lvert P(i)\rvert$ ranges from a handful (emitter contrasts inside one window) to many hundreds (mode contrasts pooled over the batch).
