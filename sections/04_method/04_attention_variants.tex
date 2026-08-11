@@ -35,7 +35,7 @@ The construction mirrors the relative-position and content-independent biases us
 \subsection*{Rotary positional encoding}
 
 The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
-In the vanilla self-attention of \cref{eq:method:attn_base}, the query and key of pulse $i$ are obtained by linear projection of the hidden representation $\vect{h}_i$ that enters the attention sub-layer,
+The query and key of pulse $i$ are obtained by linear projection of the hidden representation $\vect{h}_i$ that enters the attention sub-layer,
 \begin{equation}\label{eq:method:qk_proj}
   \vect{q}_i = \mat{W}_q\vect{h}_i,
   \qquad
