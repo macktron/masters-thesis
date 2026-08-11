@@ -10,7 +10,7 @@ Empirically answer the research questions stated in `sections/01_introduction/03
 
 ## Subsection contracts
 
-- `01_setup.tex` — Hardware (GPU type, number), software stack (PyTorch version, key libraries), reproducibility statement (fixed seeds, code/data availability).
+- `01_setup.tex` — Hardware (GPU type, number), software stack (Python/PyTorch without pinning exact versions), reproducibility statement (fixed seeds). Note that code is Saab-proprietary and not released.
 - `02_datasets.tex` — Each dataset gets its own paragraph (or table row): description, size, number of emitters, number of modes, train/val/test split, synthetic vs. real, any preprocessing peculiarities.
 - `03_hyperparameters.tex` — Exact hyperparameters for the proposed model and each baseline. Use a table. If different datasets require different hyperparameters, say so explicitly.
 - `04_quantitative_results.tex` — Main results table: rows = methods (baselines + proposed), columns = datasets and metrics (AMI/ARI/V-measure for emitter clustering and for mode clustering). Bold the best per column. Report mean $\pm$ std over at least 3 seeds.
