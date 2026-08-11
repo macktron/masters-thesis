@@ -42,7 +42,7 @@ The query and key of pulse $i$ are obtained by linear projection of the hidden r
   \vect{k}_i = \mat{W}_k\vect{h}_i,
 \end{equation}
 with learnable matrices $\mat{W}_q, \mat{W}_k \in \R^{d_k \times d_{\mathrm{model}}}$ shared across positions in the head.
-The attention logit is then simply their inner product,
+In the vanilla self-attention of \cref{eq:method:attn_base}, the attention logit is then simply their inner product,
 \begin{equation}\label{eq:method:attn_dot}
   \bigl\langle \vect{q}_i,\, \vect{k}_j \bigr\rangle
   = \vect{q}_i^{\top}\vect{k}_j
