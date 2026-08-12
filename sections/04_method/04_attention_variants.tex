@@ -17,24 +17,16 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 \subsection*{Physical attention bias}
 
 The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
-The bias uses two coordinates: the window-local \gls{toa} $t_n$ and the azimuth recovered from the horizontal incidence-direction components of \cref{eq:method:aoa_cart},
-\begin{equation}\label{eq:method:azimuth}
-  \theta_n
-  =
-  \operatorname{atan2}\bigl(u^{y}_n,\, u^{x}_n\bigr)
-  \in (-\pi,\pi],
-\end{equation}
-which recovers $\theta^{\mathrm{az}}_n$ whenever $\cos\theta^{\mathrm{lat}}_n > 0$.
-The vertical component $u^{z}_n$ is omitted because the latitude estimate is the one most corrupted by ground reflections and similar multipath effects.
+The bias uses two coordinates: the window-local \gls{toa} $t_n$ and the azimuth $\theta^{\mathrm{az}}_n$ of \cref{eq:method:aoa_cart}.
 For \gls{toa} the pairwise feature is the absolute difference $B^{(t)}_{ij} = |t_i - t_j|$.
-For azimuth, a plain absolute difference would treat bearings near $-\pi$ and $\pi$ as far apart although they describe nearly the same direction; the circular distance
+For azimuth, a plain absolute difference would treat bearings near $0$ and $2\pi$ as far apart although they describe nearly the same direction; the circular distance
 \begin{equation}\label{eq:method:circ_az}
   B^{(\theta)}_{ij}
   =
   \frac{1}{\pi}\,
   \min\bigl(
-    \lvert\theta_i - \theta_j\rvert,\,
-    2\pi - \lvert\theta_i - \theta_j\rvert
+    \lvert\theta^{\mathrm{az}}_i - \theta^{\mathrm{az}}_j\rvert,\,
+    2\pi - \lvert\theta^{\mathrm{az}}_i - \theta^{\mathrm{az}}_j\rvert
   \bigr)
   \in [0,1]
 \end{equation}
@@ -153,9 +145,9 @@ Arrival direction is excluded: an operating mode is characterised by the intrins
 
 Every head in the deinterleaving branch rotates by azimuth instead.
 Direction is a strong cue for emitter identity---within a window, pulses from one emitter arrive from a nearly constant bearing---while temporal structure is already present upstream through the \gls{toa}-rotated trunk.
-The rotary coordinate is the azimuth $\theta_n$ of \cref{eq:method:azimuth}, mapped to $[0,1]$ by
+The rotary coordinate is the azimuth $\theta^{\mathrm{az}}_n$ of \cref{eq:method:aoa_cart}, mapped to $[0,1]$ by
 \begin{equation}\label{eq:method:azimuth_scale}
-  \tilde{\theta}_n = \frac{\theta_n + \pi}{2\pi}.
+  \tilde{\theta}_n = \frac{\theta^{\mathrm{az}}_n}{2\pi}.
 \end{equation}
 The branch then applies
 \begin{equation}\label{eq:method:rope_az}
