@@ -17,32 +17,55 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 \subsection*{Physical attention bias}
 
 The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
-The bias is built from the absolute pairwise differences of three coordinates: the \gls{toa} $t_n$ and the two horizontal incidence-direction components $u^{x}_n$ and $u^{y}_n$ of \cref{eq:method:aoa_cart}.
-The vertical component $u^{z}_n$ is omitted because the latitude estimate is the one most corrupted by ground reflections and similar multipath effects.
-For each coordinate $f$, the delta matrix $B^{(f)}_{ij} = |f_i - f_j|$ is superposed on the logits with a learnable scalar coefficient,
-\begin{equation}\label{eq:method:attn_bias}
-  A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}} + \sum_{f} \lambda_f\, B^{(f)}_{ij},
-  \qquad
-  f \in \{t,\, u^{x},\, u^{y}\}.
+The bias uses two coordinates: the window-local \gls{toa} $t_n$ and the azimuth recovered from the horizontal incidence-direction components of \cref{eq:method:aoa_cart},
+\begin{equation}\label{eq:method:azimuth}
+  \theta_n
+  =
+  \operatorname{atan2}\bigl(u^{y}_n,\, u^{x}_n\bigr)
+  \in (-\pi,\pi],
 \end{equation}
-Each coefficient $\lambda_f$ is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block—throughout the shared trunk and both branches—carries its own set of three coefficients.
-No kernel shape is imposed on the bias: a negative $\lambda_f$ pushes attention towards pulses that are close in that coordinate, a positive one towards distant pulses, and $\lambda_f = 0$ removes the cue entirely, so the model chooses the sign and strength of each cue during training instead of committing to a hand-tuned prior.
-Using component-wise direction deltas rather than differences of raw angles also avoids the azimuth wrap-around problem noted in \cref{sec:method:data:norm}.
-Because the coefficients are learned independently in each part of the network, the branches are free to allocate the cues differently; one may expect the deinterleaving branch to lean more heavily on the direction deltas—pulses from one emitter arrive from a nearly constant direction—while the shared trunk and the mode branch, whose target should be invariant to viewing geometry, suppress them.
+which recovers $\theta^{\mathrm{az}}_n$ whenever $\cos\theta^{\mathrm{lat}}_n > 0$.
+The vertical component $u^{z}_n$ is omitted because the latitude estimate is the one most corrupted by ground reflections and similar multipath effects.
+For \gls{toa} the pairwise feature is the absolute difference $B^{(t)}_{ij} = |t_i - t_j|$.
+For azimuth, a plain absolute difference would treat bearings near $-\pi$ and $\pi$ as far apart although they describe nearly the same direction; the circular distance
+\begin{equation}\label{eq:method:circ_az}
+  B^{(\theta)}_{ij}
+  =
+  \frac{1}{\pi}\,
+  \min\bigl(
+    \lvert\theta_i - \theta_j\rvert,\,
+    2\pi - \lvert\theta_i - \theta_j\rvert
+  \bigr)
+  \in [0,1]
+\end{equation}
+takes the shorter arc on the circle and normalises by $\pi$ so that both bias features lie in $[0,1]$.
+Each feature is added to the logits with a learnable scalar coefficient,
+\begin{equation}\label{eq:method:attn_bias}
+  A_{ij}
+  =
+  \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}}
+  + \lambda_t\, B^{(t)}_{ij}
+  + \lambda_{\theta}\, B^{(\theta)}_{ij}.
+\end{equation}
+Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block---throughout the shared trunk and both branches---carries its own $(\lambda_t,\lambda_{\theta})$.
+No kernel shape is imposed on the bias: a negative coefficient pushes attention towards pulses that are close in that coordinate, a positive one towards distant pulses, and a zero coefficient removes the cue entirely, so the model chooses the sign and strength of each cue during training instead of committing to a hand-tuned prior.
+Because the coefficients are learned independently in each part of the network, the branches are free to allocate the cues differently; one may expect the deinterleaving branch to lean more heavily on the azimuthal term---pulses from one emitter arrive from a nearly constant bearing---while the shared trunk and the mode branch, whose target should be invariant to viewing geometry, suppress it.
 Whether this allocation emerges is examined in \cref{ch:experiments}.
 The construction mirrors the relative-position and content-independent biases used in language and graph transformers \parencite{shaw2018relative,ying2021graphormer}, specialised here to pulse parameters rather than token indices.
 
 \subsection*{Rotary positional encoding}
 
 The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
-The query and key of pulse $i$ are obtained by linear projection of the hidden representation $\vect{h}_i$ that enters the attention sub-layer,
+Notation below is for a single attention head.
+\Gls{mha} with $h$ heads uses $h$ independent projection pairs; each head maps the token representation $\vect{h}_i \in \R^{d_{\mathrm{model}}}$ to per-head queries and keys of dimension $d_k = d_{\mathrm{model}}/h$,
 \begin{equation}\label{eq:method:qk_proj}
   \vect{q}_i = \mat{W}_q\vect{h}_i,
   \qquad
   \vect{k}_i = \mat{W}_k\vect{h}_i,
 \end{equation}
-with learnable matrices $\mat{W}_q, \mat{W}_k \in \R^{d_k \times d_{\mathrm{model}}}$ shared across positions in the head.
-In the vanilla self-attention of \cref{eq:method:attn_base}, the attention logit is then simply their inner product
+with learnable $\mat{W}_q, \mat{W}_k \in \R^{d_k \times d_{\mathrm{model}}}$ shared across positions within that head.
+The $h$ head outputs are concatenated and mixed as in standard \gls{mha}.
+In the vanilla self-attention of \cref{eq:method:attn_base}, the attention logit of one head is then simply the inner product
 \begin{equation}\label{eq:method:attn_dot}
   \bigl\langle \vect{q}_i,\, \vect{k}_j \bigr\rangle
   = \vect{q}_i^{\top}\vect{k}_j
@@ -113,25 +136,36 @@ which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is 
 Setting $\mat{R}(p) = \mat{I}$ recovers the content-only inner product of \cref{eq:method:attn_dot}.
 \Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key---and hence their dot product---is set by the coordinate gap alone (right).
 
-The shared trunk and the mode branch attach the window-local \gls{toa} $t_n$ of \cref{sec:method:data}, so every head applies $\mat{R}(t_n)$ with scale $\gamma_t$.
-Arrival direction is excluded there, because an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of viewing geometry; rotating those layers by direction would inject nuisance variation into an embedding that should be geometry-invariant.
+The encoder of \cref{sec:method:arch} applies this same single-coordinate form everywhere, but the scalar $p$ differs between the shared trunk, the mode branch, and the deinterleaving branch.
 
-The deinterleaving branch instead rotates by azimuth alone.
-Direction is a strong cue for emitter identity---within a window, pulses from one emitter arrive from a nearly constant bearing---while temporal structure is already present upstream, because every window passes through the \gls{toa}-rotated trunk before reaching the branch.
-The encoder input stores arrival direction as the Cartesian components of \cref{eq:method:aoa_cart}; for the rotary coordinate these are converted back to a single azimuth
-\begin{equation}\label{eq:method:rope_theta}
-  \theta_n
-  =
-  \operatorname{atan2}\bigl(u^{y}_n,\, u^{x}_n\bigr)
-  \in (-\pi,\pi],
+\subsubsection*{Trunk and mode branch}
+
+Every head in the shared trunk and in the mode branch rotates by the window-local \gls{toa},
+\begin{equation}\label{eq:method:rope_toa}
+  \tilde{\vect{q}}_n = \mat{R}(t_n)\,\vect{q}_n,
+  \qquad
+  \tilde{\vect{k}}_n = \mat{R}(t_n)\,\vect{k}_n,
 \end{equation}
-which recovers $\theta^{\mathrm{az}}_n$ of \cref{eq:method:aoa_cart} whenever $\cos\theta^{\mathrm{lat}}_n > 0$, and is then mapped to $[0,1]$ by
-\begin{equation}\label{eq:method:rope_theta_scale}
+with scale $\gamma_t$ in $\mat{R}$.
+Arrival direction is excluded: an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of viewing geometry, so rotating these layers by direction would inject nuisance variation into an embedding that should be geometry-invariant.
+
+\subsubsection*{Deinterleaving branch}
+
+Every head in the deinterleaving branch rotates by azimuth instead.
+Direction is a strong cue for emitter identity---within a window, pulses from one emitter arrive from a nearly constant bearing---while temporal structure is already present upstream through the \gls{toa}-rotated trunk.
+The rotary coordinate is the azimuth $\theta_n$ of \cref{eq:method:azimuth}, mapped to $[0,1]$ by
+\begin{equation}\label{eq:method:azimuth_scale}
   \tilde{\theta}_n = \frac{\theta_n + \pi}{2\pi}.
 \end{equation}
-Every head of the deinterleaving branch therefore applies $\mat{R}(\tilde{\theta}_n)$ with scale $\gamma_{\theta}$.
-Using one angle rather than two Cartesian components keeps the full set of $d_k/2$ planes on a single cue.
-Algebraic differences of $\tilde{\theta}$ inherit the usual $0$--$2\pi$ wrap discontinuity noted in \cref{sec:method:data:norm}; within a window the emitters of interest typically occupy a small angular sector, so the discontinuity is rarely crossed in practice.
+The branch then applies
+\begin{equation}\label{eq:method:rope_az}
+  \tilde{\vect{q}}_n = \mat{R}(\tilde{\theta}_n)\,\vect{q}_n,
+  \qquad
+  \tilde{\vect{k}}_n = \mat{R}(\tilde{\theta}_n)\,\vect{k}_n,
+\end{equation}
+with scale $\gamma_{\theta}$ in $\mat{R}$.
+Using one angle keeps all $d_k/2$ planes on a single cue.
+Unlike the circular distance of \cref{eq:method:circ_az} used in the bias, the relative phase of \cref{eq:method:rope} sees the algebraic difference $\tilde{\theta}_j-\tilde{\theta}_i$, which inherits the usual $0$--$2\pi$ wrap discontinuity noted in \cref{sec:method:data:norm}; within a window the emitters of interest typically occupy a small angular sector, so the discontinuity is rarely crossed in practice.
 
 This variant complements rather than replaces the bias term---the bias adds pairwise relationships to the logits, while \gls{rope} encodes a coordinate difference in the geometry of the queries and keys---and it revisits the choice of \cref{sec:method:arch} to rely on \gls{toa} and arrival direction as plain input features, testing whether an explicit relative encoding adds information beyond their presence in the input.
 
