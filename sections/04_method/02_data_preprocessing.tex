@@ -45,7 +45,8 @@ whose components lie in $[-1,1]$ and are mapped to $[0,1]$ by the fixed affine r
 Neither map depends on the training corpus.
 
 The Cartesian representation avoids the wrap-around discontinuity of a rescaled angle, which places azimuths near $0$ and $2\pi$ at opposite ends of the feature range although they describe nearly the same direction.
-This matters especially for the attention variants of \cref{sec:method:attention}, whose pairwise bias and rotary encoding both act on coordinate differences: differences of direction components respect the geometry of the sphere, whereas differences of raw angles do not.
+This matters for the pairwise attention bias of \cref{sec:method:attention}, which acts on differences of the direction components and therefore respects the geometry of the sphere.
+The rotary variant in the same section recovers a single azimuth from $(u^{x}_n,u^{y}_n)$ for the deinterleaving branch; that choice is discussed there.
 
 Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across recordings.
 Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
