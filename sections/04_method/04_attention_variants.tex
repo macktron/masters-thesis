@@ -1,7 +1,7 @@
 \section{Attention Variants}\label{sec:method:attention}
 
 The encoder of \cref{sec:method:arch} uses standard self-attention, which treats a window as an unordered set of tokens and lets every pulse attend to every other pulse purely through learned query--key compatibility.
-The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} entry of each \gls{pdw}.
+The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} entry of each \gls{pdw} but also the \gls{aoa}, in our case converted to euclidian unit direction coordinates x y and z.
 A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, or have a similar pulse width are far more likely to originate from the same emitter or mode than an arbitrary pair.
 
 
