@@ -22,8 +22,59 @@ The heads specialise to different relational patterns while sharing the same res
 
 \paragraph{Positional information.}
 Self-attention is permutation-equivariant in its inputs: reordering the rows of $\mat{Q}$, $\mat{K}$, and $\mat{V}$ in the same way reorders the output rows accordingly, but does not otherwise encode order.
-Transformer encoders therefore add a positional signal to token embeddings before the first layer, for example fixed sinusoidal features or learned position embeddings added element-wise to each token vector \parencite{vaswani2017attention,devlin2019bert}.
-When the raw inputs already carry absolute or relative timing, as is common for irregularly sampled sequences, practitioners sometimes omit a separate positional encoding and rely on those measurements instead; the method chapter returns to this choice for \gls{pdw} windows.
+Transformer encoders therefore inject a positional signal. The original architecture adds fixed sinusoidal features or learned embeddings to each token vector before the first layer \parencite{vaswani2017attention,devlin2019bert}.
+Those encodings are absolute. They tag a token with its index, not with its distance to other tokens.
+
+\paragraph{Rotary positional encoding.}
+\textcite{su2024roformer} introduce \gls{rope}. The query and key of each token are rotated by a phase that depends on a scalar coordinate $p$, leaving the token embeddings unchanged.
+In the original formulation $p_i$ is the token index $i$. Write $\vect{q}_i = \mat{W}_q\vect{h}_i$ and $\vect{k}_i = \mat{W}_k\vect{h}_i$ for the usual per-head projections of a token representation $\vect{h}_i$. The rotated vectors are functions $f_q(\vect{h}_i, p_i)$ and $f_k(\vect{h}_j, p_j)$ of the hidden representation and the coordinate. Their inner product is required to depend on the two coordinates only through their difference,
+\begin{equation}\label{eq:bg:rope_goal}
+  \bigl\langle f_q(\vect{h}_i, p_i),\, f_k(\vect{h}_j, p_j) \bigr\rangle
+  = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
+\end{equation}
+
+Assume $d_k$ is even. The $d_k$ coordinates of a head are grouped into $d_k/2$ two-dimensional planes. Plane $m$ is rotated by the angle $p\omega_m$, where $\omega_m = b^{-2(m-1)/d_k}$ and $b=10^4$ is a fixed base.
+Fast-rotating planes resolve small gaps in $p$. Slow-rotating planes resolve large ones. The same geometric progression of wavelengths appears in the sinusoidal encoding of \textcite{vaswani2017attention}.
+Each plane uses the rotation
+\begin{equation}\label{eq:bg:rope_2d}
+  \mat{\Omega}(\phi) =
+  \begin{bmatrix}
+    \cos\phi & -\sin\phi \\
+    \sin\phi & \phantom{-}\cos\phi
+  \end{bmatrix},
+\end{equation}
+and the head-wide map is the block-diagonal matrix
+\begin{equation}\label{eq:bg:rope_block}
+  \mat{R}(p)
+  = \diag\!\bigl(
+      \mat{\Omega}(p\omega_1),\,
+      \mat{\Omega}(p\omega_2),\,
+      \ldots,\,
+      \mat{\Omega}(p\omega_{d_k/2})
+    \bigr).
+\end{equation}
+Applying $\mat{R}(p)$ after the projections gives
+\begin{equation}\label{eq:bg:rope_map}
+  \tilde{\vect{q}}_i = \mat{R}(p_i)\,\vect{q}_i,
+  \qquad
+  \tilde{\vect{k}}_j = \mat{R}(p_j)\,\vect{k}_j.
+\end{equation}
+
+Planar rotations compose by subtracting angles, $\mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi)$. Block-wise this is $\mat{R}(p_i)^{\top}\mat{R}(p_j) = \mat{R}(p_j - p_i)$, so
+\begin{equation}\label{eq:bg:rope}
+  \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
+    = \vect{q}_i^{\top}\,\mat{R}(p_j - p_i)\,\vect{k}_j.
+\end{equation}
+Each token is rotated by its own coordinate, yet the logit sees only the difference. Setting $\mat{R}(p) = \mat{I}$ recovers the content-only inner product. \Cref{fig:bg:rope} shows the geometry on a single plane.
+
+The construction applies to any real scalar $p$, not only to integer indices. When the token features already carry timing, a separate positional encoding is sometimes omitted altogether. The method chapter returns to this for \gls{pdw} windows: a baseline that omits a separate encoding, and a rotary encoding that uses physical coordinates in place of token indices.
+
+\begin{figure}[tbp]
+  \centering
+  \input{figures/background/rope_rotation.tex}
+  \caption{Geometry of \gls{rope} on one two-dimensional plane of a head. Left: the projected query $\vect{q}=\mat{W}_q\vect{h}$ (dashed) is rotated by $\mat{R}(p)$ from \cref{eq:bg:rope_block}, which adds the phase $p\omega_m$. Right: the angle between the rotated query and key equals the content angle $\varphi$ plus the relative phase $(p_j-p_i)\omega_m$. The inner product depends on the coordinate difference alone (\cref{eq:bg:rope}).}
+  \label{fig:bg:rope}
+\end{figure}
 
 \paragraph{Encoder layer.}
 A standard transformer \emph{encoder layer} alternates two sub-layers: \gls{mha} followed by a position-wise \gls{ffn} applied independently at every position.

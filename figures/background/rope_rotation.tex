@@ -3,7 +3,7 @@
 % Left: absolute phase applied to the projected query.
 % Right: content angle phi (dashed) vs. RoPE-modified enclosed angle.
 % Labels sit outside the unit circle; angles are large enough to read.
-% Loaded from sections/04_method/04_attention_variants.tex via \input.
+% Loaded from sections/02_background/07_transformer_encoder.tex via \input.
 % =====================================================================
 \begin{tikzpicture}[
     font=\small,
@@ -43,12 +43,12 @@
     \draw[gray!55, thin]
       ({(\qbase+\arot)/2}:7.5mm) -- (1.35*\Rad, 0.55*\Rad);
     \node[font=\scriptsize, anchor=west] at (1.38*\Rad, 0.55*\Rad)
-      {$\gamma p\omega_m$};
+      {$p\omega_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
       at (2mm, -12mm)
       {projection first, then a planar rotation\\[-1pt]
-       by the physical coordinate $p$};
+       by the coordinate $p$};
   \end{scope}
 
   % =================== RIGHT PANEL ======================================
@@ -90,7 +90,7 @@
     \pgfmathsetmacro{\relang}{(\qang+\kang)/2}
     \draw[gray!55, thin] (\relang:11mm) -- (\relang:1.38*\Rad);
     \node[font=\scriptsize, anchor=south west, inner sep=1.5pt]
-      at (\relang:1.4*\Rad) {$\varphi+\gamma(p_j-p_i)\omega_m$};
+      at (\relang:1.4*\Rad) {$\varphi+(p_j-p_i)\omega_m$};
 
     \node[font=\scriptsize, anchor=north, align=center, text=black!60]
       at (2mm, -12mm)

@@ -12,7 +12,7 @@ Give the reader the technical vocabulary needed to follow the Method and Experim
 
 Filenames mirror the `\section{...}` title in `sections/02_background/`. Each file contains exactly one `\section{...}` and its `\subsection{...}` / `\subsection*{...}` / `\paragraph{...}` blocks.
 
-**TOC policy.** Numbered `\subsection` entries appear in the table of contents; starred headings and `\paragraph` do not. Keep the TOC sparse: number only headings a reader would look up independently (PDWs, emitters versus modes, deinterleaving, mode analysis). Internal textbook splits (pulsed radar, active versus passive, detection, ML paradigms, DBSCAN, ARI/AMI/V-measure internals, transformer paragraphs) stay starred or run-in.
+**TOC policy.** Numbered `\subsection` entries appear in the table of contents; starred headings and `\paragraph` do not. Keep the TOC sparse: number only headings a reader would look up independently (PDWs, emitters versus modes, deinterleaving, mode analysis). Internal textbook splits (pulsed radar, active versus passive, detection, ML paradigms, DBSCAN, ARI/AMI/V-measure internals, transformer paragraphs including RoPE) stay starred or run-in.
 
 | File | `\section` title | Notes |
 |------|------------------|--------|
@@ -22,7 +22,7 @@ Filenames mirror the `\section{...}` title in `sections/02_background/`. Each fi
 | `04_clustering_methods.tex` | Clustering Methods | Label `sec:bg:clustering`. Cite `\parencite{xie2016unsupervised}`. |
 | `05_cluster_agreement_metrics.tex` | Cluster Agreement Metrics | Label `sec:bg:cluster_metrics`. Generic $Y,\hat{Y}$ only: contingency table, ARI (`eq:bg:ari`), AMI (`eq:bg:ami`), homogeneity/completeness/V-measure (`eq:bg:vmeasure_hc`). Cite `\parencite{hubert1985comparing,vinh2010information,rosenberg2007v}`. Starred internals; no method-specific notation. |
 | `06_deep_representation_learning.tex` | Deep Representation Learning | Label `sec:bg:dl`; bridge to DEC/SwAV `\parencite{xie2016unsupervised,caron2020swav}`. |
-| `07_transformer_encoder.tex` | The Transformer Encoder | Label `sec:bg:transformer`. Cite `\parencite{vaswani2017attention,devlin2019bert}`. |
+| `07_transformer_encoder.tex` | The Transformer Encoder | Label `sec:bg:transformer`. Cite `\parencite{vaswani2017attention,devlin2019bert}`. Canonical RoPE (`eq:bg:rope_goal`, `eq:bg:rope_2d`, `eq:bg:rope_block`, `eq:bg:rope_map`, `eq:bg:rope`, figure `fig:bg:rope` in `figures/background/rope_rotation.tex`) as a run-in paragraph: token index, no $\gamma$, no pulse coordinates. Cite `\parencite{su2024roformer}`. |
 
 ## Style notes
 

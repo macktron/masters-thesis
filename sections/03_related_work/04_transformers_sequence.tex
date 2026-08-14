@@ -18,10 +18,10 @@ Relative encodings offer a middle path.
 Graphormer generalises that idea to pairwise biases derived from graph distances \parencite{ying2021graphormer}.
 The physical attention bias in \cref{sec:method:attention:bias} is the same mechanism with continuous pulse parameters: the absolute \gls{toa} difference and the circular azimuth distance, each scaled by a learned per-head coefficient.
 
-Rotary positional encoding (\cref{sec:method:attention:rope}) builds the coordinate into the queries and keys rather than into the logits \parencite{su2024roformer}.
+\textcite{su2024roformer} rotate the queries and keys (\cref{sec:bg:transformer}).
 The inner product then depends on content and on the coordinate difference.
 Vision models split the rotation planes across spatial axes \parencite{heo2024ropevit}.
-The method reuses that split for wrap-safe cosine and sine of azimuth on the deinterleaving branch, and rotates the trunk and mode branch by \gls{toa} only, so that mode embeddings are not tied to viewing geometry.
+The method replaces token indices with physical coordinates, reuses that split for cosine and sine of azimuth on the deinterleaving branch, and rotates the trunk and mode branch by \gls{toa} only (\cref{sec:method:attention:rope}).
 
 Existing positional schemes were designed for discrete indices, regular grids, or a single shared coordinate.
 A \gls{pdw} window is an irregular point set with at least two physically distinct relations---time of arrival and arrival direction---and the two estimation tasks should not weight those relations equally.

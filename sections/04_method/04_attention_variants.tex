@@ -52,90 +52,13 @@ The bias follows the same idea as additive pairwise attention biases in relative
 
 \subsection{Rotary positional encoding}\label{sec:method:attention:rope}
 
-The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
-Notation below is for a single attention head.
-\Gls{mha} with $h$ heads uses $h$ independent projection pairs; each head maps the token representation $\vect{h}_i \in \R^{d_{\mathrm{model}}}$ to per-head queries and keys of dimension $d_k = d_{\mathrm{model}}/h$,
-\begin{equation}\label{eq:method:qk_proj}
-  \vect{q}_i = \mat{W}_q\vect{h}_i,
-  \qquad
-  \vect{k}_i = \mat{W}_k\vect{h}_i,
-\end{equation}
-with learnable $\mat{W}_q, \mat{W}_k \in \R^{d_k \times d_{\mathrm{model}}}$ shared across positions within that head.
-The $h$ head outputs are concatenated and mixed as in standard \gls{mha}.
-In the vanilla self-attention of \cref{eq:method:attn_base}, the attention logit of one head is then simply the inner product
-\begin{equation}\label{eq:method:attn_dot}
-  \bigl\langle \vect{q}_i,\, \vect{k}_j \bigr\rangle
-  = \vect{q}_i^{\top}\vect{k}_j
-  = (\mat{W}_q\vect{h}_i)^{\top}(\mat{W}_k\vect{h}_j).
-\end{equation}
-\Gls{rope} leaves these projections unchanged and rotates the resulting vectors by a phase that depends on a scalar coordinate $p$ attached to each pulse.
-Following \textcite{su2024roformer}, the query and key become functions $f_q(\vect{h}_i, p_i)$ and $f_k(\vect{h}_j, p_j)$ of both the hidden representation and that coordinate, and their inner product is required to depend on the coordinates only through their difference,
-\begin{equation}\label{eq:method:rope_goal}
-  \bigl\langle f_q(\vect{h}_i, p_i),\, f_k(\vect{h}_j, p_j) \bigr\rangle
-  = g(\vect{h}_i, \vect{h}_j, p_j - p_i).
-\end{equation}
-In the original formulation the coordinate is the token index, $p_i = i$.
-We instead attach physical coordinates rather than token indices, so that $p_j - p_i$ is a time gap or a difference of direction features rather than an ordinal distance; this suits the irregularly sampled recordings of \cref{sec:method:data}, where consecutive indices may be microseconds or milliseconds apart.
+The bias of \cref{eq:method:attn_bias} is added to the logits after the query--key product. The second variant uses the rotary encoding of \cref{sec:bg:transformer}, so the inner product depends on a pulse coordinate only through pairwise differences (\cref{eq:bg:rope}).
 
-\Gls{rope} satisfies \cref{eq:method:rope_goal} by encoding that scalar as a phase applied to the whole head.
-The $d_k$ dimensions of a head (assumed even) are grouped into $d_k/2$ two-dimensional planes, and the $m$-th plane is rotated by the angle $\gamma p\omega_m$, where $\omega_m$ is a per-plane angular frequency and $\gamma > 0$ a coordinate scale, both specified below.
-Each plane uses the planar rotation matrix
-\begin{equation}\label{eq:method:rope_2d}
-  \mat{\Omega}(\phi) =
-  \begin{bmatrix}
-    \cos\phi & -\sin\phi \\
-    \sin\phi & \phantom{-}\cos\phi
-  \end{bmatrix}.
-\end{equation}
-Collecting the per-plane rotations into a single block-diagonal matrix of size $d_k \times d_k$ gives
-\begin{equation}\label{eq:method:rope_block}
-  \mat{R}(p)
-  = \diag\!\bigl(
-      \mat{\Omega}(\gamma p\omega_1),\,
-      \mat{\Omega}(\gamma p\omega_2),\,
-      \ldots,\,
-      \mat{\Omega}(\gamma p\omega_{d_k/2})
-    \bigr),
-\end{equation}
-or written out entry-wise,
-\[
-  \mat{R}(p) =
-  {\scriptsize
-  \begin{bmatrix}
-    \cos\gamma p\omega_1 & -\sin\gamma p\omega_1 & 0 & 0 & \cdots & 0 & 0 \\
-    \sin\gamma p\omega_1 & \phantom{-}\cos\gamma p\omega_1 & 0 & 0 & \cdots & 0 & 0 \\
-    0 & 0 & \cos\gamma p\omega_2 & -\sin\gamma p\omega_2 & \cdots & 0 & 0 \\
-    0 & 0 & \sin\gamma p\omega_2 & \phantom{-}\cos\gamma p\omega_2 & \cdots & 0 & 0 \\
-    \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & \cdots & \cos\gamma p\omega_{d_k/2} & -\sin\gamma p\omega_{d_k/2} \\
-    0 & 0 & 0 & 0 & \cdots & \sin\gamma p\omega_{d_k/2} & \phantom{-}\cos\gamma p\omega_{d_k/2}
-  \end{bmatrix}.}
-\]
-The angular frequencies $\omega_m = b^{-2(m-1)/d_k}$, with a fixed base $b$ (we use $b = 10^4$, following \textcite{su2024roformer}), form a geometric progression that mirrors the wavelengths of the sinusoidal encoding of \textcite{vaswani2017attention}: fast-rotating planes resolve fine coordinate differences, slow-rotating planes capture coarse ones.
-The scale $\gamma$ multiplies every frequency of the ladder uniformly and therefore sets how much relative phase one unit of coordinate difference produces.
-In the original formulation no such factor is needed, because token indices advance in steps of exactly one; our coordinates are normalised quantities in $[0,1]$ whose typical differences depend on the quantity, so $\gamma$ is treated as a hyperparameter of the attached coordinate.
-The values used for each coordinate are reported in \cref{ch:experiments}; the dependence of $\mat{R}$ on $\gamma$ is left implicit in the notation.
-Applying $\mat{R}(p)$ after the projections of \cref{eq:method:qk_proj} yields
-\begin{equation}\label{eq:method:rope_map}
-  f_q(\vect{h}_i, p_i) = \mat{R}(p_i)\,\vect{q}_i = \mat{R}(p_i)\,\mat{W}_q\vect{h}_i,
-  \qquad
-  f_k(\vect{h}_j, p_j) = \mat{R}(p_j)\,\vect{k}_j = \mat{R}(p_j)\,\mat{W}_k\vect{h}_j,
-\end{equation}
-written $\tilde{\vect{q}}_i$ and $\tilde{\vect{k}}_j$ below; without the rotation, \cref{eq:method:rope_map} reduces to the vanilla case of \cref{eq:method:attn_dot}.
+In the original construction the coordinate is the token index. Consecutive pulses in a recording are not equally spaced, so an ordinal index misrepresents \gls{toa} gaps (\cref{sec:method:data}). We attach physical coordinates instead, so that $p_j-p_i$ is a time gap or a difference of direction features.
 
-That this construction meets the design goal follows from one property of planar rotations: composing two of them subtracts their angles, $\mat{\Omega}(\phi)^{\top}\mat{\Omega}(\psi) = \mat{\Omega}(\psi - \phi)$, hence block-wise $\mat{R}(p_i)^{\top}\mat{R}(p_j) = \mat{R}(p_j - p_i)$ and
-\begin{equation}\label{eq:method:rope}
-  \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
-    = \vect{q}_i^{\top}\,\mat{R}(p_j - p_i)\,\vect{k}_j
-    = (\mat{W}_q\vect{h}_i)^{\top}\,\mat{R}(p_j - p_i)\,(\mat{W}_k\vect{h}_j),
-\end{equation}
-which is exactly the form required by \cref{eq:method:rope_goal}: each pulse is rotated by its absolute coordinate, yet the logit sees only the difference.
-Setting $\mat{R}(p) = \mat{I}$ recovers the content-only inner product of \cref{eq:method:attn_dot}.
-\Cref{fig:method:rope} illustrates this on a single plane: increasing the coordinate fans a vector around the circle at a fixed rate (left), while the phase enclosed between a rotated query and key---and hence their dot product---is set by the coordinate gap alone (right).
+Those coordinates lie in $[0,1]$, whereas token indices advance in steps of one. A scale $\gamma>0$ therefore multiplies every frequency, so plane $m$ is rotated by $\gamma p\omega_m$. Each coordinate has its own $\gamma$, reported in \cref{ch:experiments}, and the base is $b=10^4$ as in \textcite{su2024roformer}. The factor $\gamma$ is left implicit in $\mat{R}$.
 
-The encoder of \cref{sec:method:arch} uses this construction everywhere.
-The shared trunk and the mode branch apply a single coordinate (the \gls{toa}).
-The deinterleaving branch instead splits each head across two continuous functions of azimuth, as detailed below.
+The encoder of \cref{sec:method:arch} uses this construction in every attention sub-layer. The shared trunk and the mode branch rotate by the window-local \gls{toa}. The deinterleaving branch splits each head across two continuous functions of azimuth.
 
 \subsubsection*{Trunk and mode branch}
 
@@ -146,13 +69,13 @@ Every head in the shared trunk and in the mode branch rotates by the window-loca
   \tilde{\vect{k}}_n = \mat{R}(t_n)\,\vect{k}_n,
 \end{equation}
 with scale $\gamma_t$ in $\mat{R}$.
-Arrival direction is excluded: an operating mode is characterised by the intrinsic temporal pattern of the emission and must be recognised regardless of viewing geometry, so rotating these layers by direction would inject nuisance variation into an embedding that should be geometry-invariant.
+Arrival direction is excluded. An operating mode is characterized by the intrinsic temporal pattern of the emission and must be recognized regardless of viewing geometry. Rotating these layers by direction would make the mode embedding depend on that geometry.
 
 \subsubsection*{Deinterleaving branch}
 
 Every head in the deinterleaving branch rotates by direction instead.
 Azimuth is a strong cue for emitter identity, and temporal structure is already present upstream through the \gls{toa}-rotated trunk.
-Feeding the raw angle $\theta^{\mathrm{az}}_n$ into \gls{rope} would reintroduce the $0$--$2\pi$ wrap discontinuity of \cref{sec:method:data:norm}, because the relative phase of \cref{eq:method:rope} depends on the algebraic difference of the scalar coordinate.
+Feeding the raw angle $\theta^{\mathrm{az}}_n$ into \gls{rope} would reintroduce the $0$--$2\pi$ wrap of \cref{sec:method:data:norm}, because the relative phase of \cref{eq:bg:rope} depends on the algebraic difference of the scalar coordinate.
 The branch therefore replaces $\theta^{\mathrm{az}}_n$ by the two continuous features
 \begin{equation}\label{eq:method:azimuth_trig}
   \tilde{c}_n = \frac{1 + \cos\theta^{\mathrm{az}}_n}{2},
@@ -160,7 +83,7 @@ The branch therefore replaces $\theta^{\mathrm{az}}_n$ by the two continuous fea
   \tilde{s}_n = \frac{1 + \sin\theta^{\mathrm{az}}_n}{2},
 \end{equation}
 both in $[0,1]$.
-The $d_k/2$ planes of each head are split evenly into two slices of $d_k/4$ planes, in the manner of multi-axis \gls{rope} \parencite{heo2024ropevit}, so that the query (and likewise the key) decomposes as
+The $d_k/2$ planes of each head are split evenly into two slices of $d_k/4$ planes, following multi-axis \gls{rope} \parencite{heo2024ropevit}, so that the query (and likewise the key) decomposes as
 \begin{equation}\label{eq:method:rope_split}
   \vect{q}_n
   =
@@ -171,7 +94,7 @@ The $d_k/2$ planes of each head are split evenly into two slices of $d_k/4$ plan
   \qquad
   \vect{q}_n^{(c)},\, \vect{q}_n^{(s)} \in \R^{d_k/2}.
 \end{equation}
-Each half is rotated by its own single-coordinate matrix of the form \cref{eq:method:rope_block},
+Each half is rotated by its own single-coordinate matrix of the form \cref{eq:bg:rope_block},
 \begin{equation}\label{eq:method:rope_az}
   \mat{R}^{\mathrm{em}}_n
   =
@@ -193,7 +116,7 @@ The rotated query is
   \end{bmatrix},
 \end{equation}
 and likewise for the key.
-Applying \cref{eq:method:rope} slice-wise yields
+Applying \cref{eq:bg:rope} slice-wise yields
 \begin{equation}\label{eq:method:rope_az_logit}
   \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
     = \vect{q}_i^{(c)\top}\,\mat{R}^{(c)}\bigl(\tilde{c}_j - \tilde{c}_i\bigr)\,\vect{k}_j^{(c)}
@@ -203,22 +126,14 @@ Two bearings just above $0$ and just below $2\pi$ are almost the same direction,
 Their $(\tilde{c},\tilde{s})$ values are almost the same, so the relative phase in \cref{eq:method:rope_az_logit} stays small.
 An algebraic gap in $\theta^{\mathrm{az}}$ itself would not.
 
-A control that instead rotates every layer---trunk, mode branch, and deinterleaving branch---by window-local \gls{toa}, with no azimuth encoding, is evaluated in \cref{ch:experiments}.
+A control that rotates every layer of the trunk and of both branches by window-local \gls{toa}, with no azimuth encoding, is evaluated in \cref{ch:experiments}.
 That uniform layout tests whether the branch-specific allocation above is necessary, or whether a single temporal coordinate already suffices.
 
-The pairwise bias of \cref{eq:method:circ_az} and this rotary encoding are evaluated as separate alternatives to standard self-attention in \cref{ch:experiments}; they are not combined in this thesis.
-\Cref{fig:method:rope_slicing} summarises the plane allocation for the trunk/mode and deinterleaving layouts.
+\Cref{fig:method:rope_slicing} summarizes the plane allocation for the trunk/mode and deinterleaving layouts.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/rope_slicing.tex}
-  \caption{Allocation of the $d_k/2$ rotation planes of one attention head. \emph{Top:} shared trunk and mode branch---all planes rotated by the \gls{toa} $t_n$ with scale $\gamma_t$ (\cref{eq:method:rope_toa}). \emph{Bottom:} deinterleaving branch---planes split evenly between the wrap-safe features $\tilde{c}_n$ and $\tilde{s}_n$ of \cref{eq:method:azimuth_trig}, with scales $\gamma_c$ and $\gamma_s$ (\cref{eq:method:rope_az,eq:method:rope_az_logit}). Ellipsis cells indicate intermediate planes of each frequency ladder.}
+  \caption{Allocation of the $d_k/2$ rotation planes of one attention head. Top: shared trunk and mode branch, all planes rotated by the \gls{toa} $t_n$ with scale $\gamma_t$ (\cref{eq:method:rope_toa}). Bottom: deinterleaving branch, planes split evenly between $\tilde{c}_n$ and $\tilde{s}_n$ of \cref{eq:method:azimuth_trig}, with scales $\gamma_c$ and $\gamma_s$ (\cref{eq:method:rope_az,eq:method:rope_az_logit}). Ellipsis cells are intermediate planes of each frequency ladder.}
   \label{fig:method:rope_slicing}
-\end{figure}
-
-\begin{figure}[tbp]
-  \centering
-  \input{figures/method/rope_rotation.tex}
-  \caption{Geometry of \gls{rope} on one of the $d_k/2$ two-dimensional planes of a head. \emph{Left:} the projected query $\vect{q}=\mat{W}_q\vect{h}$ (dashed) is obtained exactly as in vanilla attention (\cref{eq:method:qk_proj}); \gls{rope} then applies the planar rotation $\mat{R}(p)$ of \cref{eq:method:rope_block}, adding a modest absolute phase $\gamma p\omega_m$. \emph{Right:} after both the query and the key are rotated, the enclosed angle equals the content angle $\varphi$ (dashed pair) plus the relative phase $\gamma(p_j-p_i)\omega_m$; the inner product therefore depends on the coordinate difference alone (\cref{eq:method:rope}).}
-  \label{fig:method:rope}
 \end{figure}
