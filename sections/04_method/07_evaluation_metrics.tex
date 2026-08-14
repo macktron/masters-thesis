@@ -3,7 +3,7 @@
 The methods of \cref{sec:method:loss,sec:method:arch} return per-pulse label pairs $\hat{\vect{y}}_n = (\hat{e}_n, \hat{m}_n)$ whose coordinates have to be compared with the ground-truth pairs $\vect{y}_n$ of \cref{eq:method:label_pair}.
 Both labellings partition the same index set $\{1,\ldots,N\}$, instantiated by either the emitter pair $(e_n,\hat{e}_n)$ within a window or the mode pair $(m_n,\hat{m}_n)$ across windows, as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}.
 The integers used to name each cluster are arbitrary and may differ between the two labellings, so every metric reported here is invariant to relabelling: only the induced partitions matter, not the symbols themselves.
-This is essential because, by construction, the clustering operator of \cref{eq:method:cluster_decoding} produces window-local integers that bear no fixed relation to the ground-truth catalogue.
+That requirement is built into the method: the decoder of \cref{eq:method:cluster_decoding} is a clustering step, not a classifier, so it only groups pulses that belong together and does not assign names from a fixed label catalogue.
 
 All metrics derive from the contingency table
 \[

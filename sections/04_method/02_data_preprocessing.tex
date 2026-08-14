@@ -45,7 +45,7 @@ whose components lie in $[-1,1]$ and are mapped to $[0,1]$ by the fixed affine r
 Neither map depends on the training corpus.
 
 The Cartesian representation avoids the wrap-around discontinuity of a rescaled angle, which places azimuths near $0$ and $2\pi$ at opposite ends of the feature range although they describe nearly the same direction.
-The attention variants of \cref{sec:method:attention} reuse the azimuth $\theta^{\mathrm{az}}_n$ itself: the pairwise bias applies the circular distance of \cref{eq:method:circ_az}, while the rotary encoding on the deinterleaving branch uses the scaled angle.
+Feeding incidence as continuous direction components therefore frees the encoder from having to learn that symmetry from the input features alone.
 
 Corpus-wide standardization of frequency, pulse width, and amplitude preserves absolute ranges that may distinguish operating modes across recordings.
 Absolute \gls{toa} is left in physical units at this stage and is min--max mapped only after windowing (\cref{eq:method:minmax}).
