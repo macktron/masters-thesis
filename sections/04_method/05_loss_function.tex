@@ -44,43 +44,4 @@ Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses
 \end{equation}
 so the two branches carry equal weight.
 Tuning $\lambda_{\mathrm{md}}$ could improve the trade-off between the tasks, but is not evaluated in this thesis.
-
-\subsection*{Probabilistic interpretation}
-
-The kernel \cref{eq:method:supcon} admits a Gibbs--Boltzmann reading that clarifies the role of every factor.
-For each pulse $i \in \mathcal{B}^{+}$, define the categorical distribution over its candidates
-\begin{equation}\label{eq:method:boltzmann}
-  P_{\bm{\theta}}(a \mid i) \;=\; \frac{\exp(s_{ia}/\tau)}{Z_i},
-  \qquad
-  Z_i \;=\; \sum_{a' \in A(i)} \exp(s_{ia'}/\tau),
-  \qquad a \in A(i),
-\end{equation}
-which is exactly the Boltzmann distribution with energy $-s_{ia}$ and temperature $\tau$ on the configuration space $A(i)$.
-Substituting \cref{eq:method:boltzmann} into \cref{eq:method:supcon} yields the per-pulse cross-entropy between the empirical positive distribution (uniform on $P(i)$) and the model $P_{\bm{\theta}}(\cdot \mid i)$,
-\begin{equation}\label{eq:method:supcon_logp}
-  \Loss_{\mathrm{SC}}
-  \;=\;
-  -\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert}
-  \sum_{p \in P(i)} \log P_{\bm{\theta}}(p \mid i),
-\end{equation}
-that is, minus the average log-evidence the encoder assigns to the positives, exactly as a maximum-likelihood estimator would treat $P(i)$ as a sample of observations drawn from the latent positive class.
-
-Applying $\log(x/y) = \log x - \log y$ to \cref{eq:method:supcon} separates the attractive and repulsive contributions explicitly:
-\begin{equation}\label{eq:method:supcon_split}
-  \Loss_{\mathrm{SC}}
-  \;=\;
-  \underbrace{\sum_{i \in \mathcal{B}^{+}} \log Z_i}_{\text{log-partition (repulsion)}}
-  \;-\;
-  \underbrace{\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \frac{s_{ip}}{\tau}}_{\text{mean positive similarity (attraction)}}.
-\end{equation}
-The first term is monotone in similarities to every candidate, with $\partial \log Z_i / \partial s_{ia} = P_{\bm{\theta}}(a\mid i)/\tau$, so the gradient automatically concentrates on the hardest negatives---those whose Boltzmann weight under \cref{eq:method:boltzmann} is largest despite carrying a different label.
-The second term rewards alignment of each pulse with its positives, with each positive contributing $1/(\tau\lvert P(i)\rvert)$ to the gradient.
-
-The prefactor $1/\lvert P(i)\rvert$ turns the inner sum of log-probabilities into an arithmetic mean, equivalently into the log of a geometric mean,
-\begin{equation}\label{eq:method:supcon_geomean}
-  -\frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \log P_{\bm{\theta}}(p \mid i)
-  \;=\;
-  -\log\!\left(\,\prod_{p \in P(i)} P_{\bm{\theta}}(p \mid i)\right)^{\!1/\lvert P(i)\rvert}.
-\end{equation}
-Without the prefactor, the inner sum equals the log-likelihood of $\lvert P(i)\rvert$ conditionally independent observations of the latent positive class, and the loss would scale extensively with the number of available positives.
-Dividing by $\lvert P(i)\rvert$ replaces this product by its geometric mean, so a pulse's contribution becomes intensive in the size of its positive set; this is what allows the same kernel to remain well-behaved across the two branches, where $\lvert P(i)\rvert$ ranges from a handful (emitter contrasts inside one window) to many hundreds (mode contrasts pooled over the batch).
+The factor $1/\lvert P(i)\rvert$ in \cref{eq:method:supcon} keeps each pulse's contribution intensive in its positive-set size, which matters because emitter positives are usually few while mode positives can be many; a Gibbs--Boltzmann reading of the same kernel is given in \cref{app:supcon}.

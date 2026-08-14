@@ -1,0 +1,42 @@
+\chapter{Probabilistic Reading of the Contrastive Loss}\label{app:supcon}
+
+This appendix expands the supervised contrastive kernel of \cref{eq:method:supcon}.
+The main text states the loss used in training; the derivation below is optional background.
+
+For each pulse $i \in \mathcal{B}^{+}$, define the categorical distribution over its candidates
+\begin{equation}\label{eq:method:boltzmann}
+  P_{\bm{\theta}}(a \mid i) \;=\; \frac{\exp(s_{ia}/\tau)}{Z_i},
+  \qquad
+  Z_i \;=\; \sum_{a' \in A(i)} \exp(s_{ia'}/\tau),
+  \qquad a \in A(i),
+\end{equation}
+which is the Boltzmann distribution with energy $-s_{ia}$ and temperature $\tau$ on $A(i)$.
+Substituting \cref{eq:method:boltzmann} into \cref{eq:method:supcon} yields the per-pulse cross-entropy between the empirical positive distribution (uniform on $P(i)$) and the model $P_{\bm{\theta}}(\cdot \mid i)$,
+\begin{equation}\label{eq:method:supcon_logp}
+  \Loss_{\mathrm{SC}}
+  \;=\;
+  -\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert}
+  \sum_{p \in P(i)} \log P_{\bm{\theta}}(p \mid i).
+\end{equation}
+That is minus the average log-evidence assigned to the positives, as if $P(i)$ were observations from a latent positive class.
+
+Applying $\log(x/y) = \log x - \log y$ to \cref{eq:method:supcon} separates attraction and repulsion:
+\begin{equation}\label{eq:method:supcon_split}
+  \Loss_{\mathrm{SC}}
+  \;=\;
+  \underbrace{\sum_{i \in \mathcal{B}^{+}} \log Z_i}_{\text{log-partition (repulsion)}}
+  \;-\;
+  \underbrace{\sum_{i \in \mathcal{B}^{+}} \frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \frac{s_{ip}}{\tau}}_{\text{mean positive similarity (attraction)}}.
+\end{equation}
+The first term grows with similarity to every candidate; its gradient $\partial \log Z_i / \partial s_{ia} = P_{\bm{\theta}}(a\mid i)/\tau$ concentrates on hard negatives, i.e.\ candidates with large Boltzmann weight under \cref{eq:method:boltzmann} despite a different label.
+The second term rewards alignment with the positives, each contributing $1/(\tau\lvert P(i)\rvert)$ to the gradient.
+
+The prefactor $1/\lvert P(i)\rvert$ turns the inner sum into an arithmetic mean, or equivalently the log of a geometric mean,
+\begin{equation}\label{eq:method:supcon_geomean}
+  -\frac{1}{\lvert P(i)\rvert} \sum_{p \in P(i)} \log P_{\bm{\theta}}(p \mid i)
+  \;=\;
+  -\log\!\left(\,\prod_{p \in P(i)} P_{\bm{\theta}}(p \mid i)\right)^{\!1/\lvert P(i)\rvert}.
+\end{equation}
+Without it, the inner sum would be the log-likelihood of $\lvert P(i)\rvert$ independent positive observations and would scale with the size of $P(i)$.
+Dividing by $\lvert P(i)\rvert$ makes each pulse's contribution intensive in its positive-set size.
+That is why the same kernel stays well-behaved on both branches, where $\lvert P(i)\rvert$ ranges from a few emitter matches inside one window to many hundreds of mode matches across the batch.
