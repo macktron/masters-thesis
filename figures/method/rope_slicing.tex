@@ -1,0 +1,69 @@
+% =====================================================================
+% Allocation of RoPE rotation planes.
+% Top: trunk/mode --- all planes by TOA.
+% Bottom: deinterleaving --- even split cos(theta^az) / sin(theta^az).
+% Loaded from sections/04_method/04_attention_variants.tex via \input.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    plane/.style={draw=black!55, thin, minimum width=19.5mm, minimum height=8mm,
+                  inner sep=1pt, outer sep=0pt, align=center},
+    toaplane/.style={plane, fill=blue!18},
+    cosplane/.style={plane, fill=teal!22},
+    sinplane/.style={plane, fill=orange!28},
+    rowlabel/.style={font=\footnotesize, anchor=east, align=right},
+    slicebrace/.style={decorate, decoration={brace, mirror, amplitude=4pt}, thick},
+    bracelabel/.style={font=\footnotesize, anchor=north},
+  ]
+
+  \def\W{19.5mm}
+  \def\NP{6}
+
+  % =================== TOP STRIP: trunk and mode branch =================
+  \node[rowlabel] at (-2mm, 0) {trunk and\\mode branch};
+  \foreach \m in {1,...,\NP} {
+    \node[toaplane] (t\m) at ({(\m-0.5)*\W}, 0) {};
+  }
+  \node[font=\scriptsize] at (t1)
+    {\scalebox{0.92}{$\Omega(\gamma_t t_n\omega_1)$}};
+  \node[font=\scriptsize] at (t2) {$\cdots$};
+  \node[font=\scriptsize] at (t3) {$\cdots$};
+  \node[font=\scriptsize] at (t4) {$\cdots$};
+  \node[font=\scriptsize] at (t5) {$\cdots$};
+  \node[font=\scriptsize] at (t6)
+    {\scalebox{0.88}{$\Omega(\gamma_t t_n\omega_{d_k/2})$}};
+
+  \draw[slicebrace] (0, -4.5mm) -- ({\NP*\W}, -4.5mm);
+  \node[bracelabel] at ({\NP*\W/2}, -7mm)
+    {all $d_k/2$ planes: coordinate $t_n$, scale $\gamma_t$};
+
+  % ============== BOTTOM STRIP: deinterleaving branch ====================
+  \begin{scope}[yshift=-26mm]
+    \node[rowlabel] at (-2mm, 0) {deinterleaving\\branch};
+    \foreach \m in {1,...,3} {
+      \node[cosplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
+    }
+    \foreach \m in {4,...,6} {
+      \node[sinplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
+    }
+    \node[font=\scriptsize] at (b1)
+      {\scalebox{0.78}{$\Omega(\gamma_{c}\tilde{c}_n\omega_1)$}};
+    \node[font=\scriptsize] at (b2) {$\cdots$};
+    \node[font=\scriptsize] at (b3)
+      {\scalebox{0.78}{$\Omega(\gamma_{c}\tilde{c}_n\omega_{d_k/4})$}};
+    \node[font=\scriptsize] at (b4)
+      {\scalebox{0.78}{$\Omega(\gamma_{s}\tilde{s}_n\omega_1)$}};
+    \node[font=\scriptsize] at (b5) {$\cdots$};
+    \node[font=\scriptsize] at (b6)
+      {\scalebox{0.78}{$\Omega(\gamma_{s}\tilde{s}_n\omega_{d_k/4})$}};
+
+    \draw[slicebrace] (0, -4.5mm) -- ({3*\W}, -4.5mm);
+    \node[bracelabel] at ({1.5*\W}, -7mm)
+      {$d_k/4$ planes: $\tilde{c}_n=\tfrac{1+\cos\theta^{\mathrm{az}}_n}{2}$};
+
+    \draw[slicebrace] ({3*\W}, -4.5mm) -- ({6*\W}, -4.5mm);
+    \node[bracelabel] at ({4.5*\W}, -7mm)
+      {$d_k/4$ planes: $\tilde{s}_n=\tfrac{1+\sin\theta^{\mathrm{az}}_n}{2}$};
+  \end{scope}
+
+\end{tikzpicture}
