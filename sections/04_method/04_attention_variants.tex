@@ -1,10 +1,8 @@
 \section{Attention Variants}\label{sec:method:attention}
 
 The encoder of \cref{sec:method:arch} uses standard self-attention, which treats a window as an unordered set of tokens and lets every pulse attend to every other pulse purely through learned query--key compatibility.
-The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} entry of each \gls{pdw} but also the \gls{aoa}, in our case converted to euclidian unit direction coordinates x y and z.
+The only ordering or physical-relationship cue available to it is whatever the input features themselves carry, in particular the \gls{toa} and the \gls{aoa} converted to Euclidean unit direction components $(u^{x}_n,u^{y}_n,u^{z}_n)$ as in \cref{eq:method:aoa_cart}.
 A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, or have a similar pulse width are far more likely to originate from the same emitter or mode than an arbitrary pair.
-
-
 This section describes two variants of the attention mechanism that make such structure explicit. Each is evaluated as a drop-in replacement for the \gls{mha} sub-layers of \cref{sec:method:arch}; their relative merit is reported in \cref{ch:experiments}.
 
 Throughout, we write the attention logits of a single head over a window of $L$ pulses as
