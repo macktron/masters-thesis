@@ -1,26 +1,32 @@
 \section{Clustering Methods}\label{sec:bg:clustering}
 
 Clustering partitions a finite set of points \(\{\vect{z}_i\}_{i=1}^{N} \subset \R^{d}\) into groups so that points inside a group are more similar to one another than to points in other groups.
-In this thesis, the points are pulse embeddings and the groups are either emitters within a window or operating modes; the clustering operator is applied only at inference, after the encoder has been trained (\cref{sec:method:arch}).
-Classical algorithms differ mainly in how similarity is defined, whether the number of clusters must be known in advance, and how they treat outliers.
+In this thesis the points are pulse embeddings and the groups are emitters within a window or operating modes.
+The clustering step runs only at inference, after the encoder has been trained (\cref{sec:method:arch}).
+Classical algorithms differ in how similarity is defined, whether the number of clusters must be known in advance, and how they treat outliers.
 
 Centroid-based methods such as \(k\)-means assign every point to the nearest of \(k\) means and update those means until the partition stabilizes.
 They are fast and well understood, but they assume roughly spherical, equally scaled clusters, require a prescribed \(k\), and force every point into some cluster.
-Mixture models such as a \gls{gmm} soften the assignment into soft responsibilities under a parametric density, yet they still typically fix the number of components and remain sensitive to initialization and to elongated or overlapping structure.
-When the number of concurrent emitters or modes is unknown and the embedding space may contain noise or irregular densities, density-based methods are a more natural fit.
+Mixture models such as a \gls{gmm} replace the hard assignment with soft responsibilities under a parametric density.
+They still usually fix the number of components, and they remain sensitive to initialization and to elongated or overlapping structure.
+When the number of concurrent emitters or modes is unknown and the embedding space may contain noise or irregular densities, density-based methods fit better.
 
 \subsection*{\Gls{dbscan}}
 
-\Gls{dbscan} recovers clusters from local density rather than from a fixed catalogue of centres \parencite{ester1996density}.
+\Gls{dbscan} recovers clusters from local density rather than from a fixed set of centres \parencite{ester1996density}.
 Two hyperparameters define the density criterion: a neighbourhood radius \(\varepsilon > 0\) and a minimum neighbourhood size \(\mathrm{minPts} \in \N\).
-A point is a \emph{core} point if at least \(\mathrm{minPts}\) points (including itself) lie inside its Euclidean ball of radius \(\varepsilon\); points that are not cores but fall inside some core's ball are \emph{border} points; the remainder are labelled \emph{noise}.
-Clusters grow by connecting core points that mutually fall in each other's \(\varepsilon\)-neighbourhoods and attaching their border points, so the number of clusters is an output of the run rather than an input.
+A point is a core point if at least \(\mathrm{minPts}\) points (including itself) lie inside its Euclidean ball of radius \(\varepsilon\).
+Points that are not cores but fall inside some core's ball are border points.
+The remainder are labelled noise.
+Clusters grow by connecting core points that fall in each other's \(\varepsilon\)-neighbourhoods and attaching their border points.
+The number of clusters is then an output of the run, not an input.
 
-This behaviour matches the inference setting of \cref{eq:method:cluster_decoding}: within each window the number of active emitters (and, separately, of modes) is not known a priori, and sparse outliers can be left unassigned instead of distorting the partition.
-The main practical cost is sensitivity to \(\varepsilon\): a single global radius assumes that all clusters share a comparable density scale.
+This matches the inference setting of \cref{eq:method:cluster_decoding}: within each window the number of active emitters (and, separately, of modes) is not known in advance, and sparse outliers can be left unassigned instead of distorting the partition.
+The main practical cost is sensitivity to \(\varepsilon\).
+A single global radius assumes that all clusters share a comparable density scale.
 The method chapter uses \gls{dbscan} with frozen \((\varepsilon,\mathrm{minPts})\) on each branch embedding.
 
 Applied to raw high-dimensional features, density thresholds degrade because neighbourhoods become less informative as \(d\) grows.
-Deep clustering therefore first learns a lower-dimensional embedding in which the desired partitions are more linearly or density-separable, then runs a classical operator such as \(k\)-means or \gls{dbscan} in that space \parencite{xie2016unsupervised}.
+Deep clustering therefore first learns a lower-dimensional embedding in which the desired partitions are easier to separate, then runs a classical operator such as \(k\)-means or \gls{dbscan} in that space \parencite{xie2016unsupervised}.
 How a recovered partition is scored against a reference is defined in \cref{sec:bg:cluster_metrics}.
 \Cref{sec:bg:dl} reviews the representation-learning side of that pipeline.

@@ -1,15 +1,22 @@
 \section{Background and Motivation}\label{sec:intro:background}
 
-Radar and communications systems share a limited electromagnetic spectrum.
-Passive \gls{esm} receivers listen without transmitting and record time-ordered \glspl{pdw} that feed \gls{elint} analysis: detecting radars, grouping pulses by emitter, and recognizing operating modes \parencite{wiley2006elint,skolnik2008radar}.
+An electromagnetic wave carries electric and magnetic fields through space at a known speed.
+A conducting body in its path scatters some of that energy back toward the source.
+In 1904 Christian H\"ulsmeyer used that return to detect ships, decades before the method was named \gls{radar} and used to measure range \parencite{skolnik2001introduction}.
+A transmitter that illuminates a scene also announces itself to anyone in range if they can receive the signal.
+
+Passive \gls{esm} receivers do not transmit.
+They record a time-ordered stream of \glspl{pdw} and feed \gls{elint} analysis: detecting radars, grouping pulses by emitter, and recognizing operating modes \parencite{wiley2006elint,skolnik2008radar}.
+The listener now faces a mixture, not a single echo.
+Radar and communications share a limited spectrum, and several emitters occupy it at once.
 
 Modern radars vary carrier frequency, pulse width, amplitude, and \gls{pri} from burst to burst.
-That agility weakens simple fingerprints and makes classical parsers built for stable pulse trains less reliable.
-The same emitter also switches \emph{modes}: recurrent control policies that map a task such as volume search or track to a characteristic pulse regime.
-Knowing the mode constrains how the waveform may evolve and can separate emitters that look similar at the type level.
+Fingerprints built on a stable pulse train then weaken, and parsers written for regular trains become less reliable.
+The same emitter also switches mode, a recurrent control policy that maps a task such as volume search or track to a characteristic pulse regime.
+Knowing the mode constrains how the waveform may evolve, and it can separate emitters that look similar at the type level.
 
-The input to this thesis is a stream of \glspl{pdw}.
-Several emitters are interleaved in time, so the encoder must use context across the window.
-The supervision available in labelled training data is asymmetric: emitter identifiers are unique only within a recording, while operating modes come from a shared catalogue.
+Classical pipelines still parse these streams with rules written for regular trains.
+When several agile emitters occupy the same window, the parser has to read context rather than pulses in isolation.
+The supervision available in labelled training data is asymmetric: emitter identifiers are unique only within a recording, while operating modes come from a catalogue shared across recordings.
 
 This thesis asks whether a transformer encoder, trained with clustering objectives, can map such streams to embeddings in which emitters and modes both form separable groups.
