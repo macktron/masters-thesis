@@ -71,7 +71,6 @@ Any trailing segment shorter than $L$ is dropped.
 
 During training, choosing $\delta<L$ produces overlapping windows and therefore more training samples.
 A smaller stride improves coverage of sparse emitters and modes and reduces sensitivity to window boundaries, but it also repeats more of the same \glspl{pdw}, increasing computation and correlation between samples.
-The scenario-aware sampler in \cref{sec:method:training:sampler} allows the contrastive loss to use these repeated views.
 Advancing the window by a small stride resembles streaming inference because outputs can be refreshed as new pulses arrive, although it is not online learning because the model parameters remain fixed.
 
 Validation and test use $\delta=L$, yielding non-overlapping windows that are processed entirely offline.

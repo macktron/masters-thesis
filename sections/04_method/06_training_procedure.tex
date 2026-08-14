@@ -8,16 +8,18 @@ settings are listed in \cref{tab:exp:hparams_main}.
 \subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}
 
 Mini-batches are not formed by uniform shuffling of the pooled windows.
-Overlapping windows from \cref{sec:method:data:window} must co-occur
-in a batch to act as shifted views under the contrastive objective, and
-emitter identifiers are recording-local
-(\cref{sec:method:formulation}), so cross-window emitter positives
-exist only within a scenario.
-Each mini-batch is therefore assembled from a small number of
-scenarios, each contributing several (possibly overlapping) windows.
-Within a scenario group the emitter branch obtains cross-window
-positives; across groups the mode branch obtains batch-wide
-negatives and cross-scenario mode positives as required by
+Emitter identifiers are recording-local
+(\cref{sec:method:formulation}), so two windows drawn from different
+scenarios never share an emitter positive even when both contain
+pulses from physically similar sources.
+Uniform mixing across the corpus would therefore leave the emitter
+branch with positives only inside each individual window, which is
+often too few for a stable contrastive signal.
+Each mini-batch is instead drawn from a single scenario, with several
+windows taken from that scenario so that the same emitter can appear
+across windows and supply additional positives.
+Mode labels remain globally comparable, so the mode branch still sees
+batch-wide positives and negatives under
 \cref{sec:method:loss}.
-The number of groups and windows per group, together with any
-early-stopping policy, are recorded in \cref{tab:exp:hparams_main}.
+The number of windows per batch, together with any early-stopping
+policy, is recorded in \cref{tab:exp:hparams_main}.
