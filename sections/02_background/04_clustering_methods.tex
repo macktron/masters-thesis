@@ -22,4 +22,5 @@ The method chapter uses \gls{dbscan} with frozen \((\varepsilon,\mathrm{minPts})
 
 Applied to raw high-dimensional features, density thresholds degrade because neighbourhoods become less informative as \(d\) grows.
 Deep clustering therefore first learns a lower-dimensional embedding in which the desired partitions are more linearly or density-separable, then runs a classical operator such as \(k\)-means or \gls{dbscan} in that space \parencite{xie2016unsupervised}.
-\Cref{sec:bg:dl} reviews the representation-learning side of that pipeline; the present section supplies only the clustering primitives consumed at inference.
+How a recovered partition is scored against a reference is defined in \cref{sec:bg:cluster_metrics}.
+\Cref{sec:bg:dl} reviews the representation-learning side of that pipeline.

@@ -15,7 +15,7 @@ The result at this stage is still mixed: pulses from several emitters, possibly 
 
 \subsection{Deinterleaving: grouping pulses by emitter}\label{sec:bg:deinterleaving_evolution}
 
-\emph{Deinterleaving} (also called sorting) assigns each pulse to a physical emitter.
+Deinterleaving (also called sorting) assigns each pulse to a physical emitter.
 Its output is a set of pulse trains: one hypothesized sequence per emitter, each stripped of the others' pulses \parencite{wiley2006elint}.
 This recovers the emitter grouping of \cref{sec:bg:emitters}, not a name from a catalogue.
 
@@ -31,9 +31,9 @@ Classical architectures treat train formation as an early, discrete step: later 
 
 \subsection{Mode analysis: grouping pulses by operating mode}
 
-\emph{Mode analysis} asks a different question of the same pulses: which transmit schedule is active.
-In the classical chain this step runs \emph{after} deinterleaving, on each recovered train rather than on the mixture \parencite{wiley2006elint}.
-The usual mechanism is a \emph{mode library}: nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, against which the train is matched.
+Mode analysis asks a different question of the same pulses: which transmit schedule is active.
+In the classical chain this step runs after deinterleaving, on each recovered train rather than on the mixture \parencite{wiley2006elint}.
+The usual mechanism is a mode library: nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, against which the train is matched.
 
 The two tasks are not interchangeable.
 A correctly deinterleaved train can still contain several mode segments, because one emitter switches modes as its task changes.

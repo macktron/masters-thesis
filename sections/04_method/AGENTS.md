@@ -16,12 +16,12 @@ Describe the proposed approach in enough detail that another researcher could re
 - `04_attention_variants.tex` — Attention variants: pairwise physical bias on TOA and circular azimuth distance (`\subsection` `sec:method:attention:bias`); RoPE with TOA on trunk/mode and wrap-safe $(\cos,\sin)$ azimuth split on the deinterleaving branch (`\subsection` `sec:method:attention:rope`). These two headings are numbered so they appear in the table of contents; other method-internal headings stay `\subsection*`.
 - `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the total objective.
 - `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
-- `07_evaluation_metrics.tex` — Define AMI, ARI, and V-measure (with homogeneity/completeness). Use the `\AMI`, `\ARI` macros. Explain *why* each metric is used and what it can and cannot tell us.
+- `07_evaluation_metrics.tex` — How this method is scored: per-window, per-branch partition comparison against simulator labels; relabelling invariance because cluster IDs are window-local. Cite definitions in `sec:bg:cluster_metrics`. State why ARI, AMI, and homogeneity/completeness are reported here. No derivations.
 - `08_baselines.tex` — Matched dual-branch single-task controls (Vanilla with $\Loss_{\mathrm{em}}$ only or $\Loss_{\mathrm{md}}$ only) and optional classical DBSCAN on fixed window features. Do not describe a flat single-stack encoder unless that run exists.
 
 ## Heading / TOC policy
 
-Numbered `\subsection` appears in the table of contents; `\subsection*` does not. Keep the TOC unbloated: number only independently navigable topics (per-feature scaling, windowing, physical attention bias, rotary positional encoding). Architecture blocks, loss terms, sampler details, and metric derivations stay `\subsection*`.
+Numbered `\subsection` appears in the table of contents; `\subsection*` does not. Keep the TOC unbloated: number only independently navigable topics (per-feature scaling, windowing, physical attention bias, rotary positional encoding). Architecture blocks, loss terms, and sampler details stay `\subsection*`. Metric formulae live in `sec:bg:cluster_metrics`, not here.
 
 ## Style notes
 

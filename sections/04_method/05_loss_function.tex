@@ -1,6 +1,6 @@
 \section{Loss Function}\label{sec:method:loss}
 
-The training objective is a sum of two \emph{supervised contrastive} \parencite{khosla2020supcon} terms with the same functional form, both aggregated over the whole mini-batch.
+The training objective is a sum of two supervised contrastive \parencite{khosla2020supcon} terms with the same functional form, both aggregated over the whole mini-batch.
 The two terms differ only in which label drives the positive set: an emitter identifier on the emitter branch, and the global mode label of \cref{sec:method:formulation} on the mode branch.
 Both branches use a contrastive loss rather than a closed-catalogue softmax, so training pushes pulses with the same label together in embedding space instead of scoring a fixed set of class logits.
 That encourages the encoder to learn general similarity structure among pulses.

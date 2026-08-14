@@ -1,0 +1,108 @@
+\section{Cluster Agreement Metrics}\label{sec:bg:cluster_metrics}
+
+A clustering algorithm returns a labelling of $N$ points.
+The integers used as cluster names are arbitrary: two labellings that group the same points together are the same partition.
+External evaluation therefore compares a predicted partition $\hat{Y}$ with a reference partition $Y$ in a way that does not depend on those names.
+
+All scores below are computed from the contingency table
+\begin{equation}\label{eq:bg:contingency}
+  n_{ij}=\sum_{n=1}^{N}\indicator[y_n=i,\,\hat{y}_n=j],
+\end{equation}
+with row sums $a_i=\sum_j n_{ij}$ and column sums $b_j=\sum_i n_{ij}$ equal to the sizes of the reference and predicted clusters.
+
+\subsection*{Adjusted Rand index}
+
+Each unordered pair of points is either together or apart in a given partition.
+A cluster of size $a_i$ contributes $\binom{a_i}{2}$ co-clustered pairs, so
+\begin{equation}\label{eq:bg:pair_counts}
+  S_{Y\hat{Y}}=\sum_{i,j}\binom{n_{ij}}{2},\qquad
+  S_Y=\sum_i\binom{a_i}{2},\qquad
+  S_{\hat{Y}}=\sum_j\binom{b_j}{2}
+\end{equation}
+count the pairs that share a cluster in both labellings, in $Y$, and in $\hat{Y}$, out of $\binom{N}{2}$ pairs in total.
+
+The Rand index is the fraction of pairs on which $Y$ and $\hat{Y}$ agree: together in both, or apart in both \parencite{hubert1985comparing},
+\begin{equation}\label{eq:bg:rand}
+  R(Y,\hat{Y})
+  =
+  1 - \frac{S_Y + S_{\hat{Y}} - 2\,S_{Y\hat{Y}}}{\binom{N}{2}}
+  \in[0,1].
+\end{equation}
+The numerator $S_Y+S_{\hat{Y}}-2\,S_{Y\hat{Y}}$ is the number of pairs that are together in one partition and apart in the other.
+
+When most points lie in different clusters, the bulk of pairs are apart in both labellings by chance, and $R$ stays close to one even for weak agreement.
+The adjusted Rand index $\ARI$ subtracts the expected overlap under a permutation of labels that keeps the cluster sizes $\{a_i\}$ and $\{b_j\}$ fixed,
+\begin{equation}\label{eq:bg:ari_expected}
+  \E[S_{Y\hat{Y}}]
+  =
+  \frac{S_Y\,S_{\hat{Y}}}{\binom{N}{2}},
+\end{equation}
+and rescales so that exact recovery scores one \parencite{hubert1985comparing}:
+\begin{equation}\label{eq:bg:ari}
+  \ARI
+  =
+  \frac{S_{Y\hat{Y}}-\E[S_{Y\hat{Y}}]}{\tfrac{1}{2}\bigl(S_Y+S_{\hat{Y}}\bigr)-\E[S_{Y\hat{Y}}]},
+  \qquad
+  \ARI\le 1.
+\end{equation}
+Hence $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, and negative values indicate worse-than-random alignment.
+
+\subsection*{Adjusted mutual information}
+
+Mutual information asks how much knowing one labelling reduces uncertainty about the other \parencite{vinh2010information}.
+With the marginal entropies
+\begin{equation}\label{eq:bg:entropy_marginals}
+  H(Y)=-\sum_{i:\,a_i>0}\frac{a_i}{N}\log\frac{a_i}{N},
+  \qquad
+  H(\hat{Y})=-\sum_{j:\,b_j>0}\frac{b_j}{N}\log\frac{b_j}{N},
+\end{equation}
+the empirical mutual information is
+\begin{equation}\label{eq:bg:mi}
+  \mathrm{MI}(Y;\hat{Y})
+  =
+  \sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\,
+  \log\frac{N\,n_{ij}}{a_i b_j},
+\end{equation}
+with the convention $0\log 0=0$.
+It is zero when the labellings are independent, and equals either marginal entropy when one labelling determines the other.
+
+The expectation of $\mathrm{MI}$ under the same permutation null grows with the number of clusters.
+The adjusted mutual information $\AMI$ subtracts that baseline and rescales by the average of the marginal entropies \parencite{vinh2010information},
+\begin{equation}\label{eq:bg:ami}
+  \AMI(Y;\hat{Y})
+  =
+  \frac{\mathrm{MI}(Y;\hat{Y})-\E[\mathrm{MI}]}{\tfrac{1}{2}\bigl(H(Y)+H(\hat{Y})\bigr)-\E[\mathrm{MI}]},
+\end{equation}
+when the denominator is positive; otherwise $\AMI\equiv 0$.
+The range matches $\ARI$.
+$\AMI$ weights clusters more evenly than pair counting, so large groups dominate it less.
+
+\subsection*{Homogeneity, completeness, and V-measure}
+
+Homogeneity is high when each predicted cluster contains points from only one reference class.
+Completeness is high when each reference class is collected into a single predicted cluster.
+Splitting a class across many predicted clusters preserves homogeneity and lowers completeness; merging several classes into one predicted cluster does the reverse.
+
+With the conditional entropies
+\begin{equation}\label{eq:bg:cond_ent}
+  H(Y\mid \hat{Y})=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{b_j},
+  \qquad
+  H(\hat{Y}\mid Y)=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{a_i},
+\end{equation}
+the two quantities are \parencite{rosenberg2007v}
+\begin{equation}\label{eq:bg:vmeasure_hc}
+  h = 1-\frac{H(Y\mid \hat{Y})}{H(Y)},
+  \qquad
+  c = 1-\frac{H(\hat{Y}\mid Y)}{H(\hat{Y})},
+\end{equation}
+with $h=1$ if $H(Y)=0$ and $c=1$ if $H(\hat{Y})=0$.
+The V-measure is their harmonic mean,
+\begin{equation}\label{eq:bg:vmeasure}
+  \mathrm{V}(Y,\hat{Y})=\frac{2hc}{h+c},
+  \qquad h+c>0,
+\end{equation}
+and $\mathrm{V}=0$ if $h=c=0$.
+The harmonic mean is small if either factor is small, so a high V-measure requires both.
+
+The three families return one at exact recovery and about zero at chance.
+Between those extremes, $\ARI$ follows pair agreement, $\AMI$ follows shared information, and homogeneity versus completeness separates splitting from merging.
