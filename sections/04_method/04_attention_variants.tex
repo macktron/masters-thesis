@@ -66,7 +66,7 @@ Every head in the shared trunk and in the mode branch rotates by the window-loca
 \begin{equation}\label{eq:method:rope_toa}
   \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
   =
-  \bigl\langle \vect{q}_i,\, \mat{R}(t_j - t_i)\,\vect{k}_j \bigr\rangle.
+  \vect{q}_i^{\top}\,\mat{R}(t_j - t_i)\,\vect{k}_j.
 \end{equation}
 Arrival direction is excluded. An operating mode is characterized by the intrinsic temporal pattern of the emission and must be recognized regardless of viewing geometry. Rotating these layers by direction would make the mode embedding depend on that geometry.
 
@@ -125,15 +125,13 @@ Because the slices occupy disjoint coordinates, the head inner product is the su
   \nonumber
   \\
   &=
-  \bigl\langle
-    \vect{q}_i^{(c)},\,
-    \mat{R}^{(c)}\bigl(\tilde{c}_j - \tilde{c}_i\bigr)\,\vect{k}_j^{(c)}
-  \bigr\rangle
+  \vect{q}_i^{(c)\top}\,
+  \mat{R}^{(c)}\bigl(\tilde{c}_j - \tilde{c}_i\bigr)\,
+  \vect{k}_j^{(c)}
   +
-  \bigl\langle
-    \vect{q}_i^{(s)},\,
-    \mat{R}^{(s)}\bigl(\tilde{s}_j - \tilde{s}_i\bigr)\,\vect{k}_j^{(s)}
-  \bigr\rangle.
+  \vect{q}_i^{(s)\top}\,
+  \mat{R}^{(s)}\bigl(\tilde{s}_j - \tilde{s}_i\bigr)\,
+  \vect{k}_j^{(s)}.
   \label{eq:method:rope_az_logit}
 \end{align}
 Two bearings just above $0$ and just below $2\pi$ are almost the same direction, but their raw angles differ by nearly a full turn.
