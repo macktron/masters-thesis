@@ -46,7 +46,7 @@ Because the coefficients are learned independently in each part of the network, 
 The deinterleaving branch is expected to rely more on azimuth, since pulses from one emitter usually arrive from a nearly constant bearing.
 The shared trunk and the mode branch should instead suppress that cue, because an operating mode must be recognised independently of viewing geometry.
 Whether this allocation emerges is examined in \cref{ch:experiments}.
-The construction mirrors the relative-position and content-independent biases used in language and graph transformers \parencite{shaw2018relative,ying2021graphormer}, specialised here to pulse parameters rather than token indices.
+The bias follows the same idea as additive pairwise attention biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances.
 
 \subsection*{Rotary positional encoding}
 
