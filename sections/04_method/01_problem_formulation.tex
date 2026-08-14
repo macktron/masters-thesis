@@ -51,15 +51,15 @@ Recovering the emitter partition is the deinterleaving task, whereas recovering 
 
 \subsection*{Estimation objective}
 
-At inference, a time-ordered pulse sequence $\mat{X} = (\vect{x}_1,\ldots,\vect{x}_N)$ is observed; the label pairs in \cref{eq:method:label_pair} and the numbers of groups present are unknown.
-The task is to estimate a label pair for every pulse,
+At inference a time-ordered pulse sequence $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ is observed and the label pairs of \cref{eq:method:label_pair} are unknown.
+The goal is to recover the emitter and mode partitions of that sequence, up to independent relabelling of the cluster indices in each coordinate.
+The estimated labels
 \begin{equation}\label{eq:method:estimated_label_pair}
   \hat{\vect{y}}_n = \bigl(\hat{e}_n,\, \hat{m}_n\bigr)
   \in \{1,\ldots,\hat{K}\} \times \{1,\ldots,\hat{M}\},
   \qquad n \in \{1,\ldots,N\},
 \end{equation}
-where the counts $\hat{K}$ and $\hat{M}$ are also estimated from the observed sequence.
-These estimates induce the partitions
+induce
 \begin{equation}\label{eq:method:estimated_partitions}
   \widehat{\mathcal{E}}_k
   =
@@ -69,15 +69,16 @@ These estimates induce the partitions
   \widehat{\mathcal{M}}_\ell
   =
   \{\,n : \hat{m}_n = \ell\,\},
-  \quad \ell \in \{1,\ldots,\hat{M}\}.
+  \quad \ell \in \{1,\ldots,\hat{M}\},
 \end{equation}
-Elementwise agreement between $\hat{\vect{y}}_n$ and $\vect{y}_n$ is not required, because cluster indices are arbitrary.
-The objective is instead that the partitions in \cref{eq:method:estimated_partitions} match the restrictions of the ground-truth partitions in \cref{eq:method:emitter_partition,eq:method:mode_partition} to the observed sequence, up to independent permutations of the indices in each coordinate.
-Agreement is measured with the permutation-invariant metrics of \cref{sec:method:metrics}.
+with $\hat{K}$ and $\hat{M}$ also unknown.
+Elementwise equality with the ground-truth symbols is not required; only the partitions matter, and they are scored with the permutation-invariant metrics of \cref{sec:method:metrics}.
 
-Emitter identities are meaningful only within the recording from which the observed sequence was drawn.
-Neither $\hat{K}$ nor $\hat{M}$ is assumed known; in particular, $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
-The method instantiates this objective on fixed-length windows extracted from each recording (\cref{sec:method:data:window}), a computational choice forced by the quadratic cost of self-attention; estimated symbols are therefore local to a window and are not linked across windows.
+The method does not classify pulses against a fixed catalogue.
+It learns a map $\Enc$ that sends $\mat{X}$ to two sequences of pulse embeddings, one for emitters and one for modes.
+A clustering step applied to those embeddings produces \cref{eq:method:estimated_label_pair}.
+All trainable weights of $\Enc$ are collected in the parameter vector $\bm{\theta}$, which is fitted by the loss of \cref{sec:method:loss}; the architecture is specified in \cref{sec:method:arch}.
 
-The proposed method estimates $\hat{\vect{y}}_n$ with a shared encoder and two separate encoding and embedding branches: recording-local emitter labels supervise one branch, and globally shared mode labels make the other comparable across recordings.
-The losses are specified in \cref{sec:method:loss}, and the architecture and decoding step in \cref{sec:method:arch}.
+Emitter identities remain meaningful only within the recording that produced $\mat{X}$.
+In particular $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
+In practice $\Enc$ is applied to fixed-length windows of each recording (\cref{sec:method:data:window}), so the estimated symbols are local to a window.
