@@ -13,13 +13,18 @@ Emitter identifiers are recording-local
 scenarios never share an emitter positive even when both contain
 pulses from physically similar sources.
 Uniform mixing across the corpus would therefore leave the emitter
-branch with positives only inside each individual window, which is
-often too few for a stable contrastive signal.
+branch with positives only inside each individual window, unless two
+windows happen to be drawn from the same scenario---an event that is
+unlikely among roughly \(1500\) training scenarios
+(\cref{sec:exp:datasets}).
+Such sparse positives can hinder learning and leave most of a
+multi-window batch unused for the emitter term.
+
 Each mini-batch is instead drawn from a single scenario, with several
 windows taken from that scenario so that the same emitter can appear
 across windows and supply additional positives.
-Mode labels remain globally comparable, so the mode branch still sees
-batch-wide positives and negatives under
-\cref{sec:method:loss}.
+Mode labels remain globally comparable across scenarios, but drawing
+several windows from one scenario also increases the number of
+same-mode positives available to the mode branch in each batch.
 The number of windows per batch, together with any early-stopping
 policy, is recorded in \cref{tab:exp:hparams_main}.
