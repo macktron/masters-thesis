@@ -1,5 +1,20 @@
 \section{Joint and Multi-Task Clustering}\label{sec:related:joint}
 
-% TODO: Multi-task / hierarchical / joint clustering at multiple
-% granularities. End with the precise gap the thesis fills.
-Placeholder paragraph.
+When two tasks share structure, a common pattern is a shared trunk with task-specific heads, trained by a weighted sum of losses \parencite{caruana1997multitask}.
+Image models often attach two softmax heads to one backbone, for example object class and attribute.
+That layout assumes both label sets are globally consistent catalogues.
+It does not by itself produce clusterable embeddings, and it cannot represent emitter identifiers that are comparable only within a recording.
+
+Hierarchical clustering learns several partitions, but they are nested levels of one relation, not two different relations.
+\textcite{yang2016jule} alternate agglomerative merges with representation updates under a triplet loss, so coarser groups are formed from finer ones of the same kind.
+A hierarchy of that form would be appropriate if modes were subtypes of emitters, or emitters subtypes of modes.
+They are not.
+One emitter uses several modes, and one mode appears on several emitters (\cref{sec:method:formulation}).
+The two partitions also do not share a label scope: emitter symbols are recording-local, mode symbols are global.
+
+A method that treats the two as softmax heads on a shared backbone therefore asks the wrong questions at inference.
+A method that learns a single embedding must compromise between two incompatible similarity relations: pulses that should be close as modes may need to be far as emitters, and conversely.
+The dual-branch encoder of \cref{sec:method:arch} is the direct response to that conflict.
+The two supervised contrastive terms of \cref{sec:method:loss} differ only in the scope of the positive set, and each branch is decoded by clustering rather than by a closed-catalogue classifier.
+
+\Cref{ch:method} therefore uses a transformer encoder on interleaved \gls{pdw} streams, two contrastive terms with recording-local versus global positives, and independent density clustering of each branch at inference.

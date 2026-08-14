@@ -13,11 +13,15 @@ Describe the proposed approach in enough detail that another researcher could re
 - `01_problem_formulation.tex` — Recording-level problem statement. Defines the observed recordings $\mat{X}^{(s)}$, the ground-truth label pairs $\vect{y}_n = (e_n, m_n)$, the two target partitions (emitter and mode), and the estimation objective: recover both partitions of a generic observed pulse sequence up to independent relabelling per coordinate. Windowing and clustering are *method* choices and are only forward-referenced here, never assumed by the problem statement.
 - `02_data_preprocessing.tex` — Per-feature scaling, AoA-to-direction conversion, windowing (window length $L$, stride $\delta$, window superscript $(w)$), and per-window TOA min--max mapping.
 - `03_architecture.tex` — The transformer encoder: input embedding, shared trunk, two task-specific branches, projection heads, and the DBSCAN decoding step that turns embeddings into discrete estimates. Model widths, depths, and head counts are stated here. Schematic figures live in `figures/method/`.
-- `04_attention_variants.tex` — Attention variants: pairwise physical bias on TOA and circular azimuth distance; RoPE with TOA on trunk/mode and wrap-safe $(\cos,\sin)$ azimuth split on the deinterleaving branch.
+- `04_attention_variants.tex` — Attention variants: pairwise physical bias on TOA and circular azimuth distance (`\subsection` `sec:method:attention:bias`); RoPE with TOA on trunk/mode and wrap-safe $(\cos,\sin)$ azimuth split on the deinterleaving branch (`\subsection` `sec:method:attention:rope`). These two headings are numbered so they appear in the table of contents; other method-internal headings stay `\subsection*`.
 - `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the total objective.
 - `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
 - `07_evaluation_metrics.tex` — Define AMI, ARI, and V-measure (with homogeneity/completeness). Use the `\AMI`, `\ARI` macros. Explain *why* each metric is used and what it can and cannot tell us.
-- `08_baselines.tex` — Baselines to compare against, with justification for each.
+- `08_baselines.tex` — Matched dual-branch single-task controls (Vanilla with $\Loss_{\mathrm{em}}$ only or $\Loss_{\mathrm{md}}$ only) and optional classical DBSCAN on fixed window features. Do not describe a flat single-stack encoder unless that run exists.
+
+## Heading / TOC policy
+
+Numbered `\subsection` appears in the table of contents; `\subsection*` does not. Keep the TOC unbloated: number only independently navigable topics (per-feature scaling, windowing, physical attention bias, rotary positional encoding). Architecture blocks, loss terms, sampler details, and metric derivations stay `\subsection*`.
 
 ## Style notes
 

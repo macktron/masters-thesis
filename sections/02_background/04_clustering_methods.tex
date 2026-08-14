@@ -9,7 +9,7 @@ They are fast and well understood, but they assume roughly spherical, equally sc
 Mixture models such as a \gls{gmm} soften the assignment into soft responsibilities under a parametric density, yet they still typically fix the number of components and remain sensitive to initialization and to elongated or overlapping structure.
 When the number of concurrent emitters or modes is unknown and the embedding space may contain noise or irregular densities, density-based methods are a more natural fit.
 
-\subsection{\Gls{dbscan}}
+\subsection*{\Gls{dbscan}}
 
 \Gls{dbscan} recovers clusters from local density rather than from a fixed catalogue of centres \parencite{ester1996density}.
 Two hyperparameters define the density criterion: a neighbourhood radius \(\varepsilon > 0\) and a minimum neighbourhood size \(\mathrm{minPts} \in \N\).

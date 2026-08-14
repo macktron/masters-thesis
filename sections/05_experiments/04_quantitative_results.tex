@@ -1,7 +1,243 @@
 \section{Quantitative Results}\label{sec:exp:results}
 
-This section reports primary clustering scores for the proposed model and for each baseline under the data conditions in \cref{sec:exp:datasets}.
-Rows index methods (including ablated variants where applicable); columns index emitter-level and mode-level \gls{ami}, \gls{ari}, and V-measure against the reference simulator labels (\cref{sec:method:metrics}).
-Each entry is aggregated over random seeds and window splits as stated in \cref{sec:exp:setup,sec:exp:hparams}; mean $\pm$ one standard deviation is shown when multiple seeds are available.
+This section reports clustering scores for four jointly trained encoders that differ only in the attention mechanism.
+The Vanilla encoder, with standard self-attention, is the existence test for RQ1; the remaining three rows are the RQ3 comparison against that baseline.
+The joint-versus-single-task comparison that answers RQ2 is deferred to \cref{sec:exp:ablation}.
+Numerical entries marked with an em dash, and the figures under \texttt{figures/experiments/}, will be filled after the test evaluation.
 
-% TODO: insert main results table(s) here once experiments finish; bold the best value in each column.
+% Drop-in PDFs live in figures/experiments/. A labelled box is shown until each file exists,
+% so the chapter still compiles while results are being collected.
+\providecommand{\expfig}[1]{%
+  \IfFileExists{figures/experiments/#1}{%
+    \includegraphics[width=\linewidth]{experiments/#1}%
+  }{%
+    \IfFileExists{../../figures/experiments/#1}{%
+      \includegraphics[width=\linewidth]{experiments/#1}%
+    }{%
+      \fbox{\parbox[c][3.6cm][c]{0.92\linewidth}{\centering\scriptsize\texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+
+\subsection{Evaluation protocol}\label{sec:exp:results:protocol}
+
+All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
+Windows have length $L = 2000$ and stride $\delta = L$, so they do not overlap.
+For each window, \gls{dbscan} on each branch yields a predicted partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
+
+Each table entry is the mean $\pm$ one standard deviation of that per-window score over the test windows.
+Results are from a single training seed; the reported spread is therefore window-level variation, not seed-level uncertainty.
+The \gls{dbscan} radius $\varepsilon$ is selected independently for each model and each branch on the validation grid of \cref{sec:method:arch}, with $\mathrm{minPts} = 5$ throughout; selected radii are listed in \cref{tab:exp:hparams_attn}.
+
+Homogeneity and completeness are reported separately rather than only through their harmonic mean, the \gls{vmeasure}, so that oversplitting can be distinguished from undermerging.
+Mean absolute cluster-count error $\lvert\hat{K}-K\rvert$ (emitters) and $\lvert\hat{M}-M\rvert$ (modes) summarises how well the inferred number of clusters matches the number of distinct reference labels in the same window.
+
+\subsection{Attention variants}\label{sec:exp:results:attention}
+
+Four configurations are trained with the joint objective of \cref{eq:method:loss_total} and otherwise identical hyperparameters (\cref{sec:exp:hparams}).
+Vanilla is the encoder of \cref{sec:method:arch} with standard \gls{mha}; \gls{toa} enters only as an input feature.
+RoPE-TOA applies rotary encoding on the window-local \gls{toa} in the trunk and in both branches.
+RoPE-az is the branch-specific design of \cref{sec:method:attention}: \gls{toa} on the trunk and the mode branch, and the wrap-safe pair $(\tilde{c},\tilde{s})$ of \cref{eq:method:azimuth_trig} on the deinterleaving branch.
+Bias adds the pairwise physical logits of \cref{eq:method:attn_bias}.
+No model combines \gls{rope} with the bias.
+
+Vanilla tests whether a transformer encoder can deinterleave pulses and recover operating modes by clustering (RQ1).
+The remaining three rows test whether explicit physical structure in attention improves those scores relative to standard \gls{mha} (RQ3).
+\Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores; the best value in each column will be set in bold once the numbers are filled.
+
+\begin{table}[tbp]
+  \centering
+  \small
+  \caption{Emitter clustering on the test split. Entries are mean $\pm$ std over non-overlapping test windows from a single training seed. Em dashes will be replaced after evaluation; the best value in each column will then be set in bold.}
+  \label{tab:exp:attn_em}
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{K}-K\rvert$ \\
+    \midrule
+    Vanilla   & {---} & {---} & {---} & {---} & {---} \\
+    RoPE-TOA  & {---} & {---} & {---} & {---} & {---} \\
+    RoPE-az   & {---} & {---} & {---} & {---} & {---} \\
+    Bias      & {---} & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[tbp]
+  \centering
+  \small
+  \caption{Mode clustering on the test split. Entries follow the same aggregation as \cref{tab:exp:attn_em}.}
+  \label{tab:exp:attn_md}
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{M}-M\rvert$ \\
+    \midrule
+    Vanilla   & {---} & {---} & {---} & {---} & {---} \\
+    RoPE-TOA  & {---} & {---} & {---} & {---} & {---} \\
+    RoPE-az   & {---} & {---} & {---} & {---} & {---} \\
+    Bias      & {---} & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The histograms in \cref{fig:exp:hist_em,fig:exp:hist_md} show the distribution of the four metrics over test windows, one panel per model.
+Each panel is the four-plot already produced per run ($\ARI$, $\AMI$, homogeneity, completeness).
+A mass near one indicates consistent recovery.
+A left tail indicates windows where clustering fails, which in this corpus typically coincide with crowded mixtures or rare-label windows (\cref{sec:exp:datasets}).
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_vanilla_em.pdf}
+    \caption{Vanilla}
+    \label{fig:exp:hist_em:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_rope_toa_em.pdf}
+    \caption{RoPE-TOA}
+    \label{fig:exp:hist_em:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_rope_az_em.pdf}
+    \caption{RoPE-az}
+    \label{fig:exp:hist_em:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_bias_em.pdf}
+    \caption{Bias}
+    \label{fig:exp:hist_em:bias}
+  \end{subfigure}
+  \caption{Distribution of emitter-clustering metrics over non-overlapping test windows. Each panel is a four-plot of $\ARI$, $\AMI$, homogeneity, and completeness for one attention variant.}
+  \label{fig:exp:hist_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_vanilla_md.pdf}
+    \caption{Vanilla}
+    \label{fig:exp:hist_md:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_rope_toa_md.pdf}
+    \caption{RoPE-TOA}
+    \label{fig:exp:hist_md:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_rope_az_md.pdf}
+    \caption{RoPE-az}
+    \label{fig:exp:hist_md:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{hist_bias_md.pdf}
+    \caption{Bias}
+    \label{fig:exp:hist_md:bias}
+  \end{subfigure}
+  \caption{Distribution of mode-clustering metrics over non-overlapping test windows. Layout as in \cref{fig:exp:hist_em}.}
+  \label{fig:exp:hist_md}
+\end{figure}
+
+\subsection{Cluster-count recovery}\label{sec:exp:results:kcorr}
+
+\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} scatter, for each test window, the number of clusters returned by \gls{dbscan} against the number of distinct reference labels in that window.
+The identity line $y=x$ is exact count recovery.
+Points above the line oversplit a true class, which lowers completeness; points below it merge distinct classes, which lowers homogeneity.
+That geometry is why \cref{tab:exp:attn_em,tab:exp:attn_md} report homogeneity and completeness separately, and why the mean absolute count error is included as a summary column.
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_vanilla_em.pdf}
+    \caption{Vanilla}
+    \label{fig:exp:kcorr_em:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_rope_toa_em.pdf}
+    \caption{RoPE-TOA}
+    \label{fig:exp:kcorr_em:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_rope_az_em.pdf}
+    \caption{RoPE-az}
+    \label{fig:exp:kcorr_em:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_bias_em.pdf}
+    \caption{Bias}
+    \label{fig:exp:kcorr_em:bias}
+  \end{subfigure}
+  \caption{Predicted versus true number of emitters per test window. The line $y=x$ is exact count recovery; points above it oversplit, points below it undermerge.}
+  \label{fig:exp:kcorr_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_vanilla_md.pdf}
+    \caption{Vanilla}
+    \label{fig:exp:kcorr_md:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_rope_toa_md.pdf}
+    \caption{RoPE-TOA}
+    \label{fig:exp:kcorr_md:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_rope_az_md.pdf}
+    \caption{RoPE-az}
+    \label{fig:exp:kcorr_md:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{kcorr_bias_md.pdf}
+    \caption{Bias}
+    \label{fig:exp:kcorr_md:bias}
+  \end{subfigure}
+  \caption{Predicted versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_em}.}
+  \label{fig:exp:kcorr_md}
+\end{figure}
+
+\subsection{Model size and inference cost}\label{sec:exp:results:efficiency}
+
+\Cref{tab:exp:efficiency} reports the number of trainable parameters and the wall-clock time per test window.
+Timing is measured on the A100 of \cref{sec:exp:setup}, with one window per forward pass, and includes both the encoder and the \gls{dbscan} decoding of \cref{eq:method:cluster_decoding}.
+A short GPU warmup precedes the timed loop and is excluded from the mean.
+\Gls{rope} adds no trainable weights relative to Vanilla; Bias adds the $128$ scalar coefficients of \cref{sec:method:attention}.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Trainable parameters and inference time per test window (mean $\pm$ std), including \gls{dbscan} decoding. Em dashes will be replaced after evaluation.}
+  \label{tab:exp:efficiency}
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    Model & Parameters & Time (ms/window) \\
+    \midrule
+    Vanilla   & {---} & {---} \\
+    RoPE-TOA  & {---} & {---} \\
+    RoPE-az   & {---} & {---} \\
+    Bias      & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}

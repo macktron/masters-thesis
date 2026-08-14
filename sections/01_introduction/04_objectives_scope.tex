@@ -4,7 +4,7 @@
 
 We implement a transformer encoder that maps windows of \glspl{pdw} to emitter and mode embeddings, cluster each embedding independently, and measure agreement with simulator labels using \gls{ami}, \gls{ari}, and \gls{vmeasure} (\cref{sec:method:formulation,sec:method:arch,ch:experiments}).
 We train with two supervised contrastive terms---recording-local emitter positives and batch-wide mode positives---and compare that joint loss with a deinterleaving-only baseline of similar capacity (\cref{sec:method:loss,ch:experiments}).
-We compare standard self-attention with a physical pairwise bias, rotary positional encoding, and both together (\cref{sec:method:attention,ch:experiments}).
+We compare standard self-attention with a physical pairwise bias and with rotary positional encoding on pulse coordinates (\cref{sec:method:attention,ch:experiments}).
 
 \subsection{Delimitations}\label{sec:intro:delimitations}
 

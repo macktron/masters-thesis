@@ -30,3 +30,26 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
 
 Total optimisation steps equal eight epochs times the number of training batches per epoch.
 The warmup fraction and cosine phase are counted in those steps, as stated in \cref{sec:method:training}.
+
+\Cref{tab:exp:hparams_attn} collects the attention-variant knobs deferred from \cref{sec:method:attention} and the \gls{dbscan} radii of \cref{sec:method:arch}.
+Vanilla and Bias do not use rotary scales.
+RoPE-TOA uses a single scale $\gamma_t$ on every layer; RoPE-az uses $\gamma_t$ on the trunk and the mode branch and $(\gamma_c,\gamma_s)$ on the deinterleaving branch.
+Unused coordinates are marked n/a; an em dash in an $\varepsilon$ column, or in a $\gamma$ column that the model does use, will be replaced after selection.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Rotary scales and \gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed.}
+  \label{tab:exp:hparams_attn}
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Model & $\gamma_t$ & $\gamma_c$ & $\gamma_s$ & $\varepsilon_{\mathrm{em}}$ & $\varepsilon_{\mathrm{md}}$ \\
+    \midrule
+    Vanilla   & {n/a} & {n/a} & {n/a} & {---} & {---} \\
+    RoPE-TOA  & {---} & {n/a} & {n/a} & {---} & {---} \\
+    RoPE-az   & {---} & {---} & {---} & {---} & {---} \\
+    Bias      & {n/a} & {n/a} & {n/a} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla row of \cref{tab:exp:hparams_main,tab:exp:hparams_attn}, including a re-selected $\varepsilon$ per branch on the validation set of each objective.

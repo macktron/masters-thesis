@@ -1,5 +1,28 @@
 \section{Transformers for Time Series and Sets}\label{sec:related:transformers_seq}
 
-% TODO: Transformers applied to time series, point sets, and irregular
-% sequences; position encodings for non-uniform sampling.
-Placeholder paragraph.
+The transformer encoder maps a sequence of tokens to contextualised representations by unmasked self-attention \parencite{vaswani2017attention,devlin2019bert}.
+Every pulse in a window can attend to every other pulse, which matches the structure of interleaved \glspl{pdw}: the next pulse of the same emitter is generally not the next token.
+The cost is quadratic in the window length, which is why \cref{sec:method:data:window} processes recordings in fixed-length windows.
+
+Self-attention is permutation-equivariant.
+Without a positional signal it treats the window as a set, which is the setting studied by the Set Transformer \parencite{lee2019set}.
+Absolute sinusoidal encodings and learned position embeddings restore order for language, where the index of a token is a meaningful coordinate \parencite{vaswani2017attention}.
+For \glspl{pdw} that coordinate is the wrong one.
+Consecutive pulses are not equally spaced in time, so an ordinal position misrepresents \gls{toa} gaps.
+Multivariate time-series transformers typically assume regular sampling and add a time-step index in the same way \parencite{zerveas2021timeseries}.
+\textcite{gunn2025deinterleaving} therefore omit positional encodings and rely on \gls{toa} as an input feature.
+The baseline encoder of \cref{sec:method:arch} makes the same choice.
+
+Relative encodings offer a middle path.
+\textcite{shaw2018relative} add a learned embedding of the discrete offset between token indices to the attention logits.
+Graphormer generalises that idea to pairwise biases derived from graph distances \parencite{ying2021graphormer}.
+The physical attention bias in \cref{sec:method:attention:bias} is the same mechanism with continuous pulse parameters: the absolute \gls{toa} difference and the circular azimuth distance, each scaled by a learned per-head coefficient.
+
+Rotary positional encoding (\cref{sec:method:attention:rope}) builds the coordinate into the queries and keys rather than into the logits \parencite{su2024roformer}.
+The inner product then depends on content and on the coordinate difference.
+Vision models split the rotation planes across spatial axes \parencite{heo2024ropevit}.
+The method reuses that split for wrap-safe cosine and sine of azimuth on the deinterleaving branch, and rotates the trunk and mode branch by \gls{toa} only, so that mode embeddings are not tied to viewing geometry.
+
+Existing positional schemes were designed for discrete indices, regular grids, or a single shared coordinate.
+A \gls{pdw} window is an irregular point set with at least two physically distinct relations---time of arrival and arrival direction---and the two estimation tasks should not weight those relations equally.
+Whether injecting them as a logit bias, as a rotary phase, or not at all improves clustering is taken up in \cref{ch:experiments}.

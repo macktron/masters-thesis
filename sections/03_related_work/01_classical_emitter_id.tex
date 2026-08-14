@@ -1,5 +1,28 @@
 \section{Classical Radar Emitter Identification}\label{sec:related:classical}
 
-% TODO: Pre-DL approaches: histogramming, statistical fingerprinting,
-% template matching, deinterleaving. End with the gap.
-Placeholder paragraph.
+Operational \gls{elint} systems recover emitter identity from measured \glspl{pdw} by combining pulse sorting with library lookup \parencite{wiley2006elint,skolnik2008radar}.
+After detection, pulses are grouped into trains and each train is matched against stored templates of carrier frequency, pulse width, \gls{pri} family, and scan behavior.
+The grouping step is deinterleaving; the matching step is identification.
+Both historically depend on hand-specified features and on regularity that agile radars no longer guarantee.
+
+The oldest deinterleavers exploit repetition in \gls{toa}.
+The cumulative difference histogram (CDIF) accumulates \gls{toa} differences at increasing pulse lags and treats histogram peaks as candidate \glspl{pri}, which a subsequent search then validates as pulse sequences \parencite{mardia1989deinterleaving}.
+The sequential difference histogram (SDIF) keeps only the current difference level, with a derived detection threshold, which avoids accumulating every lag while remaining a \gls{toa}-only method \parencite{milojevic1992sdif}.
+These algorithms are reliable when each emitter keeps an approximately constant \gls{pri} and when missing pulses and cross-emitter differences do not create false peaks.
+They degrade under stagger, jitter, and dense mixing, which is the setting of the recordings in \cref{sec:method:formulation}.
+
+When timing alone is unstable, sorting moves into a joint space of \gls{rf}, pulse width, and \gls{aoa}.
+Centroid methods such as \(k\)-means and density clustering such as \gls{dbscan} then replace histogram peak finding \parencite{ester1996density,qu2026radardeinterleavingreview}.
+Density clustering has the operational advantage that the number of emitters need not be specified in advance.
+Its accuracy still depends on the metric, the scaling of each coordinate, and a neighbourhood radius that is hard to set when cluster densities differ.
+Offline direction clustering of overlapping pulses is one concrete instance of this approach \parencite{bedoire2022offlineclustering}.
+The method chapter uses \gls{dbscan} only after a learned embedding; applying it to raw window features is retained as a baseline (\cref{sec:method:baselines}).
+
+Once trains are formed, identification is typically template matching against a mode or equipment library \parencite{wiley2006elint}.
+Statistical fingerprints---histograms of \gls{rf} and \gls{pri}, dwell statistics, scan-period estimates---summarize each train.
+The match assumes that the library contains the emitter and that deinterleaving errors have not corrupted the fingerprint.
+Novel emitters and modes that are absent from the catalogue fall outside this procedure by construction.
+
+Classical pipelines treat deinterleaving and mode analysis as successive stages, each with its own hand-engineered features.
+They do not learn a representation in which both partitions are visible, and they have no mechanism for emitters that appear only at inference.
+Those two requirements---recording-local emitter grouping and a mode grouping that is not a closed-catalogue softmax---motivate the learned encoder of \cref{ch:method}.

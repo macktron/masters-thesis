@@ -1,6 +1,40 @@
 \section{Ablation Studies}\label{sec:exp:ablation}
 
-Ablations isolate the contribution of individual components in \cref{ch:method} by retraining with exactly one change relative to the full configuration (matched data, seeds, and hyperparameters unless the ablation itself is a hyperparameter).
-Planned comparisons include removing or downweighting the emitter contrastive term, the mode contrastive term, or the coupling between branches; reducing the number of attention layers or heads; disabling stochastic augmentations beyond deterministic scaling; and swapping \gls{dbscan} post-processing for a simpler fixed-$k$ assignment when that variant is implemented.
+This section isolates the joint objective of \cref{eq:method:loss_total} from the attention variants of \cref{sec:exp:results:attention}.
+All three runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
+That matched dual-branch control is the comparable transformer for RQ2: whether coupling deinterleaving with mode clustering outperforms training for one task alone.
 
-% TODO: add one table row per completed ablation with the same metric columns as \cref{sec:exp:results}.
+The three objectives are:
+\begin{description}
+  \item[Joint] $\Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ with $\lambda_{\mathrm{md}} = 1$, identical to Vanilla in \cref{sec:exp:results}.
+  \item[Emitter-only] $\Loss = \Loss_{\mathrm{em}}$; the mode branch receives no direct gradient.
+  \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$; the emitter branch receives no direct gradient.
+\end{description}
+Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla row of \cref{tab:exp:attn_em,tab:exp:attn_md}, not from a second training run.
+The single-task models are trained from the same initialisation seed, on the same data splits, and with the remaining hyperparameters of \cref{sec:exp:hparams}.
+
+Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
+The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only: they measure how much the shared trunk transfers to the unsupervised branch, versus collapse of that branch.
+RQ2 is answered primarily by comparing Joint with Emitter-only on the emitter metrics; the mode column and the Mode-only row complete the symmetric picture.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Joint versus single-task objectives on the Vanilla encoder. Aggregation as in \cref{tab:exp:attn_em,tab:exp:attn_md}. Hom.\ and Comp.\ are homogeneity and completeness. Joint entries are those of Vanilla, not a repeated run. Em dashes will be replaced after evaluation.}
+  \label{tab:exp:ablation_loss}
+  \small
+  \begin{tabular}{@{}llccccc@{}}
+    \toprule
+    Objective & Branch & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
+    \midrule
+    Joint         & Emitter & {---} & {---} & {---} & {---} & {---} \\
+    Joint         & Mode    & {---} & {---} & {---} & {---} & {---} \\
+    Emitter-only  & Emitter & {---} & {---} & {---} & {---} & {---} \\
+    Emitter-only  & Mode    & {---} & {---} & {---} & {---} & {---} \\
+    Mode-only     & Emitter & {---} & {---} & {---} & {---} & {---} \\
+    Mode-only     & Mode    & {---} & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
+No additional histogram or scatter pages are included here; the distributions for Joint are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.

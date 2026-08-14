@@ -1,5 +1,26 @@
 \section{Deep Learning for Radar Signal Analysis}\label{sec:related:dl_radar}
 
-% TODO: CNN/RNN/attention classifiers for radar pulses. Most are
-% supervised. End with the gap.
-Placeholder paragraph.
+Learned models replace histogram rules with a parametric map from \gls{pdw} sequences or time-frequency images to labels.
+Most published systems are supervised classifiers: they assume a global catalogue of emitter types, or of intra-pulse modulations, and they train a \gls{cnn} or \gls{rnn} with cross-entropy \parencite{qu2026radardeinterleavingreview}.
+Attribute-specific recurrent networks on \gls{pdw} streams are a representative sequence model in this family \parencite{notaro2019emitter}.
+They capture temporal dependence that a bag of pulse parameters misses, but the output is still a class index in a fixed label set.
+
+A closer relative is supervised contrastive training for emitter classification.
+\textcite{jonsson2023supcon} trains an encoder so that samples with the same emitter label lie close in embedding space, using synthetic scenarios from the same simulator lineage as \cref{sec:method:data}.
+The loss belongs to the family used in \cref{sec:method:loss}, but the task is still closed-set identification: emitter identifiers are treated as globally comparable classes, and inference is classification rather than clustering.
+Recurrent ensembles for emitter classification under dataset drift make the same closed-set assumption and treat out-of-distribution detection as a separate module \parencite{coleman2023rwrdrift}.
+
+Deinterleaving as clustering, with an unknown number of emitters, is a different problem.
+\textcite{gunn2025deinterleaving} train a transformer encoder with a triplet loss so that, within one interleaved stream, pulses from the same emitter are close and pulses from different emitters are far.
+At inference they cluster the embeddings with hierarchical density clustering (HDBSCAN) \parencite{campello2015hierarchical,mcinnes2017hdbscan}.
+They do not assume a known emitter count, they evaluate with \gls{ami}, \gls{ari}, and \gls{vmeasure}, and they omit index-based positional encodings because \gls{toa} already orders the pulses.
+That pipeline is the closest published counterpart to \cref{sec:method:arch}.
+
+Three differences remain.
+First, Gunn et al.\ produce a single embedding and a single partition---emitter identity---and treat operating mode as a later analysis that becomes easier after deinterleaving.
+Second, they train with a triplet hinge, which uses one positive and one negative per anchor; the method in \cref{sec:method:loss} uses the supervised contrastive kernel of \textcite{khosla2020supcon}, which averages over all positives of an anchor in the mini-batch.
+Third, their transformer uses vanilla dot-product attention.
+This thesis additionally evaluates a pairwise physical bias and a rotary encoding of time and azimuth (\cref{sec:method:attention}).
+
+Deep models for radar pulses already exist.
+What they still omit is the joint problem of this thesis: two embeddings whose positive sets have different scopes---recording-local emitters and globally shared modes---both decoded by clustering rather than by a catalogue softmax.

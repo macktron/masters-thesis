@@ -33,12 +33,13 @@ Context: ELINT / ESM applications, where mixtures and previously unseen emitters
 - **Equations:** use `\[ ... \]` for display math, `equation`/`align` (with `\label` and `\cref`) when referenced.
 - **Cross-references:** always `\cref{...}` from `cleveref` (already loaded). Labels follow the pattern `ch:`, `sec:`, `eq:`, `fig:`, `tab:`, `alg:`.
 - **Figures:** put assets in `figures/<chapter>/` and reference with `\includegraphics{<chapter>/<name>}` (the `\graphicspath` is already configured).
+- **Table of contents:** numbered `\subsection` appears in the TOC; `\subsection*` and `\paragraph` do not. Number only headings a reader would look up independently (for example PDWs, emitters versus modes, attention variants). Keep internal splits starred so the TOC stays unbloated.
 
 ## File layout
 
 - Each chapter is `sections/NN_<name>/<name>.tex` — a `subfiles` wrapper that `\input`s a numbered sequence of `.tex` files in the same directory.
 - In most chapters, each input file is one `\section{...}` (and its nested headings). Chapter~2 follows that rule strictly: one file per `\section`, with filenames aligned to the section title; see `sections/02_background/AGENTS.md`.
-- Input files contain only `\section{...}` / `\subsection{...}` headings and prose. **Do not** add `\documentclass` or `\begin{document}` lines to them.
+- Input files contain only `\section{...}` / `\subsection{...}` / `\subsection*{...}` headings and prose. **Do not** add `\documentclass` or `\begin{document}` lines to them.
 - The wrapper opens with `\documentclass[../../main.tex]{subfiles}\begin{document}\chapter{...}\label{ch:...}` and ends with `\end{document}`.
 
 ## Editing rules for the AI

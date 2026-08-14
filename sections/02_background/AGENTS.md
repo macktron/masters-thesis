@@ -10,12 +10,14 @@ Give the reader the technical vocabulary needed to follow the Method and Experim
 
 ## File layout (one `\section` per file)
 
-Filenames mirror the `\section{...}` title in `sections/02_background/`. Each file contains exactly one `\section{...}` and its `\subsection{...}` / `\paragraph{...}` blocks.
+Filenames mirror the `\section{...}` title in `sections/02_background/`. Each file contains exactly one `\section{...}` and its `\subsection{...}` / `\subsection*{...}` / `\paragraph{...}` blocks.
+
+**TOC policy.** Numbered `\subsection` entries appear in the table of contents; starred headings and `\paragraph` do not. Keep the TOC sparse: number only headings a reader would look up independently (PDWs, emitters versus modes, deinterleaving, mode analysis). Internal textbook splits (pulsed radar, active versus passive, detection, ML paradigms, DBSCAN, transformer paragraphs) stay starred or run-in.
 
 | File | `\section` title | Notes |
 |------|------------------|--------|
-| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; subsections: history and uses, echo delay and biosonar, active versus passive reception, sampling to pulse list (STFT `eq:bg:stft`), PDWs and the recording as input (`sec:bg:pdw`), emitters versus modes (`sec:bg:emitters`). Figure `fig:bg:pulse_echo_timeline`. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
-| `02_signal_processing_pipeline_passive_elint.tex` | Signal Processing Pipeline for Passive ELINT | Label `sec:bg:elint_pipeline`; `\label{sec:bg:deinterleaving_evolution}` on the deinterleaving subsection. Add pipeline figure under `figures/background/`. |
+| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; TOC subsections: PDWs (`sec:bg:pdw`), emitters versus modes (`sec:bg:emitters`). Starred: pulsed radar (range `eq:bg:range`, unambiguous range `eq:bg:runamb`), active versus passive reception. Figure `fig:bg:pulse_echo_timeline`. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
+| `02_signal_processing_pipeline_passive_elint.tex` | The Classical ELINT Pipeline | Label `sec:bg:elint_pipeline`; TOC subsections: deinterleaving (`sec:bg:deinterleaving_evolution`), mode analysis. Starred: detection and pulse measurement. Classical chain: detect/measure, deinterleave (emitter grouping), then mode analysis. |
 | `03_machine_learning_fundamentals.tex` | Machine Learning Fundamentals | Label `sec:bg:ml`. |
 | `04_clustering_methods.tex` | Clustering Methods | Label `sec:bg:clustering`. Cite `\parencite{xie2016unsupervised}`. |
 | `05_deep_representation_learning.tex` | Deep Representation Learning | Label `sec:bg:dl`; bridge to DEC/SwAV `\parencite{xie2016unsupervised,caron2020swav}`. |

@@ -4,7 +4,8 @@ The encoder of \cref{sec:method:arch} uses standard self-attention, which treats
 The only ordering cue available to it is whatever the input features themselves carry, in particular the \gls{toa}.
 A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, have a similar pulse width, or arrive from a similar direction, are far more likely to originate from the same emitter or mode than an arbitrary pair.
 This section describes two variants of the attention mechanism that make such structure explicit.
-They can be used alone or together as drop-in modifications of the \gls{mha} sub-layers of \cref{sec:method:arch}; all three configurations are evaluated in \cref{ch:experiments}.
+They are used as drop-in modifications of the \gls{mha} sub-layers of \cref{sec:method:arch}.
+Each variant is evaluated separately against standard self-attention in \cref{ch:experiments}; combining the bias with \gls{rope} is not tested here.
 
 Throughout, we write the attention logits of a single head over a window of $L$ pulses as
 \begin{equation}\label{eq:method:attn_base}
@@ -15,7 +16,7 @@ Throughout, we write the attention logits of a single head over a window of $L$ 
 where $\vect{q}_i$ and $\vect{k}_j$ are the query and key of pulses $i$ and $j$ and $d_k$ is the per-head dimension.
 The attention weights are the row-wise softmax of $\mat{A}$, which then mixes the value vectors.
 
-\subsection*{Physical attention bias}
+\subsection{Physical attention bias}\label{sec:method:attention:bias}
 
 The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
 The bias uses two coordinates: the window-local \gls{toa} $t_n$ and the azimuth $\theta^{\mathrm{az}}_n$ of \cref{eq:method:aoa_cart}.
@@ -49,7 +50,7 @@ The shared trunk and the mode branch should instead suppress that cue, because a
 Whether this allocation emerges is examined in \cref{ch:experiments}.
 The bias follows the same idea as additive pairwise attention biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances.
 
-\subsection*{Rotary positional encoding}
+\subsection{Rotary positional encoding}\label{sec:method:attention:rope}
 
 The bias variant adjusts the logits after the query--key product is formed; the second variant instead builds positional information into the queries and keys themselves.
 Notation below is for a single attention head.
@@ -202,8 +203,10 @@ Two bearings just above $0$ and just below $2\pi$ are almost the same direction,
 Their $(\tilde{c},\tilde{s})$ values are almost the same, so the relative phase in \cref{eq:method:rope_az_logit} stays small.
 An algebraic gap in $\theta^{\mathrm{az}}$ itself would not.
 
-The pairwise bias of \cref{eq:method:circ_az} and this rotary encoding can be used separately or combined.
-Both the individual variants and their combination are evaluated in \cref{ch:experiments}.
+A control that instead rotates every layer---trunk, mode branch, and deinterleaving branch---by window-local \gls{toa}, with no azimuth encoding, is evaluated in \cref{ch:experiments}.
+That uniform layout tests whether the branch-specific allocation above is necessary, or whether a single temporal coordinate already suffices.
+
+The pairwise bias of \cref{eq:method:circ_az} and this rotary encoding are evaluated as separate alternatives to standard self-attention in \cref{ch:experiments}; they are not combined in this thesis.
 \Cref{fig:method:rope_slicing} summarises the plane allocation for the trunk/mode and deinterleaving layouts.
 
 \begin{figure}[tbp]

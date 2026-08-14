@@ -1,32 +1,29 @@
 \section{Radar Systems and Passive Reception}\label{sec:bg:radar}
 
-\subsection{Electromagnetic Pulses for Navigation, Surveillance, and Control}
+\subsection*{Pulsed radar}
 
-The term \gls{radar} stands for \textbf{Ra}dio \textbf{D}etection \textbf{a}nd \textbf{R}anging. At its core, a radar system operates by sending out electromagnetic pulses and then listening for the echoes that reflect back from objects in the environment. This basic principle supports a wide range of applications, including air traffic control, weather monitoring, altitude measurement, navigation of ships and vehicles, target tracking, and monitoring of the electromagnetic spectrum alongside commercial communication services \parencite{skolnik2008radar}.
+The term \gls{radar} stands for \textbf{Ra}dio \textbf{D}etection \textbf{a}nd \textbf{R}anging.
+A radar transmits a short electromagnetic pulse, waits for the echo that scatters from objects in the environment, and infers range and motion from that return \parencite{skolnik2008radar}.
+The same principle supports air traffic control, weather observation, navigation, altitude measurement, and target tracking \parencite{skolnik2008radar}.
 
-What unifies all radar systems is a practical goal: they emit a carefully controlled burst of electromagnetic energy, allow it to scatter from surrounding objects, and then extract information about the location and motion of those objects from the returning signals. Electromagnetic waves are generated whenever electric charges accelerate, such as when an alternating current passes through an antenna. These waves move outward from the antenna at the speed of light in air. In radar, each outgoing pulse can be thought of as a brief and well-defined packet of energy. By recording the time it takes for this energy to bounce off an object and return, and knowing the speed at which it traveled, the radar can directly calculate how far away the object is \parencite{skolnik2008radar}.
-
-\subsection{Time-of-Flight Ranging and Ambiguity Fundamentals}
-
-At its core, radar sensing uses the physics of wave propagation to measure distance. A transmitter emits a brief electromagnetic pulse, which travels at speed $c$ (the speed of light in air), reflects from an object, and returns as an echo. By measuring the elapsed time $\tau$ between emission and reception—known as the round-trip delay—the system can infer the distance to the object.
-
-In the canonical configuration, a single (monostatic) radar platform handles both transmission and reception, with the wave traversing to the target and back. The fundamental relation connecting time delay to range follows directly from the definition of speed:
+Distance follows from the round-trip delay $\tau$ between transmission and reception.
+With wave speed $c$, the range of a monostatic radar---transmitter and receiver on the same platform---is
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
 \end{equation}
-where $R$ is the target range and $c$ is the wave speed \parencite{skolnik2008radar}. The factor of 2 accounts for the outbound and return paths.
+where the factor of 2 accounts for the outbound and return paths \parencite{skolnik2008radar}.
+Animal echolocation uses the same timing argument with sound in place of radio waves \parencite{skolnik2008radar}.
+Separated receive antennas, in bistatic or multistatic geometries, add angle of arrival and other spatial measurements to this range estimate.
 
-A similar approach is found in animal echolocation: for instance, a bat produces a short sound pulse and estimates the distance to an obstacle or prey by interpreting the delay before it hears the echo, substituting sound waves for electromagnetic ones \parencite{skolnik2008radar}.
-
-While monostatic setups are common, many practical radar and electronic support systems employ multiple spatially separated receive antennas, or distributed arrays, forming so-called bistatic or multistatic configurations. By correlating the signals arriving at different locations, these systems can measure angles of arrival and other spatial properties in addition to range, thus supporting direction finding and improved localization.
-
-Practical radar systems emit periodic pulses, each separated by a pulse repetition interval (\gls{pri}) or, equivalently, a pulse repetition frequency (\gls{prf}). A core challenge appears when echoes from earlier pulses arrive after a new pulse is sent. This leads to \emph{range ambiguity}, where it is unclear which transmitted pulse a received echo should be attributed to. The largest range without ambiguity—the \emph{unambiguous range}—is set by the time between pulses:
+Practical radars emit pulses at a pulse repetition interval (\gls{pri}), or equivalently a pulse repetition frequency (\gls{prf}).
+If an echo from an earlier pulse arrives after the next pulse has been sent, the measured delay no longer identifies a unique range: this is \emph{range ambiguity}.
+The largest range that remains unique is the \emph{unambiguous range}
 \begin{equation}
 \label{eq:bg:runamb}
 R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
 \end{equation}
-Signal processing techniques such as matched filtering and coherent integration increase detection performance within this range, but no algorithm can resolve targets unambiguously beyond $R_{\mathrm{u}}$ as limited by the physics of pulse timing \parencite{skolnik2008radar}.
+Matched filtering and coherent integration improve detection inside this window, but they cannot remove the ambiguity that pulse timing itself imposes \parencite{skolnik2008radar}.
 
 \begin{figure}[tbp]
 \centering
@@ -35,27 +32,24 @@ Signal processing techniques such as matched filtering and coherent integration 
 \label{fig:bg:pulse_echo_timeline}
 \end{figure}
 
-\subsection{Transmitting radars versus receive-only systems}
+\subsection*{Active radar versus passive reception}
 
-Any receiver within range can detect intentional electromagnetic transmissions, and repeated radar pulses make timing and direction information available not only to the radar user, but to anyone listening in \parencite{wiley2006elint}.
-This exposes a fundamental trade-off: transmitting enables the measurement of objects at a distance, but simultaneously reveals the radar's presence, position, and activity to others in the environment.
+A transmitting radar measures delay against its own outgoing pulses and thereby obtains range \parencite{skolnik2008radar}.
+Those same pulses are visible to any receiver in range, so transmission reveals presence, location, and activity as well as it measures them \parencite{wiley2006elint}.
 
-Traditional (transmitting) radar systems measure the delay between their own outgoing pulses and the returning echoes, allowing direct range estimation \parencite{skolnik2008radar}.
-In contrast, passive systems such as \gls{esm} and \gls{elint} do not transmit their own signals.
-Instead, they monitor emissions from other sources and attempt to infer information about those emitters and their behavior \parencite{wiley2006elint}.
-Because they do not transmit, passive receivers maintain a lower profile and avoid revealing themselves by radiation—a key advantage in situations where stealth is important.
+Passive systems such as \gls{esm} and \gls{elint} do not transmit.
+They listen to other radars to determine which emitters are present and how those emitters are behaving \parencite{wiley2006elint}.
+Without control of the waveform, the receiver is limited to what it can measure after detection: carrier frequency, time of arrival, pulse width, amplitude, and, if the antenna supports it, angle of arrival.
+Those measurements are stored as the \gls{pdw} defined next.
+How a classical processing chain uses them is the subject of \cref{sec:bg:elint_pipeline}.
 
-Lacking direct control over the transmitted waveform, passive receivers rely on whatever pulse measurements they can extract after detection: carrier frequency, time of arrival, pulse width, amplitude, and angle of arrival if available.
-This necessity motivates the \gls{pdw} abstraction described next.
-\cref{sec:bg:elint_pipeline} shows how PDWs fit into the overall signal processing chain.
+\subsection{Pulse descriptor words}\label{sec:bg:pdw}
 
-\subsection{From the raw signal to a pulse sequence and descriptor words}\label{sec:bg:pdw}
+A receiver records a voltage time series at the antenna.
+Pulses appear as brief energy rises above the noise floor.
+For each detection the receiver estimates carrier frequency, pulse width, time of arrival, amplitude, and, when directional antennas are available, angle of arrival.
 
-Every radar or receiver starts by collecting a raw electrical signal—essentially a voltage that varies in time as electromagnetic waves are picked up by the antenna. This raw signal can be viewed as a digital recording of the environment’s radio activity, capturing everything present, including both the pulses of interest and background noise.
-
-To extract information, the system looks for brief increases in signal energy that stand out above the noise. These increases correspond to pulses—short bursts of transmitted energy. Locating a pulse means finding where in time the signal rises above a set threshold. After locating pulses, the receiver estimates several physical properties for each one: when it arrived (its time of arrival), how long it lasted (its pulse width), how strong it was (amplitude or energy), and what frequency it had. If the receiver has directional antennas, it can also estimate the angle from which the pulse arrived.
-
-After initial detection and measurement, each pulse is summarized into a standardized set of numbers called a \emph{\gls{pdw}} (pulse descriptor word). This record captures the essential measured properties of a pulse, such as:
+Those estimates are stored as a \emph{\gls{pdw}}:
 \begin{equation}\label{eq:bg:pdw_vector}
   \vect{x}_n
   =
@@ -69,7 +63,9 @@ After initial detection and measurement, each pulse is summarized into a standar
   \bigr)^{\top}
   \in \R^{d},
 \end{equation}
-where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $t_n$ is time of arrival (often the leading edge), $A_n$ is amplitude, and $\theta_n$ is angle of arrival if available. The ellipsis allows for extra recorded properties, like elevation angle of arrival, but the main idea is that each column represents a specific physical measurement, and the format is fixed once chosen. \cref{fig:bg:pdw} visualizes this five-parameter template.
+where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $t_n$ is time of arrival (often the leading edge), $A_n$ is amplitude, and $\theta_n$ is angle of arrival if available.
+The ellipsis allows further recorded properties, such as elevation; once the template is chosen, every pulse is stored in the same format.
+\cref{fig:bg:pdw} shows this five-parameter template.
 
 \begin{figure}[tbp]
   \centering
@@ -78,25 +74,28 @@ where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $
   \label{fig:bg:pdw}
 \end{figure}
 
-A sequence of such pulses emitted by a single transmitter, indexed by order of arrival $(\vect{x}_1, \vect{x}_2, \ldots)$, forms what is called a \emph{pulse train}. When the transmitter operates in a stable mode, the intervals between arrivals ($\tau_n = t_n - t_{n-1}$, for $n \ge 2$) are usually regular or follow a set schedule. This interval is called the pulse repetition interval (\gls{pri}); its inverse, the pulse repetition frequency (\gls{prf}), describes how often pulses are sent:
+A sequence of pulses from one transmitter is a \emph{pulse train}.
+When that transmitter holds a stable mode, the inter-arrival times
 \begin{equation}\label{eq:bg:pdw_pri}
-  \tau_n = t_n - t_{n-1}, \qquad n \ge 2.
+  \tau_n = t_n - t_{n-1}, \qquad n \ge 2
 \end{equation}
-While simple systems use a fixed interval, more complex transmitters may change their intervals in a predictable or agile way, and this information can be included in the record for each pulse.
+are regular or follow a programmed schedule; that interval is the \gls{pri} of the train, and its inverse is the \gls{prf}.
+Simple emitters keep a fixed interval; agile emitters vary it in a planned way.
 
-Each measured descriptor is thus a function of both the true (but unknown) properties of the transmitting source and the effects of noise, measurement error, and possible missing data. Very weak pulses may be missed, and noise or spurious events may be incorrectly identified as pulses.
+Each measured descriptor is a noisy, possibly incomplete observation of the true pulse.
+Weak pulses may be missed, and noise events may be reported as pulses.
 
-Finally, rather than carrying forward the full raw signal, the system represents each pulse only by its measured properties in the form of a time-ordered sequence of \glspl{pdw}. This sequence $(\vect{x}_1,\ldots,\vect{x}_T)$—referred to in this thesis as a \emph{recording}, since it generally interleaves the pulse trains of several transmitters—is the main input to later processing and learning algorithms. Each $\vect{x}_n$ is a compact summary of one pulse, and the order reflects the timeline of arrivals, replacing the need for direct inspection of the original sampled voltage trace.
+After this step the sampled voltage is discarded.
+The working input is a time-ordered sequence of \glspl{pdw} $(\vect{x}_1,\ldots,\vect{x}_T)$, called a \emph{recording} because it generally interleaves the pulse trains of several transmitters.
 
-\subsection{Physical sources and transmit schedules}\label{sec:bg:emitters}
+\subsection{Emitters and operating modes}\label{sec:bg:emitters}
 
-In passive \gls{esm} and \gls{elint}, a \emph{radar emitter} means a physical transmitter whose pulses line up in time and frequency strongly enough to be treated as one source \parencite{wiley2006elint}.
-An \emph{operating mode} is the instantaneous transmit recipe: carrier plan, pulse width, repetition pattern, beam motion, and any programmed switching rules among them \parencite{skolnik2008radar,wiley2006elint}.
-The same hardware cycles among modes as tasks change, so a timeline of \glspl{pdw} mixes mode segments even when the physical box is fixed.
-Different platforms can also implement the same functional mode with different numerical parameters, for example two trackers with distinct nominal \glspl{prf} \parencite{wiley2006elint}.
+In passive \gls{esm} and \gls{elint}, an \emph{emitter} is a physical transmitter: pulses that line up in time, frequency, and direction strongly enough to be treated as one source \parencite{wiley2006elint}.
+An \emph{operating mode} is the transmit schedule in force at a given time---carrier plan, pulse width, repetition pattern, and scan or switching rules---chosen for a task such as search, acquisition, track, or illumination \parencite{skolnik2008radar,wiley2006elint}.
 
-Illustrative mode families include wide-area search, acquisition and track, fire-control illumination, weather sensing, and terminal guidance support \parencite{skolnik2008radar}.
-Those roles push different combinations of \gls{pri}, dwell, agility, and scan law, which is why operators care both about identity and about what the transmitter is doing at a given time \parencite{skolnik2008radar,wiley2006elint}.
+These are two different groupings of the same pulses.
+One emitter switches among modes as its task changes, so a single physical source produces several mode segments over a mission.
+Different emitters can also run the same functional mode with different numerical parameters, for example two trackers with distinct nominal \glspl{prf} \parencite{wiley2006elint}.
 
-The relationship between emitters and modes is many-to-many: one emitter runs many modes over a mission, and different emitters can realize similar modes with different parameter sets \parencite{wiley2006elint}.
-The rest of this chapter walks through the passive processing chain (\cref{sec:bg:elint_pipeline}) and then supplies the learning background used in the method.
+Operators therefore care about both questions: which transmitter is present, and what that transmitter is doing now.
+\Cref{sec:bg:elint_pipeline} describes how classical processing answers them in sequence.

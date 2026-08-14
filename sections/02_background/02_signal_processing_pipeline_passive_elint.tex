@@ -1,47 +1,48 @@
-\section{Signal Processing Pipeline for Passive ELINT}\label{sec:bg:elint_pipeline}
+\section{The Classical ELINT Pipeline}\label{sec:bg:elint_pipeline}
 
-In \gls{ew} and \gls{esm} applications, measured radar energy passes through a staged \emph{signal processing pipeline} before it reaches higher-level \gls{elint} reasoning.
-The exact implementation varies with platform, band, and mission software, but the logical chain is broadly stable across textbooks and system descriptions.
+A passive collector turns intercepted radar energy into a time-ordered list of \glspl{pdw} and then tries to answer two questions about that list: which physical emitter sent each pulse, and which operating mode was in use.
+Classical \gls{elint} and \gls{esm} architectures answer those questions in stages rather than jointly \parencite{wiley2006elint}.
+Implementations differ by band and platform, but the logical order is stable: detect and measure, deinterleave into pulse trains, then identify equipment and analyze mode on each train.
 
-\subsection{Front-end reception, detection, and pulse-parameter estimation}
+\subsection*{Detection and pulse measurement}
 
-At the \emph{front end}, antennas and \gls{rf} conditioning capture emissions over one or more instantaneous bandwidths, often after wideband digitization or channelized sub-band processing.
-A \emph{detection} stage then marks pulse-like events against a noise and clutter background, producing a sparse list of candidate pulse times (and sometimes coarse frequency hints).
+Antennas and \gls{rf} conditioning capture a band of interest, often after wideband digitization or channelized sub-band processing.
+A detector marks pulse-like events against noise and clutter.
+Parameter estimation then attaches the per-pulse measurements of \cref{sec:bg:pdw}, producing the \gls{pdw} list that later stages consume.
+Estimates are noisy, weak pulses may be missed, and false alarms may enter the list with no associated radar.
 
-Given detections, \emph{parameter estimation} attaches per-pulse measurements such as carrier frequency, pulse width, time of arrival, direction of arrival when available, and amplitude or signal-to-noise proxies, this becomes our PDWs after possibly attatching AoA after triangulation.
-These estimates are noisy, can be missing for weak emitters, and may include false alarms that are not associated with any physical radar.
+The result at this stage is still mixed: pulses from several emitters, possibly in several modes, share one time-ordered recording.
 
-\subsection{Deinterleaving and pulse-train formation}\label{sec:bg:deinterleaving_evolution}
+\subsection{Deinterleaving: grouping pulses by emitter}\label{sec:bg:deinterleaving_evolution}
 
-\emph{Sorting} and \emph{deinterleaving} group pulses into coherent pulse trains by exploiting periodic structure in inter-pulse timing and consistent parameter tracks across time.
-The output of this stage is commonly packaged as a stream of \glspl{pdw} (or closely related pulse descriptor records), which form the usual interface to downstream tasks such as emitter identification and mode analysis (\cref{sec:bg:pdw}).
+\emph{Deinterleaving} (also called sorting) assigns each pulse to a physical emitter.
+Its output is a set of pulse trains: one hypothesized sequence per emitter, each stripped of the others' pulses \parencite{wiley2006elint}.
+This recovers the emitter grouping of \cref{sec:bg:emitters}, not a name from a catalogue.
 
-Operationally, deinterleaving developed from deterministic temporal rules toward multi-parameter clustering and, more recently, toward learned sequence models \parencite{qu2026radardeinterleavingreview}.
-In comparatively sparse environments with simple pulse trains, \gls{pri} inferred from \gls{toa} differences often behaved like a stable timing signature, so early algorithms searched for repetition by accumulating histograms of inter-pulse intervals.
-Cumulative and sequential difference histograms (CDIF and SDIF) are representative: they ``vote'' for candidate \gls{pri} values through peaks in the difference domain and remain standard pedagogical references \parencite{qu2026radardeinterleavingreview,wiley2006elint}.
-Their accuracy rests on approximately regular timing; dense mixing, harmonic ambiguity, false peaks from cross-emitter differences, and missing pulses that break sequential differencing all erode reliability \parencite{qu2026radardeinterleavingreview}.
+When trains are sparse and nearly periodic, the \gls{pri} inferred from \gls{toa} differences is a usable timing signature.
+Histogram methods such as CDIF and SDIF accumulate inter-pulse intervals and treat peaks as candidate \glspl{pri} \parencite{wiley2006elint,qu2026radardeinterleavingreview}.
+They fail when timing is agile, when several trains overlap so that cross-emitter differences create false peaks, or when missing pulses break sequential differencing.
 
-Once \gls{pri} agility became widespread, many systems augmented timing with unsupervised structure in joint spaces of \gls{rf}, pulse width, \gls{aoa}, and related measurements, using methods such as $k$-means or density-based clustering \parencite{qu2026radardeinterleavingreview,ester1996density}.
-That shift treats deinterleaving as geometric separability in hand-crafted feature space, but performance still depends on scaling, metric choices, and hyperparameters (for example cluster counts or neighborhood radii) that are difficult to set when emitters are unknown a priori \parencite{qu2026radardeinterleavingreview}.
+A common next step is to cluster pulses in a joint space of \gls{rf}, pulse width, \gls{aoa}, and related measurements, using $k$-means or density-based methods \parencite{ester1996density,qu2026radardeinterleavingreview}.
+That treats deinterleaving as geometric separation in a hand-chosen feature space.
+Cluster count, metric, and scaling are then extra design choices, and they are hard to set when the number of emitters is unknown.
 
-Modern emitters compound the difficulty through overlapping pulse trains, rapid mode changes, and low-observable emissions that increase loss and measurement jitter \parencite{qu2026radardeinterleavingreview}.
-The \gls{pdw} representation in \cref{sec:bg:pdw} and the learning-based tools in later sections of this chapter target reasoning under those conditions.
+Classical architectures treat train formation as an early, discrete step: later logic is expected to see one dominant hypothesis per emitter, or a short ranked list, rather than the interleaved mixture \parencite{wiley2006elint}.
 
-In classical \gls{elint} architectures, specifications therefore treat train formation as an early, largely discrete step: deinterleaving is completed first so that downstream logic receives one dominant hypothesis per physical emission path, or a short ranked list, rather than a time-interleaved mixture \parencite{wiley2006elint}.
+\subsection{Mode analysis: grouping pulses by operating mode}
 
-\subsection{Emitter reporting and equipment identification}
+\emph{Mode analysis} asks a different question of the same pulses: which transmit schedule is active.
+In the classical chain this step runs \emph{after} deinterleaving, on each recovered train rather than on the mixture \parencite{wiley2006elint}.
+The usual mechanism is a \emph{mode library}: nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, against which the train is matched.
 
-\emph{Emitter reports} are assembled after train formation, summarizing each train with aggregated \gls{pdw} statistics, tentative equipment identities from lookup tables, and temporal extent.
-Library-driven identification and threat correlation consume those reports together with operator context.
+The two tasks are not interchangeable.
+A correctly deinterleaved train can still contain several mode segments, because one emitter switches modes as its task changes.
+A mode label is not an emitter identity either, because several emitters can implement the same functional mode.
+When the library is incomplete, analysts group trains---or segments of trains---by similar behavior and name those groups later.
 
-\subsection{Operating-mode analysis and waveform libraries}
+Equipment identification is a related but distinct lookup: aggregated train statistics are compared with an emitter library to propose a radar type.
+That step names hardware against a catalogue; it is not required in order to form the emitter and mode partitions, and it is not the subject of this thesis.
 
-Mode classification is then commonly framed as matching the train against a \emph{mode library} of nominal \gls{rf} bands, \gls{pri}/\gls{prf} families, stagger laws, and scan programs, so that declared modes remain anchored to catalogued waveform templates.
-When labels are incomplete, unsupervised or weakly supervised grouping over pulse trains plays the same operational role as \emph{mode clustering} at the library boundary: it proposes coherent behavior segments that analysts later align to doctrine or intelligence products.
-
-\subsection{Emitter geolocation, fusion, and downstream displays}
-
-\emph{Positional estimation}---for example \gls{aoa} intersections from direction-finding networks, time-difference-of-arrival fixes along baselines, or fused tracks across collectors---consumes the same deinterleaved associations, which isolates geometry and timing errors from the sorting stage.
-Later stages may maintain libraries, threat lists, and operator displays, but for the learning problem in this thesis the critical contract is that the model consumes the deinterleaved \gls{pdw} stream produced here.
-
-% TODO: Add a schematic figure (figures/background/) and cite a standard EW/ESM text for the pipeline stages.
+Classical processing is therefore sequential: form trains first, then analyze mode on each train.
+Errors in deinterleaving enter mode analysis as corrupted trains.
+The two groupings are computed by separate stages, not read off a single description of the mixed stream.

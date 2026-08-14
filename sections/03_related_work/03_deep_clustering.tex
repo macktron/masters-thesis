@@ -1,13 +1,28 @@
-\section{Deep Clustering and Joint Representation Learning}\label{sec:related:deep_clustering}
+\section{Deep Clustering and Contrastive Representation Learning}\label{sec:related:deep_clustering}
 
-Classical clustering assumes that either raw features or a fixed embedding already reveal the desired partition.
-\Gls{dec} departs from that split by learning an encoder jointly with a soft assignment to a small set of trainable cluster centroids in embedding space \parencite{xie2016unsupervised}.
-Training alternates between computing soft assignments from the current encoder and refining the encoder with a Kullback--Leibler objective that sharpens confident assignments toward an auxiliary target distribution, so that the network discovers both features and cluster structure.
-Follow-on work tightens initialization, adds reconstruction constraints, or refines the target distribution; the common theme is that discrete structure is not fixed in advance but co-adapts with the representation.
+Classical clustering assumes that either the raw features or a fixed embedding already reveal the desired partition.
+Deep clustering drops that split: the encoder and the discrete structure are learned together.
 
-SwAV and related \emph{prototype} methods replace dense pairwise contrastive negatives with a prediction problem onto a modest codebook of cluster prototypes, swapping predicted codes between augmented views to avoid representation collapse while still encouraging invariance \parencite{caron2020swav}.
-They sit between purely self-supervised contrastive pretraining \parencite{chen2020simclr} and hard assignment $k$-means: gradients still flow through discrete-like targets, but the geometry is anchored by learned prototypes rather than by instance indices alone.
+\Gls{dec} places trainable centroids in embedding space and alternates soft assignment with a Kullback--Leibler objective that sharpens confident assignments toward an auxiliary target \parencite{xie2016unsupervised}.
+\Gls{idec} adds a reconstruction term so that the clustering loss does not destroy local geometry \parencite{guo2017idec}.
+DeepCluster instead runs \(k\)-means on the current features and treats the assignments as pseudo-labels for a discriminative update \parencite{caron2018deepcluster}.
+In all three, the number of clusters is a design choice, and the only partition being learned is a single flat grouping.
 
-Several lines extend deep clustering to \emph{multiple} partitions or hierarchical labels, for example by stacking separate assignment heads, alternating optimization over two clusterings, or enforcing orthogonality constraints between subspaces.
-The gap relevant to this thesis is narrower: emitter identity and operating mode are not arbitrary independent clusterings---modes nest inside emitters---yet many published pipelines still treat a single flat label space or attach two unrelated classification heads to the same backbone.
-Work that jointly addresses deinterleaving-style separation, in which emitter identifiers are inherently local to each recording and must be recovered by clustering at inference, alongside finer-grained mode grouping that uses global mode labels for supervision but still produces clusters at inference (so that modulation types absent from the training catalogue can surface as additional clusters), all from a shared transformer encoder, remains comparatively sparse; this combination motivates the supervised dual-branch method in \cref{ch:method}.
+Contrastive methods replace explicit centroids with pairwise attraction and repulsion.
+InfoNCE and SimCLR pull two views of the same instance together and push other batch members apart \parencite{oord2018representation,chen2020simclr}.
+SwAV predicts a small codebook of prototypes from one view and uses the assignment of the other view as the target, which avoids comparing every pair while still preventing collapse \parencite{caron2020swav}.
+Contrastive clustering applies the same idea in both the instance dimension and the cluster dimension of a feature matrix \parencite{li2021contrastive}.
+These objectives are unsupervised: positives are defined by augmentation, not by labels.
+
+When labels are available, the positive set can be defined by class identity rather than by instance identity.
+Supervised contrastive learning does exactly that: every other sample with the same class is a positive, and the loss is an InfoNCE average over those positives \parencite{khosla2020supcon}.
+It recovers the triplet loss of FaceNet as a special case that uses a single positive and a hard negative \parencite{schroff2015facenet}.
+The method of \cref{sec:method:loss} uses this kernel twice, with different rules for who counts as a positive.
+
+Two properties of this literature matter for the method.
+First, training and assignment are usually coupled: \gls{dec}, DeepCluster, and SwAV produce cluster indices as part of the loss.
+This thesis decouples them.
+The contrastive terms shape the embedding; \gls{dbscan} is applied only at inference and contributes no gradient (\cref{eq:method:cluster_decoding}).
+Second, almost every method learns one partition.
+A single contrastive term cannot encode both a recording-local emitter grouping and a globally comparable mode grouping, because those two relations contradict each other in one embedding: two pulses from different emitters can share a mode, and two pulses from one emitter can differ in mode.
+That conflict is why the encoder splits into two branches after a shared trunk.

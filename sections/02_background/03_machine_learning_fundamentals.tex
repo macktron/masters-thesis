@@ -15,7 +15,7 @@ Given a dataset \(\setD = \{(\vect{x}_i, y_i)\}_{i=1}^{N}\) drawn from an unknow
 where \(\Omega\) is an optional regularizer that trades fidelity to the training data against complexity of the fitted model.
 Generalization to fresh inputs is then assessed on held-out data, and the entire training procedure---data, model class, loss, optimizer, regularization---is judged by its effect on that out-of-sample behavior rather than on the training fit alone.
 
-\subsection{Learning paradigms}
+\subsection*{Learning paradigms}
 
 \Gls{ml} problems are conventionally separated by the kind of supervision available at training time.
 In \emph{supervised} learning, each \(\vect{x}_i\) is paired with a label \(y_i\), categorical for classification or real-valued for regression, and \(\ell\) penalizes disagreement between the prediction and that label.
@@ -23,14 +23,14 @@ In \emph{unsupervised} learning, labels are absent and the goal is to expose str
 \emph{Self-supervised} learning sits between the two: it constructs supervisory targets automatically from the data through a designed pretext task---predicting masked parts of an input, contrasting augmented views, or ordering shuffled tokens---so that an encoder can be trained without manual annotation.
 The remainder of this thesis operates in the supervised regime: training recordings carry per-pulse emitter and operating-mode labels (\cref{sec:method:formulation,sec:method:data}), and the training objective uses both label streams directly; the unsupervised and self-supervised paradigms are summarised here only because the clustering tools in \cref{sec:bg:clustering} and the contrastive representation-learning machinery in \cref{sec:bg:dl} are inherited from those traditions.
 
-\subsection{Representation learning}
+\subsection*{Representation learning}
 
 Much of modern \gls{dl} practice is best understood as \emph{representation learning}: a parametric encoder maps high-dimensional observations into a lower-dimensional vector space whose geometry is shaped by the training objective.
 Downstream tasks---classification, clustering, retrieval, or sequence prediction---then operate on the resulting \emph{embeddings} \(\vect{z} = \Enc(\vect{x}) \in \R^{d}\) rather than on raw sensor coordinates.
 The advantage of routing tasks through a learned representation is that invariances, similarities, and task-relevant factors of variation can be encoded by \(\Enc\) once, after which simple linear or geometric operations on \(\vect{z}\) suffice for many downstream questions.
 \Cref{sec:bg:dl,sec:bg:transformer} expand on this view; the method chapter (\cref{ch:method}) instantiates it for \gls{pdw} streams, training an encoder whose embeddings are intended to expose emitter and mode structure.
 
-\subsection{Applications in radar deinterleaving and mode classification}
+\subsection*{Applications in radar deinterleaving and mode classification}
 
 Radar signal deinterleaving and operating-mode classification illustrate the practical pull of these ideas.
 For decades, both tasks were addressed by deterministic temporal rules and hand-crafted statistics over \gls{pdw} parameters, as outlined in \cref{sec:bg:elint_pipeline}.
