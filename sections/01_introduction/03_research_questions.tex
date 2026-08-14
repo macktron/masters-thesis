@@ -1,11 +1,8 @@
 \section{Research Questions}\label{sec:intro:rq}
 
-% TODO: 2-4 numbered research questions, each answerable from the
-% experiments in Chapter 5.
-The thesis addresses the following research questions:
+The thesis addresses the following questions:
 \begin{description}
-  \item[RQ1] Under practical sequence-length limits of a transformer encoder, can the model support effective deinterleaving and recover operating modes via clustering?
-  \item[RQ2] Does a joint objective that couples deinterleaving with mode-aware clustering yield better clustering performance or representations than a comparable single-objective transformer baseline focused on deinterleaving alone?
+  \item[RQ1] Given a bounded window of \glspl{pdw}, can a transformer encoder deinterleave pulses and recover operating modes by clustering?
+  \item[RQ2] Does a joint objective that couples deinterleaving with mode clustering outperform a comparable transformer trained for deinterleaving alone?
+  \item[RQ3] Do a pairwise physical attention bias and rotary positional encoding on pulse coordinates improve clustering relative to standard multi-head attention?
 \end{description}
-
-

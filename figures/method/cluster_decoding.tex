@@ -3,7 +3,7 @@
 % embeddings to discrete per-pulse labels.  Two parallel pipelines
 % (emitter / mode) take the $L$-token embedding sequences produced by
 % the projection heads of \cref{sec:method:arch} and cluster them
-% independently with \gls{hdbscan} on a per-window basis, yielding the
+% independently with \gls{dbscan} on a per-window basis, yielding the
 % discrete partitions of
 % \cref{eq:method:estimated_label_pair}.  The
 % pipelines are structurally identical; the asymmetry between the two

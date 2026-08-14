@@ -1,10 +1,10 @@
 \section{Hyperparameters and Training Details}\label{sec:exp:hparams}
 
 This section collects numerical training choices deferred from \cref{sec:method:training,sec:method:loss,sec:method:arch}.
-Unless \cref{sec:exp:ablation} states otherwise, baseline models use the same epoch budget, hardware (\cref{sec:exp:setup}), and early-stopping protocol so that differences reflect architecture and objective rather than compute.
+Unless \cref{sec:exp:ablation} states otherwise, baseline models use the same epoch budget and hardware (\cref{sec:exp:setup}) so that differences reflect architecture and objective rather than compute.
 
 The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:method:loss}.
-\cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder; entries marked with an em dash are still being matched to the released training script and will be filled before the final thesis submission.
+\cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder; entries marked with an em dash will be filled before the final thesis submission.
 
 \begin{table}[t]
   \centering
@@ -14,13 +14,12 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
     \toprule
     Setting & Value \\
     \midrule
-    Optimiser & Adam \parencite{kingma2014adam} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
+    Optimiser & AdamW \parencite{loshchilov2019adamw} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
     Peak learning rate $\eta_{\max}$ & --- \\
-    Minimum learning rate $\eta_{\min}$ & \num{0} (cosine floor; PyTorch default) \\
-    Cosine period $T_{\max}$ & \num{30} scheduler steps, one step per training epoch \\
-    Maximum epochs & \num{30} \\
-    Early stopping patience & \num{7} epochs without improvement on the validation loss \\
-    Early stopping checkpoint & Weights from the epoch with lowest validation loss so far \\
+    Warmup & Linear from $0$ to $\eta_{\max}$ over $5\%$ of total steps \\
+    Schedule after warmup & Cosine annealing to $\eta_{\min}$ \\
+    Minimum learning rate $\eta_{\min}$ & \num{0} \\
+    Epochs & \num{8} \\
     Dropout (attention and feed-forward) & \num{0.1} throughout the transformer blocks \\
     Batch size $B$ (windows per step) & --- \\
     Mode loss weight $\lambda_{\mathrm{md}}$ & \num{1} \\
@@ -29,5 +28,5 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
   \end{tabular}
 \end{table}
 
-The cosine scheduler follows the PyTorch \texttt{CosineAnnealingLR} convention: after each epoch the learning rate is updated from $\eta_{\max}$ toward $\eta_{\min}$ over $T_{\max} = \num{30}$ steps, which aligns the period with the nominal training horizon.
-If early stopping triggers first, training halts at the best validation checkpoint and the final few scheduler steps may not be executed.
+Total optimisation steps equal eight epochs times the number of training batches per epoch.
+The warmup fraction and cosine phase are counted in those steps, as stated in \cref{sec:method:training}.

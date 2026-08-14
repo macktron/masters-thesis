@@ -14,7 +14,7 @@ Empirically answer the research questions stated in `sections/01_introduction/03
 - `02_datasets.tex` — Each dataset gets its own paragraph (or table row): description, size, number of emitters, number of modes, train/val/test split, synthetic vs. real, any preprocessing peculiarities.
 - `03_hyperparameters.tex` — Exact hyperparameters for the proposed model and each baseline. Use a table. If different datasets require different hyperparameters, say so explicitly.
 - `04_quantitative_results.tex` — Main results table: rows = methods (baselines + proposed), columns = datasets and metrics (AMI/ARI/V-measure for emitter clustering and for mode clustering). Bold the best per column. Report mean $\pm$ std over at least 3 seeds.
-- `05_ablations.tex` — Drop one component at a time: no contrastive loss, no clustering head, single-head only, no positional encoding, fewer layers, fewer heads. One row per ablation.
+- `05_ablations.tex` — Drop one component at a time: no contrastive loss, no clustering head, single-head only, fewer layers, fewer heads, and the attention variants of RQ3 (bias, RoPE, both). One row per ablation.
 - `06_qualitative_analysis.tex` — t-SNE/UMAP plots of embeddings colored by ground-truth emitter and by ground-truth mode. Attention-weight visualizations if useful. Optionally a confusion matrix.
 
 ## Style notes

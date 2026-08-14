@@ -1,9 +1,10 @@
 \section{Training Procedure}\label{sec:method:training}
 
 Parameters $\bm{\theta}$ are estimated by minimising $\Loss$
-(\cref{eq:method:loss_total}) with Adam \parencite{kingma2014adam}.
-Learning rate, weight decay, epoch count, dropout, and related
-settings are listed in \cref{tab:exp:hparams_main}.
+(\cref{eq:method:loss_total}) with AdamW \parencite{loshchilov2019adamw} in PyTorch.
+Training runs for eight epochs on the training split; after each epoch the model is evaluated on the validation split.
+The learning rate rises linearly from zero to its peak over the first $5\%$ of the total optimisation steps (eight epochs times the number of training batches), then follows a cosine anneal.
+Peak learning rate, weight decay, batch size, and related settings are listed in \cref{tab:exp:hparams_main}.
 
 \subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}
 
@@ -26,5 +27,4 @@ across windows and supply additional positives.
 Mode labels remain globally comparable across scenarios, but drawing
 several windows from one scenario also increases the number of
 same-mode positives available to the mode branch in each batch.
-The number of windows per batch, together with any early-stopping
-policy, is recorded in \cref{tab:exp:hparams_main}.
+The number of windows per batch is recorded in \cref{tab:exp:hparams_main}.

@@ -1,9 +1,8 @@
 \section{Thesis Outline}\label{sec:intro:outline}
 
-The remainder of the thesis is organized as follows.
-\Cref{ch:background} supplies textbook-style background on pulsed radar, \glspl{pdw}, emitters and operating modes, the \gls{elint} processing chain, and the \gls{ml} and transformer concepts needed to read the method.
-\Cref{ch:related_work} turns to the literature, contrasting classical emitter identification with deep supervised radar models, deep clustering objectives, sequence transformers, and work on joint or hierarchical cluster structure; each subsection closes with the limitation that motivates the present approach.
-\Cref{ch:method} states the formal problem, documents data representation and preprocessing (\cref{sec:method:data}), specifies the dual-branch encoder and losses (\cref{sec:method:arch,sec:method:loss}), describes training and metrics, and lists baselines.
-\Cref{ch:experiments} reports hardware and software setup, the synthetic scenario corpus (\cref{sec:exp:datasets}), hyperparameters, quantitative scores, ablations, and qualitative analyses.
-\Cref{ch:discussion} interprets findings, positions them against prior art, states limitations---including simulator-only evidence and operational gaps---and discusses implications.
-\Cref{ch:conclusion} summarizes answers to the research questions and outlines future work.
+\Cref{ch:background} covers pulsed radar, \glspl{pdw}, emitters and modes, the \gls{elint} chain, and the machine-learning and transformer background used later.
+\Cref{ch:related_work} surveys classical emitter identification, supervised radar models, deep clustering, sequence transformers, and joint clustering, and states the gap that motivates the method.
+\Cref{ch:method} defines the problem, the preprocessing, the encoder and losses, the attention variants, training, metrics, and baselines.
+\Cref{ch:experiments} reports setup, the synthetic corpus, hyperparameters, scores, ablations, and qualitative plots.
+\Cref{ch:discussion} interprets the results, compares them with prior work, and states limitations.
+\Cref{ch:conclusion} answers the research questions and lists future work.

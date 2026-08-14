@@ -18,8 +18,7 @@ Clusters grow by connecting core points that mutually fall in each other's \(\va
 
 This behaviour matches the inference setting of \cref{eq:method:cluster_decoding}: within each window the number of active emitters (and, separately, of modes) is not known a priori, and sparse outliers can be left unassigned instead of distorting the partition.
 The main practical cost is sensitivity to \(\varepsilon\): a single global radius assumes that all clusters share a comparable density scale.
-Hierarchical extensions such as \gls{hdbscan} replace the fixed radius with a hierarchy of density levels and extract a flat partition by cluster stability \parencite{campello2015hierarchical,mcinnes2017hdbscan}, at the expense of additional tuning choices.
-The method chapter uses plain \gls{dbscan} with frozen \((\varepsilon,\mathrm{minPts})\) on each branch embedding; alternatives appear only as planned ablations (\cref{sec:exp:ablation}).
+The method chapter uses \gls{dbscan} with frozen \((\varepsilon,\mathrm{minPts})\) on each branch embedding.
 
 Applied to raw high-dimensional features, density thresholds degrade because neighbourhoods become less informative as \(d\) grows.
 Deep clustering therefore first learns a lower-dimensional embedding in which the desired partitions are more linearly or density-separable, then runs a classical operator such as \(k\)-means or \gls{dbscan} in that space \parencite{xie2016unsupervised}.

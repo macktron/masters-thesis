@@ -12,7 +12,7 @@ Describe the proposed approach in enough detail that another researcher could re
 
 - `01_problem_formulation.tex` — Recording-level problem statement. Defines the observed recordings $\mat{X}^{(s)}$, the ground-truth label pairs $\vect{y}_n = (e_n, m_n)$, the two target partitions (emitter and mode), and the estimation objective: recover both partitions of a generic observed pulse sequence up to independent relabelling per coordinate. Windowing and clustering are *method* choices and are only forward-referenced here, never assumed by the problem statement.
 - `02_data_preprocessing.tex` — Per-feature scaling, AoA-to-direction conversion, windowing (window length $L$, stride $\delta$, window superscript $(w)$), and per-window TOA min--max mapping.
-- `03_architecture.tex` — The transformer encoder: input embedding, shared trunk, two task-specific branches, projection heads, and the DBSCAN decoding step that turns embeddings into discrete estimates. Schematic figures live in `figures/method/`.
+- `03_architecture.tex` — The transformer encoder: input embedding, shared trunk, two task-specific branches, projection heads, and the DBSCAN decoding step that turns embeddings into discrete estimates. Model widths, depths, and head counts are stated here. Schematic figures live in `figures/method/`.
 - `04_attention_variants.tex` — Attention variants: pairwise physical bias on TOA and circular azimuth distance; RoPE with TOA on trunk/mode and wrap-safe $(\cos,\sin)$ azimuth split on the deinterleaving branch.
 - `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the total objective.
 - `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
@@ -26,4 +26,4 @@ Describe the proposed approach in enough detail that another researcher could re
 - Reserved index symbols: $s$ is the recording index, $w$ the window index, $\delta$ the windowing stride, $L$ the window length, $N$ ($N_s$) the recording length. Do not reuse these letters for anything else in this chapter.
 - Algorithm pseudocode is welcome — use the `algorithm` / `algpseudocode` environments already loaded in `preamble.tex`. Label as `alg:method:...`.
 - Place the architecture figure and any training-pipeline diagrams in `figures/method/`.
-- Do **not** mention specific datasets or hyperparameter values here — those go in Chapter 5.
+- Model hyperparameters that define the encoder (width, depth, heads, FFN size, embedding dimension) are stated in `03_architecture.tex`. Dataset sizes and optimisation settings go in Chapter 5.

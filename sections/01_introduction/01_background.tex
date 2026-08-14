@@ -1,16 +1,15 @@
 \section{Background and Motivation}\label{sec:intro:background}
 
-Recent large-scale conflicts illustrate how contested the electromagnetic spectrum has become.
-Commanders rely on timely, passive sensing to build situational awareness, protect platforms, and coordinate fires without revealing their own emissions.
-Within \gls{ew}, which aims to exploit, protect, and maneuver in the spectrum, \gls{esm} systems listen passively and supply the measurements that feed higher-level \gls{elint} tasks such as detecting radars, grouping pulses by emitter, and inferring behavior \parencite{wiley2006elint,skolnik2008radar}.
+Radar and communications systems share a limited electromagnetic spectrum.
+Passive \gls{esm} receivers listen without transmitting and record time-ordered \glspl{pdw} that feed \gls{elint} analysis: detecting radars, grouping pulses by emitter, and recognizing operating modes \parencite{wiley2006elint,skolnik2008radar}.
 
-Modern radars are increasingly agile: they vary carrier frequency, pulse width, amplitude, and \gls{pri} across bursts to improve performance and survivability.
-That agility blurs simple fingerprints and stresses classical rule-based parsers tuned to stable pulse trains.
-The same physical emitter also switches \emph{modes}---recurrent control policies that map an operational objective (for example, volume search versus track) to a characteristic regime in the pulse train.
-Mode awareness is therefore operationally informative: it constrains how the waveform may evolve, signals intent at a coarse level, and can help disambiguate emitters when type-level signatures overlap.
+Modern radars vary carrier frequency, pulse width, amplitude, and \gls{pri} from burst to burst.
+That agility weakens simple fingerprints and makes classical parsers built for stable pulse trains less reliable.
+The same emitter also switches \emph{modes}: recurrent control policies that map a task such as volume search or track to a characteristic pulse regime.
+Knowing the mode constrains how the waveform may evolve and can separate emitters that look similar at the type level.
 
-At the same time, \gls{ml} and \gls{dl} have become the default toolkit for sequence modeling and representation learning in other domains.
-Radar pulse analysis naturally presents as a stream of low-level measurements---often summarized as \glspl{pdw}---where long-range dependence and mixture structure (multiple emitters superposed in time) favor learned encoders over purely hand-crafted feature pipelines, and where the available supervision is itself asymmetric: emitter identifiers in curated training data are typically defined per recording rather than across an open global population, while operating modes are drawn from a much smaller, shared catalogue.
+The input to this thesis is a stream of \glspl{pdw}.
+Several emitters are interleaved in time, so the encoder must use context across the window.
+The supervision available in labelled training data is asymmetric: emitter identifiers are unique only within a recording, while operating modes come from a shared catalogue.
 
-This thesis studies whether a transformer-style encoder, trained with objectives suited to clustering, can produce embeddings in which both distinct emitters and their operating modes emerge as separable structure.
-The remainder of the introduction states the problem precisely, lists the research questions, and outlines scope, contributions, and ethics.
+This thesis asks whether a transformer encoder, trained with clustering objectives, can map such streams to embeddings in which emitters and modes both form separable groups.

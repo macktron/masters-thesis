@@ -1,9 +1,10 @@
 \section{Evaluation Metrics}\label{sec:method:metrics}
 
 The methods of \cref{sec:method:loss,sec:method:arch} return per-pulse label pairs $\hat{\vect{y}}_n = (\hat{e}_n, \hat{m}_n)$ whose coordinates have to be compared with the ground-truth pairs $\vect{y}_n$ of \cref{eq:method:label_pair}.
-Both labellings partition the same index set $\{1,\ldots,N\}$, instantiated by either the emitter pair $(e_n,\hat{e}_n)$ within a window or the mode pair $(m_n,\hat{m}_n)$ across windows, as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}.
+Both labellings partition the same index set of one window, instantiated by the emitter pair $(e_n,\hat{e}_n)$ or the mode pair $(m_n,\hat{m}_n)$ as in \cref{eq:method:emitter_partition,eq:method:mode_partition,eq:method:dual_embeddings}.
 The integers used to name each cluster are arbitrary and may differ between the two labellings, so every metric reported here is invariant to relabelling: only the induced partitions matter, not the symbols themselves.
-That requirement is built into the method: the decoder of \cref{eq:method:cluster_decoding} is a clustering step, not a classifier, so it only groups pulses that belong together and does not assign names from a fixed label catalogue.
+That requirement is built into the method: inference is per window on both branches (\cref{eq:method:cluster_decoding}).
+Global mode labels are used only in training, as an inductive bias that pulls same-mode embeddings together; they are not a catalogue of names at inference.
 
 All metrics derive from the contingency table
 \[
@@ -116,7 +117,7 @@ The harmonic mean is small whenever either component is small, so a high V-measu
 The three families agree at the extremes --- all return one at exact recovery and approximately zero at chance --- but they disagree in the middle.
 $\ARI$ summarises the pair structure and is comparable across runs with different cluster counts.
 $\AMI$ captures how much information one labelling carries about the other and remains comparable when the number of clusters varies.
-Reporting homogeneity and completeness alongside the V-measure separates oversplitting from undermerging, which matters for the open-set mode setting where $\hat{M}>M$ is expected.
+Reporting homogeneity and completeness alongside the V-measure separates oversplitting from undermerging.
 We therefore report several scores rather than a single headline metric.
 
 \subsection*{Qualitative inspection}
