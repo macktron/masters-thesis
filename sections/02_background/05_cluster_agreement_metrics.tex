@@ -49,14 +49,24 @@ Hence $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, a
 
 \subsection*{Adjusted mutual information}
 
-Mutual information asks how much knowing one labelling reduces uncertainty about the other \parencite{vinh2010information}.
-With the marginal entropies
+Mutual information is the reduction in uncertainty about one labelling given the other \parencite{vinh2010information},
+\begin{equation}\label{eq:bg:mi_def}
+  \mathrm{MI}(Y;\hat{Y})
+  =
+  H(Y)-H(Y\mid\hat{Y})
+  =
+  H(\hat{Y})-H(\hat{Y}\mid Y).
+\end{equation}
+$H(Y\mid\hat{Y})$ is the uncertainty left in $Y$ once $\hat{Y}$ is known, and likewise with the labels swapped.
+The quantity is zero when the labellings are independent, and equals $H(Y)$ or $H(\hat{Y})$ when one labelling determines the other.
+
+The Shannon entropies of the cluster-size distributions are
 \begin{equation}\label{eq:bg:entropy_marginals}
   H(Y)=-\sum_{i:\,a_i>0}\frac{a_i}{N}\log\frac{a_i}{N},
   \qquad
-  H(\hat{Y})=-\sum_{j:\,b_j>0}\frac{b_j}{N}\log\frac{b_j}{N},
+  H(\hat{Y})=-\sum_{j:\,b_j>0}\frac{b_j}{N}\log\frac{b_j}{N}.
 \end{equation}
-the empirical mutual information is
+The plug-in estimate of \cref{eq:bg:mi_def} from \cref{eq:bg:contingency} is
 \begin{equation}\label{eq:bg:mi}
   \mathrm{MI}(Y;\hat{Y})
   =
@@ -64,7 +74,6 @@ the empirical mutual information is
   \log\frac{N\,n_{ij}}{a_i b_j},
 \end{equation}
 with the convention $0\log 0=0$.
-It is zero when the labellings are independent, and equals either marginal entropy when one labelling determines the other.
 
 The expectation of $\mathrm{MI}$ under the same permutation null grows with the number of clusters.
 The adjusted mutual information $\AMI$ subtracts that baseline and rescales by the average of the marginal entropies \parencite{vinh2010information},
@@ -83,13 +92,13 @@ Homogeneity is high when each predicted cluster contains points from only one re
 Completeness is high when each reference class is collected into a single predicted cluster.
 Splitting a class across many predicted clusters preserves homogeneity and lowers completeness; merging several classes into one predicted cluster does the reverse.
 
-With the conditional entropies
+Expanding the conditional entropies of \cref{eq:bg:mi_def} gives
 \begin{equation}\label{eq:bg:cond_ent}
   H(Y\mid \hat{Y})=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{b_j},
   \qquad
-  H(\hat{Y}\mid Y)=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{a_i},
+  H(\hat{Y}\mid Y)=-\sum_{i,j:\,n_{ij}>0}\frac{n_{ij}}{N}\log\frac{n_{ij}}{a_i}.
 \end{equation}
-the two quantities are \parencite{rosenberg2007v}
+Homogeneity and completeness are then \parencite{rosenberg2007v}
 \begin{equation}\label{eq:bg:vmeasure_hc}
   h = 1-\frac{H(Y\mid \hat{Y})}{H(Y)},
   \qquad
