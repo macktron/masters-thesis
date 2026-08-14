@@ -30,23 +30,17 @@ The Rand index is the fraction of pairs on which $Y$ and $\hat{Y}$ agree: togeth
 \end{equation}
 The numerator $S_Y+S_{\hat{Y}}-2\,S_{Y\hat{Y}}$ is the number of pairs that are together in one partition and apart in the other.
 
-When most points lie in different clusters, the bulk of pairs are apart in both labellings by chance, and $R$ stays close to one even for weak agreement.
-The adjusted Rand index removes that baseline.
+When most points lie in different clusters, many pairs are apart in both labellings by chance, so $R$ stays close to one even when the partitions disagree.
 
-Hold $Y$ fixed and reassign the predicted labels uniformly at random, keeping the cluster sizes $\{b_j\}$ and hence $S_{\hat{Y}}$.
-Any given pair then lies in the same predicted cluster with probability $S_{\hat{Y}}/\binom{N}{2}$.
-There are $S_Y$ pairs that are together in $Y$, so the expected number that are also together in $\hat{Y}$ is
+If the predicted labels are shuffled at random, keeping the cluster sizes, a pair is together in $\hat{Y}$ with probability $S_{\hat{Y}}/\binom{N}{2}$.
+The expected number of pairs that are also together in $Y$ is therefore
 \begin{equation}\label{eq:bg:ari_expected}
   \E[S_{Y\hat{Y}}]
   =
   \frac{S_Y\,S_{\hat{Y}}}{\binom{N}{2}}.
 \end{equation}
-
-Once the cluster sizes are fixed, $S_Y$, $S_{\hat{Y}}$, and $\binom{N}{2}$ are constants, so $R$ in \cref{eq:bg:rand} depends on the data only through $S_{Y\hat{Y}}$.
-The usual chance correction of an index with maximum $1$ is $(R-\E[R])/(1-\E[R])$.
-That ratio is unchanged if $R$ is replaced by any affine increasing function of $S_{Y\hat{Y}}$.
-$R=1$ holds exactly when $S_{Y\hat{Y}}=\tfrac12(S_Y+S_{\hat{Y}})$.
-Substituting that maximum for the $1$ in the denominator gives \parencite{hubert1985comparing}
+With the sizes fixed, $R$ in \cref{eq:bg:rand} moves only with $S_{Y\hat{Y}}$.
+Subtracting this chance overlap, and dividing by the overlap at a perfect match, $\tfrac12(S_Y+S_{\hat{Y}})$, gives \parencite{hubert1985comparing}
 \begin{equation}\label{eq:bg:ari}
   \ARI
   =
@@ -54,7 +48,7 @@ Substituting that maximum for the $1$ in the denominator gives \parencite{hubert
   \qquad
   \ARI\le 1.
 \end{equation}
-Hence $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, and negative values indicate worse-than-random alignment.
+Then $\ARI=1$ at exact recovery up to relabelling, $\ARI\approx 0$ at chance, and negative values are worse than random.
 
 \subsection*{Adjusted mutual information}
 

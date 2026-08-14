@@ -12,7 +12,7 @@ Given a dataset \(\setD = \{(\vect{x}_i, y_i)\}_{i=1}^{N}\) drawn from an unknow
   \argmin_{\bm{\theta}}\;
   \frac{1}{N}\sum_{i=1}^{N} \ell\bigl(\Enc(\vect{x}_i),\, y_i\bigr) + \Omega(\bm{\theta}),
 \end{equation}
-where \(\Omega\) is an optional regularizer that trades fidelity to the training data against complexity of the fitted model.
+where \(\Omega\) is an optional regularizer that trades fit to the training data against complexity of the fitted model.
 Generalization to fresh inputs is then assessed on held-out data, and the entire training procedure---data, model class, loss, optimizer, regularization---is judged by its effect on that out-of-sample behavior rather than on the training fit alone.
 
 \subsection*{Learning paradigms}
