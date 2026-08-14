@@ -78,7 +78,3 @@ The method does not classify pulses against a fixed catalogue.
 It learns a map $\Enc$ that sends $\mat{X}$ to two sequences of pulse embeddings, one for emitters and one for modes.
 A clustering step applied to those embeddings produces \cref{eq:method:estimated_label_pair}.
 All trainable weights of $\Enc$ are collected in the parameter vector $\bm{\theta}$, which is fitted by the loss of \cref{sec:method:loss}; the architecture is specified in \cref{sec:method:arch}.
-
-Emitter identities remain meaningful only within the recording that produced $\mat{X}$.
-In particular $\hat{M}$ is not bounded by the catalogue size $M$, so modes absent from training can still form clusters.
-In practice $\Enc$ is applied to fixed-length windows of each recording (\cref{sec:method:data:window}), so the estimated symbols are local to a window.
