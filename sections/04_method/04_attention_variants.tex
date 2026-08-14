@@ -40,7 +40,8 @@ Each feature is added to the logits with a learnable scalar coefficient,
   + \lambda_{\theta}\, B^{(\theta)}_{ij}.
 \end{equation}
 Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block---throughout the shared trunk and both branches---carries its own $(\lambda_t,\lambda_{\theta})$.
-No kernel shape is imposed on the bias: a negative coefficient pushes attention towards pulses that are close in that coordinate, a positive one towards distant pulses, and a zero coefficient removes the cue entirely, so the model chooses the sign and strength of each cue during training instead of committing to a hand-tuned prior.
+This adds only about \(192\) scalar parameters in total; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
+Coefficients may be negative, and all is initialised to a small negative value so that, in line with the intended inductive bias, a larger coordinate difference initially decreases attention between the corresponding pulses.
 Because the coefficients are learned independently in each part of the network, the branches are free to allocate the cues differently; one may expect the deinterleaving branch to lean more heavily on the azimuthal term---pulses from one emitter arrive from a nearly constant bearing---while the shared trunk and the mode branch, whose target should be invariant to viewing geometry, suppress it.
 Whether this allocation emerges is examined in \cref{ch:experiments}.
 The construction mirrors the relative-position and content-independent biases used in language and graph transformers \parencite{shaw2018relative,ying2021graphormer}, specialised here to pulse parameters rather than token indices.
