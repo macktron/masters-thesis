@@ -56,7 +56,20 @@ The bias of \cref{eq:method:attn_bias} is added to the logits after the query--k
 
 In the original construction the coordinate is the token index. Consecutive pulses in a recording are not equally spaced, so an ordinal index misrepresents \gls{toa} gaps (\cref{sec:method:data}). We attach physical coordinates instead, so that $p_j-p_i$ is a time gap or a difference of direction features.
 
-Those coordinates lie in $[0,1]$, whereas token indices advance in steps of one. A scale $\gamma>0$ therefore multiplies every frequency, so plane $m$ is rotated by $\gamma p\omega_m$. Each coordinate has its own $\gamma$, reported in \cref{ch:experiments}, and the base is $b=10^4$ as in \textcite{su2024roformer}. The factor $\gamma$ is left implicit in $\mat{R}$.
+Those coordinates lie in $[0,1]$ after the maps of \cref{sec:method:data}.
+A token index over the same window would instead run through $\{0,\ldots,L-1\}$ in steps of one.
+Feeding the unit interval to $\mat{R}(p)$ with the original frequencies would leave almost every plane unrotated: the first plane would turn by at most one radian from the start of the window to the end, and the slow planes by about $1/b$.
+A scale $\gamma>0$ therefore stretches $p$ so that plane $m$ is rotated by $\gamma p\omega_m$. Equivalently, $\mat{R}$ is evaluated at $\gamma p$. The factor is left implicit in $\mat{R}$ below.
+
+The base is kept at $b=10^4$ as in \textcite{su2024roformer}.
+Changing $b$ would alter how quickly successive planes slow down, and therefore how large a gap the last plane can represent before wrapping.
+Changing $\gamma$ multiplies every frequency, including the fastest, and maps the unit interval onto an effective index range of length $\gamma$.
+Choosing $\gamma=L$ would give that interval the same numeric span as token indices on a window of this length.
+A larger $\gamma$ gives a small gap in $p$ more phase and makes the fast planes wrap inside the window.
+A smaller $\gamma$ keeps phases unique over a wider span of the window and flattens nearby distinctions.
+Unlike the bias coefficients of \cref{eq:method:attn_bias}, $\gamma$ is not learned.
+Each coordinate has its own scale, because a numerical gap of a given size is not the same physical distance in time as in direction.
+The values $\gamma_t$, $\gamma_c$, and $\gamma_s$ are reported in \cref{ch:experiments}.
 
 The encoder of \cref{sec:method:arch} uses this construction in every attention sub-layer. The shared trunk and the mode branch rotate by the window-local \gls{toa}. The deinterleaving branch splits each head across two continuous functions of azimuth.
 
