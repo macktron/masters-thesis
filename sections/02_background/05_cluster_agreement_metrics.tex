@@ -32,12 +32,13 @@ The numerator $S_Y+S_{\hat{Y}}-2\,S_{Y\hat{Y}}$ is the number of pairs that are 
 
 When most points lie in different clusters, many pairs are apart in both labellings by chance, so $R$ stays close to one even when the partitions disagree.
 
-If the predicted labels are shuffled at random, keeping the cluster sizes, a pair is together in $\hat{Y}$ with probability $S_{\hat{Y}}/\binom{N}{2}$.
-The expected number of pairs that are also together in $Y$ is therefore
+If the predicted labels are shuffled at random, keeping the cluster sizes, any fixed pair is together in $\hat{Y}$ with probability $p=S_{\hat{Y}}/\binom{N}{2}$, which lies in $[0,1]$.
+Only the $S_Y$ pairs that are already together in $Y$ can contribute to $S_{Y\hat{Y}}$.
+Each of them remains together in $\hat{Y}$ with probability $p$, so the expected overlap is that count times $p$,
 \begin{equation}\label{eq:bg:ari_expected}
   \E[S_{Y\hat{Y}}]
   =
-  \frac{S_Y\,S_{\hat{Y}}}{\binom{N}{2}}.
+  S_Y \cdot \frac{S_{\hat{Y}}}{\binom{N}{2}}.
 \end{equation}
 With the sizes fixed, $R$ in \cref{eq:bg:rand} moves only with $S_{Y\hat{Y}}$.
 Subtracting this chance overlap, and dividing by the overlap at a perfect match, $\tfrac12(S_Y+S_{\hat{Y}})$, gives \parencite{hubert1985comparing}
