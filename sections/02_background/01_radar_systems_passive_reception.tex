@@ -4,6 +4,30 @@
 
 A radar transmits a short electromagnetic pulse, waits for the echo that scatters from objects in the environment, and infers range and motion from that return \parencite{skolnik2008radar}.
 
+
+Z: L x D
+
+
+W_q: D X D/4
+W_k: D X D/4
+
+
+Q = ZxW_q = L x D/4
+K = ZxW_k = L x D/4
+
+V = ZxW_v = L x D/4
+
+A = QK^t = L x L
+
+AK = A x V
+
+
+
+
+
+
+
+
 Distance follows from the round-trip delay $\tau$ between transmission and reception.
 With wave speed $c$, the range of a monostatic radar (transmitter and receiver on the same platform and thus approximately same position) is
 \begin{equation}
