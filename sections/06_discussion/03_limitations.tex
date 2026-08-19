@@ -5,6 +5,7 @@ That setting supports controlled optimization and reproducible metrics but does 
 
 Fixed-length windows are partly a consequence of full self-attention, whose standard implementation scales quadratically with the number of pulses in the window (\cref{sec:method:data}).
 The chosen cap on $L$ therefore trades faithful coverage of long mode segments and rare emitters against compute, and the present pipeline drops trailing segments shorter than $L$, which can remove evidence entirely when a scenario does not fill an integral number of windows.
+The physical bias stores an extra $h \times L \times L$ tensor per layer, so its memory follows the same quadratic factor. Extending $L$ would widen the gap reported in \cref{sec:disc:interp}.
 
 Interleaved emitters and mode-hopping further skew how many pulses from each ground-truth label appear inside any given window, so performance summaries aggregate over heterogeneous label incidence rather than over an idealized balanced design (\cref{sec:exp:datasets}).
 Where metrics depend on comparing inferred partitions to reference labels, conclusions are most informative for label configurations that actually recur with sufficient mass inside windows; weak support for a label in a window is a limitation of the observation model, not necessarily of the encoder in isolation.

@@ -1,10 +1,31 @@
 \section{Interpretation of Results}\label{sec:disc:interp}
 
-This section connects the quantitative tables in \cref{sec:exp:results} and the qualitative material in \cref{sec:exp:qualitative} to the modeling choices in \cref{ch:method}.
-The goal is not to restate individual scores, but to explain \emph{which} mechanisms plausibly drive the observed ranking of methods and ablations.
+The tables in \cref{sec:exp:results} say two different things about the two branches.
+Mode clustering is already strong with standard self-attention.
+Emitter clustering is the place where the attention variants move the score, and they do not all move it the same way.
 
-When emitter-level \gls{ami} or \gls{ari} lag while mode-level scores are stronger, a natural hypothesis is that the encoder prioritizes intra-window structure tied to waveform parameters (which modes share) before it fully exploits slower cues that separate physical platforms across mixed traffic.
-Conversely, if emitter scores dominate but mode partitions collapse, the dual-head coupling or the mode contrastive term may be underweighted relative to the emitter branch, or certain modes may be too short-lived inside length-$L$ windows to support stable clusters.
+Vanilla's leftover emitter errors sit in a minority of windows rather than on every window.
+The histogram tail in \cref{fig:exp:hist_em} and the off-diagonal mass in \cref{fig:exp:kcorr_em} are the same windows: mixtures where frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxmode}.
+Window $100$ is the opposite case. The two emitters are already separated in incidence and in the scanning amplitude, and every model recovers both partitions.
 
-The dropped and spurious-pulse regimes produced by the simulator (\cref{sec:method:data}) interact with self-attention in two ways: they perturb local timing patterns that define modes, and they change which pulses co-occur inside a window, which can confuse any window-level emitter summary.
-Interpretation should therefore read noise sweeps alongside the corpus diagnostics in \cref{sec:exp:datasets:qualitative,sec:exp:qualitative}: a metric drop that coincides with visibly corrupted tracks is evidence of a robustness limit, whereas a drop on clean held-out scenarios points toward generalization or optimization issues instead.
+RoPE-TOA puts time into every attention product.
+On this corpus that is enough to close the emitter tail, with no extra weights.
+RoPE-az spends the deinterleaving rotations on planar incidence instead.
+Incidence is a useful input feature, as \cref{fig:exp:feat_w100_em} shows, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
+The embeddings in \cref{fig:exp:emb_w100_em} agree with the table: RoPE-az still splits the two colors, and it does not tighten them the way RoPE-TOA does.
+
+The physical bias reaches the same emitter scores as RoPE-TOA by a more expensive route.
+It adds a handful of learned scalars, not a second network.
+What it adds at run time is a pairwise map of shape $h \times L \times L$ per layer.
+With $h=8$ and $L=2000$, one such map is $128$~MB in fp32.
+Twelve attention sublayers make about $1.5$~GB if the maps are all resident, and a training dump at batch size $4$ reports $30$~GB of forward and backward storage for Bias against $19$~GB for Vanilla.
+That gap is the pairwise tensors, counted twice when gradients are kept.
+At the evaluation batch size of one window the extra is a few gigabytes rather than tens, which matches the encoder time in \cref{tab:exp:efficiency}: $30$~ms instead of $1.5$~ms, while \gls{dbscan} stays near $60$~ms for every model.
+
+RoPE never builds those maps.
+Its dumped parameter count matches Vanilla, and its encoder time stays within a couple of milliseconds of Vanilla.
+The enormous total-size figure printed for the RoPE summaries is an artifact of expanding rotation blocks in the layer dump, not a measured allocation.
+
+Joint training is a separate axis, taken up in \cref{sec:exp:ablation}.
+Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla, while its untrained mode branch collapses by merging.
+The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias are gains under that more demanding objective, not under a deinterleaving-only loss.

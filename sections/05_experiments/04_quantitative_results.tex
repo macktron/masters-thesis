@@ -81,167 +81,104 @@ The best value in each column is in bold; ties are bold on every tied row.
   \end{tabular}
 \end{table}
 
-The histograms in \cref{fig:exp:hist_em,fig:exp:hist_md} show the distribution of the four metrics over test windows, one panel per model.
-Each panel is the four-plot already produced per run ($\ARI$, $\AMI$, homogeneity, completeness).
-A mass near one indicates consistent recovery.
-A left tail indicates windows where clustering fails, which in this corpus typically coincide with crowded mixtures or rare-label windows (\cref{sec:exp:datasets}).
+Vanilla already recovers both partitions on this corpus, which is the existence test of RQ1.
+Emitter $\ARI$ is $0.944$, and $87\%$ of windows score at or above $0.99$, but about one window in ten falls below $0.90$.
+That tail is what widens the standard deviation.
+Mode recovery is stronger: mean $\ARI$ $0.986$, with only $2.3\%$ of windows below $0.90$.
+
+RoPE-TOA and Bias remove the emitter tail.
+Mean emitter $\ARI$ is $1.000$ to three decimals, $99\%$ of windows sit at or above $0.99$, and none of the $960$ windows falls below $0.90$.
+Completeness is $1.000$ with no spread, so a true emitter is not split across clusters.
+The leftover errors are rare undercounts, visible as a small homogeneity gap and as the count-error column.
+
+RoPE-az improves on Vanilla for emitters ($\ARI$ $0.972$, $5\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
+Rotating the deinterleaving branch by planar incidence is not, on this test set, a replacement for rotating every layer by \gls{toa}.
+Mode scores occupy a narrow band for all four models.
+Bias is the tightest there, with the smallest count error.
+
+\subsection{Metric histograms}\label{sec:exp:results:hist}
+
+\Cref{fig:exp:hist_em,fig:exp:hist_md} show the per-window $\ARI$ for each model.
+$\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the histograms correspond to the numbers in \cref{tab:exp:attn_em,tab:exp:attn_md}.
+$\AMI$, homogeneity, and completeness follow the same right spike and are not repeated as extra pages.
+
+The Vanilla emitter histogram has a mass at $1$ and a long left tail.
+RoPE-TOA and Bias put almost every window in the last bin.
+RoPE-az sits between those two shapes.
+On the mode branch the four histograms are harder to tell apart: all are peaked at $1$, and Bias has the smallest leftover tail.
 
 \begin{figure}[tbp]
   \centering
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_vanilla_em.pdf}
-    \caption{Vanilla}
-    \label{fig:exp:hist_em:vanilla}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_rope_toa_em.pdf}
-    \caption{RoPE-TOA}
-    \label{fig:exp:hist_em:rope_toa}
-  \end{subfigure}\\[0.8em]
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_rope_az_em.pdf}
-    \caption{RoPE-az (incidence)}
-    \label{fig:exp:hist_em:rope_az}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_bias_em.pdf}
-    \caption{Bias}
-    \label{fig:exp:hist_em:bias}
-  \end{subfigure}
-  \caption{Distribution of emitter-clustering metrics over non-overlapping test windows. Each panel is a four-plot of $\ARI$, $\AMI$, homogeneity, and completeness for one attention variant.}
+  \expfig{hist_em.pdf}
+  \caption{Emitter $\ARI$ over the $960$ non-overlapping test windows. The dashed line is the mean.}
   \label{fig:exp:hist_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_vanilla_md.pdf}
-    \caption{Vanilla}
-    \label{fig:exp:hist_md:vanilla}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_rope_toa_md.pdf}
-    \caption{RoPE-TOA}
-    \label{fig:exp:hist_md:rope_toa}
-  \end{subfigure}\\[0.8em]
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_rope_az_md.pdf}
-    \caption{RoPE-az (incidence)}
-    \label{fig:exp:hist_md:rope_az}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{hist_bias_md.pdf}
-    \caption{Bias}
-    \label{fig:exp:hist_md:bias}
-  \end{subfigure}
-  \caption{Distribution of mode-clustering metrics over non-overlapping test windows. Layout as in \cref{fig:exp:hist_em}.}
+  \expfig{hist_md.pdf}
+  \caption{Mode $\ARI$ over the same windows as \cref{fig:exp:hist_em}.}
   \label{fig:exp:hist_md}
 \end{figure}
 
 \subsection{Cluster-count recovery}\label{sec:exp:results:kcorr}
 
-\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} scatter, for each test window, the number of clusters returned by \gls{dbscan} against the number of distinct reference labels in that window.
-The identity line $y=x$ is exact count recovery.
-Points above the line oversplit a true class, which lowers completeness; points below it merge distinct classes, which lowers homogeneity.
-That geometry is why \cref{tab:exp:attn_em,tab:exp:attn_md} report homogeneity and completeness separately, and why the mean absolute count error is included as a summary column.
+\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} are heatmaps of predicted versus true cluster counts.
+Each cell is the number of test windows with that pair.
+The diagonal is exact count recovery.
+Mass above the diagonal is extra clusters (splits).
+Mass below it is missing clusters (merges).
+That is why \cref{tab:exp:attn_em,tab:exp:attn_md} report homogeneity and completeness separately, and why they include a mean absolute count error.
+
+On the emitter branch, Vanilla leaves the diagonal more often than the other three, with splits and merges in roughly equal number.
+RoPE-TOA never oversplits an emitter window in this set: the off-diagonal mass is only undercounts.
+Bias is the same pattern, up to one window.
+RoPE-az is closer to the diagonal than Vanilla and still produces some extra clusters.
+
+The mode heatmaps are diagonal-dominant for every model.
+When they miss, they more often undercount than invent labels, and the misses concentrate at the crowded end of the catalogue, where a window can contain a dozen modes (\cref{sec:exp:datasets}).
+Bias keeps more mass on the diagonal than Vanilla or RoPE-az.
 
 \begin{figure}[tbp]
   \centering
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_vanilla_em.pdf}
-    \caption{Vanilla}
-    \label{fig:exp:kcorr_em:vanilla}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_rope_toa_em.pdf}
-    \caption{RoPE-TOA}
-    \label{fig:exp:kcorr_em:rope_toa}
-  \end{subfigure}\\[0.8em]
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_rope_az_em.pdf}
-    \caption{RoPE-az (incidence)}
-    \label{fig:exp:kcorr_em:rope_az}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_bias_em.pdf}
-    \caption{Bias}
-    \label{fig:exp:kcorr_em:bias}
-  \end{subfigure}
-  \caption{Predicted versus true number of emitters per test window. The line $y=x$ is exact count recovery; points above it oversplit, points below it undermerge.}
+  \expfig{kcorr_em.pdf}
+  \caption{Predicted versus true number of emitters per test window. Cell values are window counts. The line is $\hat{K}=K$.}
   \label{fig:exp:kcorr_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_vanilla_md.pdf}
-    \caption{Vanilla}
-    \label{fig:exp:kcorr_md:vanilla}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_rope_toa_md.pdf}
-    \caption{RoPE-TOA}
-    \label{fig:exp:kcorr_md:rope_toa}
-  \end{subfigure}\\[0.8em]
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_rope_az_md.pdf}
-    \caption{RoPE-az (incidence)}
-    \label{fig:exp:kcorr_md:rope_az}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\linewidth}
-    \centering
-    \expfig{kcorr_bias_md.pdf}
-    \caption{Bias}
-    \label{fig:exp:kcorr_md:bias}
-  \end{subfigure}
+  \expfig{kcorr_md.pdf}
   \caption{Predicted versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_em}.}
   \label{fig:exp:kcorr_md}
 \end{figure}
 
 \subsection{Model size and inference cost}\label{sec:exp:results:efficiency}
 
-\Cref{tab:exp:efficiency} reports the number of trainable parameters and the wall-clock time per test window.
-Timing is measured on the A100 of \cref{sec:exp:setup}, with one window per forward pass, and includes both the encoder and the \gls{dbscan} decoding of \cref{eq:method:cluster_decoding}.
-A short GPU warmup precedes the timed loop and is excluded from the mean.
-\Gls{rope} adds no trainable Linear weights relative to Vanilla.
-Bias adds one learned scalar per head, layer, and selected coordinate.
-The dumped parameter totals in \cref{tab:exp:efficiency} therefore match; the cost of the bias appears in wall-clock time.
+\Cref{tab:exp:efficiency} reports trainable parameters and wall-clock time per test window on the A100 of \cref{sec:exp:setup}.
+One window is forwarded at a time.
+A short GPU warmup is excluded from the mean.
+Clustering time is \gls{dbscan} on the embeddings of \cref{eq:method:cluster_decoding}.
+
+Rotary encoding adds no learned weights, so both RoPE models dump the same $16\,081\,536$ parameters as Vanilla.
+That is fewer extra parameters than a learned positional table of length $L$, and fewer than the physical bias, which stores one scalar per head, layer, and selected coordinate.
+Those scalars do not change the dumped total at the reported precision.
+They do change the encoder time: Bias spends $30$~ms in the forward pass where Vanilla spends $1.5$~ms, because each layer forms pairwise coordinate maps of shape $h \times L \times L$.
+\Gls{dbscan} is about $60$~ms for every model, so it dominates Vanilla and both RoPE variants.
+Memory for the pairwise maps is taken up in \cref{sec:disc:interp}.
 
 \begin{table}[tbp]
   \centering
-  \caption{Trainable parameters and inference time per test window (mean), including \gls{dbscan} decoding.}
+  \caption{Trainable parameters and mean time per test window. Encoder is the forward pass. Clustering is \gls{dbscan} on both branches.}
   \label{tab:exp:efficiency}
-  \begin{tabular}{@{}lcc@{}}
+  \begin{tabular}{@{}lcccc@{}}
     \toprule
-    Model & Parameters & Time (ms/window) \\
+    Model & Parameters & Encoder (ms) & Clustering (ms) & Total (ms) \\
     \midrule
-    Vanilla   & $16\,081\,536$ & $62.6$ \\
-    RoPE-TOA  & $16\,081\,536$ & $62.6$ \\
-    RoPE-az   & $16\,081\,536$ & $64.4$ \\
-    Bias      & $16\,081\,536$ & $91.6$ \\
+    Vanilla   & $16\,081\,536$ & $1.5$ & $61.2$ & $62.7$ \\
+    RoPE-TOA  & $16\,081\,536$ & $2.5$ & $59.9$ & $62.4$ \\
+    RoPE-az   & $16\,081\,536$ & $2.9$ & $61.3$ & $64.2$ \\
+    Bias      & $16\,081\,536$ & $29.6$ & $62.0$ & $91.6$ \\
     \bottomrule
   \end{tabular}
 \end{table}
