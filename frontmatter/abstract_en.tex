@@ -4,12 +4,23 @@
 \chapter*{Abstract}
 \markboth{Abstract}{Abstract}
 
-% TODO: 250-300 word abstract in English. Cover (i) the problem of
-% identifying radar emitters and their operating modes from intercepted
-% recordings, (ii) why joint clustering is appealing, (iii) the
-% proposed transformer-encoder approach, (iv) experimental setup
-% (datasets, baselines), and (v) headline quantitative results.
-This thesis investigates joint clustering of radar emitters and their operating modes from intercepted pulse descriptor word (PDW) streams using a transformer encoder architecture.
+Passive electronic support measures record a time-ordered stream of pulse descriptor words in which several radars are interleaved and each radar may change operating mode.
+Operators need both groupings from the same stream.
+Classical pipelines deinterleave first and then classify modes. That split does not produce one representation for both partitions, and it assumes emitter names that can be compared across recordings.
+
+This thesis trains a transformer encoder with a shared trunk and two branches on synthetic, fully labelled windows of length $2000$.
+Each pulse has a recording-local emitter identity and a mode drawn from a catalogue of $16$ types shared across recordings.
+Two supervised contrastive losses, identical in form, differ only in the positive set: emitters within a recording, modes across the batch.
+At inference, DBSCAN clusters each branch independently. No catalogue softmax is used.
+
+On $960$ non-overlapping test windows, standard self-attention already recovers both partitions on most windows (mean emitter ARI $0.944$, mode ARI $0.986$).
+Rotary encoding of time of arrival, and a pairwise physical attention bias, raise emitter ARI to $1.000$ and remove the remaining failure tail.
+Rotary encoding of planar incidence on the deinterleaving branch helps less.
+The bias matches the time-rotary scores and spends extra memory and encoder time on pairwise maps of size $L \times L$.
+
+A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ against $0.944$) while its untrained mode branch merges.
+The joint objective is therefore a trade-off, not a free extra head.
+Held-out modulations and operational recordings are not scored.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} transformer, deep clustering, electronic intelligence, radar emitter identification, mode recognition, supervised contrastive learning.

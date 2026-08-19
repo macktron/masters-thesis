@@ -2,21 +2,21 @@
 
 This section isolates the joint objective of \cref{eq:method:loss_total} from the attention variants of \cref{sec:exp:results:attention}.
 The completed runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
-That matched dual-branch control is the comparable transformer for RQ2: whether coupling deinterleaving with mode clustering outperforms training for one task alone.
+That matched dual-branch control is the comparison for RQ2.
 
 The three objectives are:
 \begin{description}
   \item[Joint] $\Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ with $\lambda_{\mathrm{md}} = 1$, identical to Vanilla in \cref{sec:exp:results}.
-  \item[Emitter-only] $\Loss = \Loss_{\mathrm{em}}$; the mode branch receives no direct gradient.
-  \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$; the emitter branch receives no direct gradient.
+  \item[Emitter-only] $\Loss = \Loss_{\mathrm{em}}$. The mode branch receives no direct gradient.
+  \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
 \end{description}
 Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla row of \cref{tab:exp:attn_em,tab:exp:attn_md}, not from a second training run.
-The single-task models are trained from the same initialisation seed, on the same data splits, and with the remaining hyperparameters of \cref{sec:exp:hparams}.
-A mode-only Vanilla run is not yet included; its row will be filled when that checkpoint is evaluated.
+The single-task models use the same initialisation seed, the same splits, and the remaining hyperparameters of \cref{sec:exp:hparams}.
+A mode-only Vanilla run is not included. Its row stays empty until that checkpoint is evaluated.
 
 Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
-The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only: they measure how much the shared trunk transfers to the unsupervised branch, versus collapse of that branch.
-RQ2 is answered primarily by comparing Joint with Emitter-only on the emitter metrics; the mode column and the Mode-only row complete the symmetric picture.
+The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only.
+They measure how much the shared trunk transfers to the unsupervised branch, versus collapse of that branch.
 
 \begin{table}[tbp]
   \centering
@@ -38,4 +38,18 @@ RQ2 is answered primarily by comparing Joint with Emitter-only on the emitter me
 \end{table}
 
 Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
-No additional histogram pages are included here. The distributions for Joint are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.
+
+On the emitter branch, Emitter-only outperforms Joint.
+Mean $\ARI$ rises from $0.944$ to $0.999$, the spread collapses, and the count error falls to the same range as RoPE-TOA and Bias in \cref{tab:exp:attn_em}.
+Adding the mode term therefore costs deinterleaving accuracy on this backbone, at least at $\lambda_{\mathrm{md}}=1$.
+
+The unpaid cost of dropping the mode term is the mode branch itself.
+Under Emitter-only that branch still produces clusters, but they merge: homogeneity falls to $0.79$ while completeness stays at $0.999$, and the mean count error exceeds two modes per window.
+The clusters are internally pure and too few.
+Joint training is what keeps the mode partition usable.
+
+RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
+On the emitter metrics it does not.
+What it buys is a second partition that Emitter-only does not provide.
+The missing Mode-only row would show whether the same trade-off appears in the other direction.
+No extra histogram pages are included here. The Joint distributions are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.

@@ -1,5 +1,9 @@
 \section{Summary}\label{sec:concl:summary}
 
-% TODO: 1-2 paragraphs summarizing the thesis: problem, approach,
-% headline result. No new claims.
-Placeholder paragraph.
+This thesis asked whether a transformer encoder can recover two partitions from one interleaved \gls{pdw} window: emitters that are comparable only inside a recording, and operating modes that are comparable across recordings.
+The encoder shares a trunk, splits into two branches, and is trained with two supervised contrastive losses that differ only in the scope of their positive sets.
+Inference clusters each branch with \gls{dbscan}. No catalogue softmax is used.
+
+On the synthetic test split, standard self-attention already recovers both partitions on most windows.
+Rotary encoding of window-local \gls{toa}, and a pairwise physical bias on the same coordinates, close the remaining emitter errors.
+A joint loss is not a free improvement over deinterleaving-only training. It costs emitter agreement on Vanilla and is what keeps the mode branch from merging.

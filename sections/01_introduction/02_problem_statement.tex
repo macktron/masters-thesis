@@ -11,4 +11,4 @@ The encoder maps each window of pulses to two embedding sequences.
 A clustering step on each sequence recovers the partitions, without assigning names from a fixed catalogue.
 Emitter clustering is recording-local and does not assume a known number of emitters.
 Mode labels are used in training to pull same-mode pulses together; at inference, mode clusters are also formed per window.
-The experiments measure agreement with the simulator partitions under mixture, noise, and a fixed window length.
+The experiments measure agreement with the simulator partitions on mixture windows of fixed length.

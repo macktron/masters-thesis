@@ -1,18 +1,34 @@
 \section{Limitations}\label{sec:disc:limitations}
 
-The experimental programme is offline: models are trained and scored on bounded, revisit-able windows rather than under the latency, memory, and non-stationarity constraints of a continuously arriving pulse stream (\cref{sec:intro:scope,sec:intro:delimitations,sec:method:data}).
-That setting supports controlled optimization and reproducible metrics but does not demonstrate that the same representations would support stable online emitter or mode tracking without periodic retraining or revised windowing policy.
+All tabulated scores come from one synthetic corpus with full per-pulse labels and from a single training seed.
+The spread in \cref{tab:exp:attn_em,tab:exp:attn_md} is variation across windows, not across retrainings.
+A second seed could move the Vanilla tail, and it could change how close RoPE-TOA and Bias remain to each other.
+The code is proprietary, so those reruns are not available from the text alone.
 
-Fixed-length windows are partly a consequence of full self-attention, whose standard implementation scales quadratically with the number of pulses in the window (\cref{sec:method:data}).
-The chosen cap on $L$ therefore trades faithful coverage of long mode segments and rare emitters against compute, and the present pipeline drops trailing segments shorter than $L$, which can remove evidence entirely when a scenario does not fill an integral number of windows.
-The physical bias stores an extra $h \times L \times L$ tensor per layer, so its memory follows the same quadratic factor. Extending $L$ would widen the gap reported in \cref{sec:disc:interp}.
+The test modes are the training modes.
+Held-out modulation types were not scored, even though clustering rather than a softmax is what would make that experiment possible.
+Claims about novel emitters or novel modes at inference therefore go beyond the tables.
+Emitter identifiers are recording-local by construction, which is the right operational assumption, but it is not a measured open-set test.
 
-Interleaved emitters and mode-hopping further skew how many pulses from each ground-truth label appear inside any given window, so performance summaries aggregate over heterogeneous label incidence rather than over an idealized balanced design (\cref{sec:exp:datasets}).
-Where metrics depend on comparing inferred partitions to reference labels, conclusions are most informative for label configurations that actually recur with sufficient mass inside windows; weak support for a label in a window is a limitation of the observation model, not necessarily of the encoder in isolation.
+Every score is a window score.
+The encoder never sees a full recording in one forward pass, trailing segments shorter than $L$ are dropped, and nothing is tracked across window boundaries.
+Self-attention and the physical bias both scale as $L^{2}$. Extending the window would raise the memory gap in \cref{sec:disc:interp} and would still not be streaming inference.
 
-Finally, all quantitative evidence is derived from synthetic scenarios with full reference labels; operational recordings with imperfect deinterleaving, sensor dropouts, and distribution shift are not included here.
-Related Saab-line work on track association under deinterleaving errors highlights that real pipelines fragment pulse trains and introduce structured mistakes that are only partly captured by the stylized drop and spurious models used for stress tests \parencite{jakobsson2024trackassociation}.
-Likewise, classifiers trained on simulator draws can exhibit overconfidence on held-out emitters or modulation families, which motivates explicit out-of-distribution and drift analyses when moving toward fielded receivers \parencite{coleman2023rwrdrift}.
-The present thesis does not implement drift monitors or uncertainty heads; those remain orthogonal safeguards if embeddings from \cref{ch:method} are ever deployed under evolving threat libraries.
+Pulse counts per label are unbalanced inside windows, as \cref{sec:exp:datasets} notes.
+Rare modes and sparse emitters contribute little to a window-mean $\ARI$.
+A method can look strong in \cref{tab:exp:attn_md} while still failing the labels that occupy few pulses.
+The crowded window in \cref{fig:exp:feat_maxmode} is a reminder of that regime, not a substitute for a stratified breakdown.
 
-The \gls{dbscan} post-processing used in \cref{sec:method:arch} also encodes density assumptions that may not match every deployment, and we do not exhaust efficient-attention or hierarchical alternatives that could extend context within the same hardware envelope.
+The joint versus single-task comparison is incomplete.
+Mode-only Vanilla is missing, and $\lambda_{\mathrm{md}}$ was not swept.
+The finding that joint training costs emitter $\ARI$ on Vanilla is therefore tied to equal loss weights and to that backbone.
+Whether RoPE-TOA or Bias would show the same cost under an emitter-only objective is unknown.
+
+\Gls{dbscan} is part of the reported system.
+The radius is chosen on the validation grid, $\mathrm{minPts}$ is fixed, and the noise category was ignored because it stayed small on this corpus.
+A different density clusterer, or a different $\varepsilon$ rule, would change the discrete partitions without changing the embeddings.
+Feature-space \gls{dbscan} was not a fair row in \cref{tab:exp:attn_em} because that dump uses $L=1500$.
+
+Finally, no operational \gls{elint} recordings enter the numbers.
+Simulator drop and spurious-pulse models exist in the generator, but they are not the test set behind the tables.
+Distribution shift, library mismatch, and deinterleaving errors of the kind studied by \textcite{jakobsson2024trackassociation} and \textcite{coleman2023rwrdrift} remain outside the present scores.
