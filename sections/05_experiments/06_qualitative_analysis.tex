@@ -11,7 +11,7 @@ Embeddings differ by model and by branch.
 The four panels are carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate, each against window-local \gls{toa}.
 The export names that last panel Theta. It is a direction component after \cref{eq:method:aoa_scale}, not a raw azimuth.
 Color is the only change between the two figures: \cref{fig:exp:feat_w100_em} uses the recording-local emitter label, \cref{fig:exp:feat_w100_md} the global mode label.
-All four joint models score $\ARI=1$ on both branches of this window, with two emitters and four modes.
+Vanilla, RoPE-TOA, RoPE-az, and Bias score $\ARI=1$ on both branches of this window, with two emitters and four modes.
 
 The emitter coloring shows one platform with a scanning amplitude (the lower, scalloped track) and one platform whose amplitude sits on several flat levels.
 Frequency and pulse width already separate the scanner from the other platform, but they do not separate the flat tracks from each other: two of those tracks share a frequency band near $1.45$ and the same narrow pulse width.
@@ -63,7 +63,7 @@ RoPE-az remains closer to Vanilla: the two colors still split, but the layout is
 
 On the mode branch the four colors separate in every panel.
 Some colors form thin arcs rather than round blobs, which is consistent with a mode whose amplitude or timing still moves inside the window.
-The four models do not disagree on this window in $\ARI$, so the visual differences are layout, not a change in the discrete partition.
+Vanilla, RoPE-TOA, RoPE-az, and Bias do not disagree on this window in $\ARI$, so the visual differences are layout, not a change in the discrete partition.
 
 \begin{figure}[tbp]
   \centering

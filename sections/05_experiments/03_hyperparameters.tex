@@ -38,6 +38,7 @@ Vanilla and Bias do not use rotary scales.
 RoPE-TOA uses a single scale $\gamma_t$ on every layer.
 RoPE-az uses $\gamma_t$ on the trunk and the mode branch and $(\gamma_x,\gamma_y)$ on the two planar Euclidean incidence axes of the deinterleaving branch.
 Those axes are the Cartesian components of \cref{eq:method:aoa_scale}, not azimuth or elevation angles.
+RoPE-TOA+Bias uses the same $\gamma_t$ as RoPE-TOA, on every layer, together with the pairwise bias.
 Unused coordinates are marked n/a.
 
 \begin{table}[tbp]
@@ -52,8 +53,9 @@ Unused coordinates are marked n/a.
     RoPE-TOA  & $10$ & {n/a} & {n/a} & $0.6$ & $0.1$ \\
     RoPE-az   & $10$ & $10$ & $10$ & $0.6$ & $0.2$ \\
     Bias      & {n/a} & {n/a} & {n/a} & $0.6$ & $0.1$ \\
+    RoPE-TOA+Bias & $10$ & {n/a} & {n/a} & {---} & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla row of \cref{tab:exp:hparams_main,tab:exp:hparams_attn}, including a re-selected $\varepsilon$ per branch on the validation set of each objective.
+The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla architecture and the optimisation schedule of \cref{tab:exp:hparams_main}.

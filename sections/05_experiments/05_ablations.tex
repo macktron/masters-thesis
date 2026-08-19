@@ -1,7 +1,7 @@
 \section{Ablation Studies}\label{sec:exp:ablation}
 
 This section isolates the joint objective of \cref{eq:method:loss_total} from the attention variants of \cref{sec:exp:results:attention}.
-The completed runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
+The runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
 That matched dual-branch control is the comparison for RQ2.
 
 The three objectives are:
@@ -12,7 +12,6 @@ The three objectives are:
 \end{description}
 Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla row of \cref{tab:exp:attn_em,tab:exp:attn_md}, not from a second training run.
 The single-task models use the same initialisation seed, the same splits, and the remaining hyperparameters of \cref{sec:exp:hparams}.
-A mode-only Vanilla run is not included. Its row stays empty until that checkpoint is evaluated.
 
 Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
 The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only.
@@ -20,7 +19,7 @@ They measure how much the shared trunk transfers to the unsupervised branch, ver
 
 \begin{table}[tbp]
   \centering
-  \caption{Joint versus single-task objectives on the Vanilla encoder. Aggregation as in \cref{tab:exp:attn_em,tab:exp:attn_md}. Hom.\ and Comp.\ are homogeneity and completeness. Joint entries are those of Vanilla, not a repeated run. Mode-only is reserved for a forthcoming Vanilla run trained only on $\Loss_{\mathrm{md}}$.}
+  \caption{Joint versus single-task objectives on the Vanilla encoder. Aggregation as in \cref{tab:exp:attn_em,tab:exp:attn_md}. Hom.\ and Comp.\ are homogeneity and completeness. Joint entries are those of Vanilla, not a repeated run.}
   \label{tab:exp:ablation_loss}
   \small
   \begin{tabular}{@{}llccccc@{}}
@@ -51,5 +50,4 @@ Joint training is what keeps the mode partition usable.
 RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
 On the emitter metrics it does not.
 What it buys is a second partition that Emitter-only does not provide.
-The missing Mode-only row would show whether the same trade-off appears in the other direction.
 No extra histogram pages are included here. The Joint distributions are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.

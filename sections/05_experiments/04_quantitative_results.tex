@@ -1,7 +1,8 @@
 \section{Quantitative Results}\label{sec:exp:results}
 
-This section reports clustering scores for four jointly trained encoders that differ only in the attention mechanism.
-The Vanilla encoder, with standard self-attention, is the existence test for RQ1; the remaining three rows are the RQ3 comparison against that baseline.
+This section reports clustering scores for jointly trained encoders that differ in the attention mechanism.
+The Vanilla encoder, with standard self-attention, is the existence test for RQ1.
+The remaining joint rows are the RQ3 comparison against that baseline.
 The joint-versus-single-task comparison that answers RQ2 is deferred to \cref{sec:exp:ablation}.
 
 % Drop-in PDFs live in figures/experiments/. A labelled box is shown until each file exists,
@@ -34,16 +35,16 @@ Mean absolute cluster-count error $\lvert\hat{K}-K\rvert$ (emitters) and $\lvert
 
 \subsection{Attention variants}\label{sec:exp:results:attention}
 
-Four configurations are trained with the joint objective of \cref{eq:method:loss_total} and otherwise identical hyperparameters (\cref{sec:exp:hparams}).
+Five configurations are trained with the joint objective of \cref{eq:method:loss_total} and otherwise identical hyperparameters (\cref{sec:exp:hparams}).
 Vanilla is the encoder of \cref{sec:method:arch} with standard \gls{mha}; \gls{toa} enters only as an input feature.
 RoPE-TOA applies rotary encoding on the window-local \gls{toa} in the trunk and in both branches.
 RoPE-az is the branch-specific rotary design of \cref{sec:method:attention}.
 Despite the name, it does not rotate by azimuth or elevation: the trunk and the mode branch rotate by window-local \gls{toa}, and the deinterleaving branch rotates by the two planar Euclidean incidence components $\tilde{u}^{x},\tilde{u}^{y}$ of \cref{eq:method:aoa_scale}.
 Bias adds the pairwise physical logits of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
-A combination of RoPE-TOA with the bias is not included in these tables; it is reserved for a later run, as is a Vanilla encoder trained only on the mode term (\cref{sec:exp:ablation}).
+RoPE-TOA+Bias stacks the uniform \gls{toa} rotary layout of RoPE-TOA with that pairwise bias. Incidence is not used as a rotary coordinate.
 
 Vanilla tests whether a transformer encoder can deinterleave pulses and recover operating modes by clustering (RQ1).
-The remaining three rows test whether explicit physical structure in attention improves those scores relative to standard \gls{mha} (RQ3).
+The other joint rows test whether explicit physical structure in attention improves those scores relative to standard \gls{mha} (RQ3).
 \Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores.
 The best value in each column is in bold; ties are bold on every tied row.
 
@@ -60,6 +61,7 @@ The best value in each column is in bold; ties are bold on every tied row.
     RoPE-TOA  & $\mathbf{1.000\pm0.003}$ & $0.998\pm0.007$ & $\mathbf{0.997\pm0.013}$ & $\mathbf{1.000\pm0.000}$ & $0.09\pm0.31$ \\
     RoPE-az   & $0.972\pm0.136$ & $0.976\pm0.113$ & $0.994\pm0.045$ & $0.973\pm0.131$ & $0.14\pm0.37$ \\
     Bias      & $\mathbf{1.000\pm0.003}$ & $\mathbf{0.999\pm0.006}$ & $\mathbf{0.997\pm0.012}$ & $\mathbf{1.000\pm0.000}$ & $\mathbf{0.09\pm0.30}$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -77,6 +79,7 @@ The best value in each column is in bold; ties are bold on every tied row.
     RoPE-TOA  & $0.990\pm0.087$ & $0.989\pm0.083$ & $0.995\pm0.023$ & $0.990\pm0.084$ & $0.20\pm0.49$ \\
     RoPE-az   & $0.984\pm0.097$ & $0.987\pm0.084$ & $0.989\pm0.047$ & $0.993\pm0.079$ & $0.23\pm0.50$ \\
     Bias      & $\mathbf{0.993\pm0.074}$ & $\mathbf{0.993\pm0.073}$ & $\mathbf{0.997\pm0.017}$ & $\mathbf{0.994\pm0.073}$ & $\mathbf{0.13\pm0.39}$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -93,12 +96,12 @@ The leftover errors are rare undercounts, visible as a small homogeneity gap and
 
 RoPE-az improves on Vanilla for emitters ($\ARI$ $0.972$, $5\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
 Rotating the deinterleaving branch by planar incidence is not, on this test set, a replacement for rotating every layer by \gls{toa}.
-Mode scores occupy a narrow band for all four models.
+Mode scores occupy a narrow band for Vanilla, RoPE-TOA, RoPE-az, and Bias.
 Bias is the tightest there, with the smallest count error.
 
 \subsection{Metric histograms}\label{sec:exp:results:hist}
 
-\Cref{fig:exp:hist_em,fig:exp:hist_md} show the per-window $\ARI$ for each model.
+\Cref{fig:exp:hist_em,fig:exp:hist_md} show the per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, and Bias.
 $\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the histograms correspond to the numbers in \cref{tab:exp:attn_em,tab:exp:attn_md}.
 $\AMI$, homogeneity, and completeness follow the same right spike and are not repeated as extra pages.
 
@@ -179,6 +182,7 @@ Memory for the pairwise maps is taken up in \cref{sec:disc:interp}.
     RoPE-TOA  & $16\,081\,536$ & $2.5$ & $59.9$ & $62.4$ \\
     RoPE-az   & $16\,081\,536$ & $2.9$ & $61.3$ & $64.2$ \\
     Bias      & $16\,081\,536$ & $29.6$ & $62.0$ & $91.6$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}

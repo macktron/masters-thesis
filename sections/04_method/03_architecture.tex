@@ -21,7 +21,7 @@ Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of 
 where $\mat{W}_{\mathrm{in}} \in \R^{d_{\mathrm{model}} \times d}$ and $d_{\mathrm{model}}$ is the trunk width specified below.
 In the baseline configuration of the encoder, no positional encoding is added to $\vect{h}^{(0)}_n$.
 The temporal ordering of pulses is already carried by the \gls{toa} entry of $\vect{x}_n$; moreover, the index-based absolute positional encodings of the original architecture \parencite{vaswani2017attention} are ill-suited to this input, since the \gls{toa} gap between consecutive pulses is not constant and an ordinal position therefore misrepresents the relative distances in time.
-Whether an explicit relative encoding of time and arrival direction nevertheless adds information beyond their presence as input features is revisited in \cref{sec:method:attention:bias,sec:method:attention:rope}, where a pairwise attention bias and a rotary positional encoding acting on physical coordinate differences are evaluated as drop-in modifications of this architecture.
+Whether an explicit relative encoding of time and arrival direction nevertheless adds information beyond their presence as input features is revisited in \cref{sec:method:attention:bias,sec:method:attention:rope}, where a pairwise attention bias and a rotary positional encoding on physical coordinate differences are used as drop-in modifications of this architecture, including both mechanisms together.
 
 \subsection*{Shared trunk}
 
