@@ -6,7 +6,7 @@ The trunk produces a single contextualised representation of the input window, w
 \begin{figure}[tbp]
   \centering
   \input{figures/method/architecture.tex}
-  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an affine input embedding, processed by a shared trunk of $6$ transformer-encoder layers, and then split into two parallel branches, each with its own affine $256\!\to\!256$ projection and $2$ encoder layers. Branch outputs are mapped by affine projection heads to the $64$-dimensional emitter and mode embedding spaces and $\ell_2$-normalized over the embedding dimension. The input embedding, branch projections, and projection heads are all affine maps of the same form.}
+  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an affine input embedding, processed by a shared trunk of $4$ transformer-encoder layers, and then split into two parallel branches, each with its own affine $256\!\to\!256$ projection and $4$ encoder layers. Branch outputs are mapped by affine projection heads to the $64$-dimensional emitter and mode embedding spaces and $\ell_2$-normalized over the embedding dimension. The input embedding, branch projections, and projection heads are all affine maps of the same form.}
   \label{fig:method:arch}
 \end{figure}
 
@@ -27,15 +27,16 @@ Whether an explicit relative encoding of time and arrival direction nevertheless
 
 The token sequence $(\vect{h}^{(0)}_1,\ldots,\vect{h}^{(0)}_L)$ is processed by a stack of $N_{\mathrm{sh}}$ standard transformer-encoder layers, each comprising a \gls{mha} sub-layer and a position-wise \gls{ffn} sub-layer with residual connections and layer normalisation around both.
 Self-attention is unmasked, so every pulse can attend to every other pulse in the window.
-The trunk operates with hidden dimension $d_{\mathrm{model}} = 256$, $h_{\mathrm{sh}} = 8$ attention heads (so that each head has dimension $32$), and an inner \gls{ffn} dimension of $d_{\mathrm{ff,sh}} = 2048$; $N_{\mathrm{sh}} = 6$ layers are used.
+The trunk operates with hidden dimension $d_{\mathrm{model}} = 256$, $h_{\mathrm{sh}} = 8$ attention heads (so that each head has dimension $32$), and an inner \gls{ffn} dimension of $d_{\mathrm{ff,sh}} = 2048$; $N_{\mathrm{sh}} = 4$ layers are used.
 Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}^{\mathrm{sh}}_1,\ldots,\vect{h}^{\mathrm{sh}}_L)$ with $\vect{h}^{\mathrm{sh}}_n \in \R^{256}$, in which information has been mixed across the full window.
 
 \subsection*{Task-specific branches}
 
 The trunk output feeds two parallel branches that do not share parameters.
-Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, after which $N_{\mathrm{br}} = 2$ transformer-encoder layers of the same form as the trunk are applied.
+Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, after which $N_{\mathrm{br}} = 4$ transformer-encoder layers of the same form as the trunk are applied.
 The projection decouples the branch representation from the shared trunk output and, more generally, allows the branch width to differ from the trunk width; here the branches retain $d_{\mathrm{br}} = 256$, so the projection maps $\R^{256} \to \R^{256}$.
-Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 4$ heads (per-head dimension $64$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 2048$.
+Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 8$ heads (per-head dimension $32$) and the \gls{ffn} inner dimension is $d_{\mathrm{ff,br}} = 2048$.
+The incidence rotary variant of \cref{sec:method:attention:rope} is the one exception: it uses $4$ heads on the deinterleaving branch so that the two incidence axes can split a $64$-dimensional head evenly.
 Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{256}$.
 
 \subsection*{Projection heads}
@@ -70,7 +71,7 @@ At inference time, each branch's $L$-token embedding sequence is therefore decod
 \end{equation}
 with cardinalities $\hat{K},\hat{M} \in \N$ inferred from the data (\cref{fig:method:cluster_decoding}).
 \Gls{dbscan} \parencite{ester1996density} groups embeddings by local density at a Euclidean radius $\varepsilon$ and minimum neighbourhood count $\mathrm{minPts}$, assigning sparser points to a noise category.
-The radius $\varepsilon$ is selected by a grid search over $\varepsilon \in \{0.1, 0.2, 0.3, 0.4, 0.5\}$ on the validation set, separately for each branch, using the clustering metrics of \cref{sec:method:metrics}; the selected values are reported in \cref{ch:experiments}.
+The radius $\varepsilon$ is selected by a grid search over $\varepsilon \in \{0.1, 0.2, 0.3, 0.4, 0.5, 0.6\}$ on the validation set, separately for each branch, using the clustering metrics of \cref{sec:method:metrics}; the selected values are reported in \cref{ch:experiments}.
 The neighbourhood count is fixed at $\mathrm{minPts} = 5$, following its use in prior work on embedding-based deinterleaving \parencite{gunn2025deinterleaving}.
 With these settings the noise category remained marginal on the validation set---empty for most windows and almost never exceeding ten pulses per window---so no further treatment of noise-labelled pulses was deemed necessary.
 The clustering operator is applied only at inference, independently on each window and on each branch, and contributes no gradients.

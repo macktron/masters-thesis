@@ -4,7 +4,7 @@ This section collects numerical training choices deferred from \cref{sec:method:
 Unless \cref{sec:exp:ablation} states otherwise, baseline models use the same epoch budget and hardware (\cref{sec:exp:setup}) so that differences reflect architecture and objective rather than compute.
 
 The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:method:loss}.
-\cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder; entries marked with an em dash will be filled before the final thesis submission.
+\cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder.
 
 \begin{table}[t]
   \centering
@@ -15,39 +15,43 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
     Setting & Value \\
     \midrule
     Optimiser & AdamW \parencite{loshchilov2019adamw} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
-    Peak learning rate $\eta_{\max}$ & --- \\
+    Peak learning rate $\eta_{\max}$ & $\num{5e-4}$ \\
     Warmup & Linear from $0$ to $\eta_{\max}$ over $5\%$ of total steps \\
     Schedule after warmup & Cosine annealing to $\eta_{\min}$ \\
     Minimum learning rate $\eta_{\min}$ & \num{0} \\
-    Epochs & \num{8} \\
+    Epochs & \num{10} \\
+    Window length $L$ & \num{2000} \\
+    Training stride $\delta$ & \num{200} (overlap $1800$ pulses) \\
     Dropout (attention and feed-forward) & \num{0.1} throughout the transformer blocks \\
-    Batch size $B$ (windows per step) & --- \\
+    Batch size $B$ (windows per step) & \num{4} \\
     Mode loss weight $\lambda_{\mathrm{md}}$ & \num{1} \\
-    Weight decay & --- \\
+    Weight decay & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Total optimisation steps equal eight epochs times the number of training batches per epoch.
+Total optimisation steps equal ten epochs times the number of training batches per epoch.
 The warmup fraction and cosine phase are counted in those steps, as stated in \cref{sec:method:training}.
 
 \Cref{tab:exp:hparams_attn} collects the attention-variant knobs deferred from \cref{sec:method:attention} and the \gls{dbscan} radii of \cref{sec:method:arch}.
 Vanilla and Bias do not use rotary scales.
-RoPE-TOA uses a single scale $\gamma_t$ on every layer; RoPE-az uses $\gamma_t$ on the trunk and the mode branch and $(\gamma_c,\gamma_s)$ on the deinterleaving branch.
-Unused coordinates are marked n/a; an em dash in an $\varepsilon$ column, or in a $\gamma$ column that the model does use, will be replaced after selection.
+RoPE-TOA uses a single scale $\gamma_t$ on every layer.
+RoPE-az uses $\gamma_t$ on the trunk and the mode branch and $(\gamma_x,\gamma_y)$ on the two planar Euclidean incidence axes of the deinterleaving branch.
+Those axes are the Cartesian components of \cref{eq:method:aoa_scale}, not azimuth or elevation angles.
+Unused coordinates are marked n/a.
 
 \begin{table}[tbp]
   \centering
-  \caption{Rotary scales and \gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed.}
+  \caption{Rotary scales and \gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed. $\gamma_x$ and $\gamma_y$ apply only to RoPE-az.}
   \label{tab:exp:hparams_attn}
   \begin{tabular}{@{}lccccc@{}}
     \toprule
-    Model & $\gamma_t$ & $\gamma_c$ & $\gamma_s$ & $\varepsilon_{\mathrm{em}}$ & $\varepsilon_{\mathrm{md}}$ \\
+    Model & $\gamma_t$ & $\gamma_x$ & $\gamma_y$ & $\varepsilon_{\mathrm{em}}$ & $\varepsilon_{\mathrm{md}}$ \\
     \midrule
-    Vanilla   & {n/a} & {n/a} & {n/a} & {---} & {---} \\
-    RoPE-TOA  & {---} & {n/a} & {n/a} & {---} & {---} \\
-    RoPE-az   & {---} & {---} & {---} & {---} & {---} \\
-    Bias      & {n/a} & {n/a} & {n/a} & {---} & {---} \\
+    Vanilla   & {n/a} & {n/a} & {n/a} & $0.6$ & $0.1$ \\
+    RoPE-TOA  & $10$ & {n/a} & {n/a} & $0.6$ & $0.1$ \\
+    RoPE-az   & $10$ & $10$ & $10$ & $0.6$ & $0.2$ \\
+    Bias      & {n/a} & {n/a} & {n/a} & $0.6$ & $0.1$ \\
     \bottomrule
   \end{tabular}
 \end{table}

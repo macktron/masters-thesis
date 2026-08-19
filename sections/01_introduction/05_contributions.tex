@@ -4,6 +4,6 @@ The main contributions of this thesis are:
 \begin{itemize}
   \item We propose a transformer encoder with a shared trunk and two branches that map a window of \glspl{pdw} to emitter and mode embeddings, decoded by per-window \gls{dbscan} (\cref{sec:method:arch}).
   \item We train both branches with supervised contrastive losses that differ only in the scope of the positive set: recording-local emitter identifiers versus global mode labels (\cref{sec:method:loss}).
-  \item We evaluate a pairwise physical attention bias and a rotary positional encoding on time and azimuth as drop-in changes to standard self-attention (\cref{sec:method:attention}).
+  \item We evaluate a pairwise physical attention bias and a rotary positional encoding on time and Euclidean incidence as drop-in changes to standard self-attention (\cref{sec:method:attention}).
   \item We test the method on a labelled synthetic scenario corpus and report emitter and mode clustering with \gls{ami}, \gls{ari}, and \gls{vmeasure} (\cref{ch:experiments}).
 \end{itemize}

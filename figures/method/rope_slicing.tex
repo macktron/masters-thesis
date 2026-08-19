@@ -1,7 +1,7 @@
 % =====================================================================
 % Allocation of RoPE rotation planes.
 % Top: trunk/mode --- all planes by TOA.
-% Bottom: deinterleaving --- even split cos(theta^az) / sin(theta^az).
+% Bottom: deinterleaving --- even split of Euclidean incidence u^x / u^y.
 % Loaded from sections/04_method/04_attention_variants.tex via \input.
 % =====================================================================
 \begin{tikzpicture}[
@@ -47,23 +47,23 @@
       \node[sinplane] (b\m) at ({(\m-0.5)*\W}, 0) {};
     }
     \node[font=\scriptsize] at (b1)
-      {\scalebox{0.78}{$\Omega(\gamma_{c}\tilde{c}_n\omega_1)$}};
+      {\scalebox{0.78}{$\Omega(\gamma_{x}\tilde{u}^{x}_n\omega_1)$}};
     \node[font=\scriptsize] at (b2) {$\cdots$};
     \node[font=\scriptsize] at (b3)
-      {\scalebox{0.78}{$\Omega(\gamma_{c}\tilde{c}_n\omega_{d_k/4})$}};
+      {\scalebox{0.78}{$\Omega(\gamma_{x}\tilde{u}^{x}_n\omega_{d_k/4})$}};
     \node[font=\scriptsize] at (b4)
-      {\scalebox{0.78}{$\Omega(\gamma_{s}\tilde{s}_n\omega_1)$}};
+      {\scalebox{0.78}{$\Omega(\gamma_{y}\tilde{u}^{y}_n\omega_1)$}};
     \node[font=\scriptsize] at (b5) {$\cdots$};
     \node[font=\scriptsize] at (b6)
-      {\scalebox{0.78}{$\Omega(\gamma_{s}\tilde{s}_n\omega_{d_k/4})$}};
+      {\scalebox{0.78}{$\Omega(\gamma_{y}\tilde{u}^{y}_n\omega_{d_k/4})$}};
 
     \draw[slicebrace] (0, -4.5mm) -- ({3*\W}, -4.5mm);
     \node[bracelabel] at ({1.5*\W}, -7mm)
-      {$d_k/4$ planes: $\tilde{c}_n=\tfrac{1+\cos\theta^{\mathrm{az}}_n}{2}$};
+      {$d_k/4$ planes: $\tilde{u}^{x}_n$};
 
     \draw[slicebrace] ({3*\W}, -4.5mm) -- ({6*\W}, -4.5mm);
     \node[bracelabel] at ({4.5*\W}, -7mm)
-      {$d_k/4$ planes: $\tilde{s}_n=\tfrac{1+\sin\theta^{\mathrm{az}}_n}{2}$};
+      {$d_k/4$ planes: $\tilde{u}^{y}_n$};
   \end{scope}
 
 \end{tikzpicture}
