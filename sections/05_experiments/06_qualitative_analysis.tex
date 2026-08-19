@@ -1,12 +1,130 @@
 \section{Qualitative Analysis}\label{sec:exp:qualitative}
 
-Qualitative analysis complements the scalar metrics in \cref{sec:exp:results} by checking whether embeddings organize pulses in ways that align with physical emitter boundaries and with mode transitions inside a window.
-The checks in \cref{sec:exp:datasets:qualitative} validate that the simulator export behaves as intended; this section applies analogous scrutiny \emph{after} models are trained.
+The tables average over hundreds of windows.
+This section looks at the pulses themselves, first as input features and then as embeddings, to check that those averages correspond to a geometry a reader can inspect.
+The input is the same for every model, so the feature plots are shown once.
+Embeddings differ by model and by branch.
 
-Two-dimensional projections of pooled or per-pulse embeddings (for example UMAP or t-SNE) should be colored separately by reference emitter (using the recording-local emitter label of each pulse) and by reference mode (using the global mode catalogue from \cref{sec:method:formulation}).
-Disjoint emitter-colored manifolds with mode-colored substructure that stays coherent within an emitter are evidence that the dual geometry in \cref{ch:method} is behaving as designed; elongated bridges between emitter manifolds often indicate residual deinterleaving ambiguity or shared waveform parameters across platforms.
+\subsection*{Input window}\label{sec:exp:qualitative:features}
 
-Attention maps or head-wise statistics, if exported, can be overlaid on \gls{toa}-ordered pulses to see whether specific heads track stable intervals versus rapid mode hops.
-% TODO: add figures under \texttt{figures/experiments/} (e.g.\ \texttt{embedding\_tsne\_emitter.pdf}, \texttt{embedding\_tsne\_mode.pdf}) and reference them here with \cref{fig:exp:...}.
+\Cref{fig:exp:feat_w100_em,fig:exp:feat_w100_md} are the same $L=2000$ pulses from evaluation window $100$ (test scenario $1752$).
+The four panels are carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate, each against window-local \gls{toa}.
+The export names that last panel Theta. It is a direction component after \cref{eq:method:aoa_scale}, not a raw azimuth.
+Color is the only change between the two figures: \cref{fig:exp:feat_w100_em} uses the recording-local emitter label, \cref{fig:exp:feat_w100_md} the global mode label.
+Vanilla, RoPE-TOA, RoPE-az, and Bias score $\ARI=1$ on both branches of this window, with two emitters and four modes.
 
-Confusion matrices between inferred clusters and reference labels (after optimal assignment) are optional but useful when a small number of emitter or mode classes dominate error mass.
+The emitter coloring shows one platform with a scanning amplitude (the lower, scalloped track) and one platform whose amplitude sits on several flat levels.
+Frequency and pulse width already separate the scanner from the other platform, but they do not separate the flat tracks from each other: two of those tracks share a frequency band near $1.45$ and the same narrow pulse width.
+Incidence does separate them.
+The mode coloring splits those flat tracks into different colors, which is the intended distinction.
+The scanner stays one color in both plots, so in this window that emitter uses a single mode.
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{feat_w100_em.png}
+  \caption{Evaluation window $100$, colored by ground-truth emitter. Two emitters are present.}
+  \label{fig:exp:feat_w100_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{feat_w100_md.png}
+  \caption{The same pulses as \cref{fig:exp:feat_w100_em}, colored by ground-truth mode. Four modes are present.}
+  \label{fig:exp:feat_w100_md}
+\end{figure}
+
+Window $100$ is a light mixture.
+\Cref{fig:exp:feat_maxmode} is a crowded counterpart: an overlapping evaluation window with $17$ distinct mode labels on four emitters, one more than the non-overlapping maximum used as $M$ in \cref{sec:exp:datasets}.
+Frequency and pulse width collapse to a handful of horizontal bands that several modes share.
+Amplitude is no longer a set of flats. Several tracks scan or hop.
+Incidence still stacks platforms on separate levels, but the levels are closer and more numerous than in \cref{fig:exp:feat_w100_em}.
+A method that clustered on one \gls{pdw} coordinate would not recover this window.
+The dual-branch encoder still has to do so from the same four channels.
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{feat_maxmode.png}
+  \caption{A crowded overlapping test window (evaluation index $4126$), colored by ground-truth mode.}
+  \label{fig:exp:feat_maxmode}
+\end{figure}
+
+\subsection*{Embeddings}\label{sec:exp:qualitative:embed}
+
+\Cref{fig:exp:emb_w100_em,fig:exp:emb_w100_md} are \gls{umap} projections of the per-pulse embeddings on window $100$.
+Each panel is one model.
+Color is again the ground-truth label of that branch (two emitters, four modes).
+The source plots have no legend. The two-color panels match \cref{fig:exp:feat_w100_em}, the four-color panels match \cref{fig:exp:feat_w100_md}.
+The projection is used only to look at the embeddings. It is not part of decoding.
+
+On the emitter branch the two colors occupy separate regions for every model.
+Vanilla keeps one emitter as several small islands and the other as a connected, more spread component, which matches the scanner versus the multi-level platform in the features.
+RoPE-TOA and Bias pull those islands tighter and leave a wider gap between the two colors.
+RoPE-az remains closer to Vanilla: the two colors still split, but the layout is less compact.
+
+On the mode branch the four colors separate in every panel.
+Some colors form thin arcs rather than round blobs, which is consistent with a mode whose amplitude or timing still moves inside the window.
+Vanilla, RoPE-TOA, RoPE-az, and Bias do not disagree on this window in $\ARI$, so the visual differences are layout, not a change in the discrete partition.
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_vanilla_w100_em.png}
+    \caption{Vanilla}
+    \label{fig:exp:emb_w100_em:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_rope_toa_w100_em.png}
+    \caption{RoPE-TOA}
+    \label{fig:exp:emb_w100_em:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_rope_az_w100_em.png}
+    \caption{RoPE-az}
+    \label{fig:exp:emb_w100_em:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_bias_w100_em.png}
+    \caption{Bias}
+    \label{fig:exp:emb_w100_em:bias}
+  \end{subfigure}
+  \caption{UMAP of emitter-branch embeddings on window $100$, colored by ground-truth emitter.}
+  \label{fig:exp:emb_w100_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_vanilla_w100_md.png}
+    \caption{Vanilla}
+    \label{fig:exp:emb_w100_md:vanilla}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_rope_toa_w100_md.png}
+    \caption{RoPE-TOA}
+    \label{fig:exp:emb_w100_md:rope_toa}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_rope_az_w100_md.png}
+    \caption{RoPE-az}
+    \label{fig:exp:emb_w100_md:rope_az}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_bias_w100_md.png}
+    \caption{Bias}
+    \label{fig:exp:emb_w100_md:bias}
+  \end{subfigure}
+  \caption{UMAP of mode-branch embeddings on window $100$, colored by ground-truth mode.}
+  \label{fig:exp:emb_w100_md}
+\end{figure}

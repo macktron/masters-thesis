@@ -16,12 +16,13 @@ The baseline encoder of \cref{sec:method:arch} makes the same choice.
 Relative encodings offer a middle path.
 \textcite{shaw2018relative} add a learned embedding of the discrete offset between token indices to the attention logits.
 Graphormer generalises that idea to pairwise biases derived from graph distances \parencite{ying2021graphormer}.
-The physical attention bias in \cref{sec:method:attention:bias} is the same mechanism with continuous pulse parameters: the absolute \gls{toa} difference and the circular azimuth distance, each scaled by a learned per-head coefficient.
+The physical attention bias in \cref{sec:method:attention:bias} is the same mechanism with continuous pulse parameters: pairwise absolute differences of window-local \gls{toa} and of the two planar Euclidean incidence components, each scaled by a learned per-head coefficient.
 
 \textcite{su2024roformer} rotate the queries and keys (\cref{sec:bg:transformer}).
 The inner product then depends on content and on the coordinate difference.
 Vision models split the rotation planes across spatial axes \parencite{heo2024ropevit}.
-The method replaces token indices with physical coordinates, reuses that split for cosine and sine of azimuth on the deinterleaving branch, and rotates the trunk and mode branch by \gls{toa} only (\cref{sec:method:attention:rope}).
+The method replaces token indices with physical coordinates, reuses that split for the two Euclidean incidence components on the deinterleaving branch, and rotates the trunk and mode branch by \gls{toa} only (\cref{sec:method:attention:rope}).
+It does not rotate by a scalar azimuth angle.
 
 Existing positional schemes were designed for discrete indices, regular grids, or a single shared coordinate.
 A \gls{pdw} window is an irregular point set with at least two physically distinct relations---time of arrival and arrival direction---and the two estimation tasks should not weight those relations equally.

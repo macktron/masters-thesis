@@ -20,7 +20,7 @@ Three differences remain.
 First, Gunn et al.\ produce a single embedding and a single partition---emitter identity---and treat operating mode as a later analysis that becomes easier after deinterleaving.
 Second, they train with a triplet hinge, which uses one positive and one negative per anchor; the method in \cref{sec:method:loss} uses the supervised contrastive kernel of \textcite{khosla2020supcon}, which averages over all positives of an anchor in the mini-batch.
 Third, their transformer uses vanilla dot-product attention.
-This thesis additionally evaluates a pairwise physical bias and a rotary encoding of time and azimuth (\cref{sec:method:attention}).
+This thesis additionally evaluates a pairwise physical bias and a rotary encoding of time and Euclidean incidence (\cref{sec:method:attention}).
 
 Deep models for radar pulses already exist.
 What they still omit is the joint problem of this thesis: two embeddings whose positive sets have different scopes---recording-local emitters and globally shared modes---both decoded by clustering rather than by a catalogue softmax.

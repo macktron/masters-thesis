@@ -5,15 +5,20 @@ The simulator supplies time-ordered pulse records together with ground-truth lab
 
 Each \emph{scenario} is one simulated timeline: a sequence of \glspl{pdw} whose length and the number of concurrent emitters vary across draws so that the encoder sees both sparse and crowded electromagnetic pictures.
 Scenarios are disjointly assigned to training, validation, and test partitions before any windowing; training-split statistics for carrier frequency, pulse width, and amplitude in \cref{sec:method:data} are fit on the training partition only and applied unchanged to validation and test pulses, whereas \gls{toa} is min--max mapped independently inside each window.
-Windows contain $L = 2000$ pulses; training windows use stride $\delta = 200$, so consecutive windows overlap by $L - \delta = 1800$ pulses, whereas validation and test windows use stride $\delta = L$ and are therefore non-overlapping.
-As a consequence, the effective number of windows per scenario differs by split even when raw pulse counts are similar.
+Windows contain $L = 2000$ pulses.
+The run configuration uses stride $\delta = 200$ on every split, so consecutive dumped windows overlap by $L - \delta = 1800$ pulses.
+Training consumes that overlapping stream.
+Reported validation and test scores keep every tenth dumped window, which restores $\delta = L$ and yields non-overlapping windows (\cref{sec:exp:results:protocol}).
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
 The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
 The emitter column counts the distinct emitters active in each scenario.
 Emitter identifiers are meaningful only within their own scenario (\cref{sec:method:formulation}), so these figures describe how many emitters each scenario contains rather than membership in some global emitter set; at inference, the within-window clustering accordingly never has to separate more emitters than the enclosing scenario contains.
-The number of unique emitters per scenario ranges from 1 to 23 and the number of unique modes per scenario from 1 to 7 in every split, so the three partitions are statistically homogeneous in this respect.
-The global mode catalogue comprises $M = 7$ operating modes (\cref{sec:method:formulation}), all of which are exercised in each split.
+The number of unique emitters per scenario ranges from 1 to 23 in every split, so the three partitions are statistically homogeneous in this respect.
+A window of length $L$ never contains that many concurrent emitters: on the non-overlapping test windows used for scoring, the largest number of distinct emitter labels in one window is $7$.
+The global mode catalogue is taken to have size $M = 16$, equal to the largest number of distinct mode labels in any of those same evaluated windows.
+A recording uses a subset of that catalogue.
+The catalogue is shared across the training, validation, and test splits.
 
 The numbers of emitters and assigned modes per scenario are sampled uniformly; however, the resulting pulse counts per emitter and mode are highly imbalanced due to variation in mode behavior. For instance, scanning modes typically generate far fewer pulses than lock-on modes, and some modes differ by more than an order of magnitude in their base PRI. As a result, the number of pulses (\glspl{pdw}) per emitter or mode is not balanced either within a scenario or across the corpus.
 Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data}), rare combinations of emitter, mode, and interleaving pattern can be missing from individual windows or represented by only a handful of pulses, which limits what any single forward pass can evidence about those labels.
@@ -40,5 +45,4 @@ Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data
 Beyond aggregate counts, the corpus is checked qualitatively before large training runs: example timelines are inspected for plausible \gls{pri} structure per mode, for physically admissible \gls{rf} and pulse-width ranges, and for the intended mixture density when multiple emitters are active.
 When the simulator regime adds dropped or spurious pulses (\cref{sec:method:data}), spot checks confirm that surviving pulses retain their original time order and that spurious insertions stay within the configured parameter ranges.
 This mirrors the reporting practice in earlier Saab-hosted simulator studies, which often include illustrative emitter tracks alongside tables \parencite{jonsson2023supcon}.
-\cref{sec:exp:qualitative} complements the brief sanity checks here with embedding-space visualizations and other qualitative diagnostics once model checkpoints are available.
-% TODO: add \texttt{figures/experiments/corpus\_examples.pdf} (e.g.\ example windows by emitter/mode) and reference with \cref{fig:exp:corpus_examples}.
+\Cref{sec:exp:qualitative} inspects one light window and one crowded window from the test dump after training.

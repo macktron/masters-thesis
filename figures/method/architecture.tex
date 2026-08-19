@@ -38,7 +38,7 @@
 
   \node[trunk, above=of embed] (trunk)
     {Shared transformer trunk\\
-     $N_{\mathrm{sh}}{=}6$ encoder layers\\
+     $N_{\mathrm{sh}}{=}4$ encoder layers\\
      $d_{\mathrm{model}}{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
 
   \coordinate (fork) at ($(trunk.north)+(0,5mm)$);
@@ -50,12 +50,12 @@
 
   \node[branch, above=of proj_em] (br_em)
     {Emitter branch\\
-     $N_{\mathrm{br}}{=}2$ encoder layers\\
-     $d{=}256$,\; $h{=}4$,\; $d_{\mathrm{ff}}{=}1024$};
+     $N_{\mathrm{br}}{=}4$ encoder layers\\
+     $d{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
   \node[branch, above=of proj_md] (br_md)
     {Mode branch\\
-     $N_{\mathrm{br}}{=}2$ encoder layers\\
-     $d{=}256$,\; $h{=}4$,\; $d_{\mathrm{ff}}{=}1024$};
+     $N_{\mathrm{br}}{=}4$ encoder layers\\
+     $d{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
 
   \node[affine, above=of br_em] (head_em)
     {Projection head\\

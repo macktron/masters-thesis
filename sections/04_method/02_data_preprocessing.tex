@@ -54,7 +54,7 @@ Absolute \gls{toa} is left in physical units at this stage and is min--max mappe
 
 Standard self-attention has time and memory complexity $\mathcal{O}(L^2)$ for a window of $L$ pulses.
 Because a complete recording may contain millions of pulses, the encoder processes fixed-length windows rather than entire recordings.
-The value of $L$ is reported with the experimental hyperparameters in \cref{tab:exp:hparams_main}.
+The value of $L$, and the training stride, are reported in \cref{tab:exp:hparams_main}.
 
 Given a recording $\mat{X}=(\vect{x}_1,\ldots,\vect{x}_N)$ and stride $\delta$, window $w$ is
 \begin{equation}\label{eq:method:windowing}
@@ -73,7 +73,8 @@ During training, choosing $\delta<L$ produces overlapping windows and therefore 
 A smaller stride improves coverage of sparse emitters and modes and reduces sensitivity to window boundaries, but it also repeats more of the same \glspl{pdw}, increasing computation and correlation between samples.
 Advancing the window by a small stride resembles streaming inference because outputs can be refreshed as new pulses arrive, although it is not online learning because the model parameters remain fixed.
 
-Validation and test use $\delta=L$, yielding non-overlapping windows that are processed entirely offline.
+Reported validation and test scores use $\delta=L$, yielding non-overlapping windows that are processed entirely offline.
+The evaluation dump itself may be generated with the training stride and then subsampled; that protocol is stated in \cref{sec:exp:results:protocol}.
 Streaming inference and online model adaptation are left to future work (\cref{sec:concl:future}).
 
 \begin{figure}[tbp]

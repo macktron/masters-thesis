@@ -1,5 +1,12 @@
 \section{Future Work}\label{sec:concl:future}
 
-% TODO: Concrete follow-ups: novel emitter detection, online learning,
-% real-world deployment, longer sequences, joint deinterleaving.
-Placeholder paragraph.
+A sweep of $\lambda_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging.
+Retraining the attention variants under an emitter-only objective would show whether RoPE-TOA and Bias still separate from Vanilla when the trunk is not also serving modes.
+
+Held-out modulation types are the experiment that the clustering decoder is for.
+Until that split is scored, the mode branch is a grouping of seen catalogue types.
+Operational recordings, and simulator drop or spurious-pulse regimes as an actual test set, are the corresponding check on distribution shift.
+
+Longer context needs a cheaper attention map, not a larger $L$ on the present bias.
+Association of window-local emitter indices into tracks is a separate stage.
+Several training seeds would turn the window-level spread in the tables into an uncertainty on the ranking itself.

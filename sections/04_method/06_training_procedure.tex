@@ -2,8 +2,8 @@
 
 Parameters $\bm{\theta}$ are estimated by minimising $\Loss$
 (\cref{eq:method:loss_total}) with AdamW \parencite{loshchilov2019adamw} in PyTorch.
-Training runs for eight epochs on the training split; after each epoch the model is evaluated on the validation split.
-The learning rate rises linearly from zero to its peak over the first $5\%$ of the total optimisation steps (eight epochs times the number of training batches), then follows a cosine anneal.
+Training runs for ten epochs on the training split; after each epoch the model is evaluated on the validation split.
+The learning rate rises linearly from zero to its peak over the first $5\%$ of the total optimisation steps (ten epochs times the number of training batches), then follows a cosine anneal.
 Peak learning rate, weight decay, batch size, and related settings are listed in \cref{tab:exp:hparams_main}.
 
 \subsection*{Scenario-aware batch sampling}\label{sec:method:training:sampler}

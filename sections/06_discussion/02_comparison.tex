@@ -1,9 +1,26 @@
 \section{Comparison with Related Work}\label{sec:disc:comparison}
 
-Relative to classical \gls{elint} fingerprinter pipelines surveyed in \cref{sec:related:classical}, the proposed approach trades hand-engineered feature logic for a learned encoder, at the cost of data hunger, compute, and reduced transparency unless accompanied by diagnostics such as those in \cref{sec:exp:qualitative}.
-Unlike the supervised radar classifiers discussed in \cref{sec:related:dl_radar}, which typically assume a fixed global label set for emitters and a fixed mode catalogue at inference, the training objective here treats emitter identity as a \emph{recording-local} symbol used only through within-recording comparisons (\cref{sec:method:loss}); operating-mode labels are used globally during training to shape the mode embedding geometry, but the inference path runs through clustering rather than through a softmax over the training catalogue, so that the same model can accommodate modulation types absent from the training data.
+Classical \gls{elint} pipelines surveyed in \cref{sec:related:classical} deinterleave with \gls{toa} histograms or with density clustering on raw \gls{pdw} coordinates, then match trains against a library.
+The encoder here replaces that first stage with a learned embedding, and it never performs the second.
+Scores in \cref{ch:experiments} are partition agreement, not equipment names.
+A raw-feature \gls{dbscan} control exists in the dumps, but it uses $L=1500$ and is omitted from the tables for that reason.
+What can be said is narrower. On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_w100_em,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
 
-Deep clustering methods in \cref{sec:related:deep_clustering} typically optimise a \emph{single} flat partition without labels, or attach two unrelated supervised heads to the same backbone.
-This thesis instead targets two aligned partitions with a nesting interpretation (modes within emitters), with two supervised contrastive losses that share the same functional form and differ only in the scope of their positive sets: within-window for emitter labels and batch-wide for global mode labels.
-The setup is closer in spirit to offline pulse-level grouping work that reasons about geometry and overlap in \gls{esm} data \parencite{bedoire2022offlineclustering} but uses gradient-based representation learning rather than hand-tuned density stages alone.
-Where scores fall short of the best published supervised benchmarks, the gap is expected: those models often operate on curated single-emitter tracks with a flat, globally consistent emitter label set, whereas the present setting stresses mixture windows and a label structure that forces emitter inference through clustering rather than through a global classifier.
+Supervised radar classifiers in \cref{sec:related:dl_radar} assume a global emitter catalogue and a softmax at inference.
+\textcite{jonsson2023supcon} trains a related contrastive encoder on the same simulator lineage, still as closed-set identification.
+The present scores cannot be stacked against that accuracy. The tasks differ.
+Emitter labels here are recording-local, and both branches are clustered rather than classified.
+That is closer to \textcite{gunn2025deinterleaving}, who train a transformer for deinterleaving and cluster the embeddings with HDBSCAN.
+The Vanilla row of \cref{tab:exp:attn_em} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
+Gunn et al.\ stop at one partition. The second column of \cref{tab:exp:attn_md} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
+
+The attention variants go one step past that counterpart.
+Gunn et al.\ use standard dot-product attention and leave \gls{toa} as an input feature.
+RoPE-TOA and Bias put time into the attention product itself, and on this test set they close the emitter tail that Vanilla leaves.
+RoPE-az does not, once incidence is already in the token.
+None of these variants is a published radar baseline. They are drop-in changes of the same encoder, which is the comparison RQ3 asks for.
+
+Deep clustering methods in \cref{sec:related:deep_clustering} usually learn one partition, often with the number of clusters chosen in advance.
+The two branches here are not a hierarchy of one relation. Modes are not subtypes of emitters.
+A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_loss} is the empirical trace of that conflict in the shared trunk.
+The comparison with multi-task softmax heads in \cref{sec:related:joint} is the same point in other words. Those heads need globally consistent class names. The emitter identifiers in this corpus are not that.

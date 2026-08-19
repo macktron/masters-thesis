@@ -1,10 +1,25 @@
 \section{Implications}\label{sec:disc:implications}
 
-For \gls{elint} and \gls{esm} practice, the main takeaway is methodological: joint emitter- and mode-aware embeddings can be learned from \gls{pdw} streams whose supervision is structured asymmetrically (recording-local emitter labels, global mode catalogue), with downstream discretisation handled by clustering on \emph{both} branches so that previously unseen emitters and modulation types can in principle surface as distinct clusters rather than be silently absorbed into existing catalogue entries.
-Operators should treat the resulting per-pulse emitter and mode cluster indices as hypotheses that require human or library-based adjudication before tactical use, especially when training data are synthetic and drift relative to live emitters or to mode catalogues is unmodelled; in particular, mode-branch clusters whose count exceeds the size of the training catalogue, or that occupy regions of the mode embedding space far from those populated by training-time modes, are informative as candidate novel modulations and warrant separate review.
+If the task is deinterleaving alone, the Vanilla ablation is the practical message.
+Train the emitter term only.
+The joint loss is for the case where a mode partition is required from the same window, and even then the equal-weight sum is a compromise rather than a free extra head.
 
-For the deep-clustering and sequence-modeling research communities, the thesis sits at the intersection of contrastive representation learning on irregular pulse sequences and multi-partition clustering with a physical nesting constraint (modes within emitters).
-The architectural and loss choices in \cref{ch:method} are portable to other domains with hierarchical latent structure, provided that evaluation metrics separate which level of the hierarchy is being scored.
+If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
+Putting \gls{toa} into the attention product, either as RoPE-TOA or as the pairwise bias, is what closes that gap.
+RoPE-TOA does it without extra weights and without a material change in encoder time.
+The bias matches those scores and spends memory and milliseconds on pairwise maps.
+Incidence rotary encoding on the deinterleaving branch is not a substitute, once the Cartesian direction channels are already input features.
 
-Follow-up work naturally includes streaming or sliding-window evaluation, richer deinterleaving and track-error models \parencite{jakobsson2024trackassociation}, and explicit \gls{ml} safeguards against dataset shift and overconfident extrapolation \parencite{coleman2023rwrdrift}.
-On the ethics side, the considerations in \cref{sec:intro:ethics} still apply: dual-use sensitivity, data stewardship if operational traces are introduced later, and the energy cost of transformer-scale training should be revisited whenever the experimental footprint grows.
+The clustering path at inference keeps the output open in form.
+It does not, by itself, demonstrate that unseen modes would form their own clusters.
+Until a held-out-modulation split is scored, operators should read the mode indices as a grouping of catalogue types that were present in training, not as a detector of new waveforms.
+Emitter indices are window-local hypotheses. They still need a later association stage if the product is a track, not a window.
+
+For representation learning more broadly, the useful fact is the one in \cref{tab:exp:ablation_loss}.
+Two supervised contrastive terms with different positive-set scopes can share a trunk, and the trunk will trade one partition against the other.
+That is expected once the two similarities conflict, and it is measurable.
+Tuning $\lambda_{\mathrm{md}}$, or detaching more of the trunk, is the obvious next control when both heads must stay close to their single-task ceilings.
+
+The ethical limits in \cref{sec:intro:ethics} do not change with these scores.
+The work is a clustering method on synthetic pulse features.
+It is not an identification system, and it is not ready to be read as one.

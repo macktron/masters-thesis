@@ -5,7 +5,8 @@ The only ordering cue available to it is whatever the input features themselves 
 A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, have a similar pulse width, or arrive from a similar direction, are far more likely to originate from the same emitter or mode than an arbitrary pair.
 This section describes two variants of the attention mechanism that make such structure explicit.
 They are used as drop-in modifications of the \gls{mha} sub-layers of \cref{sec:method:arch}.
-Each variant is evaluated separately against standard self-attention in \cref{ch:experiments}; combining the bias with \gls{rope} is not tested here.
+Each mechanism is evaluated on its own against standard self-attention, and they are also stacked: uniform \gls{toa} rotary encoding in every layer together with the pairwise bias, with no incidence rotary coordinates.
+All of these layouts are included in \cref{ch:experiments}.
 
 Throughout, we write the attention logits of a single head over a window of $L$ pulses as
 \begin{equation}\label{eq:method:attn_base}
@@ -19,33 +20,31 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 \subsection{Physical attention bias}\label{sec:method:attention:bias}
 
 The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
-The bias uses two coordinates: the window-local \gls{toa} $t_n$ and the azimuth $\theta^{\mathrm{az}}_n$ of \cref{eq:method:aoa_cart}.
-For \gls{toa} the pairwise feature is the absolute difference $B^{(t)}_{ij} = |t_i - t_j|$.
-For azimuth, a plain absolute difference would treat bearings near $0$ and $2\pi$ as far apart although they describe nearly the same direction; the circular distance
-\begin{equation}\label{eq:method:circ_az}
-  B^{(\theta)}_{ij}
+The implemented coordinates are the window-local \gls{toa} $t_n$ and the two planar Euclidean incidence components $(\tilde{u}^{x}_n,\tilde{u}^{y}_n)$ of \cref{eq:method:aoa_scale}.
+None of these coordinates is a raw angle.
+Each selected coordinate $p$ contributes an absolute pairwise difference $B^{(p)}_{ij} = |p_i - p_j|$, added to the logits with its own learnable scalar coefficient.
+On the shared trunk only \gls{toa} is used,
+\begin{equation}\label{eq:method:attn_bias_trunk}
+  A_{ij}
   =
-  \frac{1}{\pi}\,
-  \min\bigl(
-    \lvert\theta^{\mathrm{az}}_i - \theta^{\mathrm{az}}_j\rvert,\,
-    2\pi - \lvert\theta^{\mathrm{az}}_i - \theta^{\mathrm{az}}_j\rvert
-  \bigr)
-  \in [0,1]
+  \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}}
+  + \lambda_t\, B^{(t)}_{ij}.
 \end{equation}
-takes the shorter arc on the circle and normalises by $\pi$ so that both bias features lie in $[0,1]$.
-Each feature is added to the logits with a learnable scalar coefficient,
+On the two task branches all three coordinates are present,
 \begin{equation}\label{eq:method:attn_bias}
   A_{ij}
   =
   \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}}
   + \lambda_t\, B^{(t)}_{ij}
-  + \lambda_{\theta}\, B^{(\theta)}_{ij}.
+  + \lambda_{x}\, B^{(x)}_{ij}
+  + \lambda_{y}\, B^{(y)}_{ij},
 \end{equation}
-Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer, so every head in every encoder block---throughout the shared trunk and both branches---carries its own $(\lambda_t,\lambda_{\theta})$.
-This adds only \(128\) scalar parameters in total, given the layer and head counts of \cref{sec:method:arch}; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
+where $B^{(x)}$ and $B^{(y)}$ are the absolute differences of $\tilde{u}^{x}$ and $\tilde{u}^{y}$.
+Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer.
+This adds one scalar per head, layer, and selected coordinate; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
 Coefficients may be negative, and each is initialised to a small negative value so that, in line with the intended inductive bias, a larger coordinate difference initially decreases attention between the corresponding pulses.
 Because the coefficients are learned independently in each part of the network, the branches can weight the cues differently.
-The deinterleaving branch is expected to rely more on azimuth, since pulses from one emitter usually arrive from a nearly constant bearing.
+The deinterleaving branch is expected to rely more on incidence, since pulses from one emitter usually arrive from a nearly constant direction.
 The shared trunk and the mode branch should instead suppress that cue, because an operating mode must be recognised independently of viewing geometry.
 Whether this allocation emerges is examined in \cref{ch:experiments}.
 The bias follows the same idea as additive pairwise attention biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances.
@@ -69,9 +68,9 @@ A larger $\gamma$ gives a small gap in $p$ more phase and makes the fast planes 
 A smaller $\gamma$ keeps phases unique over a wider span of the window and flattens nearby distinctions.
 Unlike the bias coefficients of \cref{eq:method:attn_bias}, $\gamma$ is not learned.
 Each coordinate has its own scale, because a numerical gap of a given size is not the same physical distance in time as in direction.
-The values $\gamma_t$, $\gamma_c$, and $\gamma_s$ are reported in \cref{ch:experiments}.
+The values $\gamma_t$, $\gamma_x$, and $\gamma_y$ are reported in \cref{ch:experiments}.
 
-The encoder of \cref{sec:method:arch} uses this construction in every attention sub-layer. The shared trunk and the mode branch rotate by the window-local \gls{toa}. The deinterleaving branch splits each head across two continuous functions of azimuth.
+The encoder of \cref{sec:method:arch} uses this construction in every attention sub-layer. The shared trunk and the mode branch rotate by the window-local \gls{toa}. The deinterleaving branch splits each head across the two planar Euclidean incidence components of \cref{eq:method:aoa_scale}. It does not rotate by a scalar azimuth or elevation angle.
 
 \subsubsection*{Trunk and mode branch}
 
@@ -85,80 +84,81 @@ Arrival direction is excluded. An operating mode is characterized by the intrins
 
 \subsubsection*{Deinterleaving branch}
 
-Every head in the deinterleaving branch rotates by direction instead.
-Azimuth is a strong cue for emitter identity, and temporal structure is already present upstream through the \gls{toa}-rotated trunk.
-Feeding the raw angle $\theta^{\mathrm{az}}_n$ into \gls{rope} would reintroduce the $0$--$2\pi$ wrap of \cref{sec:method:data:norm}, because the relative phase of \cref{eq:bg:rope} depends on the algebraic difference of the scalar coordinate.
-The branch therefore replaces $\theta^{\mathrm{az}}_n$ by the two continuous features
-\begin{equation}\label{eq:method:azimuth_trig}
-  \tilde{c}_n = \frac{1 + \cos\theta^{\mathrm{az}}_n}{2},
-  \qquad
-  \tilde{s}_n = \frac{1 + \sin\theta^{\mathrm{az}}_n}{2},
+Every head in the deinterleaving branch rotates by planar incidence instead.
+Direction is a strong cue for emitter identity, and temporal structure is already present upstream through the \gls{toa}-rotated trunk.
+Feeding the raw azimuth $\theta^{\mathrm{az}}_n$ into \gls{rope} would reintroduce the $0$--$2\pi$ wrap of \cref{sec:method:data:norm}, because the relative phase of \cref{eq:bg:rope} depends on the algebraic difference of the scalar coordinate.
+The branch therefore uses the two Euclidean components already in the input,
+\begin{equation}\label{eq:method:incidence_coords}
+  \tilde{u}^{x}_n,\; \tilde{u}^{y}_n \in [0,1],
 \end{equation}
-both in $[0,1]$.
+from \cref{eq:method:aoa_scale}.
+These are Cartesian incidence coordinates, not angles.
 The $d_k/2$ planes of each head are split evenly into two slices of $d_k/4$ planes, following multi-axis \gls{rope} \parencite{heo2024ropevit}, so that the query (and likewise the key) decomposes as
 \begin{equation}\label{eq:method:rope_split}
   \vect{q}_n
   =
   \begin{bmatrix}
-    \vect{q}_n^{(c)} \\
-    \vect{q}_n^{(s)}
+    \vect{q}_n^{(x)} \\
+    \vect{q}_n^{(y)}
   \end{bmatrix},
   \qquad
-  \vect{q}_n^{(c)},\, \vect{q}_n^{(s)} \in \R^{d_k/2}.
+  \vect{q}_n^{(x)},\, \vect{q}_n^{(y)} \in \R^{d_k/2}.
 \end{equation}
 Each half is rotated by its own single-coordinate matrix of the form \cref{eq:bg:rope_block},
 \begin{equation}\label{eq:method:rope_az}
   \mat{R}^{\mathrm{em}}_n
   =
   \diag\!\bigl(
-    \mat{R}^{(c)}(\tilde{c}_n),\;
-    \mat{R}^{(s)}(\tilde{s}_n)
+    \mat{R}^{(x)}(\tilde{u}^{x}_n),\;
+    \mat{R}^{(y)}(\tilde{u}^{y}_n)
   \bigr),
 \end{equation}
-with $\mat{R}^{(c)},\mat{R}^{(s)}\in\R^{d_k/2\times d_k/2}$ using scales $\gamma_c$ and $\gamma_s$ respectively.
+with $\mat{R}^{(x)},\mat{R}^{(y)}\in\R^{d_k/2\times d_k/2}$ using scales $\gamma_x$ and $\gamma_y$ respectively.
 The two halves of the query are then
 \begin{equation}\label{eq:method:rope_az_q}
-  \tilde{\vect{q}}_n^{(c)}
+  \tilde{\vect{q}}_n^{(x)}
   =
-  \mat{R}^{(c)}(\tilde{c}_n)\,\vect{q}_n^{(c)},
+  \mat{R}^{(x)}(\tilde{u}^{x}_n)\,\vect{q}_n^{(x)},
   \qquad
-  \tilde{\vect{q}}_n^{(s)}
+  \tilde{\vect{q}}_n^{(y)}
   =
-  \mat{R}^{(s)}(\tilde{s}_n)\,\vect{q}_n^{(s)},
+  \mat{R}^{(y)}(\tilde{u}^{y}_n)\,\vect{q}_n^{(y)},
 \end{equation}
 and likewise for the key.
-The cosine rotation acts only on $\vect{q}_n^{(c)}$, the sine rotation only on $\vect{q}_n^{(s)}$.
+The $x$ rotation acts only on $\vect{q}_n^{(x)}$, the $y$ rotation only on $\vect{q}_n^{(y)}$.
 Because the slices occupy disjoint coordinates, the head inner product is the sum of two half-dimension inner products,
 \begin{align}
   \bigl\langle \tilde{\vect{q}}_i,\, \tilde{\vect{k}}_j \bigr\rangle
   &=
-  \bigl\langle \tilde{\vect{q}}_i^{(c)},\, \tilde{\vect{k}}_j^{(c)} \bigr\rangle
+  \bigl\langle \tilde{\vect{q}}_i^{(x)},\, \tilde{\vect{k}}_j^{(x)} \bigr\rangle
   +
-  \bigl\langle \tilde{\vect{q}}_i^{(s)},\, \tilde{\vect{k}}_j^{(s)} \bigr\rangle
+  \bigl\langle \tilde{\vect{q}}_i^{(y)},\, \tilde{\vect{k}}_j^{(y)} \bigr\rangle
   \nonumber
   \\
   &=
-  \vect{q}_i^{(c)\top}\,
-  \mat{R}^{(c)}\bigl(\tilde{c}_j - \tilde{c}_i\bigr)\,
-  \vect{k}_j^{(c)}
+  \vect{q}_i^{(x)\top}\,
+  \mat{R}^{(x)}\bigl(\tilde{u}^{x}_j - \tilde{u}^{x}_i\bigr)\,
+  \vect{k}_j^{(x)}
   +
-  \vect{q}_i^{(s)\top}\,
-  \mat{R}^{(s)}\bigl(\tilde{s}_j - \tilde{s}_i\bigr)\,
-  \vect{k}_j^{(s)}.
+  \vect{q}_i^{(y)\top}\,
+  \mat{R}^{(y)}\bigl(\tilde{u}^{y}_j - \tilde{u}^{y}_i\bigr)\,
+  \vect{k}_j^{(y)}.
   \label{eq:method:rope_az_logit}
 \end{align}
-Two bearings just above $0$ and just below $2\pi$ are almost the same direction, but their raw angles differ by nearly a full turn.
-Their $(\tilde{c},\tilde{s})$ values are almost the same, so the relative phase in \cref{eq:method:rope_az_logit} stays small.
+Two arrivals that differ by a full turn in azimuth but point in the same direction have nearly the same $(\tilde{u}^{x},\tilde{u}^{y})$, so the relative phase in \cref{eq:method:rope_az_logit} stays small.
 An algebraic gap in $\theta^{\mathrm{az}}$ itself would not.
 
-A control that rotates every layer of the trunk and of both branches by window-local \gls{toa}, with no azimuth encoding, is evaluated in \cref{ch:experiments}.
+This branch uses $4$ heads rather than $8$, so each incidence axis occupies $d_k/4 = 16$ planes of a $64$-dimensional head.
+
+A control that rotates every layer of the trunk and of both branches by window-local \gls{toa}, with no incidence encoding, is evaluated in \cref{ch:experiments}.
 That uniform layout tests whether the branch-specific allocation above is necessary, or whether a single temporal coordinate already suffices.
+The same uniform \gls{toa} layout is also used together with the pairwise bias of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
 
 \Cref{fig:method:rope_slicing} summarizes the plane allocation for the trunk/mode and deinterleaving layouts.
 
 \begin{figure}[tbp]
   \centering
   \input{figures/method/rope_slicing.tex}
-  \caption{Allocation of the $d_k/2$ rotation planes of one attention head. Top: shared trunk and mode branch, all planes rotated by the \gls{toa} $t_n$ with scale $\gamma_t$ (\cref{eq:method:rope_toa}). Bottom: deinterleaving branch, planes split evenly between $\tilde{c}_n$ and $\tilde{s}_n$ of \cref{eq:method:azimuth_trig}, with scales $\gamma_c$ and $\gamma_s$ (\cref{eq:method:rope_az,eq:method:rope_az_logit}). Ellipsis cells are intermediate planes of each frequency ladder.}
+  \caption{Allocation of the $d_k/2$ rotation planes of one attention head. Top: shared trunk and mode branch, all planes rotated by the \gls{toa} $t_n$ with scale $\gamma_t$ (\cref{eq:method:rope_toa}). Bottom: deinterleaving branch, planes split evenly between the Euclidean incidence components $\tilde{u}^{x}_n$ and $\tilde{u}^{y}_n$ of \cref{eq:method:aoa_scale}, with scales $\gamma_x$ and $\gamma_y$ (\cref{eq:method:rope_az,eq:method:rope_az_logit}). Ellipsis cells are intermediate planes of each frequency ladder.}
   \label{fig:method:rope_slicing}
 \end{figure}

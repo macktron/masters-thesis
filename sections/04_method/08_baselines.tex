@@ -6,11 +6,12 @@ Final configurations and numbers are deferred to \cref{ch:experiments}; this sec
 \begin{description}
   \item[Dual-branch, single-task.] The encoder of \cref{sec:method:arch} with standard self-attention, trained with one contrastive term only: $\Loss_{\mathrm{em}}$ (emitter-only) or $\Loss_{\mathrm{md}}$ (mode-only).
   Architecture, width, and decoding remain those of the joint model, so the only change is the objective.
-  Emitter-only is the comparable transformer for whether the joint loss outperforms deinterleaving-alone training; mode-only completes the symmetric picture.
+  Emitter-only is the comparable transformer for whether the joint loss outperforms deinterleaving-alone training.
+  Mode-only is the symmetric control, trained only on $\Loss_{\mathrm{md}}$.
   Both branches are still decoded with \gls{dbscan}, including the branch that received no direct gradient.
 
   \item[\Gls{dbscan} on fixed window features.] No transformer; \gls{dbscan} \parencite{ester1996density} clusters a deterministic vector built from the scaled \glspl{pdw} of a window.
   The neighbourhood radius $\varepsilon$ is selected by grid search on the validation set, holding $\mathrm{minPts}$ fixed; the selected $\varepsilon$ is then frozen for the held-out test evaluation.
   Separates the gain from learned sequence context from what density clustering already recovers on hand-specified summaries.
-  This control is not included in the tables of \cref{ch:experiments} unless a corresponding run is added.
+  This control is omitted from the tables of \cref{ch:experiments}: the available dump uses window length $L=1500$, which is not comparable with the $L=2000$ neural runs.
 \end{description}

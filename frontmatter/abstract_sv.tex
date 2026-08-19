@@ -5,9 +5,24 @@
 \chapter*{Sammanfattning}
 \markboth{Sammanfattning}{Sammanfattning}
 
-% TODO: Svensk sammanfattning (motsvarande engelska abstractet, 250-300 ord).
-Detta examensarbete undersöker gemensam klustring av radarsändare och deras operativa moder från avlyssnade pulsbeskrivande ord (PDW) med hjälp av en transformerbaserad encoderarkitektur.
+Passiv signalspaning ger en tidsordnad ström av pulsbeskrivande ord där flera radarstationer är sammanflätade och varje station kan byta arbetsmod.
+Båda grupperingarna behövs ur samma ström.
+Klassiska kedjor avinterfolierar först och klassificerar sedan moder. Den uppdelningen ger inte en gemensam representation, och den förutsätter sändarnamn som kan jämföras mellan inspelningar.
+
+Detta arbete tränar en transformerkodare med en gemensam stam och två grenar på syntetiska, fullt märkta fönster av längd $2000$.
+Varje puls har en sändaridentitet som bara gäller inom inspelningen och en mod ur en katalog med $16$ typer som delas mellan inspelningar.
+Två övervakade kontrastiva förluster, identiska till formen, skiljer sig bara i den positiva mängden: sändare inom en inspelning, moder över minibatchen.
+Vid inferens klustrar DBSCAN varje gren för sig. Ingen softmax över katalogen används.
+
+På $960$ överlappningsfria testfönster återfinner vanlig självuppmärksamhet redan båda partitionerna på de flesta fönster (medelvärde ARI $0{,}944$ för sändare, $0{,}986$ för moder).
+Roterande kodning av ankomsttid, och en parvis fysisk uppmärksamhetsbias, höjer sändar-ARI till $1{,}000$ och tar bort den kvarvarande felsvansen.
+Roterande kodning av plan infallriktning på avinterfolieringsgrenen hjälper mindre.
+Biasen når samma sändarsiffror som tidskodningen och kostar extra minne och kodartid på parvisa kartor av storlek $L \times L$.
+
+En Vanilla-kodare tränad bara för avinterfoliering slår den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}944$), medan dess otränade modgren slår ihop kluster.
+Det gemensamma målet är alltså en avvägning, inte ett gratis extra huvud.
+Modulationstyper utanför träningskatalogen och operativa inspelningar utvärderas inte.
 
 \vspace{1em}
-\noindent\textbf{Nyckelord:} transformer, djup klustring, signalspaning, radarsändaridentifiering, modigenkänning, självövervakad inlärning.
+\noindent\textbf{Nyckelord:} transformer, djup klustring, signalspaning, radarsändaridentifiering, modigenkänning, övervakad kontrastiv inlärning.
 \end{otherlanguage}
