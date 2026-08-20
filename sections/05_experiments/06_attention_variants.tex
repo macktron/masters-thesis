@@ -130,7 +130,13 @@ Clustering time is \gls{dbscan} on the embeddings of \cref{eq:method:cluster_dec
 Rotary encoding adds no learned weights, so both RoPE models dump the same $16\,081\,536$ parameters as Vanilla.
 That is fewer extra parameters than a learned positional table of length $L$, and fewer than the physical bias, which stores one scalar per head, layer, and selected coordinate.
 Those scalars do not change the dumped total at the reported precision.
-They do change the encoder time: Bias spends $30$~ms in the forward pass where Vanilla spends $1.5$~ms, because each layer forms pairwise coordinate maps of shape $h \times L \times L$.
+They do change the encoder time: Bias spends $30$~ms in the forward pass where Vanilla spends $1.5$~ms.
+The extra work is the pairwise differences $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$ of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
+Those matrices depend only on the window coordinates, so they are the same for every head and every attention sub-layer.
+The implementation rebuilds them in each head of each sub-layer and then scales by that head's $\lambda$.
+A single copy per coordinate, computed once per window, would remove that repetition.
+No such cache was used.
+The time in \cref{tab:exp:efficiency} includes that redundant construction, not only the add into the logits.
 \Gls{dbscan} is about $60$~ms for every neural model, so it dominates Vanilla and both RoPE variants.
 Feature \gls{dbscan} has no encoder weights; its clustering time is $21$~ms.
 Memory for the pairwise maps is taken up in \cref{sec:disc:interp}.

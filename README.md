@@ -1,4 +1,4 @@
-# Joint Radar Emitter and Mode Clustering Using a Transformer Encoder Architecture
+# Joint Radar Emitter and Mode Clustering Using Transformer Encoder Architecture
 
 Master's thesis at the [KTH](https://www.kth.se/) School of Electrical Engineering and Computer Science (EECS), Master's Programme in Machine Learning.
 

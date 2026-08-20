@@ -26,7 +26,7 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
     Dropout (attention and feed-forward) & \num{0.1} throughout the transformer blocks \\
     Batch size $B$ (windows per step) & \num{4} \\
     Mode loss weight $\lambda_{\mathrm{md}}$ & \num{1} \\
-    Weight decay & {---} \\
+    Weight decay & $\num{0.01}$ (PyTorch AdamW default) \\
     \bottomrule
   \end{tabular}
 \end{table}

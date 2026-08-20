@@ -7,6 +7,33 @@ Held-out modulation types are the experiment that the clustering decoder is for.
 Until that split is scored, the mode branch is a grouping of seen catalogue types.
 Operational recordings, and simulator drop or spurious-pulse regimes as an actual test set, are the corresponding check on distribution shift.
 
-Longer context needs a cheaper attention map, not a larger $L$ on the present bias.
-Association of window-local emitter indices into tracks is a separate stage.
+The scores in \cref{ch:experiments} describe a window, not a recording.
+Cluster indices stop at the window boundary, so the same emitter in two adjacent windows is not known to be the same object.
+A cheap association is to replace each window cluster by the mean of its embeddings and to cluster those means over the recording with \gls{dbscan}.
+The pulse encoder stays frozen.
+A second transformer on top of those means, or of the window embeddings, could learn the association instead of leaving it to a second density step.
+Either construction yields one partition per scenario.
+
+Mode labels are already global.
+A classification head on the mode embeddings would name types from the training catalogue, while clustering remains the decoder for types that are not in that list.
+The head can sit on a frozen encoder, or it can be trained jointly.
+The clustering scores in \cref{tab:exp:attn_md} do not say whether the catalogue is linearly separable in that space.
+
+Mean $\ARI$ hides which recordings are hard.
+Simple corpus statistics would make that visible: how often two emitters share a frequency band, how uneven the pulse counts are, how many modes sit in one window, and how large the \gls{toa} gaps are relative to the \gls{pri} of each mode.
+Those quantities can be computed from the simulator labels without a new model.
+They would also make a later comparison to another generator, or to operational data, a comparison of the same axes rather than of two unlabelled averages.
+
+Only \gls{dbscan} is used at inference.
+HDBSCAN would remove the $\varepsilon$ grid.
+A Gaussian mixture or spectral clustering would assume a different geometry in the same embeddings.
+Running those decoders on frozen embeddings would separate encoder error from decoder error.
+
+The encoder is bidirectional over a block of $L$ pulses.
+A live stream does not arrive as a block.
+Keys and values from pulses already in the window can be cached, so a new pulse attends against that cache instead of forcing a full forward pass.
+A mask then chooses which cached pulses remain visible: a sliding window of length $L$, or a causal band if later pulses must not leak into the present.
+That is incremental inference.
+Updating the weights from the stream is a separate problem and is not required for the cache.
+
 Several training seeds would turn the window-level spread in the tables into an uncertainty on the ranking itself.

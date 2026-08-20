@@ -23,10 +23,23 @@ With $h=8$ and $L=2000$, one such map is $128$~MB in fp32.
 Twelve attention sublayers make about $1.5$~GB if the maps are all resident, and a training dump at batch size $4$ reports $30$~GB of forward and backward storage for Bias against $19$~GB for Vanilla.
 That gap is the pairwise tensors, counted twice when gradients are kept.
 At the evaluation batch size of one window the extra is a few gigabytes rather than tens, which matches the encoder time in \cref{tab:exp:efficiency}: $30$~ms instead of $1.5$~ms, while \gls{dbscan} stays near $60$~ms for every model.
+The $30$~ms includes the uncached rebuild of the same $\lvert p_i-p_j\rvert$ matrices in every head of every sub-layer (\cref{sec:exp:results:efficiency}).
+A cache would remove the rebuild.
+It would not remove the add into each head's logits, which is still quadratic in $L$.
 
 RoPE never builds those maps.
 Its dumped parameter count matches Vanilla, and its encoder time stays within a couple of milliseconds of Vanilla.
 The total-size figure printed for the RoPE summaries is an artifact of expanding rotation blocks in the layer dump, not a measured allocation.
+
+The accuracy of the bias is a statement about pairwise geometry.
+A few scalars on $\lvert p_i-p_j\rvert$ recover the same emitter partition as rotating every query and key by time.
+Vanilla has to learn that structure from a single \gls{toa} channel.
+The differences themselves already carry it.
+That points to a network whose layers read those delta matrices, rather than adding them onto a learned query--key product.
+Self-attention on a window is already mixing on a complete graph (\cref{sec:bg:transformer}).
+The bias is already the Graphormer-style edge term of \cref{sec:method:attention:bias,sec:related:transformers_seq}.
+A graph network whose edges carry $(\lvert\Delta t\rvert,\lvert\Delta\tilde{u}^{x}\rvert,\lvert\Delta\tilde{u}^{y}\rvert)$ would use that pairwise physics directly.
+Whether it matches the scores, and whether it is cheaper once the differences are computed once, is not measured here.
 
 Joint training is a separate axis.
 Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla, while its untrained mode branch collapses by merging (\cref{tab:exp:ablation_loss}).
