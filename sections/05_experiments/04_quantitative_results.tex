@@ -28,7 +28,6 @@ It is not trained, and its test dump already uses overlap $0$ at the same $L$, s
 For each window, \gls{dbscan} on each branch yields a predicted partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
 
 Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $960$ windows.
-Results for the trained encoders are from a single training seed; the reported spread is therefore window-level variation, not seed-level uncertainty.
 The \gls{dbscan} radius $\varepsilon$ is selected independently for each model and each branch on the validation grid of \cref{sec:method:arch}, with $\mathrm{minPts} = 5$ throughout; selected radii are listed in \cref{tab:exp:hparams_attn}.
 
 Homogeneity and completeness are reported separately rather than only through their harmonic mean, the \gls{vmeasure}, so that oversplitting can be distinguished from undermerging.
@@ -44,7 +43,7 @@ Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Feature \gls{dbscan} versus jointly trained Vanilla on the test split. Entries are mean $\pm$ std over $960$ non-overlapping windows of length $L=2000$. Vanilla is a single training seed. Feature \gls{dbscan} is not trained. Hom.\ and Comp.\ are homogeneity and completeness. Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.}
+  \caption{Feature \gls{dbscan} versus jointly trained Vanilla on the test split. Entries are mean $\pm$ std over $960$ non-overlapping windows of length $L=2000$. Feature \gls{dbscan} is not trained. Hom.\ and Comp.\ are homogeneity and completeness. Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.}
   \label{tab:exp:vanilla}
   \begin{tabular}{@{}llccccc@{}}
     \toprule

@@ -11,7 +11,7 @@ Embeddings differ by model and by branch.
 The four panels are carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate, each against window-local \gls{toa}.
 The export names that last panel Theta. It is a direction component after \cref{eq:method:aoa_scale}, not a raw azimuth.
 Color is the only change between the two figures: \cref{fig:exp:feat_w100_em} uses the recording-local emitter label, \cref{fig:exp:feat_w100_md} the global mode label.
-Vanilla, RoPE-TOA, RoPE-az, and Bias score $\ARI=1$ on both branches of this window, with two emitters and four modes.
+Vanilla, RoPE-TOA, RoPE-az, Bias, and RoPE-TOA+Bias score $\ARI=1$ on both branches of this window, with two emitters and four modes.
 
 The emitter coloring shows one platform with a scanning amplitude (the lower, scalloped track) and one platform whose amplitude sits on several flat levels.
 Frequency and pulse width already separate the scanner from the other platform, but they do not separate the flat tracks from each other: two of those tracks share a frequency band near $1.45$ and the same narrow pulse width.
@@ -60,10 +60,12 @@ On the emitter branch the two colors occupy separate regions for every model.
 Vanilla keeps one emitter as several small islands and the other as a connected, more spread component, which matches the scanner versus the multi-level platform in the features.
 RoPE-TOA and Bias pull those islands tighter and leave a wider gap between the two colors.
 RoPE-az remains closer to Vanilla: the two colors still split, but the layout is less compact.
+RoPE-TOA+Bias also splits the two colors on this window. The orange side is a set of thin arcs, closer to RoPE-TOA than to Vanilla.
+This window is not where that model fails. The splits in \cref{tab:exp:attn_em,fig:exp:kcorr_em} sit elsewhere.
 
 On the mode branch the four colors separate in every panel.
 Some colors form thin arcs rather than round blobs, which is consistent with a mode whose amplitude or timing still moves inside the window.
-Vanilla, RoPE-TOA, RoPE-az, and Bias do not disagree on this window in $\ARI$, so the visual differences are layout, not a change in the discrete partition.
+None of the five joint models disagrees on this window in $\ARI$, so the visual differences are layout, not a change in the discrete partition.
 
 \begin{figure}[tbp]
   \centering
@@ -92,6 +94,12 @@ Vanilla, RoPE-TOA, RoPE-az, and Bias do not disagree on this window in $\ARI$, s
     \expfig{emb_bias_w100_em.png}
     \caption{Bias}
     \label{fig:exp:emb_w100_em:bias}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_combined_w100_em.png}
+    \caption{RoPE-TOA+Bias}
+    \label{fig:exp:emb_w100_em:combined}
   \end{subfigure}
   \caption{UMAP of emitter-branch embeddings on window $100$, colored by ground-truth emitter.}
   \label{fig:exp:emb_w100_em}
@@ -124,6 +132,12 @@ Vanilla, RoPE-TOA, RoPE-az, and Bias do not disagree on this window in $\ARI$, s
     \expfig{emb_bias_w100_md.png}
     \caption{Bias}
     \label{fig:exp:emb_w100_md:bias}
+  \end{subfigure}\\[0.8em]
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \expfig{emb_combined_w100_md.png}
+    \caption{RoPE-TOA+Bias}
+    \label{fig:exp:emb_w100_md:combined}
   \end{subfigure}
   \caption{UMAP of mode-branch embeddings on window $100$, colored by ground-truth mode.}
   \label{fig:exp:emb_w100_md}

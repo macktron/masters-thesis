@@ -18,8 +18,10 @@ På $960$ överlappningsfria testfönster återfinner vanlig självuppmärksamhe
 Roterande kodning av ankomsttid, och en parvis fysisk uppmärksamhetsbias, höjer sändar-ARI till $1{,}000$ och tar bort den kvarvarande felsvansen.
 Roterande kodning av plan infallriktning på avinterfolieringsgrenen hjälper mindre.
 Biasen når samma sändarsiffror som tidskodningen och kostar extra minne och kodartid på parvisa kartor av storlek $L \times L$.
+Att använda båda mekanismerna tillsammans sänker sändar-ARI till $0{,}853$.
 
 En Vanilla-kodare tränad bara för avinterfoliering slår den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}944$), medan dess otränade modgren slår ihop kluster.
+En Vanilla-kodare tränad bara för moder når samma modnivå som den gemensamma modellen (ARI $0{,}984$), medan dess otränade sändargren delar upp sändare i för många kluster.
 Det gemensamma målet är alltså en avvägning, inte ett gratis extra huvud.
 Modulationstyper utanför träningskatalogen och operativa inspelningar utvärderas inte.
 

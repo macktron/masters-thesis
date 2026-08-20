@@ -1,7 +1,8 @@
 \section{Future Work}\label{sec:concl:future}
 
-A sweep of $\lambda_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging.
+A sweep of $\lambda_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging or splitting.
 Retraining the attention variants under an emitter-only objective would show whether RoPE-TOA and Bias still separate from Vanilla when the trunk is not also serving modes.
+A stack that puts RoPE on time and the bias only on incidence would test whether the stacked failure is double-counting of $\Delta t$.
 
 Held-out modulation types are the experiment that the clustering decoder is for.
 Until that split is scored, the mode branch is a grouping of seen catalogue types.
@@ -35,5 +36,3 @@ Keys and values from pulses already in the window can be cached, so a new pulse 
 A mask then chooses which cached pulses remain visible: a sliding window of length $L$, or a causal band if later pulses must not leak into the present.
 That is incremental inference.
 Updating the weights from the stream is a separate problem and is not required for the cache.
-
-Several training seeds would turn the window-level spread in the tables into an uncertainty on the ranking itself.

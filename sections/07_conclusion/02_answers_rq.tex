@@ -10,11 +10,13 @@
   \item[RQ2]
   Not on the emitter task.
   A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$ (\cref{tab:exp:ablation_loss}).
-  The joint objective is what prevents the mode branch from collapsing by merging.
+  A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes and splits emitters.
+  The joint objective is the setting in which both partitions remain usable.
 
   \item[RQ3]
   Yes for time, with a cost that depends on how time is injected.
   RoPE-TOA and the physical bias both remove the Vanilla emitter tail (\cref{tab:exp:attn_em,fig:exp:hist_em}).
+  Stacking them does not: RoPE-TOA+Bias is slower than Vanilla and worse on emitters.
   Rotary encoding of planar incidence on the deinterleaving branch improves on Vanilla and does not match TOA-only rotary encoding.
   Mode scores move much less.
   The bias matches RoPE-TOA on accuracy and spends extra memory and encoder time on pairwise maps (\cref{tab:exp:efficiency,sec:disc:interp}).

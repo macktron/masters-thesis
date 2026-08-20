@@ -16,7 +16,7 @@ Filenames mirror the `\section{...}` title in `sections/02_background/`. Each fi
 
 | File | `\section` title | Notes |
 |------|------------------|--------|
-| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; TOC subsections: PDWs (`sec:bg:pdw`), emitters versus modes (`sec:bg:emitters`). Starred: pulsed radar (range `eq:bg:range`, unambiguous range `eq:bg:runamb`), active versus passive reception. Figure `fig:bg:pulse_echo_timeline`. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
+| `01_radar_systems_passive_reception.tex` | Radar Systems and Passive Reception | Label `sec:bg:radar`; TOC subsections: PDWs (`sec:bg:pdw`), emitters versus modes (`sec:bg:emitters`). Starred: pulsed radar (range `eq:bg:range`), active versus passive reception. Figure `fig:bg:pulse_echo_timeline`. Cite `\parencite{skolnik2008radar,wiley2006elint}`. |
 | `02_signal_processing_pipeline_passive_elint.tex` | The Classical ELINT Pipeline | Label `sec:bg:elint_pipeline`; TOC subsections: deinterleaving (`sec:bg:deinterleaving_evolution`), mode analysis. Starred: detection and pulse measurement. Classical chain: detect/measure, deinterleave (emitter grouping), then mode analysis. |
 | `03_machine_learning_fundamentals.tex` | Machine Learning Fundamentals | Label `sec:bg:ml`. |
 | `04_clustering_methods.tex` | Clustering Methods | Label `sec:bg:clustering`. Cite `\parencite{xie2016unsupervised}`. |

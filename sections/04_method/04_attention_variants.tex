@@ -5,7 +5,7 @@ The only ordering cue available to it is whatever the input features themselves 
 A radar recording, however, has strong pairwise structure: two pulses that are close in time, share a carrier frequency, have a similar pulse width, or arrive from a similar direction, are far more likely to originate from the same emitter or mode than an arbitrary pair.
 This section describes two variants of the attention mechanism that make such structure explicit.
 They are used as drop-in modifications of the \gls{mha} sub-layers of \cref{sec:method:arch}.
-Each mechanism is evaluated on its own against standard self-attention, and they are also stacked: uniform \gls{toa} rotary encoding in every layer together with the pairwise bias, with no incidence rotary coordinates.
+Each mechanism is evaluated on its own against standard self-attention, and they are also stacked: rotary encoding on window-local \gls{toa} in every layer of the trunk and of both branches, together with the pairwise bias, with no incidence rotary coordinates.
 All of these layouts are included in \cref{ch:experiments}.
 
 Throughout, we write the attention logits of a single head over a window of $L$ pulses as
@@ -46,7 +46,7 @@ Coefficients may be negative, and each is initialised to a small negative value 
 Because the coefficients are learned independently in each part of the network, the branches can weight the cues differently.
 The deinterleaving branch is expected to rely more on incidence, since pulses from one emitter usually arrive from a nearly constant direction.
 The shared trunk and the mode branch should instead suppress that cue, because an operating mode must be recognised independently of viewing geometry.
-Whether this allocation emerges is examined in \cref{ch:experiments}.
+Whether this allocation emerges is examined in \cref{sec:exp:results:bias_coef}.
 The bias follows the same idea as additive pairwise attention biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances.
 
 \subsection{Rotary positional encoding}\label{sec:method:attention:rope}

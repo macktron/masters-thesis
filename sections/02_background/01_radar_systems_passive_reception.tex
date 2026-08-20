@@ -4,25 +4,16 @@
 
 A radar transmits a short electromagnetic pulse, waits for the echo that scatters from objects in the environment, and infers range and motion from that return \parencite{skolnik2008radar}.
 
-
 Distance follows from the round-trip delay $\tau$ between transmission and reception.
-With wave speed $c$, the range of a monostatic radar (transmitter and receiver on the same platform and thus approximately same position) is
+With wave speed $c$, the range of a monostatic radar (transmitter and receiver on the same platform and thus approximately the same position) is
 \begin{equation}
 \label{eq:bg:range}
 R = \frac{c\tau}{2},
 \end{equation}
 where the factor of 2 accounts for the outbound and return paths \parencite{skolnik2008radar}.
-Bistatic and multistatic geometries place the receive antenna elsewhere and add angle of arrival and other spatial measurements to this range estimate.
 
 Radars emit pulses at a \gls{pri}, or equivalently a \gls{prf}.
 If an echo from an earlier pulse arrives after the next pulse has been sent, the measured delay no longer identifies a unique range.
-This is called range ambiguity.
-The largest range that remains unique is the unambiguous range
-\begin{equation}
-\label{eq:bg:runamb}
-R_{\mathrm{u}} = \frac{c}{2\,\mathrm{PRF}} = \frac{c\,\mathrm{PRI}}{2}.
-\end{equation}
-Matched filtering and coherent integration improve detection inside this window, but they do not remove the ambiguity imposed by the pulse timing \parencite{skolnik2008radar}.
 
 \begin{figure}[tbp]
 \centering

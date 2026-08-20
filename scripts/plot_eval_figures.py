@@ -20,11 +20,13 @@ RUNS = [
     ("RoPE-TOA", ROOT / "agg_results/final_pure_rope/20260817_055105/eval_results/metrics.csv"),
     ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/eval_results/metrics.csv"),
     ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/eval_results/metrics.csv"),
+    ("RoPE-TOA+Bias", ROOT / "agg_results/final_combined/20260819_200101/eval_results/metrics.csv"),
 ]
 
 # Draw the longer tails first so the near-perfect curves stay on top.
-ECDF_ORDER = ("Vanilla", "RoPE-az", "RoPE-TOA", "Bias")
+ECDF_ORDER = ("RoPE-TOA+Bias", "Vanilla", "RoPE-az", "RoPE-TOA", "Bias")
 ECDF_STYLE = {
+    "RoPE-TOA+Bias": dict(color="#000000", linestyle="-", linewidth=1.4),
     "Vanilla": dict(color="#0072B2", linestyle="-", linewidth=1.6),
     "RoPE-az": dict(color="#009E73", linestyle="-.", linewidth=1.6),
     "RoPE-TOA": dict(color="#D55E00", linestyle="--", linewidth=1.6),
@@ -99,7 +101,7 @@ def plot_ari_ecdf(branch: str, outfile: Path) -> None:
     ax.set_yticklabels(["0.001", "0.01", "0.1", "1"])
     ax.set_xlabel("ARI")
     ax.set_ylabel("Fraction of windows")
-    ax.legend(frameon=False, loc="upper left", fontsize=7)
+    ax.legend(frameon=False, loc="upper left", fontsize=6.5)
     fig.tight_layout()
     fig.savefig(outfile)
     plt.close(fig)
@@ -118,17 +120,17 @@ def count_matrix(rows: list[dict], kmax: int) -> np.ndarray:
 
 
 def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Path) -> None:
-    mats = []
-    for _, path in RUNS:
-        mats.append(count_matrix(load_branch(path, branch), kmax))
+    mats = [count_matrix(load_branch(path, branch), kmax) for _, path in RUNS]
     vmax = max(int(m.max()) for m in mats)
-    fig, axes = plt.subplots(2, 2, figsize=(6.8, 6.4))
+    fig, axes = plt.subplots(3, 2, figsize=(6.8, 9.2))
+    axes_flat = axes.ravel()
     im = None
     ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, 16]
     cmap = plt.cm.Blues
     cmap = cmap.copy()
     cmap.set_under("white")
-    for ax, (name, _), mat in zip(axes.ravel(), RUNS, mats):
+    for i, ((name, _), mat) in enumerate(zip(RUNS, mats)):
+        ax = axes_flat[i]
         vis = mat.astype(float)
         vis[vis == 0] = np.nan
         im = ax.imshow(
@@ -141,7 +143,6 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
             extent=(-0.5, kmax + 0.5, -0.5, kmax + 0.5),
         )
         ax.plot([0.5, kmax + 0.5], [0.5, kmax + 0.5], color="#b85c38", linewidth=0.8)
-        # annotate cells that are not tiny
         thresh = 0.45 * vmax
         for p in range(kmax + 1):
             for t in range(kmax + 1):
@@ -165,12 +166,13 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
         ax.set_aspect("equal")
         ax.spines["top"].set_visible(True)
         ax.spines["right"].set_visible(True)
-    for ax in axes[1, :]:
-        ax.set_xlabel(xlabel)
+    axes_flat[5].axis("off")
+    axes[2, 0].set_xlabel(xlabel)
+    axes[1, 1].set_xlabel(xlabel)
     for ax in axes[:, 0]:
         ax.set_ylabel(ylabel)
-    fig.tight_layout(rect=(0.0, 0.06, 1.0, 1.0), w_pad=0.7, h_pad=0.8)
-    cax = fig.add_axes([0.25, 0.02, 0.5, 0.025])
+    fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0), w_pad=0.7, h_pad=0.8)
+    cax = fig.add_axes([0.25, 0.015, 0.5, 0.018])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
     cb.set_label("Number of windows")
     fig.savefig(outfile)

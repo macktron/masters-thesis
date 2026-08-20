@@ -4,12 +4,8 @@ Clustering partitions a finite set of points \(\{\vect{z}_i\}_{i=1}^{N} \subset 
 In this thesis the points are pulse embeddings and the groups are emitters within a window or operating modes.
 The clustering step runs only at inference, after the encoder has been trained (\cref{sec:method:arch}).
 Classical algorithms differ in how similarity is defined, whether the number of clusters must be known in advance, and how they treat outliers.
-
-Centroid-based methods such as \(k\)-means assign every point to the nearest of \(k\) means and update those means until the partition stabilizes.
-They are fast and well understood, but they assume roughly spherical, equally scaled clusters, require a prescribed \(k\), and force every point into some cluster.
-Mixture models such as a \gls{gmm} replace the hard assignment with soft responsibilities under a parametric density.
-They still usually fix the number of components, and they remain sensitive to initialization and to elongated or overlapping structure.
-When the number of concurrent emitters or modes is unknown and the embedding space may contain noise or irregular densities, density-based methods fit better.
+Centroid methods such as \(k\)-means, and mixture models such as a \gls{gmm}, require a prescribed number of groups and typically assign every point.
+When that number is unknown and some points should remain unassigned, density-based clustering is a better match.
 
 \subsection*{\Gls{dbscan}}
 

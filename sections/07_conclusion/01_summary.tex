@@ -6,4 +6,5 @@ Inference clusters each branch with \gls{dbscan}. No catalogue softmax is used.
 
 On the synthetic test split, standard self-attention already recovers both partitions on most windows.
 Rotary encoding of window-local \gls{toa}, and a pairwise physical bias on the same coordinates, close the remaining emitter errors.
-A joint loss is not a free improvement over deinterleaving-only training. It costs emitter agreement on Vanilla and is what keeps the mode branch from merging.
+Using both together does not.
+A joint loss is not a free improvement over a single-task encoder. It costs emitter agreement relative to deinterleaving-only training, it splits emitters relative to mode-only training, and it is what keeps both branches usable.

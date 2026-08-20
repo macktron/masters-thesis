@@ -17,8 +17,10 @@ On $960$ non-overlapping test windows, standard self-attention already recovers 
 Rotary encoding of time of arrival, and a pairwise physical attention bias, raise emitter ARI to $1.000$ and remove the remaining failure tail.
 Rotary encoding of planar incidence on the deinterleaving branch helps less.
 The bias matches the time-rotary scores and spends extra memory and encoder time on pairwise maps of size $L \times L$.
+Using both mechanisms together lowers emitter ARI to $0.853$.
 
 A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ against $0.944$) while its untrained mode branch merges.
+A Vanilla encoder trained only for modes matches the joint mode scores (ARI $0.984$) while its untrained emitter branch splits.
 The joint objective is therefore a trade-off, not a free extra head.
 Held-out modulations and operational recordings are not scored.
 

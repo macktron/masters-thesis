@@ -12,7 +12,7 @@ The three objectives are:
   \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
 \end{description}
 Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
-The single-task models use the same initialisation seed, the same splits, and the remaining hyperparameters of \cref{sec:exp:hparams}.
+The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}.
 
 Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
 The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only.
@@ -31,8 +31,8 @@ They measure how much the shared trunk transfers to the unsupervised branch, ver
     Joint         & Mode    & $0.986\pm0.100$ & $0.987\pm0.094$ & $0.993\pm0.037$ & $0.990\pm0.092$ & $0.23\pm0.50$ \\
     Emitter-only  & Emitter & $0.999\pm0.010$ & $0.997\pm0.012$ & $0.996\pm0.019$ & $0.999\pm0.008$ & $0.09\pm0.32$ \\
     Emitter-only  & Mode    & $0.815\pm0.255$ & $0.864\pm0.167$ & $0.793\pm0.212$ & $0.999\pm0.013$ & $2.13\pm1.95$ \\
-    Mode-only     & Emitter & {---} & {---} & {---} & {---} & {---} \\
-    Mode-only     & Mode    & {---} & {---} & {---} & {---} & {---} \\
+    Mode-only     & Emitter & $0.712\pm0.311$ & $0.757\pm0.237$ & $0.931\pm0.156$ & $0.699\pm0.261$ & $1.85\pm1.53$ \\
+    Mode-only     & Mode    & $0.984\pm0.105$ & $0.985\pm0.099$ & $0.991\pm0.038$ & $0.989\pm0.097$ & $0.23\pm0.51$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -46,11 +46,17 @@ Adding the mode term therefore costs deinterleaving accuracy on this backbone, a
 The unpaid cost of dropping the mode term is the mode branch itself.
 Under Emitter-only that branch still produces clusters, but they merge: homogeneity falls to $0.79$ while completeness stays at $0.999$, and the mean count error exceeds two modes per window.
 The clusters are internally pure and too few.
-Joint training is what keeps the mode partition usable.
+
+Mode-only is the other single-task ceiling.
+Its mode $\ARI$ is $0.984$, within rounding of Joint.
+The untrained emitter branch splits rather than merges: homogeneity stays at $0.93$ while completeness falls to $0.70$, and the mean count error is $1.85\pm1.53$.
+True emitters are broken into extra clusters.
+Window $100$ is a local case, with two emitters recovered as four.
 
 RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
 On the emitter metrics it does not.
-What it buys is a second partition that Emitter-only does not provide.
+It also does not beat Mode-only on the mode metrics.
+What it buys is that both partitions remain usable in the same run.
 No extra distribution figures are included here.
 The Joint per-window distributions are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.
 The next section asks whether physical structure in attention recovers the emitter accuracy of Emitter-only without dropping the mode term.

@@ -3,5 +3,3 @@
 All neural models in this chapter were trained and evaluated on a single workstation with one NVIDIA A100 GPU (80~GB high-bandwidth memory).
 The implementation is written in Python with PyTorch.
 The source code and training scripts remain proprietary to Saab and are not released with this thesis.
-
-Fixed random seeds control weight initialization, training-window shuffling, and other stochastic steps, so that ablations in \cref{sec:exp:ablation} are run under identical noise conditions unless an experiment deliberately varies the seed.

@@ -50,9 +50,13 @@ The rotary scales are those of \cref{sec:method:attention} and are not repeated 
     RoPE-TOA  & $0.6$ & $0.1$ \\
     RoPE-az   & $0.6$ & $0.2$ \\
     Bias      & $0.6$ & $0.1$ \\
-    RoPE-TOA+Bias & {---} & {---} \\
+    RoPE-TOA+Bias & $0.3$ & $0.1$ \\
+    \midrule
+    Emitter-only & $0.6$ & $0.1$ \\
+    Mode-only & $0.5$ & $0.1$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla architecture and the optimisation schedule of \cref{tab:exp:hparams_main}.
+Their radii are selected independently, as for the joint models.

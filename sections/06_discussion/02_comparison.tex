@@ -14,15 +14,16 @@ The present scores cannot be stacked against that accuracy. The tasks differ.
 Emitter labels here are recording-local, and both branches are clustered rather than classified.
 That is closer to \textcite{gunn2025deinterleaving}, who train a transformer for deinterleaving and cluster the embeddings with HDBSCAN.
 The Vanilla emitter row of \cref{tab:exp:vanilla} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
-Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
+Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder, and a mode-only copy splits emitters.
 
 The attention variants go one step past that counterpart.
 Gunn et al.\ use standard dot-product attention and leave \gls{toa} as an input feature.
 RoPE-TOA and Bias put time into the attention product itself, and on this test set they close the emitter tail that Vanilla leaves.
 RoPE-az does not, once incidence is already in the token.
+Stacking the two time mechanisms does not close the tail either.
 None of these variants is a published radar baseline. They are drop-in changes of the same encoder, which is the comparison RQ3 asks for.
 
 Deep clustering methods in \cref{sec:related:deep_clustering} usually learn one partition, often with the number of clusters chosen in advance.
 The two branches here are not a hierarchy of one relation. Modes are not subtypes of emitters.
-A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_loss} is the empirical trace of that conflict in the shared trunk.
+A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_loss} is the empirical trace of that conflict in the shared trunk: the unused head either merges or splits.
 The comparison with multi-task softmax heads in \cref{sec:related:joint} is the same point in other words. Those heads need globally consistent class names. The emitter identifiers in this corpus are not that.

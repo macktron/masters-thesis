@@ -1,6 +1,6 @@
 \section{The Transformer Encoder}\label{sec:bg:transformer}
 
-The transformer architecture replaces recurrence with a stack of layers built around \emph{self-attention}, so that every position in a sequence can directly attend to every other position in parallel \parencite{vaswani2017attention}. One understanding of this is a weighted fully connected graph.
+The transformer architecture replaces recurrence with a stack of layers built around \emph{self-attention}, so that every position in a sequence can directly attend to every other position in parallel \parencite{vaswani2017attention}.
 Encoder-only stacks, as in \gls{bert} \parencite{devlin2019bert}, map an input sequence to contextualised token representations of the same length and are a natural choice when the downstream task is representation learning or clustering over tokens rather than autoregressive generation.
 
 \paragraph{Scaled dot-product attention.}
@@ -82,8 +82,5 @@ The construction applies to any real scalar $p$, not only to integer indices. Wh
 A standard transformer \emph{encoder layer} alternates two sub-layers: \gls{mha} followed by a position-wise \gls{ffn} applied independently at every position.
 Each sub-layer uses a residual connection and layer normalisation \parencite{vaswani2017attention}.
 The \gls{ffn} is typically a two-layer \gls{mlp} with a wide inner dimension and a nonlinear activation, acting as the per-token nonlinearity while \gls{mha} handles cross-token mixing.
-Stacking $N$ such layers yields a deep encoder that maps an input sequence $(\vect{x}_1,\ldots,\vect{x}_L)$ to contextualised representations $(\vect{h}^{(N)}_1,\ldots,\vect{h}^{(N)}_L)$, which downstream heads can pool or read out for sequence-level or token-level predictions.
-
-\paragraph{Computational cost.}
-In the usual dense implementation, each self-attention block materialises an $L \times L$ matrix of token--token scores before the softmax, so time and activation memory for that block scale as $\mathcal{O}(L^2)$ in the sequence length $L$ at fixed embedding width, up to constants from the number of heads and projection ranks \parencite{vaswani2017attention}.
-Repeating the block across depth multiplies that cost by the number of layers, which motivates hard caps on $L$, sparse or low-rank attention variants, or chunked processing when inputs are long; the method chapter states the windowing choice adopted here.
+Stacking $N$ such layers yields a deep encoder that maps an input sequence $(\vect{x}_1,\ldots,\vect{x}_L)$ to contextualised representations $(\vect{h}^{(N)}_1,\ldots,\vect{h}^{(N)}_L)$.
+Dense self-attention scales as $L^{2}$, so the method chapter fixes a window length.

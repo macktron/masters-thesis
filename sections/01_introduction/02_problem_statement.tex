@@ -3,7 +3,7 @@
 Passive \gls{esm} produces a time-ordered stream of \glspl{pdw} in which pulses from several emitters are interleaved and each emitter may change mode over time (\cref{sec:intro:background}).
 Operators need both a grouping by emitter and a grouping by mode from the same stream.
 Classical pipelines usually deinterleave first and then apply separate mode heuristics or classifiers.
-That split does not produce one representation whose geometry shows both partitions at once, and it scales poorly when waveforms are agile and pulse trains overlap.
+That split does not produce embeddings that carry both partitions, and it scales poorly when waveforms are agile and trains overlap.
 
 This thesis treats the two partitions as a joint learning problem.
 Training data come from a scenario simulator (\cref{sec:method:data}) in which every pulse has two labels: an emitter identity that is unique only inside its recording, and a mode drawn from a catalogue shared across recordings.

@@ -2,12 +2,14 @@
 
 If the task is deinterleaving alone, the Vanilla ablation is the practical message.
 Train the emitter term only.
-The joint loss is for the case where a mode partition is required from the same window, and even then the equal-weight sum is a compromise rather than a free extra head.
+If the task is modes alone, train the mode term only.
+The joint loss is for the case where both partitions are required from the same window, and even then the equal-weight sum is a compromise rather than a free extra head.
 
 If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
 Putting \gls{toa} into the attention product, either as RoPE-TOA or as the pairwise bias, is what closes that gap.
 RoPE-TOA does it without extra weights and without a material change in encoder time.
 The bias matches those scores and spends memory and milliseconds on pairwise maps.
+Using both at once does not help on this split, and it keeps the pairwise cost.
 Incidence rotary encoding on the deinterleaving branch is not a substitute, once the Cartesian direction channels are already input features.
 
 The clustering path at inference keeps the output open in form.
