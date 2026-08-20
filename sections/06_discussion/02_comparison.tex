@@ -3,7 +3,7 @@
 Classical \gls{elint} pipelines surveyed in \cref{sec:related:classical} deinterleave with \gls{toa} histograms or with density clustering on raw \gls{pdw} coordinates, then match trains against a library.
 The encoder here replaces that first stage with a learned embedding, and it never performs the second.
 Scores in \cref{ch:experiments} are partition agreement, not equipment names.
-A raw-feature \gls{dbscan} control is the Feature \gls{dbscan} row of \cref{tab:exp:attn_em,tab:exp:attn_md}.
+A raw-feature \gls{dbscan} control is the Feature \gls{dbscan} rows of \cref{tab:exp:vanilla}.
 It oversplits emitters.
 Vanilla is already well above that control, so the encoder is doing work that density clustering on the same scaled \glspl{pdw} does not.
 On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_w100_em,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
@@ -13,8 +13,8 @@ Supervised radar classifiers in \cref{sec:related:dl_radar} assume a global emit
 The present scores cannot be stacked against that accuracy. The tasks differ.
 Emitter labels here are recording-local, and both branches are clustered rather than classified.
 That is closer to \textcite{gunn2025deinterleaving}, who train a transformer for deinterleaving and cluster the embeddings with HDBSCAN.
-The Vanilla row of \cref{tab:exp:attn_em} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
-Gunn et al.\ stop at one partition. The second column of \cref{tab:exp:attn_md} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
+The Vanilla emitter row of \cref{tab:exp:vanilla} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
+Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
 
 The attention variants go one step past that counterpart.
 Gunn et al.\ use standard dot-product attention and leave \gls{toa} as an input feature.

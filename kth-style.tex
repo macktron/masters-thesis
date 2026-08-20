@@ -33,16 +33,22 @@
 % ---- Thesis metadata (override in main.tex if desired) --------------
 \newcommand{\thesistitle}{Joint Radar Emitter and Mode Clustering Using a Transformer Encoder Architecture}
 \newcommand{\thesissubtitle}{}
-\newcommand{\thesisauthor}{Markus Swegmark}
+\newcommand{\thesisauthor}{Markus Johnson Swegmark}
 \newcommand{\thesisyear}{\the\year}
 \newcommand{\thesismonth}{\ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
 
 \newcommand{\thesisschool}{School of Electrical Engineering and Computer Science}
 \newcommand{\thesisuniversity}{KTH Royal Institute of Technology}
 \newcommand{\thesisprogram}{Master's Programme in Machine Learning}
-\newcommand{\thesissupervisor}{TBD}
-\newcommand{\thesisexaminer}{TBD}
-\newcommand{\thesishost}{TBD}
+\newcommand{\thesissupervisor}{%
+  \begin{tabular}[t]{@{}l@{}}
+    Saikat Chatterjee (KTH)\\
+    Alexander Karlsson (Saab)\\
+    Elin Ohlman (Saab)
+  \end{tabular}%
+}
+\newcommand{\thesisexaminer}{Magnus Jansson}
+\newcommand{\thesishost}{Saab AB}
 \newcommand{\thesistrita}{TRITA-EECS-EX-XXXX:XXX}
 
 \hypersetup{
@@ -83,9 +89,9 @@
 
     \vfill
     \begin{tabular}{rl}
-      Supervisor: & \thesissupervisor \\
-      Examiner:   & \thesisexaminer   \\
-      Host:       & \thesishost       \\
+      Supervisors: & \thesissupervisor \\
+      Examiner:    & \thesisexaminer   \\
+      Host:        & \thesishost       \\
     \end{tabular}\par
 
     \vspace{1cm}

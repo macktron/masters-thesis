@@ -1,0 +1,154 @@
+\section{Attention Variants}\label{sec:exp:attention}\label{sec:exp:results:attention}
+
+Five configurations are trained with the joint objective of \cref{eq:method:loss_total} and otherwise identical hyperparameters (\cref{sec:exp:hparams}).
+Vanilla is the joint encoder of \cref{sec:exp:results:vanilla}.
+RoPE-TOA applies rotary encoding on the window-local \gls{toa} in the trunk and in both branches.
+RoPE-az is the branch-specific rotary design of \cref{sec:method:attention}.
+Despite the name, it does not rotate by azimuth or elevation: the trunk and the mode branch rotate by window-local \gls{toa}, and the deinterleaving branch rotates by the two planar Euclidean incidence components $\tilde{u}^{x},\tilde{u}^{y}$ of \cref{eq:method:aoa_scale}.
+Bias adds the pairwise physical logits of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
+RoPE-TOA+Bias stacks the uniform \gls{toa} rotary layout of RoPE-TOA with that pairwise bias. Incidence is not used as a rotary coordinate.
+
+The rows other than Vanilla test whether explicit physical structure in attention improves clustering relative to standard \gls{mha} (RQ3).
+Feature \gls{dbscan} remains the no-encoder control of \cref{tab:exp:vanilla}; it is omitted here.
+\Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores.
+The best value in each column is in bold; ties are bold on every tied row.
+
+\begin{table}[tbp]
+  \centering
+  \small
+  \caption{Emitter clustering on the test split for jointly trained attention variants. Entries are mean $\pm$ std over the same $960$ windows as \cref{tab:exp:vanilla}. Single training seed.}
+  \label{tab:exp:attn_em}
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{K}-K\rvert$ \\
+    \midrule
+    Vanilla   & $0.944\pm0.182$ & $0.955\pm0.142$ & $0.989\pm0.054$ & $0.948\pm0.172$ & $0.25\pm0.48$ \\
+    RoPE-TOA  & $\mathbf{1.000\pm0.003}$ & $0.998\pm0.007$ & $\mathbf{0.997\pm0.013}$ & $\mathbf{1.000\pm0.000}$ & $0.09\pm0.31$ \\
+    RoPE-az   & $0.972\pm0.136$ & $0.976\pm0.113$ & $0.994\pm0.045$ & $0.973\pm0.131$ & $0.14\pm0.37$ \\
+    Bias      & $\mathbf{1.000\pm0.003}$ & $\mathbf{0.999\pm0.006}$ & $\mathbf{0.997\pm0.012}$ & $\mathbf{1.000\pm0.000}$ & $\mathbf{0.09\pm0.30}$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[tbp]
+  \centering
+  \small
+  \caption{Mode clustering on the test split. Entries follow the same aggregation as \cref{tab:exp:attn_em}.}
+  \label{tab:exp:attn_md}
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{M}-M\rvert$ \\
+    \midrule
+    Vanilla   & $0.986\pm0.100$ & $0.987\pm0.094$ & $0.993\pm0.037$ & $0.990\pm0.092$ & $0.23\pm0.50$ \\
+    RoPE-TOA  & $0.990\pm0.087$ & $0.989\pm0.083$ & $0.995\pm0.023$ & $0.990\pm0.084$ & $0.20\pm0.49$ \\
+    RoPE-az   & $0.984\pm0.097$ & $0.987\pm0.084$ & $0.989\pm0.047$ & $0.993\pm0.079$ & $0.23\pm0.50$ \\
+    Bias      & $\mathbf{0.993\pm0.074}$ & $\mathbf{0.993\pm0.073}$ & $\mathbf{0.997\pm0.017}$ & $\mathbf{0.994\pm0.073}$ & $\mathbf{0.13\pm0.39}$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+RoPE-TOA and Bias remove the emitter tail that joint Vanilla leaves in \cref{tab:exp:vanilla,tab:exp:ablation_loss}.
+Mean emitter $\ARI$ is $1.000$ to three decimals, $99\%$ of windows sit at or above $0.99$, and none of the $960$ windows falls below $0.90$.
+Completeness is $1.000$ with no spread, so a true emitter is not split across clusters.
+The leftover errors are rare undercounts, visible as a small homogeneity gap and as the count-error column.
+Emitter-only Vanilla already reaches this emitter range in \cref{tab:exp:ablation_loss}, without a usable mode branch.
+RoPE-TOA and Bias reach it under the joint objective.
+
+RoPE-az improves on Vanilla for emitters ($\ARI$ $0.972$, $5\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
+Rotating the deinterleaving branch by planar incidence is not, on this test set, a replacement for rotating every layer by \gls{toa}.
+Mode scores occupy a narrow band for Vanilla, RoPE-TOA, RoPE-az, and Bias.
+Bias is the tightest there, with the smallest count error.
+
+\subsection{Per-window ARI distributions}\label{sec:exp:results:hist}
+
+\Cref{fig:exp:hist_em,fig:exp:hist_md} show the empirical CDF of per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, and Bias.
+$\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the curves correspond to the neural rows of \cref{tab:exp:attn_em,tab:exp:attn_md}.
+Each curve is the fraction of the $960$ windows whose $\ARI$ does not exceed the value on the horizontal axis.
+The vertical axis is logarithmic so that a tail of a few windows remains visible against the jump at $1$.
+$\AMI$, homogeneity, and completeness follow the same right spike and are not repeated as extra pages.
+
+The Vanilla emitter curve leaves the axis well before $0.90$.
+RoPE-TOA and Bias stay near zero until just below $1$, and the two curves nearly coincide on this split.
+RoPE-az sits between those two shapes.
+On the mode branch the four curves rise later and closer together; Bias is the last to leave zero.
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{hist_em.pdf}
+  \caption{Empirical CDF of emitter $\ARI$ over the $960$ non-overlapping test windows. The vertical axis is logarithmic.}
+  \label{fig:exp:hist_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{hist_md.pdf}
+  \caption{Empirical CDF of mode $\ARI$ over the same windows as \cref{fig:exp:hist_em}. The vertical axis is logarithmic.}
+  \label{fig:exp:hist_md}
+\end{figure}
+
+\subsection{Cluster-count recovery}\label{sec:exp:results:kcorr}
+
+\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} are heatmaps of predicted versus true cluster counts.
+Each cell is the number of test windows with that pair.
+The diagonal is exact count recovery.
+Mass above the diagonal is extra clusters (splits).
+Mass below it is missing clusters (merges).
+That is why \cref{tab:exp:attn_em,tab:exp:attn_md} report homogeneity and completeness separately, and why they include a mean absolute count error.
+
+On the emitter branch, Vanilla leaves the diagonal more often than the other three, with splits and merges in roughly equal number.
+RoPE-TOA never oversplits an emitter window in this set: the off-diagonal mass is only undercounts.
+Bias is the same pattern, up to one window.
+RoPE-az is closer to the diagonal than Vanilla and still produces some extra clusters.
+
+The mode heatmaps are diagonal-dominant for every model.
+When they miss, they more often undercount than invent labels, and the misses concentrate at the crowded end of the catalogue, where a window can contain a dozen modes (\cref{sec:exp:datasets}).
+Bias keeps more mass on the diagonal than Vanilla or RoPE-az.
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{kcorr_em.pdf}
+  \caption{Predicted versus true number of emitters per test window. Cell values are window counts. The line is $\hat{K}=K$.}
+  \label{fig:exp:kcorr_em}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \expfig{kcorr_md.pdf}
+  \caption{Predicted versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_em}.}
+  \label{fig:exp:kcorr_md}
+\end{figure}
+
+\subsection{Model size and inference cost}\label{sec:exp:results:efficiency}
+
+\Cref{tab:exp:efficiency} reports trainable parameters and wall-clock time per test window on the A100 of \cref{sec:exp:setup}.
+One window is forwarded at a time.
+A short GPU warmup is excluded from the mean.
+Clustering time is \gls{dbscan} on the embeddings of \cref{eq:method:cluster_decoding}.
+
+Rotary encoding adds no learned weights, so both RoPE models dump the same $16\,081\,536$ parameters as Vanilla.
+That is fewer extra parameters than a learned positional table of length $L$, and fewer than the physical bias, which stores one scalar per head, layer, and selected coordinate.
+Those scalars do not change the dumped total at the reported precision.
+They do change the encoder time: Bias spends $30$~ms in the forward pass where Vanilla spends $1.5$~ms, because each layer forms pairwise coordinate maps of shape $h \times L \times L$.
+\Gls{dbscan} is about $60$~ms for every neural model, so it dominates Vanilla and both RoPE variants.
+Feature \gls{dbscan} has no encoder weights; its clustering time is $21$~ms.
+Memory for the pairwise maps is taken up in \cref{sec:disc:interp}.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Trainable parameters and mean time per test window. Encoder is the forward pass, or the feature copy for Feature \gls{dbscan}. Clustering is \gls{dbscan} on both branches.}
+  \label{tab:exp:efficiency}
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    Model & Parameters & Encoder (ms) & Clustering (ms) & Total (ms) \\
+    \midrule
+    Feature DBSCAN & $0$ & $0.1$ & $20.9$ & $21.0$ \\
+    Vanilla   & $16\,081\,536$ & $1.5$ & $61.2$ & $62.7$ \\
+    RoPE-TOA  & $16\,081\,536$ & $2.5$ & $59.9$ & $62.4$ \\
+    RoPE-az   & $16\,081\,536$ & $2.9$ & $61.3$ & $64.2$ \\
+    Bias      & $16\,081\,536$ & $29.6$ & $62.0$ & $91.6$ \\
+    RoPE-TOA+Bias & {---} & {---} & {---} & {---} \\
+    \bottomrule
+  \end{tabular}
+\end{table}

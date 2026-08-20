@@ -1,16 +1,17 @@
 \section{Ablation Studies}\label{sec:exp:ablation}
 
-This section isolates the joint objective of \cref{eq:method:loss_total} from the attention variants of \cref{sec:exp:results:attention}.
+This section isolates the joint objective of \cref{eq:method:loss_total} from the attention mechanism.
 The runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
 That matched dual-branch control is the comparison for RQ2.
+The jointly trained attention variants are compared afterwards in \cref{sec:exp:attention}.
 
 The three objectives are:
 \begin{description}
-  \item[Joint] $\Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ with $\lambda_{\mathrm{md}} = 1$, identical to Vanilla in \cref{sec:exp:results}.
+  \item[Joint] $\Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ with $\lambda_{\mathrm{md}} = 1$, identical to Vanilla in \cref{sec:exp:results:vanilla}.
   \item[Emitter-only] $\Loss = \Loss_{\mathrm{em}}$. The mode branch receives no direct gradient.
   \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
 \end{description}
-Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla row of \cref{tab:exp:attn_em,tab:exp:attn_md}, not from a second training run.
+Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
 The single-task models use the same initialisation seed, the same splits, and the remaining hyperparameters of \cref{sec:exp:hparams}.
 
 Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
@@ -19,7 +20,7 @@ They measure how much the shared trunk transfers to the unsupervised branch, ver
 
 \begin{table}[tbp]
   \centering
-  \caption{Joint versus single-task objectives on the Vanilla encoder. Aggregation as in \cref{tab:exp:attn_em,tab:exp:attn_md}. Hom.\ and Comp.\ are homogeneity and completeness. Joint entries are those of Vanilla, not a repeated run.}
+  \caption{Joint versus single-task objectives on the Vanilla encoder. Aggregation as in \cref{tab:exp:vanilla}. Hom.\ and Comp.\ are homogeneity and completeness. Joint entries are those of Vanilla, not a repeated run.}
   \label{tab:exp:ablation_loss}
   \small
   \begin{tabular}{@{}llccccc@{}}
@@ -39,7 +40,7 @@ They measure how much the shared trunk transfers to the unsupervised branch, ver
 Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
 
 On the emitter branch, Emitter-only outperforms Joint.
-Mean $\ARI$ rises from $0.944$ to $0.999$, the spread collapses, and the count error falls to the same range as RoPE-TOA and Bias in \cref{tab:exp:attn_em}.
+Mean $\ARI$ rises from $0.944$ to $0.999$, the spread collapses, and the count error falls to $0.09\pm0.32$.
 Adding the mode term therefore costs deinterleaving accuracy on this backbone, at least at $\lambda_{\mathrm{md}}=1$.
 
 The unpaid cost of dropping the mode term is the mode branch itself.
@@ -50,4 +51,6 @@ Joint training is what keeps the mode partition usable.
 RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
 On the emitter metrics it does not.
 What it buys is a second partition that Emitter-only does not provide.
-No extra distribution figures are included here. The Joint distributions are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.
+No extra distribution figures are included here.
+The Joint per-window distributions are those of Vanilla in \cref{fig:exp:hist_em,fig:exp:hist_md,fig:exp:kcorr_em,fig:exp:kcorr_md}.
+The next section asks whether physical structure in attention recovers the emitter accuracy of Emitter-only without dropping the mode term.

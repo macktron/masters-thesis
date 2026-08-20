@@ -2,7 +2,7 @@
 
 Master's thesis at the [KTH](https://www.kth.se/) School of Electrical Engineering and Computer Science (EECS), Master's Programme in Machine Learning.
 
-**Author:** Markus Swegmark
+**Author:** Markus Johnson Swegmark
 **Year:** 2026
 
 ## Build
