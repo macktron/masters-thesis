@@ -1,7 +1,8 @@
 \section{Hyperparameters and Training Details}\label{sec:exp:hparams}
 
 This section collects numerical training choices deferred from \cref{sec:method:training,sec:method:loss,sec:method:arch}.
-Unless \cref{sec:exp:ablation} states otherwise, baseline models use the same epoch budget and hardware (\cref{sec:exp:setup}) so that differences reflect architecture and objective rather than compute.
+Unless \cref{sec:exp:ablation} states otherwise, jointly trained encoders use the same epoch budget and hardware (\cref{sec:exp:setup}) so that differences reflect architecture and objective rather than compute.
+Feature \gls{dbscan} is not trained.
 
 The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:method:loss}.
 \cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder.
@@ -33,27 +34,23 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
 Total optimisation steps equal ten epochs times the number of training batches per epoch.
 The warmup fraction and cosine phase are counted in those steps, as stated in \cref{sec:method:training}.
 
-\Cref{tab:exp:hparams_attn} collects the attention-variant knobs deferred from \cref{sec:method:attention} and the \gls{dbscan} radii of \cref{sec:method:arch}.
-Vanilla and Bias do not use rotary scales.
-RoPE-TOA uses a single scale $\gamma_t$ on every layer.
-RoPE-az uses $\gamma_t$ on the trunk and the mode branch and $(\gamma_x,\gamma_y)$ on the two planar Euclidean incidence axes of the deinterleaving branch.
-Those axes are the Cartesian components of \cref{eq:method:aoa_scale}, not azimuth or elevation angles.
-RoPE-TOA+Bias uses the same $\gamma_t$ as RoPE-TOA, on every layer, together with the pairwise bias.
-Unused coordinates are marked n/a.
+The rotary scales are those of \cref{sec:method:attention} and are not repeated here.
+\Cref{tab:exp:hparams_attn} lists only the \gls{dbscan} radii of \cref{sec:method:arch}.
 
 \begin{table}[tbp]
   \centering
-  \caption{Rotary scales and \gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed. $\gamma_x$ and $\gamma_y$ apply only to RoPE-az.}
+  \caption{\Gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed.}
   \label{tab:exp:hparams_attn}
-  \begin{tabular}{@{}lccccc@{}}
+  \begin{tabular}{@{}lcc@{}}
     \toprule
-    Model & $\gamma_t$ & $\gamma_x$ & $\gamma_y$ & $\varepsilon_{\mathrm{em}}$ & $\varepsilon_{\mathrm{md}}$ \\
+    Model & $\varepsilon_{\mathrm{em}}$ & $\varepsilon_{\mathrm{md}}$ \\
     \midrule
-    Vanilla   & {n/a} & {n/a} & {n/a} & $0.6$ & $0.1$ \\
-    RoPE-TOA  & $10$ & {n/a} & {n/a} & $0.6$ & $0.1$ \\
-    RoPE-az   & $10$ & $10$ & $10$ & $0.6$ & $0.2$ \\
-    Bias      & {n/a} & {n/a} & {n/a} & $0.6$ & $0.1$ \\
-    RoPE-TOA+Bias & $10$ & {n/a} & {n/a} & {---} & {---} \\
+    Feature DBSCAN & $0.1$ & $0.1$ \\
+    Vanilla   & $0.6$ & $0.1$ \\
+    RoPE-TOA  & $0.6$ & $0.1$ \\
+    RoPE-az   & $0.6$ & $0.2$ \\
+    Bias      & $0.6$ & $0.1$ \\
+    RoPE-TOA+Bias & {---} & {---} \\
     \bottomrule
   \end{tabular}
 \end{table}

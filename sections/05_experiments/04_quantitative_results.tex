@@ -1,6 +1,6 @@
 \section{Quantitative Results}\label{sec:exp:results}
 
-This section reports clustering scores for jointly trained encoders that differ in the attention mechanism.
+This section reports clustering scores for jointly trained encoders that differ in the attention mechanism, together with a no-encoder Feature \gls{dbscan} control.
 The Vanilla encoder, with standard self-attention, is the existence test for RQ1.
 The remaining joint rows are the RQ3 comparison against that baseline.
 The joint-versus-single-task comparison that answers RQ2 is deferred to \cref{sec:exp:ablation}.
@@ -22,12 +22,14 @@ The joint-versus-single-task comparison that answers RQ2 is deferred to \cref{se
 \subsection{Evaluation protocol}\label{sec:exp:results:protocol}
 
 All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
-Windows have length $L = 2000$.
-The evaluation dump scored overlapping windows with stride $200$; every tenth window is kept here, which restores stride $\delta = L$ and yields $960$ non-overlapping windows over the $244$ test scenarios.
+Every model is scored with window length $L = 2000$ and with no overlap between scored windows.
+The neural evaluation dumps used stride $200$; every tenth window is kept here, which restores stride $\delta = L$ and yields $960$ non-overlapping windows over the $244$ test scenarios.
+Feature \gls{dbscan} of \cref{sec:method:baselines} clusters the scaled \gls{pdw} vector of each pulse directly.
+It is not trained, and its test dump already uses overlap $0$ at the same $L$, so no subsample is applied.
 For each window, \gls{dbscan} on each branch yields a predicted partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
 
-Each table entry is the mean $\pm$ one standard deviation of that per-window score over the $960$ windows.
-Results are from a single training seed; the reported spread is therefore window-level variation, not seed-level uncertainty.
+Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $960$ windows.
+Results for the trained encoders are from a single training seed; the reported spread is therefore window-level variation, not seed-level uncertainty.
 The \gls{dbscan} radius $\varepsilon$ is selected independently for each model and each branch on the validation grid of \cref{sec:method:arch}, with $\mathrm{minPts} = 5$ throughout; selected radii are listed in \cref{tab:exp:hparams_attn}.
 
 Homogeneity and completeness are reported separately rather than only through their harmonic mean, the \gls{vmeasure}, so that oversplitting can be distinguished from undermerging.
@@ -45,18 +47,20 @@ RoPE-TOA+Bias stacks the uniform \gls{toa} rotary layout of RoPE-TOA with that p
 
 Vanilla tests whether a transformer encoder can deinterleave pulses and recover operating modes by clustering (RQ1).
 The other joint rows test whether explicit physical structure in attention improves those scores relative to standard \gls{mha} (RQ3).
+Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores.
 The best value in each column is in bold; ties are bold on every tied row.
 
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Emitter clustering on the test split. Entries are mean $\pm$ std over $960$ non-overlapping test windows from a single training seed.}
+  \caption{Emitter clustering on the test split. Entries are mean $\pm$ std over non-overlapping windows of length $L=2000$. Neural rows use $960$ windows from a single training seed. Feature \gls{dbscan} is not trained.}
   \label{tab:exp:attn_em}
   \begin{tabular}{@{}lccccc@{}}
     \toprule
     Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{K}-K\rvert$ \\
     \midrule
+    Feature DBSCAN & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
     Vanilla   & $0.944\pm0.182$ & $0.955\pm0.142$ & $0.989\pm0.054$ & $0.948\pm0.172$ & $0.25\pm0.48$ \\
     RoPE-TOA  & $\mathbf{1.000\pm0.003}$ & $0.998\pm0.007$ & $\mathbf{0.997\pm0.013}$ & $\mathbf{1.000\pm0.000}$ & $0.09\pm0.31$ \\
     RoPE-az   & $0.972\pm0.136$ & $0.976\pm0.113$ & $0.994\pm0.045$ & $0.973\pm0.131$ & $0.14\pm0.37$ \\
@@ -75,6 +79,7 @@ The best value in each column is in bold; ties are bold on every tied row.
     \toprule
     Model & $\ARI$ & $\AMI$ & Homogeneity & Completeness & $\lvert\hat{M}-M\rvert$ \\
     \midrule
+    Feature DBSCAN & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
     Vanilla   & $0.986\pm0.100$ & $0.987\pm0.094$ & $0.993\pm0.037$ & $0.990\pm0.092$ & $0.23\pm0.50$ \\
     RoPE-TOA  & $0.990\pm0.087$ & $0.989\pm0.083$ & $0.995\pm0.023$ & $0.990\pm0.084$ & $0.20\pm0.49$ \\
     RoPE-az   & $0.984\pm0.097$ & $0.987\pm0.084$ & $0.989\pm0.047$ & $0.993\pm0.079$ & $0.23\pm0.50$ \\
@@ -83,6 +88,12 @@ The best value in each column is in bold; ties are bold on every tied row.
     \bottomrule
   \end{tabular}
 \end{table}
+
+Feature \gls{dbscan} sits well below every trained encoder.
+Emitter $\ARI$ is $0.578$, and $71\%$ of windows fall below $0.90$.
+Completeness is $0.523$ and the mean count error exceeds seven emitters, so the method oversplits.
+Homogeneity remains $0.976$: the extra clusters are internally pure.
+Mode $\ARI$ is $0.811$, still below Vanilla.
 
 Vanilla already recovers both partitions on this corpus, which is the existence test of RQ1.
 Emitter $\ARI$ is $0.944$, and $87\%$ of windows score at or above $0.99$, but about one window in ten falls below $0.90$.
@@ -99,28 +110,30 @@ Rotating the deinterleaving branch by planar incidence is not, on this test set,
 Mode scores occupy a narrow band for Vanilla, RoPE-TOA, RoPE-az, and Bias.
 Bias is the tightest there, with the smallest count error.
 
-\subsection{Metric histograms}\label{sec:exp:results:hist}
+\subsection{Per-window ARI distributions}\label{sec:exp:results:hist}
 
-\Cref{fig:exp:hist_em,fig:exp:hist_md} show the per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, and Bias.
-$\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the histograms correspond to the numbers in \cref{tab:exp:attn_em,tab:exp:attn_md}.
+\Cref{fig:exp:hist_em,fig:exp:hist_md} show the empirical CDF of per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, and Bias.
+$\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the curves correspond to the neural rows of \cref{tab:exp:attn_em,tab:exp:attn_md}.
+Each curve is the fraction of the $960$ windows whose $\ARI$ does not exceed the value on the horizontal axis.
+The vertical axis is logarithmic so that a tail of a few windows remains visible against the jump at $1$.
 $\AMI$, homogeneity, and completeness follow the same right spike and are not repeated as extra pages.
 
-The Vanilla emitter histogram has a mass at $1$ and a long left tail.
-RoPE-TOA and Bias put almost every window in the last bin.
+The Vanilla emitter curve leaves the axis well before $0.90$.
+RoPE-TOA and Bias stay near zero until just below $1$, and the two curves nearly coincide on this split.
 RoPE-az sits between those two shapes.
-On the mode branch the four histograms are harder to tell apart: all are peaked at $1$, and Bias has the smallest leftover tail.
+On the mode branch the four curves rise later and closer together; Bias is the last to leave zero.
 
 \begin{figure}[tbp]
   \centering
   \expfig{hist_em.pdf}
-  \caption{Emitter $\ARI$ over the $960$ non-overlapping test windows. The dashed line is the mean.}
+  \caption{Empirical CDF of emitter $\ARI$ over the $960$ non-overlapping test windows. The vertical axis is logarithmic.}
   \label{fig:exp:hist_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
   \expfig{hist_md.pdf}
-  \caption{Mode $\ARI$ over the same windows as \cref{fig:exp:hist_em}.}
+  \caption{Empirical CDF of mode $\ARI$ over the same windows as \cref{fig:exp:hist_em}. The vertical axis is logarithmic.}
   \label{fig:exp:hist_md}
 \end{figure}
 
@@ -167,17 +180,19 @@ Rotary encoding adds no learned weights, so both RoPE models dump the same $16\,
 That is fewer extra parameters than a learned positional table of length $L$, and fewer than the physical bias, which stores one scalar per head, layer, and selected coordinate.
 Those scalars do not change the dumped total at the reported precision.
 They do change the encoder time: Bias spends $30$~ms in the forward pass where Vanilla spends $1.5$~ms, because each layer forms pairwise coordinate maps of shape $h \times L \times L$.
-\Gls{dbscan} is about $60$~ms for every model, so it dominates Vanilla and both RoPE variants.
+\Gls{dbscan} is about $60$~ms for every neural model, so it dominates Vanilla and both RoPE variants.
+Feature \gls{dbscan} has no encoder weights; its clustering time is $21$~ms.
 Memory for the pairwise maps is taken up in \cref{sec:disc:interp}.
 
 \begin{table}[tbp]
   \centering
-  \caption{Trainable parameters and mean time per test window. Encoder is the forward pass. Clustering is \gls{dbscan} on both branches.}
+  \caption{Trainable parameters and mean time per test window. Encoder is the forward pass, or the feature copy for Feature \gls{dbscan}. Clustering is \gls{dbscan} on both branches.}
   \label{tab:exp:efficiency}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
     Model & Parameters & Encoder (ms) & Clustering (ms) & Total (ms) \\
     \midrule
+    Feature DBSCAN & $0$ & $0.1$ & $20.9$ & $21.0$ \\
     Vanilla   & $16\,081\,536$ & $1.5$ & $61.2$ & $62.7$ \\
     RoPE-TOA  & $16\,081\,536$ & $2.5$ & $59.9$ & $62.4$ \\
     RoPE-az   & $16\,081\,536$ & $2.9$ & $61.3$ & $64.2$ \\

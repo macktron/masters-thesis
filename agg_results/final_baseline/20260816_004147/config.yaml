@@ -13,7 +13,7 @@ data:
   test:
     start_scenario_id: 1750
     end_scenario_id: 2000
-    sequence_length: 1500
+    sequence_length: 2000
     overlap: 0
     batch_size: 4
     num_scenarios_per_batch: 1
@@ -24,8 +24,8 @@ data:
   val:
     start_scenario_id: 1500
     end_scenario_id: 1501
-    sequence_length: 1500
-    overlap: 1200
+    sequence_length: 2000
+    overlap: 0
     batch_size: 4
     num_scenarios_per_batch: 1
     max_rows_per_scenario: 10000

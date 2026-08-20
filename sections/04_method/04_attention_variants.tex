@@ -67,8 +67,9 @@ Choosing $\gamma=L$ would give that interval the same numeric span as token indi
 A larger $\gamma$ gives a small gap in $p$ more phase and makes the fast planes wrap inside the window.
 A smaller $\gamma$ keeps phases unique over a wider span of the window and flattens nearby distinctions.
 Unlike the bias coefficients of \cref{eq:method:attn_bias}, $\gamma$ is not learned.
-Each coordinate has its own scale, because a numerical gap of a given size is not the same physical distance in time as in direction.
-The values $\gamma_t$, $\gamma_x$, and $\gamma_y$ are reported in \cref{ch:experiments}.
+A separate scale per coordinate would let time and direction be stretched independently, because a numerical gap of a given size is not the same physical distance in time as in direction.
+In every rotary layout they are nevertheless set equal, $\gamma_t=\gamma_x=\gamma_y=10$.
+That is far below $\gamma=L$, so a unit gap in a normalised coordinate produces only a modest phase and the fastest planes do not wrap inside a window.
 
 The encoder of \cref{sec:method:arch} uses this construction in every attention sub-layer. The shared trunk and the mode branch rotate by the window-local \gls{toa}. The deinterleaving branch splits each head across the two planar Euclidean incidence components of \cref{eq:method:aoa_scale}. It does not rotate by a scalar azimuth or elevation angle.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build thesis figures from agg_results metrics.csv files.
 
-Histograms and count heatmaps use every tenth dumped window (stride L).
+ECDFs and count heatmaps use every tenth dumped window (stride L).
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = Path("/workspace")
+ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "figures" / "experiments"
 
 RUNS = [
@@ -21,6 +21,15 @@ RUNS = [
     ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/eval_results/metrics.csv"),
     ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/eval_results/metrics.csv"),
 ]
+
+# Draw the longer tails first so the near-perfect curves stay on top.
+ECDF_ORDER = ("Vanilla", "RoPE-az", "RoPE-TOA", "Bias")
+ECDF_STYLE = {
+    "Vanilla": dict(color="#0072B2", linestyle="-", linewidth=1.6),
+    "RoPE-az": dict(color="#009E73", linestyle="-.", linewidth=1.6),
+    "RoPE-TOA": dict(color="#D55E00", linestyle="--", linewidth=1.6),
+    "Bias": dict(color="#CC79A7", linestyle=":", linewidth=2.0),
+}
 
 
 def load_branch(path: Path, branch: str) -> list[dict]:
@@ -61,32 +70,37 @@ def style() -> None:
     )
 
 
-def plot_ari_histograms(branch: str, outfile: Path) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(6.8, 5.4), sharex=True, sharey=True)
-    bins = np.linspace(0.0, 1.0, 21)
-    for ax, (name, path) in zip(axes.ravel(), RUNS):
-        rows = load_branch(path, branch)
-        ari = np.array([r["ari"] for r in rows])
-        ax.hist(ari, bins=bins, color="#4c6b8a", edgecolor="white", linewidth=0.4)
-        ax.axvline(ari.mean(), color="#b85c38", linewidth=1.0, linestyle="--")
-        ax.set_title(name)
-        ax.set_xlim(0.0, 1.0)
-        ax.set_xticks([0.0, 0.25, 0.5, 0.75, 1.0])
+def plot_ari_ecdf(branch: str, outfile: Path) -> None:
+    """Overlaid ECDF of per-window ARI on a log vertical axis.
+
+    Linear histograms (and linear ECDFs) collapse to a spike at 1. The log
+    scale makes the leftover tail, down to a single window, readable.
+    """
+    runs = dict(RUNS)
+    fig, ax = plt.subplots(figsize=(6.8, 3.6))
+    for name in ECDF_ORDER:
+        ari = np.sort(np.array([r["ari"] for r in load_branch(runs[name], branch)]))
+        n = len(ari)
+        x = np.concatenate((ari, [1.0]))
+        y = np.concatenate((np.arange(1, n + 1) / n, [1.0]))
         n_hi = np.mean(ari >= 0.99)
-        ax.text(
-            0.04,
-            0.96,
-            f"mean {ari.mean():.3f}\nARI$\\geq$0.99: {100*n_hi:.0f}%",
-            transform=ax.transAxes,
-            va="top",
-            ha="left",
-            fontsize=7,
+        ax.plot(
+            x,
+            y,
+            drawstyle="steps-post",
+            label=rf"{name} ({100 * n_hi:.0f}% $\geq$ 0.99)",
+            **ECDF_STYLE[name],
         )
-    for ax in axes[1, :]:
-        ax.set_xlabel("ARI")
-    for ax in axes[:, 0]:
-        ax.set_ylabel("Windows")
-    fig.tight_layout(w_pad=0.8, h_pad=0.9)
+    ax.set_yscale("log")
+    ax.set_xlim(-0.02, 1.02)
+    ax.set_ylim(7.0e-4, 1.4)
+    ax.set_xticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_yticks([0.001, 0.01, 0.1, 1.0])
+    ax.set_yticklabels(["0.001", "0.01", "0.1", "1"])
+    ax.set_xlabel("ARI")
+    ax.set_ylabel("Fraction of windows")
+    ax.legend(frameon=False, loc="upper left", fontsize=7)
+    fig.tight_layout()
     fig.savefig(outfile)
     plt.close(fig)
 
@@ -166,8 +180,8 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     style()
-    plot_ari_histograms("deint", OUT / "hist_em.pdf")
-    plot_ari_histograms("mode", OUT / "hist_md.pdf")
+    plot_ari_ecdf("deint", OUT / "hist_em.pdf")
+    plot_ari_ecdf("mode", OUT / "hist_md.pdf")
     plot_heatmaps(
         "deint",
         7,

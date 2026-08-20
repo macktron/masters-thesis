@@ -6,9 +6,10 @@ The simulator supplies time-ordered pulse records together with ground-truth lab
 Each \emph{scenario} is one simulated timeline: a sequence of \glspl{pdw} whose length and the number of concurrent emitters vary across draws so that the encoder sees both sparse and crowded electromagnetic pictures.
 Scenarios are disjointly assigned to training, validation, and test partitions before any windowing; training-split statistics for carrier frequency, pulse width, and amplitude in \cref{sec:method:data} are fit on the training partition only and applied unchanged to validation and test pulses, whereas \gls{toa} is min--max mapped independently inside each window.
 Windows contain $L = 2000$ pulses.
-The run configuration uses stride $\delta = 200$ on every split, so consecutive dumped windows overlap by $L - \delta = 1800$ pulses.
+The neural run configuration uses stride $\delta = 200$ on every split, so consecutive dumped windows overlap by $L - \delta = 1800$ pulses.
 Training consumes that overlapping stream.
 Reported validation and test scores keep every tenth dumped window, which restores $\delta = L$ and yields non-overlapping windows (\cref{sec:exp:results:protocol}).
+Feature \gls{dbscan} of \cref{sec:method:baselines} is not trained; its test dump uses the same $L$ with overlap already $0$.
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
 The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
