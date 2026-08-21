@@ -6,7 +6,7 @@
 
 Passive electronic support measures record a time-ordered stream of pulse descriptor words in which several radars are interleaved and each radar may change operating mode.
 Operators need both groupings from the same stream.
-Classical pipelines deinterleave first and then classify modes. That split does not produce one representation for both partitions, and it assumes emitter names that can be compared across recordings.
+Classical pipelines deinterleave first and then classify modes. That split does not produce one representation for both partitions.
 
 This thesis trains a transformer encoder with a shared trunk and two branches on synthetic, fully labelled windows of length $2000$.
 Each pulse has a recording-local emitter identity and a mode drawn from a catalogue of $16$ types shared across recordings.

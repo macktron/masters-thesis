@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build thesis figures from agg_results metrics.csv files.
+"""Build thesis figures from agg_results metrics.csv and training_stats.json.
 
 ECDFs and count heatmaps use every tenth dumped window (stride L).
 """
@@ -7,6 +7,7 @@ ECDFs and count heatmaps use every tenth dumped window (stride L).
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -21,6 +22,17 @@ RUNS = [
     ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/eval_results/metrics.csv"),
     ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/eval_results/metrics.csv"),
     ("RoPE-TOA+Bias", ROOT / "agg_results/final_combined/20260819_200101/eval_results/metrics.csv"),
+]
+
+# Feature DBSCAN is omitted: it is not trained.
+TRAIN_RUNS = [
+    ("Vanilla", ROOT / "agg_results/final_vanilla/20260817_191119/training_stats.json"),
+    ("RoPE-TOA", ROOT / "agg_results/final_pure_rope/20260817_055105/training_stats.json"),
+    ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/training_stats.json"),
+    ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/training_stats.json"),
+    ("RoPE-TOA+Bias", ROOT / "agg_results/final_combined/20260819_200101/training_stats.json"),
+    ("Emitter-only", ROOT / "agg_results/final_vanilla_deint/20260818_104915/training_stats.json"),
+    ("Mode-only", ROOT / "agg_results/final_vanilla_mode/20260819_014313/training_stats.json"),
 ]
 
 # Draw the longer tails first so the near-perfect curves stay on top.
@@ -179,6 +191,78 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
     plt.close(fig)
 
 
+def plot_loss_curves(outfile: Path) -> None:
+    """Train vs validation loss per epoch for every trained model."""
+    fig, axes = plt.subplots(4, 2, figsize=(6.8, 8.6), sharex=True)
+    axes_flat = axes.ravel()
+    train_h = val_h = best_h = None
+    for i, (name, path) in enumerate(TRAIN_RUNS):
+        with path.open() as f:
+            stats = json.load(f)
+        train = np.asarray(stats["train_losses"], dtype=float)
+        val = np.asarray(stats["val_losses"], dtype=float)
+        epochs = np.arange(1, len(train) + 1)
+        best_epoch = int(stats["training_stats"]["best_val_loss_epoch"]) + 1
+        ax = axes_flat[i]
+        (train_h,) = ax.plot(
+            epochs,
+            train,
+            color="#0072B2",
+            linestyle="-",
+            linewidth=1.4,
+            marker="o",
+            markersize=3.5,
+            label="Train",
+        )
+        (val_h,) = ax.plot(
+            epochs,
+            val,
+            color="#D55E00",
+            linestyle="--",
+            linewidth=1.4,
+            marker="s",
+            markersize=3.5,
+            label="Validation",
+        )
+        best_h = ax.axvline(
+            best_epoch,
+            color="#666666",
+            linestyle=":",
+            linewidth=1.0,
+            label="Best val. epoch",
+        )
+        ax.plot(
+            best_epoch,
+            val[best_epoch - 1],
+            marker="*",
+            markersize=8,
+            color="#D55E00",
+            markeredgecolor="#1b1b1b",
+            markeredgewidth=0.4,
+            zorder=5,
+        )
+        ax.set_title(name)
+        ax.set_xticks(epochs)
+        ax.set_xlim(0.5, len(train) + 0.5)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+    legend_ax = axes_flat[7]
+    legend_ax.axis("off")
+    legend_ax.legend(
+        handles=[train_h, val_h, best_h],
+        loc="center",
+        frameon=False,
+        fontsize=8,
+    )
+    axes[3, 0].set_xlabel("Epoch")
+    axes[2, 1].set_xlabel("Epoch")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("Loss")
+    fig.tight_layout(w_pad=0.8, h_pad=0.7)
+    fig.savefig(outfile)
+    plt.close(fig)
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     style()
@@ -198,6 +282,7 @@ def main() -> None:
         r"Predicted $\hat{M}$",
         OUT / "kcorr_md.pdf",
     )
+    plot_loss_curves(OUT / "loss_curves.pdf")
     print("wrote", list(OUT.glob("*.pdf")))
 
 
