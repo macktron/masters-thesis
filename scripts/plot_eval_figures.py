@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build thesis figures from agg_results metrics.csv and training_stats.json.
+"""Build thesis figures from agg_results_new metrics.csv and training_stats.json.
 
-ECDFs and count heatmaps use every tenth dumped window (stride L).
+ECDFs and count heatmaps use the native overlap-0 test dumps (stride L).
 """
 
 from __future__ import annotations
@@ -16,23 +16,31 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "figures" / "experiments"
 
+NEW = ROOT / "agg_results_new"
+
 RUNS = [
-    ("Vanilla", ROOT / "agg_results/final_vanilla/20260817_191119/eval_results/metrics.csv"),
-    ("RoPE-TOA", ROOT / "agg_results/final_pure_rope/20260817_055105/eval_results/metrics.csv"),
-    ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/eval_results/metrics.csv"),
-    ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/eval_results/metrics.csv"),
-    ("RoPE-TOA+Bias", ROOT / "agg_results/final_combined/20260819_200101/eval_results/metrics.csv"),
+    ("Vanilla", NEW / "final_vanilla/20260817_191119/eval_results/metrics.csv"),
+    ("RoPE-TOA", NEW / "final_pure_rope/20260817_055105/eval_results/metrics.csv"),
+    ("RoPE-az", NEW / "final_multi_rope/20260816_010619/eval_results/metrics.csv"),
+    ("Bias", NEW / "final_physical_bias/20260816_130229/eval_results/metrics.csv"),
+    ("RoPE-TOA+Bias", NEW / "final_combined/20260819_200101/eval_results/metrics.csv"),
 ]
 
-# Feature DBSCAN is omitted: it is not trained.
+ABLATION_RUNS = [
+    ("Joint", NEW / "final_vanilla/20260817_191119/eval_results/metrics.csv"),
+    ("Emitter-only", NEW / "final_vanilla_deint/20260818_104915/eval_results/metrics.csv"),
+    ("Mode-only", NEW / "final_vanilla_mode/20260819_014313/eval_results/metrics.csv"),
+]
+
+# Feature DBSCAN is omitted from ECDFs/heatmaps: it is not trained.
 TRAIN_RUNS = [
-    ("Vanilla", ROOT / "agg_results/final_vanilla/20260817_191119/training_stats.json"),
-    ("RoPE-TOA", ROOT / "agg_results/final_pure_rope/20260817_055105/training_stats.json"),
-    ("RoPE-az", ROOT / "agg_results/final_multi_rope/20260816_010619/training_stats.json"),
-    ("Bias", ROOT / "agg_results/final_physical_bias/20260816_130229/training_stats.json"),
-    ("RoPE-TOA+Bias", ROOT / "agg_results/final_combined/20260819_200101/training_stats.json"),
-    ("Emitter-only", ROOT / "agg_results/final_vanilla_deint/20260818_104915/training_stats.json"),
-    ("Mode-only", ROOT / "agg_results/final_vanilla_mode/20260819_014313/training_stats.json"),
+    ("Vanilla", NEW / "final_vanilla/20260817_191119/training_stats.json"),
+    ("RoPE-TOA", NEW / "final_pure_rope/20260817_055105/training_stats.json"),
+    ("RoPE-az", NEW / "final_multi_rope/20260816_010619/training_stats.json"),
+    ("Bias", NEW / "final_physical_bias/20260816_130229/training_stats.json"),
+    ("RoPE-TOA+Bias", NEW / "final_combined/20260819_200101/training_stats.json"),
+    ("Emitter-only", NEW / "final_vanilla_deint/20260818_104915/training_stats.json"),
+    ("Mode-only", NEW / "final_vanilla_mode/20260819_014313/training_stats.json"),
 ]
 
 # Draw the longer tails first so the near-perfect curves stay on top.
@@ -51,9 +59,6 @@ def load_branch(path: Path, branch: str) -> list[dict]:
     with path.open() as f:
         for row in csv.DictReader(f):
             if row["metric_type"] != branch:
-                continue
-            wid = int(row["window_id"])
-            if wid % 10 != 0:
                 continue
             rows.append(
                 {
@@ -137,7 +142,7 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
     fig, axes = plt.subplots(3, 2, figsize=(6.8, 9.2))
     axes_flat = axes.ravel()
     im = None
-    ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, 16]
+    ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, kmax]
     cmap = plt.cm.Blues
     cmap = cmap.copy()
     cmap.set_under("white")
@@ -185,6 +190,63 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
         ax.set_ylabel(ylabel)
     fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0), w_pad=0.7, h_pad=0.8)
     cax = fig.add_axes([0.25, 0.015, 0.5, 0.018])
+    cb = fig.colorbar(im, cax=cax, orientation="horizontal")
+    cb.set_label("Number of windows")
+    fig.savefig(outfile)
+    plt.close(fig)
+
+
+def plot_ablation_heatmaps(
+    branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Path
+) -> None:
+    """1x3 count heatmaps for Joint, Emitter-only, and Mode-only."""
+    mats = [count_matrix(load_branch(path, branch), kmax) for _, path in ABLATION_RUNS]
+    vmax = max(int(m.max()) for m in mats)
+    fig, axes = plt.subplots(1, 3, figsize=(6.8, 3.05), squeeze=False)
+    ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, kmax]
+    cmap = plt.cm.Blues.copy()
+    cmap.set_under("white")
+    im = None
+    for ax, (name, _), mat in zip(axes[0], ABLATION_RUNS, mats):
+        vis = mat.astype(float)
+        vis[vis == 0] = np.nan
+        im = ax.imshow(
+            vis,
+            origin="lower",
+            cmap=cmap,
+            vmin=1,
+            vmax=vmax,
+            interpolation="nearest",
+            extent=(-0.5, kmax + 0.5, -0.5, kmax + 0.5),
+        )
+        ax.plot([0.5, kmax + 0.5], [0.5, kmax + 0.5], color="#b85c38", linewidth=0.8)
+        thresh = 0.45 * vmax
+        for p in range(kmax + 1):
+            for t in range(kmax + 1):
+                c = mat[p, t]
+                if c == 0:
+                    continue
+                ax.text(
+                    t,
+                    p,
+                    str(c),
+                    ha="center",
+                    va="center",
+                    fontsize=5.5 if kmax <= 8 else 4.5,
+                    color="white" if c >= thresh else "#1b1b1b",
+                )
+        ax.set_title(name)
+        ax.set_xlim(0.5, kmax + 0.5)
+        ax.set_ylim(0.5, kmax + 0.5)
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.set_aspect("equal")
+        ax.set_xlabel(xlabel)
+        ax.spines["top"].set_visible(True)
+        ax.spines["right"].set_visible(True)
+    axes[0, 0].set_ylabel(ylabel)
+    fig.tight_layout(rect=(0.0, 0.10, 1.0, 1.0), w_pad=0.55)
+    cax = fig.add_axes([0.25, 0.04, 0.5, 0.035])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
     cb.set_label("Number of windows")
     fig.savefig(outfile)
@@ -277,13 +339,31 @@ def main() -> None:
     )
     plot_heatmaps(
         "mode",
-        16,
+        17,
         r"True modes $M$",
         r"Predicted $\hat{M}$",
         OUT / "kcorr_md.pdf",
     )
-    plot_loss_curves(OUT / "loss_curves.pdf")
-    print("wrote", list(OUT.glob("*.pdf")))
+    plot_ablation_heatmaps(
+        "deint",
+        7,
+        r"True emitters $K$",
+        r"Predicted $\hat{K}$",
+        OUT / "kcorr_ablation_em.pdf",
+    )
+    plot_ablation_heatmaps(
+        "mode",
+        17,
+        r"True modes $M$",
+        r"Predicted $\hat{M}$",
+        OUT / "kcorr_ablation_md.pdf",
+    )
+    print("wrote", OUT / "hist_em.pdf")
+    print("wrote", OUT / "hist_md.pdf")
+    print("wrote", OUT / "kcorr_em.pdf")
+    print("wrote", OUT / "kcorr_md.pdf")
+    print("wrote", OUT / "kcorr_ablation_em.pdf")
+    print("wrote", OUT / "kcorr_ablation_md.pdf")
 
 
 if __name__ == "__main__":

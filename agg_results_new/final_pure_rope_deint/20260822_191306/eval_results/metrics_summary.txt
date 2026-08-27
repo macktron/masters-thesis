@@ -1,0 +1,25 @@
+
+    ========================================
+    EVALUATION SUMMARY
+    ========================================
+    Total Samples: 1168
+
+    Best eps:
+    mode 0.1
+    deint 0.3
+
+    MODE METRICS (OVERALL STATISTICS):
+    AMI - Mean: 0.8081, Min: 0.0000
+    ARI - Mean: 0.7720, Min: 0.0000
+    V-Measure - Mean: 0.8088, Min: 0.0000
+    Ave Inference Time:  0.0025s
+    Ave Clustering Time: 0.0632s
+
+    DEINTERLEAVING METRICS (OVERALL STATISTICS):
+    AMI - Mean: 0.9961, Min: 0.0000
+    ARI - Mean: 0.9976, Min: 0.0000
+    V-Measure - Mean: 0.9962, Min: 0.0000
+    Ave Inference Time:  0.0025s
+    Ave Clustering Time: 0.0632s
+    ========================================
+    

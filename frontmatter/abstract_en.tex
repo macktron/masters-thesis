@@ -9,18 +9,18 @@ Operators need both groupings from the same stream.
 Classical pipelines deinterleave first and then classify modes. That split does not produce one representation for both partitions.
 
 This thesis trains a transformer encoder with a shared trunk and two branches on synthetic, fully labelled windows of length $2000$.
-Each pulse has a recording-local emitter identity and a mode drawn from a catalogue of $16$ types shared across recordings.
+Each pulse has a recording-local emitter identity and a mode drawn from a catalogue of $17$ types shared across recordings.
 Two supervised contrastive losses, identical in form, differ only in the positive set: emitters within a recording, modes across the batch.
 At inference, DBSCAN clusters each branch independently. No catalogue softmax is used.
 
-On $960$ non-overlapping test windows, standard self-attention already recovers both partitions on most windows (mean emitter ARI $0.944$, mode ARI $0.986$).
+On $1168$ non-overlapping test windows, standard self-attention already recovers both partitions on most windows (mean emitter ARI $0.948$, mode ARI $0.985$).
 Rotary encoding of time of arrival, and a pairwise physical attention bias, raise emitter ARI to $1.000$ and remove the remaining failure tail.
 Rotary encoding of planar incidence on the deinterleaving branch helps less.
 The bias matches the time-rotary scores and spends extra memory and encoder time on pairwise maps of size $L \times L$.
-Using both mechanisms together lowers emitter ARI to $0.853$.
+Using both mechanisms together lowers emitter ARI to $0.851$.
 
-A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ against $0.944$) while its untrained mode branch merges.
-A Vanilla encoder trained only for modes matches the joint mode scores (ARI $0.984$) while its untrained emitter branch splits.
+A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ against $0.948$) while its untrained mode branch merges.
+A Vanilla encoder trained only for modes matches the joint mode scores (ARI $0.983$) while its untrained emitter branch splits.
 The joint objective is therefore a trade-off, not a free extra head.
 Held-out modulations and operational recordings are not scored.
 

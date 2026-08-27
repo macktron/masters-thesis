@@ -9,8 +9,8 @@
 
   \item[RQ2]
   Not on the emitter task.
-  A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$ (\cref{tab:exp:ablation_loss}).
-  A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes and splits emitters.
+  A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$, while its mode branch merges (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
+  A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes and splits emitters (\cref{fig:exp:kcorr_ablation_em,fig:exp:emb_ablation}).
   The joint objective is the setting in which both partitions remain usable.
 
   \item[RQ3]
@@ -19,5 +19,5 @@
   Stacking them does not: RoPE-TOA+Bias is slower than Vanilla and worse on emitters.
   Rotary encoding of planar incidence on the deinterleaving branch improves on Vanilla and does not match TOA-only rotary encoding.
   Mode scores move much less.
-  The bias matches RoPE-TOA on accuracy and spends extra memory and encoder time on pairwise maps (\cref{tab:exp:efficiency,sec:disc:interp}).
+  The bias matches RoPE-TOA on accuracy and spends extra memory and encoder time on pairwise maps (\cref{tab:exp:efficiency,sec:disc:attention}).
 \end{description}

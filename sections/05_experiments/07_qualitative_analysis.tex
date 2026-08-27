@@ -7,7 +7,7 @@ Embeddings differ by model and by branch.
 
 \subsection*{Input window}\label{sec:exp:qualitative:features}
 
-\Cref{fig:exp:feat_w100_em,fig:exp:feat_w100_md} are the same $L=2000$ pulses from evaluation window $100$ (test scenario $1752$).
+\Cref{fig:exp:feat_w100_em,fig:exp:feat_w100_md} are the same $L=2000$ pulses from test scenario $1752$, evaluation index $100$ on the original overlapping dump used for the qualitative figures.
 The four panels are carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate, each against window-local \gls{toa}.
 The export names that last panel Theta. It is a direction component after \cref{eq:method:aoa_scale}, not a raw azimuth.
 Color is the only change between the two figures: \cref{fig:exp:feat_w100_em} uses the recording-local emitter label, \cref{fig:exp:feat_w100_md} the global mode label.
@@ -22,7 +22,7 @@ The scanner stays one color in both plots, so in this window that emitter uses a
 \begin{figure}[tbp]
   \centering
   \expfig{feat_w100_em.png}
-  \caption{Evaluation window $100$, colored by ground-truth emitter. Two emitters are present.}
+  \caption{Test scenario $1752$ (evaluation index $100$ on the original overlapping dump), colored by ground-truth emitter. Two emitters are present.}
   \label{fig:exp:feat_w100_em}
 \end{figure}
 
@@ -33,8 +33,8 @@ The scanner stays one color in both plots, so in this window that emitter uses a
   \label{fig:exp:feat_w100_md}
 \end{figure}
 
-Window $100$ is a light mixture.
-\Cref{fig:exp:feat_maxmode} is a crowded counterpart: an overlapping evaluation window with $17$ distinct mode labels on four emitters, one more than the non-overlapping maximum used as $M$ in \cref{sec:exp:datasets}.
+Window $100$ on that dump is a light mixture.
+\Cref{fig:exp:feat_maxmode} is a crowded counterpart: an overlapping evaluation window with $17$ distinct mode labels on four emitters, equal to the non-overlapping maximum used as $M$ in \cref{sec:exp:datasets}.
 Frequency and pulse width collapse to a handful of horizontal bands that several modes share.
 Amplitude is no longer a set of flats. Several tracks scan or hop.
 Incidence still stacks platforms on separate levels, but the levels are closer and more numerous than in \cref{fig:exp:feat_w100_em}.
@@ -50,7 +50,7 @@ The dual-branch encoder still has to do so from the same four channels.
 
 \subsection*{Embeddings}\label{sec:exp:qualitative:embed}
 
-\Cref{fig:exp:emb_w100_em,fig:exp:emb_w100_md} are \gls{umap} projections of the per-pulse embeddings on window $100$.
+\Cref{fig:exp:emb_w100_em,fig:exp:emb_w100_md} are \gls{umap} projections of the per-pulse embeddings on the same scenario-$1752$ window.
 Each panel is one model.
 Color is again the ground-truth label of that branch (two emitters, four modes).
 The source plots have no legend. The two-color panels match \cref{fig:exp:feat_w100_em}, the four-color panels match \cref{fig:exp:feat_w100_md}.
@@ -101,7 +101,7 @@ None of the five joint models disagrees on this window in $\ARI$, so the visual 
     \caption{RoPE-TOA+Bias}
     \label{fig:exp:emb_w100_em:combined}
   \end{subfigure}
-  \caption{UMAP of emitter-branch embeddings on window $100$, colored by ground-truth emitter.}
+  \caption{UMAP of emitter-branch embeddings on test scenario $1752$, colored by ground-truth emitter.}
   \label{fig:exp:emb_w100_em}
 \end{figure}
 
@@ -139,6 +139,6 @@ None of the five joint models disagrees on this window in $\ARI$, so the visual 
     \caption{RoPE-TOA+Bias}
     \label{fig:exp:emb_w100_md:combined}
   \end{subfigure}
-  \caption{UMAP of mode-branch embeddings on window $100$, colored by ground-truth mode.}
+  \caption{UMAP of mode-branch embeddings on test scenario $1752$, colored by ground-truth mode.}
   \label{fig:exp:emb_w100_md}
 \end{figure}

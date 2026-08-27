@@ -14,7 +14,7 @@ The present scores cannot be stacked against that accuracy. The tasks differ.
 Emitter labels here are recording-local, and both branches are clustered rather than classified.
 That is closer to \textcite{gunn2025deinterleaving}, who train a transformer for deinterleaving and cluster the embeddings with HDBSCAN.
 The Vanilla emitter row of \cref{tab:exp:vanilla} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
-Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss} shows that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder, and a mode-only copy splits emitters.
+Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em} show that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder, and a mode-only copy splits emitters.
 
 The attention variants go one step past that counterpart.
 Gunn et al.\ use standard dot-product attention and leave \gls{toa} as an input feature.

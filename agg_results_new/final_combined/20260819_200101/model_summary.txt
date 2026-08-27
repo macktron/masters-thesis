@@ -1,0 +1,230 @@
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Linear-1             [4, 2000, 256]           2,048
+         LayerNorm-2             [4, 2000, 256]             512
+            Linear-3             [4, 2000, 256]          65,792
+            Linear-4             [4, 2000, 256]          65,792
+            Linear-5             [4, 2000, 256]          65,792
+LearnablePhysicsBias-6         [4, 8, 2000, 2000]               0
+           Dropout-7         [4, 8, 2000, 2000]               0
+            Linear-8             [4, 2000, 256]          65,792
+BiasedRoPEAttention-9             [4, 2000, 256]               0
+          Dropout-10             [4, 2000, 256]               0
+        LayerNorm-11             [4, 2000, 256]             512
+           Linear-12            [4, 2000, 2048]         526,336
+             GELU-13            [4, 2000, 2048]               0
+          Dropout-14            [4, 2000, 2048]               0
+           Linear-15             [4, 2000, 256]         524,544
+          Dropout-16             [4, 2000, 256]               0
+CustomEncoderLayer-17             [4, 2000, 256]               0
+        LayerNorm-18             [4, 2000, 256]             512
+           Linear-19             [4, 2000, 256]          65,792
+           Linear-20             [4, 2000, 256]          65,792
+           Linear-21             [4, 2000, 256]          65,792
+LearnablePhysicsBias-22         [4, 8, 2000, 2000]               0
+          Dropout-23         [4, 8, 2000, 2000]               0
+           Linear-24             [4, 2000, 256]          65,792
+BiasedRoPEAttention-25             [4, 2000, 256]               0
+          Dropout-26             [4, 2000, 256]               0
+        LayerNorm-27             [4, 2000, 256]             512
+           Linear-28            [4, 2000, 2048]         526,336
+             GELU-29            [4, 2000, 2048]               0
+          Dropout-30            [4, 2000, 2048]               0
+           Linear-31             [4, 2000, 256]         524,544
+          Dropout-32             [4, 2000, 256]               0
+CustomEncoderLayer-33             [4, 2000, 256]               0
+        LayerNorm-34             [4, 2000, 256]             512
+           Linear-35             [4, 2000, 256]          65,792
+           Linear-36             [4, 2000, 256]          65,792
+           Linear-37             [4, 2000, 256]          65,792
+LearnablePhysicsBias-38         [4, 8, 2000, 2000]               0
+          Dropout-39         [4, 8, 2000, 2000]               0
+           Linear-40             [4, 2000, 256]          65,792
+BiasedRoPEAttention-41             [4, 2000, 256]               0
+          Dropout-42             [4, 2000, 256]               0
+        LayerNorm-43             [4, 2000, 256]             512
+           Linear-44            [4, 2000, 2048]         526,336
+             GELU-45            [4, 2000, 2048]               0
+          Dropout-46            [4, 2000, 2048]               0
+           Linear-47             [4, 2000, 256]         524,544
+          Dropout-48             [4, 2000, 256]               0
+CustomEncoderLayer-49             [4, 2000, 256]               0
+        LayerNorm-50             [4, 2000, 256]             512
+           Linear-51             [4, 2000, 256]          65,792
+           Linear-52             [4, 2000, 256]          65,792
+           Linear-53             [4, 2000, 256]          65,792
+LearnablePhysicsBias-54         [4, 8, 2000, 2000]               0
+          Dropout-55         [4, 8, 2000, 2000]               0
+           Linear-56             [4, 2000, 256]          65,792
+BiasedRoPEAttention-57             [4, 2000, 256]               0
+          Dropout-58             [4, 2000, 256]               0
+        LayerNorm-59             [4, 2000, 256]             512
+           Linear-60            [4, 2000, 2048]         526,336
+             GELU-61            [4, 2000, 2048]               0
+          Dropout-62            [4, 2000, 2048]               0
+           Linear-63             [4, 2000, 256]         524,544
+          Dropout-64             [4, 2000, 256]               0
+CustomEncoderLayer-65             [4, 2000, 256]               0
+        LayerNorm-66             [4, 2000, 256]             512
+ TransformerStack-67             [4, 2000, 256]               0
+           Linear-68             [4, 2000, 256]          65,792
+        LayerNorm-69             [4, 2000, 256]             512
+           Linear-70             [4, 2000, 256]          65,792
+           Linear-71             [4, 2000, 256]          65,792
+           Linear-72             [4, 2000, 256]          65,792
+ MultiFeatureRoPE-73  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-74         [4, 8, 2000, 2000]               0
+          Dropout-75         [4, 8, 2000, 2000]               0
+           Linear-76             [4, 2000, 256]          65,792
+BiasedRoPEAttention-77             [4, 2000, 256]               0
+          Dropout-78             [4, 2000, 256]               0
+        LayerNorm-79             [4, 2000, 256]             512
+           Linear-80            [4, 2000, 2048]         526,336
+             GELU-81            [4, 2000, 2048]               0
+          Dropout-82            [4, 2000, 2048]               0
+           Linear-83             [4, 2000, 256]         524,544
+          Dropout-84             [4, 2000, 256]               0
+CustomEncoderLayer-85             [4, 2000, 256]               0
+        LayerNorm-86             [4, 2000, 256]             512
+           Linear-87             [4, 2000, 256]          65,792
+           Linear-88             [4, 2000, 256]          65,792
+           Linear-89             [4, 2000, 256]          65,792
+ MultiFeatureRoPE-90  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-91         [4, 8, 2000, 2000]               0
+          Dropout-92         [4, 8, 2000, 2000]               0
+           Linear-93             [4, 2000, 256]          65,792
+BiasedRoPEAttention-94             [4, 2000, 256]               0
+          Dropout-95             [4, 2000, 256]               0
+        LayerNorm-96             [4, 2000, 256]             512
+           Linear-97            [4, 2000, 2048]         526,336
+             GELU-98            [4, 2000, 2048]               0
+          Dropout-99            [4, 2000, 2048]               0
+          Linear-100             [4, 2000, 256]         524,544
+         Dropout-101             [4, 2000, 256]               0
+CustomEncoderLayer-102             [4, 2000, 256]               0
+       LayerNorm-103             [4, 2000, 256]             512
+          Linear-104             [4, 2000, 256]          65,792
+          Linear-105             [4, 2000, 256]          65,792
+          Linear-106             [4, 2000, 256]          65,792
+MultiFeatureRoPE-107  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-108         [4, 8, 2000, 2000]               0
+         Dropout-109         [4, 8, 2000, 2000]               0
+          Linear-110             [4, 2000, 256]          65,792
+BiasedRoPEAttention-111             [4, 2000, 256]               0
+         Dropout-112             [4, 2000, 256]               0
+       LayerNorm-113             [4, 2000, 256]             512
+          Linear-114            [4, 2000, 2048]         526,336
+            GELU-115            [4, 2000, 2048]               0
+         Dropout-116            [4, 2000, 2048]               0
+          Linear-117             [4, 2000, 256]         524,544
+         Dropout-118             [4, 2000, 256]               0
+CustomEncoderLayer-119             [4, 2000, 256]               0
+       LayerNorm-120             [4, 2000, 256]             512
+          Linear-121             [4, 2000, 256]          65,792
+          Linear-122             [4, 2000, 256]          65,792
+          Linear-123             [4, 2000, 256]          65,792
+MultiFeatureRoPE-124  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-125         [4, 8, 2000, 2000]               0
+         Dropout-126         [4, 8, 2000, 2000]               0
+          Linear-127             [4, 2000, 256]          65,792
+BiasedRoPEAttention-128             [4, 2000, 256]               0
+         Dropout-129             [4, 2000, 256]               0
+       LayerNorm-130             [4, 2000, 256]             512
+          Linear-131            [4, 2000, 2048]         526,336
+            GELU-132            [4, 2000, 2048]               0
+         Dropout-133            [4, 2000, 2048]               0
+          Linear-134             [4, 2000, 256]         524,544
+         Dropout-135             [4, 2000, 256]               0
+CustomEncoderLayer-136             [4, 2000, 256]               0
+       LayerNorm-137             [4, 2000, 256]             512
+TransformerStack-138             [4, 2000, 256]               0
+          Linear-139             [4, 2000, 256]          65,792
+       LayerNorm-140             [4, 2000, 256]             512
+          Linear-141             [4, 2000, 256]          65,792
+          Linear-142             [4, 2000, 256]          65,792
+          Linear-143             [4, 2000, 256]          65,792
+MultiFeatureRoPE-144  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-145         [4, 8, 2000, 2000]               0
+         Dropout-146         [4, 8, 2000, 2000]               0
+          Linear-147             [4, 2000, 256]          65,792
+BiasedRoPEAttention-148             [4, 2000, 256]               0
+         Dropout-149             [4, 2000, 256]               0
+       LayerNorm-150             [4, 2000, 256]             512
+          Linear-151            [4, 2000, 2048]         526,336
+            GELU-152            [4, 2000, 2048]               0
+         Dropout-153            [4, 2000, 2048]               0
+          Linear-154             [4, 2000, 256]         524,544
+         Dropout-155             [4, 2000, 256]               0
+CustomEncoderLayer-156             [4, 2000, 256]               0
+       LayerNorm-157             [4, 2000, 256]             512
+          Linear-158             [4, 2000, 256]          65,792
+          Linear-159             [4, 2000, 256]          65,792
+          Linear-160             [4, 2000, 256]          65,792
+MultiFeatureRoPE-161  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-162         [4, 8, 2000, 2000]               0
+         Dropout-163         [4, 8, 2000, 2000]               0
+          Linear-164             [4, 2000, 256]          65,792
+BiasedRoPEAttention-165             [4, 2000, 256]               0
+         Dropout-166             [4, 2000, 256]               0
+       LayerNorm-167             [4, 2000, 256]             512
+          Linear-168            [4, 2000, 2048]         526,336
+            GELU-169            [4, 2000, 2048]               0
+         Dropout-170            [4, 2000, 2048]               0
+          Linear-171             [4, 2000, 256]         524,544
+         Dropout-172             [4, 2000, 256]               0
+CustomEncoderLayer-173             [4, 2000, 256]               0
+       LayerNorm-174             [4, 2000, 256]             512
+          Linear-175             [4, 2000, 256]          65,792
+          Linear-176             [4, 2000, 256]          65,792
+          Linear-177             [4, 2000, 256]          65,792
+MultiFeatureRoPE-178  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-179         [4, 8, 2000, 2000]               0
+         Dropout-180         [4, 8, 2000, 2000]               0
+          Linear-181             [4, 2000, 256]          65,792
+BiasedRoPEAttention-182             [4, 2000, 256]               0
+         Dropout-183             [4, 2000, 256]               0
+       LayerNorm-184             [4, 2000, 256]             512
+          Linear-185            [4, 2000, 2048]         526,336
+            GELU-186            [4, 2000, 2048]               0
+         Dropout-187            [4, 2000, 2048]               0
+          Linear-188             [4, 2000, 256]         524,544
+         Dropout-189             [4, 2000, 256]               0
+CustomEncoderLayer-190             [4, 2000, 256]               0
+       LayerNorm-191             [4, 2000, 256]             512
+          Linear-192             [4, 2000, 256]          65,792
+          Linear-193             [4, 2000, 256]          65,792
+          Linear-194             [4, 2000, 256]          65,792
+MultiFeatureRoPE-195  [[-1, 8, 2000, 32], [-1, 8, 2000, 32]]               0
+LearnablePhysicsBias-196         [4, 8, 2000, 2000]               0
+         Dropout-197         [4, 8, 2000, 2000]               0
+          Linear-198             [4, 2000, 256]          65,792
+BiasedRoPEAttention-199             [4, 2000, 256]               0
+         Dropout-200             [4, 2000, 256]               0
+       LayerNorm-201             [4, 2000, 256]             512
+          Linear-202            [4, 2000, 2048]         526,336
+            GELU-203            [4, 2000, 2048]               0
+         Dropout-204            [4, 2000, 2048]               0
+          Linear-205             [4, 2000, 256]         524,544
+         Dropout-206             [4, 2000, 256]               0
+CustomEncoderLayer-207             [4, 2000, 256]               0
+       LayerNorm-208             [4, 2000, 256]             512
+TransformerStack-209             [4, 2000, 256]               0
+       LayerNorm-210             [4, 2000, 256]             512
+       LayerNorm-211             [4, 2000, 256]             512
+          Linear-212             [4, 2000, 256]          65,792
+            GELU-213             [4, 2000, 256]               0
+          Linear-214              [4, 2000, 64]          16,448
+          Linear-215             [4, 2000, 256]          65,792
+            GELU-216             [4, 2000, 256]               0
+          Linear-217              [4, 2000, 64]          16,448
+================================================================
+Total params: 16,081,536
+Trainable params: 16,081,536
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.21
+Forward/backward pass size (MB): 16030242.19
+Params size (MB): 61.35
+Estimated Total Size (MB): 16030303.75
+----------------------------------------------------------------

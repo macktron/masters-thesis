@@ -19,39 +19,40 @@ The attention weights are the row-wise softmax of $\mat{A}$, which then mixes th
 
 \subsection{Physical attention bias}\label{sec:method:attention:bias}
 
-The first variant adds a pairwise bias to the attention logits, computed from the physical parameters of each pulse pair.
+The first variant subtracts a pairwise bias from the attention logits, computed from the physical parameters of each pulse pair.
 The implemented coordinates are the window-local \gls{toa} $t_n$ and the two planar Euclidean incidence components $(\tilde{u}^{x}_n,\tilde{u}^{y}_n)$ of \cref{eq:method:aoa_scale}.
 None of these coordinates is a raw angle.
-Each selected coordinate $p$ contributes an absolute pairwise difference $B^{(p)}_{ij} = |p_i - p_j|$, added to the logits with its own learnable scalar coefficient.
+Each selected coordinate $p$ contributes an absolute pairwise difference $B^{(p)}_{ij} = |p_i - p_j|$, subtracted from the logits with its own learnable scalar coefficient.
 On the shared trunk only \gls{toa} is used,
 \begin{equation}\label{eq:method:attn_bias_trunk}
   A_{ij}
   =
   \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}}
-  + \lambda_t\, B^{(t)}_{ij}.
+  - \lambda_t\, B^{(t)}_{ij}.
 \end{equation}
 On the two task branches all three coordinates are present,
 \begin{equation}\label{eq:method:attn_bias}
   A_{ij}
   =
   \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}}
-  + \lambda_t\, B^{(t)}_{ij}
-  + \lambda_{x}\, B^{(x)}_{ij}
-  + \lambda_{y}\, B^{(y)}_{ij},
+  - \lambda_t\, B^{(t)}_{ij}
+  - \lambda_{x}\, B^{(x)}_{ij}
+  - \lambda_{y}\, B^{(y)}_{ij},
 \end{equation}
 where $B^{(x)}$ and $B^{(y)}$ are the absolute differences of $\tilde{u}^{x}$ and $\tilde{u}^{y}$.
 Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer.
-This adds one scalar per head, layer, and selected coordinate; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
-Coefficients may be negative, and each is initialised to a small negative value so that, in line with the intended inductive bias, a larger coordinate difference initially decreases attention between the corresponding pulses.
+This introduces one scalar per head, layer, and selected coordinate; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
+A positive coefficient decreases the attention logit as the pairwise absolute difference grows; a negative coefficient increases it.
+Each coefficient is initialised to a small negative value, so that at the start of training a larger coordinate difference increases attention between the corresponding pulses.
 Because the coefficients are learned independently in each part of the network, the branches can weight the cues differently.
 The deinterleaving branch is expected to rely more on incidence, since pulses from one emitter usually arrive from a nearly constant direction.
 The shared trunk and the mode branch should instead suppress that cue, because an operating mode must be recognised independently of viewing geometry.
 Whether this allocation emerges is examined in \cref{sec:exp:results:bias_coef}.
-The bias follows the same idea as additive pairwise attention biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances.
+The bias follows the same idea as pairwise logit biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances, and subtracts the learned term from the logits rather than adding it.
 
 \subsection{Rotary positional encoding}\label{sec:method:attention:rope}
 
-The bias of \cref{eq:method:attn_bias} is added to the logits after the query--key product. The second variant uses the rotary encoding of \cref{sec:bg:transformer}, so the inner product depends on a pulse coordinate only through pairwise differences (\cref{eq:bg:rope}).
+The bias of \cref{eq:method:attn_bias} is subtracted from the logits after the query--key product. The second variant uses the rotary encoding of \cref{sec:bg:transformer}, so the inner product depends on a pulse coordinate only through pairwise differences (\cref{eq:bg:rope}).
 
 In the original construction the coordinate is the token index. Consecutive pulses in a recording are not equally spaced, so an ordinal index misrepresents \gls{toa} gaps (\cref{sec:method:data}). We attach physical coordinates instead, so that $p_j-p_i$ is a time gap or a difference of direction features.
 

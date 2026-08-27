@@ -17,8 +17,8 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
     \midrule
     Optimiser & AdamW \parencite{loshchilov2019adamw} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
     Peak learning rate $\eta_{\max}$ & $\num{5e-4}$ \\
-    Warmup & Linear from $0$ to $\eta_{\max}$ over $5\%$ of total steps \\
-    Schedule after warmup & Cosine annealing to $\eta_{\min}$ \\
+    Warmup & Linear from $0$ to $\eta_{\max}$ over $5\%$ of total steps \parencite{goyal2017accurate} \\
+    Schedule after warmup & Cosine annealing to $\eta_{\min}$ \parencite{loshchilov2017sgdr} \\
     Minimum learning rate $\eta_{\min}$ & \num{0} \\
     Epochs & \num{10} \\
     Window length $L$ & \num{2000} \\
@@ -73,8 +73,8 @@ The rotary scales are those of \cref{sec:method:attention} and are not repeated 
     Vanilla   & $0.6$ & $0.1$ \\
     RoPE-TOA  & $0.6$ & $0.1$ \\
     RoPE-az   & $0.6$ & $0.2$ \\
-    Bias      & $0.6$ & $0.1$ \\
-    RoPE-TOA+Bias & $0.3$ & $0.1$ \\
+    Bias      & $0.5$ & $0.1$ \\
+    RoPE-TOA+Bias & $0.3$ & $0.2$ \\
     \midrule
     Emitter-only & $0.6$ & $0.1$ \\
     Mode-only & $0.5$ & $0.1$ \\

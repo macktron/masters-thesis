@@ -22,12 +22,12 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 
 All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
 Every model is scored with window length $L = 2000$ and with no overlap between scored windows.
-The neural evaluation dumps used stride $200$; every tenth window is kept here, which restores stride $\delta = L$ and yields $960$ non-overlapping windows over the $244$ test scenarios.
+The neural test dumps are generated at stride $\delta = L$ and comprise $1168$ windows over the $244$ test scenarios.
 Feature \gls{dbscan} of \cref{sec:method:baselines} clusters the scaled \gls{pdw} vector of each pulse directly.
-It is not trained, and its test dump already uses overlap $0$ at the same $L$, so no subsample is applied.
+It is not trained, and its test dump already uses overlap $0$ at the same $L$, with $1412$ windows.
 For each window, \gls{dbscan} on each branch yields a predicted partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
 
-Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $960$ windows.
+Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $1168$ windows.
 The \gls{dbscan} radius $\varepsilon$ is selected independently for each model and each branch on the validation grid of \cref{sec:method:arch}, with $\mathrm{minPts} = 5$ throughout; selected radii are listed in \cref{tab:exp:hparams_attn}.
 
 Homogeneity and completeness are reported separately rather than only through their harmonic mean, the \gls{vmeasure}, so that oversplitting can be distinguished from undermerging.
@@ -43,7 +43,7 @@ Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Feature \gls{dbscan} versus jointly trained Vanilla on the test split. Entries are mean $\pm$ std over $960$ non-overlapping windows of length $L=2000$. Feature \gls{dbscan} is not trained. Hom.\ and Comp.\ are homogeneity and completeness. Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.}
+  \caption{Feature \gls{dbscan} versus jointly trained Vanilla on the test split. Vanilla entries are mean $\pm$ std over $1168$ non-overlapping windows of length $L=2000$; Feature \gls{dbscan} is not trained and is scored on $1412$ windows of the same length. Hom.\ and Comp.\ are homogeneity and completeness. Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.}
   \label{tab:exp:vanilla}
   \begin{tabular}{@{}llccccc@{}}
     \toprule
@@ -52,8 +52,8 @@ Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
     Feature DBSCAN & Emitter & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
     Feature DBSCAN & Mode    & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
     \midrule
-    Vanilla        & Emitter & $0.944\pm0.182$ & $0.955\pm0.142$ & $0.989\pm0.054$ & $0.948\pm0.172$ & $0.25\pm0.48$ \\
-    Vanilla        & Mode    & $0.986\pm0.100$ & $0.987\pm0.094$ & $0.993\pm0.037$ & $0.990\pm0.092$ & $0.23\pm0.50$ \\
+    Vanilla        & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
+    Vanilla        & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -65,9 +65,9 @@ Homogeneity remains $0.976$: the extra clusters are internally pure.
 Mode $\ARI$ is $0.811$, still below Vanilla, with a mean count error of five modes.
 
 Vanilla already recovers both partitions on this corpus, which is the existence test of RQ1.
-Emitter $\ARI$ is $0.944$, and $87\%$ of windows score at or above $0.99$, but about one window in ten falls below $0.90$.
+Emitter $\ARI$ is $0.948$, and $88\%$ of windows score at or above $0.99$, but about one window in ten falls below $0.90$.
 That tail is what widens the standard deviation.
-Mode recovery is stronger: mean $\ARI$ $0.986$, with only $2.3\%$ of windows below $0.90$.
+Mode recovery is stronger: mean $\ARI$ $0.985$, with only $2.5\%$ of windows below $0.90$.
 The two tasks are therefore not equally hard for this encoder.
 Deinterleaving is the branch that still fails on a minority of windows; mode clustering is already tight on almost every window.
 The per-window emitter tail is the Vanilla curve of \cref{fig:exp:hist_em}; the corresponding count errors are the Vanilla panel of \cref{fig:exp:kcorr_em}.

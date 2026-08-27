@@ -10,18 +10,18 @@ Båda grupperingarna behövs ur samma ström.
 Klassiska kedjor avinterfolierar först och klassificerar sedan moder. Den uppdelningen ger inte en gemensam representation.
 
 Detta arbete tränar en transformerkodare med en gemensam stam och två grenar på syntetiska, fullt märkta fönster av längd $2000$.
-Varje puls har en sändaridentitet som bara gäller inom inspelningen och en mod ur en katalog med $16$ typer som delas mellan inspelningar.
+Varje puls har en sändaridentitet som bara gäller inom inspelningen och en mod ur en katalog med $17$ typer som delas mellan inspelningar.
 Två övervakade kontrastiva förluster, identiska till formen, skiljer sig bara i den positiva mängden: sändare inom en inspelning, moder över minibatchen.
 Vid inferens klustrar DBSCAN varje gren för sig. Ingen softmax över katalogen används.
 
-På $960$ överlappningsfria testfönster återfinner vanlig självuppmärksamhet redan båda partitionerna på de flesta fönster (medelvärde ARI $0{,}944$ för sändare, $0{,}986$ för moder).
+På $1168$ överlappningsfria testfönster återfinner vanlig självuppmärksamhet redan båda partitionerna på de flesta fönster (medelvärde ARI $0{,}948$ för sändare, $0{,}985$ för moder).
 Roterande kodning av ankomsttid, och en parvis fysisk uppmärksamhetsbias, höjer sändar-ARI till $1{,}000$ och tar bort den kvarvarande felsvansen.
 Roterande kodning av plan infallriktning på avinterfolieringsgrenen hjälper mindre.
 Biasen når samma sändarsiffror som tidskodningen och kostar extra minne och kodartid på parvisa kartor av storlek $L \times L$.
-Att använda båda mekanismerna tillsammans sänker sändar-ARI till $0{,}853$.
+Att använda båda mekanismerna tillsammans sänker sändar-ARI till $0{,}851$.
 
-En Vanilla-kodare tränad bara för avinterfoliering slår den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}944$), medan dess otränade modgren slår ihop kluster.
-En Vanilla-kodare tränad bara för moder når samma modnivå som den gemensamma modellen (ARI $0{,}984$), medan dess otränade sändargren delar upp sändare i för många kluster.
+En Vanilla-kodare tränad bara för avinterfoliering slår den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}948$), medan dess otränade modgren slår ihop kluster.
+En Vanilla-kodare tränad bara för moder når samma modnivå som den gemensamma modellen (ARI $0{,}983$), medan dess otränade sändargren delar upp sändare i för många kluster.
 Det gemensamma målet är alltså en avvägning, inte ett gratis extra huvud.
 Modulationstyper utanför träningskatalogen och operativa inspelningar utvärderas inte.
 

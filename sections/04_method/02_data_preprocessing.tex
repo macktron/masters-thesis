@@ -73,8 +73,7 @@ During training, choosing $\delta<L$ produces overlapping windows and therefore 
 A smaller stride improves coverage of sparse emitters and modes and reduces sensitivity to window boundaries, but it also repeats more of the same \glspl{pdw}, increasing computation and correlation between samples.
 Advancing the window by a small stride resembles streaming inference because outputs can be refreshed as new pulses arrive, although it is not online learning because the model parameters remain fixed.
 
-Reported validation and test scores use $\delta=L$, yielding non-overlapping windows that are processed entirely offline.
-The evaluation dump itself may be generated with the training stride and then subsampled; that protocol is stated in \cref{sec:exp:results:protocol}.
+Reported test scores use $\delta=L$, yielding non-overlapping windows that are processed entirely offline (\cref{sec:exp:results:protocol}).
 Streaming inference and online model adaptation are left to future work (\cref{sec:concl:future}).
 
 \begin{figure}[tbp]

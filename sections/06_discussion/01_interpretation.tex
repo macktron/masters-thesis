@@ -1,11 +1,33 @@
 \section{Interpretation of Results}\label{sec:disc:interp}
 
+The experiments separate two axes.
+The first is which contrastive term is active, on a matched Vanilla encoder (\cref{sec:exp:ablation}).
+The second is how time and incidence enter the attention product, under the joint objective (\cref{sec:exp:attention}).
+This section follows that order.
+
+\subsection{Joint versus single-task training}\label{sec:disc:joint}
+
+The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
+Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla, while its untrained mode branch collapses by merging (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md,fig:exp:emb_ablation}).
+Mode-only is the mirror image: the mode scores match Joint, and the untrained emitter branch splits (\cref{fig:exp:kcorr_ablation_em}).
+A trunk trained only for modes has a reason to separate pulses that share an emitter but not a mode.
+The emitter head, with no loss of its own, inherits that split.
+
+At $\lambda_{\mathrm{md}}=1$ the trunk yields to that conflict on the emitter side and keeps the mode side intact.
+Joint training is still the only objective in the table that leaves both partitions usable.
+The leftover joint emitter errors sit in a minority of windows rather than on every window.
+Those windows are mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxmode}.
+Window $100$ of the original overlapping dump (test scenario $1752$) is the opposite case. The two emitters are already separated in incidence and in the scanning amplitude.
+
+The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
+On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
+
+\subsection{Physical structure in attention}\label{sec:disc:attention}
+
 Mode clustering is already strong with standard self-attention.
 The attention variants mainly move the emitter scores, and they do not all move them the same way.
-
-Vanilla's leftover emitter errors sit in a minority of windows rather than on every window.
-The tail in \cref{fig:exp:hist_em} and the off-diagonal mass in \cref{fig:exp:kcorr_em} are those windows: mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxmode}.
-Window $100$ is the opposite case. The two emitters are already separated in incidence and in the scanning amplitude, and every jointly trained model in \cref{fig:exp:emb_w100_em} recovers both partitions.
+The tail in \cref{fig:exp:hist_em} and the off-diagonal mass in \cref{fig:exp:kcorr_em} are the leftover joint emitter errors of \cref{sec:disc:joint}.
+Every jointly trained model in \cref{fig:exp:emb_w100_em} recovers both partitions on that scenario-$1752$ window.
 
 RoPE-TOA puts time into every attention product.
 On this corpus that is enough to close the emitter tail, with no extra weights.
@@ -22,20 +44,26 @@ What it adds at run time is a pairwise map of shape $h \times L \times L$ per la
 With $h=8$ and $L=2000$, one such map is $128$~MB in fp32.
 Twelve attention sublayers make about $1.5$~GB if the maps are all resident, and a training dump at batch size $4$ reports $30$~GB of forward and backward storage for Bias against $19$~GB for Vanilla.
 That gap is the pairwise tensors, counted twice when gradients are kept.
-At the evaluation batch size of one window the extra is a few gigabytes rather than tens, which matches the encoder time in \cref{tab:exp:efficiency}: $30$~ms instead of $1.5$~ms, while \gls{dbscan} stays near $60$~ms for every model.
-The $30$~ms includes the uncached rebuild of the same $\lvert p_i-p_j\rvert$ matrices in every head of every sub-layer (\cref{sec:exp:results:efficiency}).
+At the evaluation batch size of one window the extra is a few gigabytes rather than tens, which matches the encoder time in \cref{tab:exp:efficiency}: $32$~ms instead of $1.6$~ms, while \gls{dbscan} stays near $55$~ms for every model.
+The $32$~ms includes the uncached rebuild of the same $\lvert p_i-p_j\rvert$ matrices in every head of every sub-layer (\cref{sec:exp:results:efficiency}).
 A cache would remove the rebuild.
-It would not remove the add into each head's logits, which is still quadratic in $L$.
+It would not remove the subtraction from each head's logits, which is still quadratic in $L$.
 
 The intended split of \cref{sec:method:attention:bias} was that deinterleaving would use incidence and that the mode branch would ignore it.
 \Cref{tab:exp:bias_coef} does not show that split.
-The largest coefficients sit on the mode branch, and they are incidence, not time.
-A negative $\lambda_{\mathrm{inc}}$ is a same-direction gate: pulses that differ in arrival direction attend less.
-That is a platform cue.
-It can still help a mode that occupies one emitter inside a window, and it can hurt a mode that is seen from two directions.
-The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so the gate does not break mode clustering on this corpus.
-Deinterleaving uses time and incidence at about the same scale, which is both cues rather than an incidence-only head.
-Trunk coefficients stay small, so most of the pairwise work is in the branches.
+The largest-magnitude means sit on the mode branch, and they are incidence, not time.
+Those table entries are averages over the eight heads and four layers of each stack, not a single shared coefficient.
+
+Because the term is subtracted from the logits, a negative $\bar\lambda_{\mathrm{inc}}$ raises attention as the incidence difference grows: pulses from different directions attend more.
+That mixes across viewing geometry rather than gating on a shared platform.
+It can help a mode that is seen from more than one direction inside a window.
+The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so that mixing does not break mode clustering on this corpus.
+
+The deinterleaving means are also negative, and of similar size on time and on incidence.
+A negative $\bar\lambda_t$ there raises attention as the \gls{toa} gap grows, so a pulse attends more strongly to pulses farther away in time than to its immediate neighbours in the interleaved stream.
+That is the cue that matches a pulse train whose next pulse is not the next token.
+Individual heads can differ in sign, as the $+0.832$ incidence head on the Bias emitter branch shows.
+Trunk means stay near zero, so most of the pairwise work is in the branches.
 
 RoPE never builds those maps.
 Its dumped parameter count matches Vanilla, and its encoder time stays within a couple of milliseconds of Vanilla.
@@ -45,27 +73,17 @@ Stacking the two time mechanisms does not add their gains.
 RoPE-TOA+Bias pays the Bias encoder time and scores below Vanilla on emitters (\cref{tab:exp:attn_em,fig:exp:hist_em}).
 The extra errors are splits (\cref{fig:exp:kcorr_em}).
 Both devices already put a function of $\Delta t$ into the attention product, so the stacked logits can double-count time.
-The stacked checkpoint still has a large negative mode incidence coefficient (\cref{tab:exp:bias_coef}), while its mode time coefficients change sign relative to Bias.
-That is consistent with rotary encoding already carrying time and with the bias remaining an incidence gate.
+The stacked checkpoint still has a large negative mode incidence mean (\cref{tab:exp:bias_coef}), while its mode time mean changes sign relative to Bias.
+Under subtraction, that sign change turns a temporal proximity term into a temporal distance term.
+That is consistent with rotary encoding already carrying time and with the bias remaining an incidence mixing term.
 The tables give no reason to pay for both.
 
 The accuracy of the bias is a statement about pairwise geometry.
 A few scalars on $\lvert p_i-p_j\rvert$ recover the same emitter partition as rotating every query and key by time.
 Vanilla has to learn that structure from a single \gls{toa} channel.
 The differences themselves already carry it.
-That points to a network whose layers read those delta matrices, rather than adding them onto a learned query--key product.
+That points to a network whose layers read those delta matrices, rather than combining them with a learned query--key product.
 Self-attention on a window is already mixing on a complete graph (\cref{sec:bg:transformer}).
 The bias is already the Graphormer-style edge term of \cref{sec:method:attention:bias,sec:related:transformers_seq}.
 A graph network whose edges carry $(\lvert\Delta t\rvert,\lvert\Delta\tilde{u}^{x}\rvert,\lvert\Delta\tilde{u}^{y}\rvert)$ would use that pairwise physics directly.
 Whether it matches the scores, and whether it is cheaper once the differences are computed once, is not measured here.
-
-Joint training is a separate axis.
-Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla, while its untrained mode branch collapses by merging (\cref{tab:exp:ablation_loss}).
-Mode-only is the mirror image: the mode scores match Joint, and the untrained emitter branch splits.
-A trunk trained only for modes has a reason to separate pulses that share an emitter but not a mode.
-The emitter head, with no loss of its own, inherits that split.
-The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
-At $\lambda_{\mathrm{md}}=1$ the trunk yields to that conflict on the emitter side and keeps the mode side intact.
-Joint training is still the only objective in the table that leaves both partitions usable.
-The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias are gains under that more demanding objective, not under a deinterleaving-only loss.
-Whether those variants would still separate from Vanilla if trained emitter-only is not measured here.

@@ -10,7 +10,7 @@ Emitter identifiers are recording-local by construction, which is the right oper
 
 Every score is a window score.
 The encoder never sees a full recording in one forward pass, trailing segments shorter than $L$ are dropped, and nothing is tracked across window boundaries.
-Self-attention and the physical bias both scale as $L^{2}$. Extending the window would raise the memory gap in \cref{sec:disc:interp} and would still not be streaming inference.
+Self-attention and the physical bias both scale as $L^{2}$. Extending the window would raise the memory gap in \cref{sec:disc:attention} and would still not be streaming inference.
 
 Pulse counts per label are unbalanced inside windows, as \cref{sec:exp:datasets} notes.
 Rare modes and sparse emitters contribute little to a window-mean $\ARI$.
@@ -19,7 +19,7 @@ The crowded window in \cref{fig:exp:feat_maxmode} is a reminder of that regime, 
 
 $\lambda_{\mathrm{md}}$ was not swept.
 The finding that joint training costs emitter $\ARI$ on Vanilla is therefore tied to equal loss weights and to that backbone.
-Whether RoPE-TOA or Bias would show the same cost under an emitter-only objective is unknown.
+RoPE-TOA does not show the same cost: its joint emitter $\ARI$ already matches an emitter-only copy of that encoder (\cref{sec:exp:attention}).
 
 \Gls{dbscan} is part of the reported system.
 The radius is chosen on the validation grid, $\mathrm{minPts}$ is fixed, and the noise category was ignored because it stayed small on this corpus.
