@@ -14,15 +14,15 @@ Throughout, we write the attention logits of a single head over a window of $L$ 
   \qquad
   A_{ij} = \frac{\vect{q}_i^{\top}\vect{k}_j}{\sqrt{d_k}},
 \end{equation}
-where $\vect{q}_i$ and $\vect{k}_j$ are the query and key of pulses $i$ and $j$ and $d_k$ is the per-head dimension.
+where $\mat{A}\in\R^{L\times L}$ is that logit matrix, $A_{ij}$ is the entry in row $i$ and column $j$, $\vect{q}_i$ and $\vect{k}_j$ are the query and key of pulses $i$ and $j$, and $d_k$ is the per-head dimension.
 The attention weights are the row-wise softmax of $\mat{A}$, which then mixes the value vectors.
 
-\subsection{Physical attention bias}\label{sec:method:attention:bias}
+\subsection{Physical Attention Bias}\label{sec:method:attention:bias}
 
 The first variant subtracts a pairwise bias from the attention logits, computed from the physical parameters of each pulse pair.
-The implemented coordinates are the window-local \gls{toa} $t_n$ and the two planar Euclidean incidence components $(\tilde{u}^{x}_n,\tilde{u}^{y}_n)$ of \cref{eq:method:aoa_scale}.
+The implemented coordinates are the window-local \gls{toa} $t_n$ of pulse $n$, after the min--max map of \cref{eq:method:minmax}, and the two planar Euclidean incidence components $(\tilde{u}^{x}_n,\tilde{u}^{y}_n)$ of \cref{eq:method:aoa_scale}.
 None of these coordinates is a raw angle.
-Each selected coordinate $p$ contributes an absolute pairwise difference $B^{(p)}_{ij} = |p_i - p_j|$, subtracted from the logits with its own learnable scalar coefficient.
+Each selected coordinate $p$ contributes an absolute pairwise difference $B^{(p)}_{ij} = |p_i - p_j|$, subtracted from the logits with its own learnable scalar coefficient $\lambda_p$.
 On the shared trunk only \gls{toa} is used,
 \begin{equation}\label{eq:method:attn_bias_trunk}
   A_{ij}
@@ -39,7 +39,7 @@ On the two task branches all three coordinates are present,
   - \lambda_{x}\, B^{(x)}_{ij}
   - \lambda_{y}\, B^{(y)}_{ij},
 \end{equation}
-where $B^{(x)}$ and $B^{(y)}$ are the absolute differences of $\tilde{u}^{x}$ and $\tilde{u}^{y}$.
+where $B^{(x)}$ and $B^{(y)}$ are the absolute differences of $\tilde{u}^{x}$ and $\tilde{u}^{y}$, and $\lambda_t$, $\lambda_x$, and $\lambda_y$ are the learned scalars for those three coordinates.
 Each coefficient is learned jointly with the rest of the network and belongs to a single head of a single attention sub-layer.
 This introduces one scalar per head, layer, and selected coordinate; the pairwise delta matrices themselves scale quadratically in the window length, as the attention mechanism already does.
 A positive coefficient decreases the attention logit as the pairwise absolute difference grows; a negative coefficient increases it.
@@ -50,7 +50,7 @@ The shared trunk and the mode branch should instead suppress that cue, because a
 Whether this allocation emerges is examined in \cref{sec:exp:results:bias_coef}.
 The bias follows the same idea as pairwise logit biases in relative-position and graph Transformers \parencite{shaw2018relative,ying2021graphormer}, but uses continuous pulse parameters instead of discrete token or path distances, and subtracts the learned term from the logits rather than adding it.
 
-\subsection{Rotary positional encoding}\label{sec:method:attention:rope}
+\subsection{Rotary Positional Encoding}\label{sec:method:attention:rope}
 
 The bias of \cref{eq:method:attn_bias} is subtracted from the logits after the query--key product. The second variant uses the rotary encoding of \cref{sec:bg:transformer}, so the inner product depends on a pulse coordinate only through pairwise differences (\cref{eq:bg:rope}).
 

@@ -1,6 +1,6 @@
 \section{Radar Systems and Passive Reception}\label{sec:bg:radar}
 
-\subsection*{Pulsed radar}
+\subsection*{Pulsed Radar}
 
 A radar transmits a short electromagnetic pulse, waits for the echo that scatters from objects in the environment, and infers range and motion from that return \parencite{skolnik2008radar}.
 
@@ -22,7 +22,7 @@ If an echo from an earlier pulse arrives after the next pulse has been sent, the
 \label{fig:bg:pulse_echo_timeline}
 \end{figure}
 
-\subsection*{Active radar versus passive reception}
+\subsection*{Active Radar Versus Passive Reception}
 
 An active radar times the echo against its own outgoing pulses and from that delay obtains range \parencite{skolnik2008radar}.
 The same pulses are visible to any receiver in range, so transmission also discloses presence, location, and activity \parencite{wiley2006elint}.
@@ -32,7 +32,7 @@ They listen to other radars to determine which emitters are present and how thos
 Without control of the waveform, the receiver is limited to the quantities it can measure after detection.
 Those measurements are stored as the \glspl{pdw} defined next.
 
-\subsection{Pulse descriptor words}\label{sec:bg:pdw}
+\subsection{Pulse Descriptor Words}\label{sec:bg:pdw}
 
 A receiver records a voltage time series at the antenna.
 Pulses appear as brief rises in energy above the noise floor.
@@ -52,11 +52,14 @@ Those estimates are stored as a \gls{pdw}:
   \bigr)^{\top}
   \in \R^{d},
 \end{equation}
-where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $t_n$ is time of arrival (often the leading edge), $A_n$ is amplitude, and $\theta_n$ is angle of arrival if available.
-Further entries, such as elevation, may be included, but once the template is chosen every pulse is stored in the same format.
+where $f_n$ is the measured carrier frequency, $\mathrm{PW}_n$ is pulse width, $t_n$ is time of arrival (often the leading edge), and $A_n$ is amplitude.
+The \gls{aoa} $\theta_n$ is the measured incidence direction of pulse $n$ at the receive aperture, typically an azimuth and, when available, an elevation relative to a boresight reference.
+It is present when the collector can resolve direction; otherwise that entry is omitted or marked missing.
+In this thesis the encoder does not consume a raw angle: \cref{sec:method:data} converts azimuth and latitude to three Euclidean unit-direction components.
+Further entries may be included, but once the template is chosen every pulse is stored in the same format.
 \cref{fig:bg:pdw} shows this five-parameter template.
 
-\begin{figure}[tbp]
+\begin{figure}[!ht]
   \centering
   \input{figures/background/pdw.tex}
   \caption{Parameters captured by a \gls{pdw} for a short pulse train. Each pulse contributes a \gls{toa} (the leading edge $t_n$ on the time axis), a pulse width (PW), a peak amplitude $A_n$, and a carrier \gls{rf} $f_n$, shown as the fast oscillation inside the middle pulse. Successive pulses also define a \gls{pri} (equivalently a \gls{prf} $=1/\mathrm{PRI}$). The inset shows the \gls{aoa} $\theta_n$ measured at the receive aperture relative to a boresight reference. A typical \gls{pdw} stacks these per-pulse measurements into a vector $\vect{x}_n = (f_n, \mathrm{PW}_n, t_n, A_n, \theta_n)$ \parencite{wiley2006elint}.}
@@ -78,10 +81,10 @@ Weak pulses may be missed, and noise events may be reported as pulses.
 After this step the sampled voltage is discarded.
 The input to later stages is a time-ordered sequence of \glspl{pdw} $(\vect{x}_1,\ldots,\vect{x}_T)$, called a \emph{recording} because it generally interleaves the pulse trains of several transmitters.
 
-\subsection{Emitters and operating modes}\label{sec:bg:emitters}
+\subsection{Emitters and Operating Modes}\label{sec:bg:emitters}
 
 In passive \gls{esm} and \gls{elint}, an \emph{emitter} is a physical transmitter: pulses that share timing, frequency, and direction closely enough to be treated as one source \parencite{wiley2006elint}.
-An \emph{operating mode} is the transmit schedule in force at a given time: carrier plan, pulse width, repetition pattern, and scan or switching rules, chosen for a task such as search, acquisition, track, or illumination \parencite{skolnik2008radar,wiley2006elint}.
+An \emph{operating mode} is the transmit schedule in force at a given time: carrier plan, pulse width, repetition pattern, and scan or switching rules, chosen for a task such as search (volume surveillance), acquisition (hand-over to a narrower beam), track (following a known target), or illumination (providing energy for a weapon seeker) \parencite{skolnik2008radar,wiley2006elint}.
 
 These are two different groupings of the same pulses.
 One emitter switches among modes as its task changes, so a single physical source produces several mode segments over a mission.

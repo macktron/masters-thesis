@@ -43,10 +43,12 @@
 \listoftables
 \cleardoublepage%
 \printglossary[type=\acronymtype,title={List of Acronyms},nonumberlist]
+\input{frontmatter/notation}
 
 % ------------------------- Main matter -------------------------------
 \cleardoublepage%
 \pagenumbering{arabic}
+\glsresetall
 
 \subfile{sections/01_introduction/introduction}
 \subfile{sections/02_background/background}

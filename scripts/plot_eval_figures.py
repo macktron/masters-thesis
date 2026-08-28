@@ -139,7 +139,7 @@ def count_matrix(rows: list[dict], kmax: int) -> np.ndarray:
 def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Path) -> None:
     mats = [count_matrix(load_branch(path, branch), kmax) for _, path in RUNS]
     vmax = max(int(m.max()) for m in mats)
-    fig, axes = plt.subplots(3, 2, figsize=(6.8, 9.2))
+    fig, axes = plt.subplots(2, 3, figsize=(6.8, 5.6))
     axes_flat = axes.ravel()
     im = None
     ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, kmax]
@@ -184,15 +184,15 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
         ax.spines["top"].set_visible(True)
         ax.spines["right"].set_visible(True)
     axes_flat[5].axis("off")
-    axes[2, 0].set_xlabel(xlabel)
-    axes[1, 1].set_xlabel(xlabel)
+    for ax in (axes[0, 0], axes[0, 1], axes[0, 2], axes[1, 0], axes[1, 1]):
+        ax.set_xlabel(xlabel)
     for ax in axes[:, 0]:
         ax.set_ylabel(ylabel)
-    fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0), w_pad=0.7, h_pad=0.8)
-    cax = fig.add_axes([0.25, 0.015, 0.5, 0.018])
+    fig.tight_layout(rect=(0.0, 0.08, 1.0, 1.0), w_pad=0.55, h_pad=0.7)
+    cax = fig.add_axes([0.25, 0.03, 0.5, 0.03])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
     cb.set_label("Number of windows")
-    fig.savefig(outfile)
+    fig.savefig(outfile, bbox_inches="tight", pad_inches=0.12)
     plt.close(fig)
 
 
@@ -245,11 +245,11 @@ def plot_ablation_heatmaps(
         ax.spines["top"].set_visible(True)
         ax.spines["right"].set_visible(True)
     axes[0, 0].set_ylabel(ylabel)
-    fig.tight_layout(rect=(0.0, 0.10, 1.0, 1.0), w_pad=0.55)
-    cax = fig.add_axes([0.25, 0.04, 0.5, 0.035])
+    fig.tight_layout(rect=(0.0, 0.12, 1.0, 1.0), w_pad=0.55)
+    cax = fig.add_axes([0.25, 0.05, 0.5, 0.04])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
     cb.set_label("Number of windows")
-    fig.savefig(outfile)
+    fig.savefig(outfile, bbox_inches="tight", pad_inches=0.12)
     plt.close(fig)
 
 
@@ -334,28 +334,28 @@ def main() -> None:
         "deint",
         7,
         r"True emitters $K$",
-        r"Predicted $\hat{K}$",
+        r"Estimated $\hat{K}$",
         OUT / "kcorr_em.pdf",
     )
     plot_heatmaps(
         "mode",
         17,
         r"True modes $M$",
-        r"Predicted $\hat{M}$",
+        r"Estimated $\hat{M}$",
         OUT / "kcorr_md.pdf",
     )
     plot_ablation_heatmaps(
         "deint",
         7,
         r"True emitters $K$",
-        r"Predicted $\hat{K}$",
+        r"Estimated $\hat{K}$",
         OUT / "kcorr_ablation_em.pdf",
     )
     plot_ablation_heatmaps(
         "mode",
         17,
         r"True modes $M$",
-        r"Predicted $\hat{M}$",
+        r"Estimated $\hat{M}$",
         OUT / "kcorr_ablation_md.pdf",
     )
     print("wrote", OUT / "hist_em.pdf")

@@ -29,7 +29,7 @@
   ]
 
   \node[io] (in)
-    {\glspl{pdw}: $\vect{x}_1,\ldots,\vect{x}_L \in \R^{d}$};
+    {\glspl{pdw}: $\vect{x}_1,\ldots,\vect{x}_L \in \R^{d}$\quad ($d{=}7$)};
 
   \node[affine, minimum width=62mm, above=of in] (embed)
     {Input embedding\\
@@ -51,11 +51,11 @@
   \node[branch, above=of proj_em] (br_em)
     {Emitter branch\\
      $N_{\mathrm{br}}{=}4$ encoder layers\\
-     $d{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
+     $d_{\mathrm{br}}{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
   \node[branch, above=of proj_md] (br_md)
     {Mode branch\\
      $N_{\mathrm{br}}{=}4$ encoder layers\\
-     $d{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
+     $d_{\mathrm{br}}{=}256$,\; $h{=}8$,\; $d_{\mathrm{ff}}{=}2048$};
 
   \node[affine, above=of br_em] (head_em)
     {Projection head\\

@@ -5,7 +5,7 @@ The first is which contrastive term is active, on a matched Vanilla encoder (\cr
 The second is how time and incidence enter the attention product, under the joint objective (\cref{sec:exp:attention}).
 This section follows that order.
 
-\subsection{Joint versus single-task training}\label{sec:disc:joint}
+\subsection{Joint Versus Single-Task Training}\label{sec:disc:joint}
 
 The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
 Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla, while its untrained mode branch collapses by merging (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md,fig:exp:emb_ablation}).
@@ -22,7 +22,7 @@ Window $100$ of the original overlapping dump (test scenario $1752$) is the oppo
 The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
 On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
 
-\subsection{Physical structure in attention}\label{sec:disc:attention}
+\subsection{Physical Structure in Attention}\label{sec:disc:attention}
 
 Mode clustering is already strong with standard self-attention.
 The attention variants mainly move the emitter scores, and they do not all move them the same way.

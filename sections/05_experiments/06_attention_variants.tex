@@ -70,7 +70,7 @@ Completeness is $0.846$, so the leftover errors are splits.
 Mode $\ARI$ stays in the same band as the other joint models.
 Stacking the two time mechanisms is not an improvement on this split.
 
-\subsection{Per-window ARI distributions}\label{sec:exp:results:hist}
+\subsection{Per-Window ARI Distributions}\label{sec:exp:results:hist}
 
 \Cref{fig:exp:hist_em,fig:exp:hist_md} show the empirical CDF of per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, Bias, and RoPE-TOA+Bias.
 $\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the curves correspond to the neural rows of \cref{tab:exp:attn_em,tab:exp:attn_md}.
@@ -98,9 +98,9 @@ On the mode branch the five curves rise later and closer together. Bias is the l
   \label{fig:exp:hist_md}
 \end{figure}
 
-\subsection{Cluster-count recovery}\label{sec:exp:results:kcorr}
+\subsection{Cluster-Count Recovery}\label{sec:exp:results:kcorr}
 
-\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} are heatmaps of predicted versus true cluster counts for the jointly trained attention variants, with the same reading as \cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md}.
+\Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} are heatmaps of estimated versus true cluster counts for the jointly trained attention variants, with the same reading as \cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md}.
 Each cell is the number of test windows with that pair.
 The diagonal is exact count recovery.
 Mass above the diagonal is extra clusters (splits).
@@ -121,18 +121,18 @@ RoPE-TOA+Bias is noisier there than Bias, with more off-diagonal counts at the h
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_em.pdf}
-  \caption{Predicted versus true number of emitters per test window. Cell values are window counts. The line is $\hat{K}=K$.}
+  \caption{Estimated versus true number of emitters per test window. Cell values are window counts. The line is $\hat{K}=K$.}
   \label{fig:exp:kcorr_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_md.pdf}
-  \caption{Predicted versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_em}.}
+  \caption{Estimated versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_em}.}
   \label{fig:exp:kcorr_md}
 \end{figure}
 
-\subsection{Model size and inference cost}\label{sec:exp:results:efficiency}
+\subsection{Model Size and Inference Cost}\label{sec:exp:results:efficiency}
 
 \Cref{tab:exp:efficiency} reports trainable parameters and wall-clock time per test window on the A100 of \cref{sec:exp:setup}.
 One window is forwarded at a time.
@@ -172,7 +172,7 @@ Memory for the pairwise maps is taken up in \cref{sec:disc:attention}.
   \end{tabular}
 \end{table}
 
-\subsection{Learned bias coefficients}\label{sec:exp:results:bias_coef}
+\subsection{Learned Bias Coefficients}\label{sec:exp:results:bias_coef}
 
 Bias and RoPE-TOA+Bias store one scalar per head, layer, and selected coordinate of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
 The trunk has only time.

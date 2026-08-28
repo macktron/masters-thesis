@@ -1,0 +1,33 @@
+\cleardoublepage%
+\phantomsection%
+\addcontentsline{toc}{chapter}{List of Notation}
+\chapter*{List of Notation}
+\markboth{List of Notation}{List of Notation}
+
+Bold italic letters denote vectors and matrices, for example $\vect{x}$ and $\mat{A}$.
+The entry of $\mat{A}$ in row $i$ and column $j$ is written $A_{ij}$.
+A superscript $\top$ denotes transpose.
+A hat marks an estimated quantity, for example $\hat{e}_n$ and $\hat{K}$.
+
+\begin{center}
+\begin{tabular}{@{}lp{0.68\textwidth}@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$\R$, $\N$ & Real numbers; natural numbers. \\
+$s$, $w$, $n$ & Recording index; window index; pulse index. \\
+$L$, $\delta$ & Window length (pulses); windowing stride. \\
+$d$ & Per-pulse feature dimension after preprocessing ($d=7$). \\
+$\vect{x}_n$ & Pulse descriptor vector of pulse $n$. \\
+$e_n$, $m_n$ & Ground-truth emitter and mode labels of pulse $n$. \\
+$K$, $M$ & Number of distinct emitters (recording-local) and modes. \\
+$t_n$ & Window-local time of arrival of pulse $n$. \\
+$\theta_n$ & Angle of arrival of pulse $n$ at the receive aperture. \\
+$\Enc$ & Encoder with trainable parameters $\bm{\theta}$. \\
+$\vect{z}^{\mathrm{em}}_n$, $\vect{z}^{\mathrm{md}}_n$ & Emitter- and mode-branch embeddings of pulse $n$. \\
+$\mat{A}$, $A_{ij}$ & Attention-logit matrix of one head; its $(i,j)$ entry. \\
+$\Loss$ & Training loss. \\
+$\ARI$, $\AMI$ & Adjusted Rand index; adjusted mutual information. \\
+\bottomrule
+\end{tabular}
+\end{center}

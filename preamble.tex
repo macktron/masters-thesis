@@ -66,6 +66,11 @@
 
 % ---- Glossaries / acronyms (loaded before hyperref per docs) -------
 \usepackage[acronym,toc,nopostdot,nonumberlist,nogroupskip]{glossaries-extra}
+\setabbreviationstyle[acronym]{long-short}
+
+% Floats may not appear before their source location (keeps pipeline
+% schematic with Section 2.2 rather than on the previous page).
+\usepackage{flafter}
 
 % ---- Hyperlinks and cross-references --------------------------------
 \usepackage[hidelinks,

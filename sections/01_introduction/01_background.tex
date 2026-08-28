@@ -1,11 +1,14 @@
 \section{Background and Motivation}\label{sec:intro:background}
 
-Passive \gls{esm} does not transmit.
-It records a time-ordered stream of \glspl{pdw} and supports \gls{elint}: which radars are present, which pulses belong to the same emitter, and which operating mode is in use \parencite{wiley2006elint,skolnik2008radar}.
+Passive electronic support measures (ESM) do not transmit.
+\glsunset{esm}%
+They record a time-ordered stream of pulse descriptor words (PDWs) and support electronic intelligence (ELINT): which radars are present, which pulses belong to the same emitter, and which operating mode is in use \parencite{wiley2006elint,skolnik2008radar}.
+\glsunset{pdw}\glsunset{elint}%
 A transmitter that illuminates a scene is also visible to anyone who can receive it.
 Several emitters occupy the same band, so the listener sees a mixed stream rather than a single echo.
 
-Modern radars vary carrier frequency, pulse width, amplitude, and \gls{pri} from burst to burst.
+Modern radars vary carrier frequency, pulse width, amplitude, and pulse repetition interval (PRI) from burst to burst.
+\glsunset{pri}%
 Fingerprints built on a stable pulse train then weaken, and parsers written for regular trains become less reliable.
 The same emitter also switches mode: a transmit schedule chosen for a task such as volume search or track.
 Knowing the mode constrains how the waveform may evolve, and it can separate emitters that look similar at the type level.

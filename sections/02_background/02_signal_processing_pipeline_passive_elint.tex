@@ -2,9 +2,16 @@
 
 A passive collector produces a time-ordered list of \glspl{pdw} and then has to answer two questions about that list: which physical emitter sent each pulse, and which operating mode was in use.
 Classical \gls{elint} and \gls{esm} architectures answer those questions in stages rather than jointly \parencite{wiley2006elint}.
-Implementations differ by band and platform, but the order of work is the same: detect and measure, deinterleave into pulse trains, then analyze mode on each train.
+Implementations differ by band and platform, but the order of work is the same: detect and measure, deinterleave into pulse trains, then analyze mode on each train (\cref{fig:bg:classical_pipeline}).
 
-\subsection*{Detection and pulse measurement}
+\begin{figure}[H]
+\centering
+\input{figures/background/classical_pipeline.tex}
+\caption{Classical \gls{elint} chain. Detection and measurement produce a mixed \gls{pdw} recording. Deinterleaving forms one hypothesized pulse train per emitter. Mode analysis then runs on each train rather than on the interleaved list.}
+\label{fig:bg:classical_pipeline}
+\end{figure}
+
+\subsection*{Detection and Pulse Measurement}
 
 Antennas and \gls{rf} conditioning capture a band of interest.
 A detector marks candidate pulses against noise and clutter.
@@ -13,24 +20,26 @@ Estimates are noisy, weak pulses may be missed, and false alarms may enter the l
 
 The list is still mixed. Pulses from several emitters, possibly in several modes, share one time-ordered recording.
 
-\subsection{Deinterleaving: grouping pulses by emitter}\label{sec:bg:deinterleaving_evolution}
+\subsection{Deinterleaving: Grouping Pulses by Emitter}\label{sec:bg:deinterleaving_evolution}
 
 Deinterleaving, also called sorting, assigns each pulse to a physical emitter.
 Its output is a set of pulse trains, one hypothesized sequence per emitter \parencite{wiley2006elint}.
 This recovers the emitter grouping of \cref{sec:bg:emitters}, not a name from a catalogue.
 
+Deployed systems still rely predominantly on non-learning methods.
 When trains are sparse and nearly periodic, the \gls{pri} inferred from \gls{toa} differences is a usable timing signature.
-Histogram methods such as CDIF and SDIF accumulate inter-pulse intervals and treat peaks as candidate \glspl{pri} \parencite{wiley2006elint,qu2026radardeinterleavingreview}.
+Histogram methods such as the \gls{cdif} and the \gls{sdif} accumulate inter-pulse intervals and treat peaks as candidate \glspl{pri} \parencite{wiley2006elint,qu2026radardeinterleavingreview}.
 They fail when timing is agile, and when missing pulses break sequential differencing.
 Overlapping trains are a further problem, because differences across emitters create false peaks.
 
-When timing is not enough, pulses are clustered in a joint space of \gls{rf}, pulse width, \gls{aoa}, and related measurements, using $k$-means or density-based methods \parencite{ester1996density,qu2026radardeinterleavingreview}.
+When timing is not enough, pulses may be clustered in a joint space of \gls{rf}, pulse width, \gls{aoa}, and related measurements, for example with $k$-means or density-based methods \parencite{ester1996density,qu2026radardeinterleavingreview}.
+Those assignments are one later option in that feature space, not the operational baseline.
 Deinterleaving is then a clustering problem in a chosen feature space.
 Cluster count, metric, and scaling have to be set by hand, which is awkward when the number of emitters is unknown.
 
 Classical architectures treat train formation as an early, discrete step. Later stages are expected to see one dominant hypothesis per emitter, or a short ranked list, rather than the interleaved mixture \parencite{wiley2006elint}.
 
-\subsection{Mode analysis: grouping pulses by operating mode}
+\subsection{Mode Analysis: Grouping Pulses by Operating Mode}
 
 Mode analysis asks a different question of the same pulses: which transmit schedule is active.
 In the classical chain this step runs after deinterleaving, on each recovered train rather than on the mixture \parencite{wiley2006elint}.
@@ -43,5 +52,6 @@ When the library is incomplete, analysts group trains, or segments of trains, by
 Equipment identification is a further lookup. Aggregated train statistics are compared with an emitter library to propose a radar type.
 That step names hardware against a catalogue. It is not required in order to form the emitter and mode partitions, and it is not the subject of this thesis.
 
-Errors in deinterleaving enter mode analysis as corrupted trains.
-Nothing in this chain produces both groupings from the mixed stream at once.
+Mode analysis is applied only to trains that deinterleaving has already formed.
+An error in sorting is therefore frozen before mode analysis begins.
+The classical chain never estimates the emitter partition and the mode partition from the interleaved \gls{pdw} list in a single step.

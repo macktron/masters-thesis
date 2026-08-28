@@ -66,7 +66,7 @@ Red frames mark the branch that received no gradient.
   \label{fig:exp:emb_ablation}
 \end{figure}
 
-\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show those count errors as heatmaps of predicted versus true cluster counts over the same $1168$ windows.
+\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show those count errors as heatmaps of estimated versus true cluster counts over the same $1168$ windows.
 Each cell is a window count.
 The diagonal is exact recovery.
 Mass above the diagonal is extra clusters (splits).
@@ -80,14 +80,14 @@ On the mode branch the pattern reverses: Mode-only stays with Joint, and Emitter
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_ablation_em.pdf}
-  \caption{Predicted versus true number of emitters per test window for the three Vanilla objectives. Cell values are window counts. The line is $\hat{K}=K$. The Joint panel is the Vanilla evaluation of \cref{tab:exp:vanilla}.}
+  \caption{Estimated versus true number of emitters per test window for the three Vanilla objectives. Cell values are window counts. The line is $\hat{K}=K$. The Joint panel is the Vanilla evaluation of \cref{tab:exp:vanilla}.}
   \label{fig:exp:kcorr_ablation_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_ablation_md.pdf}
-  \caption{Predicted versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_ablation_em}.}
+  \caption{Estimated versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_ablation_em}.}
   \label{fig:exp:kcorr_ablation_md}
 \end{figure}
 

@@ -6,11 +6,11 @@ The trunk produces a single contextualised representation of the input window, w
 \begin{figure}[tbp]
   \centering
   \input{figures/method/architecture.tex}
-  \caption{Architecture of the encoder $\Enc$. A sequence of \glspl{pdw} is first lifted to $d_{\mathrm{model}}=256$ by an affine input embedding, processed by a shared trunk of $4$ transformer-encoder layers, and then split into two parallel branches, each with its own affine $256\!\to\!256$ projection and $4$ encoder layers. Branch outputs are mapped by affine projection heads to the $64$-dimensional emitter and mode embedding spaces and $\ell_2$-normalized over the embedding dimension. The input embedding, branch projections, and projection heads are all affine maps of the same form.}
+  \caption{Architecture of the encoder $\Enc$. Each pulse is the $d=7$-dimensional scaled \gls{pdw} of \cref{sec:method:data}. A sequence of such vectors is first lifted to $d_{\mathrm{model}}=256$ by an affine input embedding, processed by a shared trunk of $4$ transformer-encoder layers, and then split into two parallel branches, each with its own affine $256\!\to\!256$ projection and $4$ encoder layers. Branch outputs are mapped by affine projection heads to the $64$-dimensional emitter and mode embedding spaces and $\ell_2$-normalized over the embedding dimension. The input embedding, branch projections, and projection heads are all affine maps of the same form.}
   \label{fig:method:arch}
 \end{figure}
 
-\subsection*{Input embedding}
+\subsection*{Input Embedding}
 
 Each pulse vector $\vect{x}_n \in \R^{d}$, built from the scaled \glspl{pdw} of \cref{sec:method:data}, is mapped to a token embedding through an affine projection
 \begin{equation}\label{eq:method:input_embed}
@@ -23,14 +23,14 @@ In the baseline configuration of the encoder, no positional encoding is added to
 The temporal ordering of pulses is already carried by the \gls{toa} entry of $\vect{x}_n$; moreover, the index-based absolute positional encodings of the original architecture \parencite{vaswani2017attention} are ill-suited to this input, since the \gls{toa} gap between consecutive pulses is not constant and an ordinal position therefore misrepresents the relative distances in time.
 Whether an explicit relative encoding of time and arrival direction nevertheless adds information beyond their presence as input features is revisited in \cref{sec:method:attention:bias,sec:method:attention:rope}, where a pairwise attention bias and a rotary positional encoding on physical coordinate differences are used as drop-in modifications of this architecture, including both mechanisms together.
 
-\subsection*{Shared trunk}
+\subsection*{Shared Trunk}
 
 The token sequence $(\vect{h}^{(0)}_1,\ldots,\vect{h}^{(0)}_L)$ is processed by a stack of $N_{\mathrm{sh}}$ standard transformer-encoder layers, each comprising a \gls{mha} sub-layer and a position-wise \gls{ffn} sub-layer with residual connections and layer normalisation around both.
 Self-attention is unmasked, so every pulse can attend to every other pulse in the window.
 The trunk operates with hidden dimension $d_{\mathrm{model}} = 256$, $h_{\mathrm{sh}} = 8$ attention heads (so that each head has dimension $32$), and an inner \gls{ffn} dimension of $d_{\mathrm{ff,sh}} = 2048$; $N_{\mathrm{sh}} = 4$ layers are used.
 Its output is a contextualised token sequence $\mat{H}^{\mathrm{sh}} = (\vect{h}^{\mathrm{sh}}_1,\ldots,\vect{h}^{\mathrm{sh}}_L)$ with $\vect{h}^{\mathrm{sh}}_n \in \R^{256}$, in which information has been mixed across the full window.
 
-\subsection*{Task-specific branches}
+\subsection*{Task-Specific Branches}
 
 The trunk output feeds two parallel branches that do not share parameters.
 Each branch begins with an affine projection of the same form as \cref{eq:method:input_embed}, after which $N_{\mathrm{br}} = 4$ transformer-encoder layers of the same form as the trunk are applied.
@@ -39,7 +39,7 @@ Within a branch, \gls{mha} uses $h_{\mathrm{br}} = 8$ heads (per-head dimension 
 The incidence rotary variant of \cref{sec:method:attention:rope} is the one exception: it uses $4$ heads on the deinterleaving branch so that the two incidence axes can split a $64$-dimensional head evenly.
 Write the resulting token sequences as $\mat{H}^{\mathrm{em}} = (\vect{h}^{\mathrm{em}}_1,\ldots,\vect{h}^{\mathrm{em}}_L)$ and $\mat{H}^{\mathrm{md}} = (\vect{h}^{\mathrm{md}}_1,\ldots,\vect{h}^{\mathrm{md}}_L)$ with $\vect{h}^{\mathrm{em}}_n, \vect{h}^{\mathrm{md}}_n \in \R^{256}$.
 
-\subsection*{Projection heads}
+\subsection*{Projection Heads}
 
 Each branch terminates in an affine projection head---of the same form as the input embedding \cref{eq:method:input_embed}---that maps every token to its respective embedding space, followed by $\ell_2$ normalization over the embedding dimension,
 \begin{equation}\label{eq:method:proj_heads}
@@ -60,7 +60,7 @@ Collecting the per-pulse outputs gives the two embedding sequences
 \end{equation}
 The normalization constrains both embedding sequences to the unit sphere in $\R^{64}$, so cluster structure is expressed through angular separation rather than vector magnitude; this is the geometry assumed by the cosine-similarity contrastive objective of \cref{sec:method:loss}.
 
-\subsection*{From continuous embeddings to discrete partitions}
+\subsection*{From Continuous Embeddings to Discrete Partitions}
 
 The projection heads in \cref{eq:method:proj_heads} produce continuous vectors, whereas the per-pulse outputs in \cref{eq:method:estimated_label_pair} are discrete.
 At inference time, each branch's $L$-token embedding sequence is therefore decoded independently and per window by a fixed clustering operator,

@@ -15,7 +15,7 @@ Preliminary experiments augmented each pulse with lagged timing features, namely
 A plausible explanation is that such look-back statistics summarize only the pulses preceding each position and mix contributions from all interleaved emitters, so under the pulse-count imbalance of the corpus (\cref{sec:exp:datasets}) they are dominated by the densest emitters and carry little signal for rare ones, whereas unmasked self-attention (\cref{sec:method:arch}) can relate each pulse to every other pulse in the window and recover inter-arrival structure per emitter.
 Letting the encoder learn timing structure implicitly also avoids committing to a fixed set of summary statistics, which keeps the representation free to adapt to interleaving patterns and \gls{pri} schedules that differ from those seen during training.
 
-\subsection{Per-feature scaling}\label{sec:method:data:norm}
+\subsection{Per-Feature Scaling}\label{sec:method:data:norm}
 
 Standardization statistics are estimated across all recordings in the training split and applied unchanged to validation and test data.
 Carrier frequency, pulse width, and log-amplitude are standardized per feature as
@@ -86,7 +86,7 @@ Streaming inference and online model adaptation are left to future work (\cref{s
 Each window retains the emitter label, mode label, and recording identifier associated with every pulse.
 The emitter and mode labels supervise their respective branches and provide evaluation targets. This makes the model and also evaluation dependent on the selected window length L, why a fixed L is used in this thesis.
 
-The recording identifier is not an encoder input or prediction target; it is used to keep recording-local emitter identifiers distinct and to form scenario-aware mini-batches.
+The recording identifier is not an encoder input or estimation target; it is used to keep recording-local emitter identifiers distinct and to form scenario-aware mini-batches.
 
 After windowing, absolute \gls{toa} is min--max mapped to $[0,1]$ using only the $L$ pulses inside the current window:
 \begin{equation}\label{eq:method:minmax}

@@ -1,7 +1,11 @@
 \section{Summary}\label{sec:concl:summary}
 
-This thesis asked whether a transformer encoder can recover two partitions from one interleaved \gls{pdw} window: emitters that are comparable only inside a recording, and operating modes that are comparable across recordings.
-The encoder shares a trunk, splits into two branches, and is trained with two supervised contrastive losses that differ only in the scope of their positive sets.
+The thesis addresses three questions.
+RQ1 asks whether, given a bounded window of \glspl{pdw}, a transformer encoder can deinterleave pulses and recover operating modes by clustering.
+RQ2 asks whether a joint objective that couples deinterleaving with mode clustering outperforms a comparable transformer trained for deinterleaving alone.
+RQ3 asks whether a pairwise physical attention bias and rotary positional encoding on pulse coordinates improve clustering relative to standard multi-head attention.
+
+The encoder shares a trunk, splits into two branches, and is trained with two supervised contrastive losses that differ only in the scope of their positive sets: recording-local emitter identifiers and global mode labels.
 Inference clusters each branch with \gls{dbscan}. No catalogue softmax is used.
 
 On the synthetic test split, standard self-attention already recovers both partitions on most windows.

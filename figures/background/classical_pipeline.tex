@@ -1,0 +1,38 @@
+% =====================================================================
+% Classical ELINT chain: detect/measure, mixed PDW list, deinterleave
+% into pulse trains, then mode analysis on each train.
+% Loaded from sections/02_background/02_signal_processing_pipeline_passive_elint.tex.
+% =====================================================================
+\begin{tikzpicture}[
+    font=\small,
+    >=Latex,
+    node distance=6.5mm and 5mm,
+    box/.style={
+      draw, thick, rounded corners=2pt,
+      align=center,
+      inner sep=4pt, inner ysep=5pt,
+      minimum height=11mm,
+      minimum width=28mm,
+      fill=gray!12,
+    },
+    mix/.style={
+      draw, thick, rounded corners=2pt,
+      align=center,
+      inner sep=4pt, inner ysep=5pt,
+      minimum height=11mm,
+      minimum width=32mm,
+      fill=orange!12,
+    },
+    arrow/.style={->, thick, shorten <=1pt, shorten >=1pt},
+  ]
+
+  \node[box] (det) {Detect and\\measure};
+  \node[mix, right=of det] (pdw) {Mixed \gls{pdw}\\recording};
+  \node[box, right=of pdw] (deint) {Deinterleave\\(pulse trains)};
+  \node[box, right=of deint] (mode) {Mode analysis\\per train};
+
+  \draw[arrow] (det) -- (pdw);
+  \draw[arrow] (pdw) -- (deint);
+  \draw[arrow] (deint) -- (mode);
+
+\end{tikzpicture}
