@@ -6,11 +6,11 @@
 
 Passive electronic support measures record a time-ordered stream of pulse descriptor words in which several radars are interleaved and each radar may change operating mode.
 Operators need both groupings from the same stream.
-Classical pipelines deinterleave first and then classify modes, however doing this in parelell rather then sequentially could provide more information to the mode classification pipelines, and in machinle learning models, perhaps improve representation learning.
+Classical pipelines deinterleave first and then classify modes. However doing this in parelell rather then sequentially could provide more information to the mode classification pipelines, and in machinle learning models, perhaps improve representation learning.
 
 The experiments use a synthetic, fully labelled scenario corpus.
 Each pulse carries a recording-local emitter identity and a mode from a catalogue of $17$ types shared across recordings.
-Training and test windows contain $2000$ pulses; scores are reported on $1168$ non-overlapping test windows.
+Training, validation and test windows contain $2000$ pulses, created by breaking up recording of different scenarios into fixed windows. Scores are reported on $1168$ non-overlapping test windows.
 Operational recordings are not used.
 
 A transformer encoder with a shared trunk and two branches is trained with two supervised contrastive losses that differ only in the positive set: emitters within a recording, modes across the batch.
