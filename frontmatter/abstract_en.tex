@@ -12,7 +12,8 @@ The experiments use a synthetic, fully labelled scenario corpus.
 Each pulse carries a recording-local emitter identity and a mode from a catalogue of $17$ types shared across recordings.
 Training, validation and test windows contain $2000$ pulses, created by breaking up recording of different simulated scenarios into fixed windows. Scores are reported on $1168$ non-overlapping test windows.
 
-A transformer encoder with a shared trunk and two branches is trained with two supervised contrastive losses that differ only in the positive set: emitters within a recording, modes across the batch.
+A transformer encoder with a shared trunk and two separate branches, one for deinterleaving, and one for mode clustering, is trained with two supervised contrastive losses from each branch.
+
 At inference, density-based clustering (DBSCAN) is applied independently on each branch.
 
 Standard self-attention already recovers both partitions on most windows (mean emitter adjusted Rand index, ARI, $0.948$; mode ARI $0.985$).
