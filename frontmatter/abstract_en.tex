@@ -3,14 +3,6 @@
 \addcontentsline{toc}{chapter}{Abstract}
 \chapter*{Abstract}
 \markboth{Abstract}{Abstract}
-Passive electronic support measures record a time-ordered stream of
-pulse descriptor words in which several radars are interleaved and
-each radar may change its operating mode. Operators need both
-groupings from the same stream. Classical pipelines deinterleave
-first and then classify modes. Performing the two tasks in parallel
-rather than sequentially could supply more information to mode
-classification and, in a machine learning model, improve
-representation learning.
 
 The experiments use a synthetic, fully labeled scenario corpus. Each
 pulse carries a recording-local emitter identity and a mode from a
@@ -19,22 +11,13 @@ and test windows contain 2000 pulses, obtained by splitting
 recordings from different simulated scenarios into fixed windows.
 Scores are reported on 1168 non-overlapping test windows.
 
-A transformer encoder with a shared trunk and two separate branches,
-one for deinterleaving and one for mode clustering, is trained with
-supervised contrastive losses aggregated from both branches. At
-inference time, density-based clustering (DBSCAN) is applied
-independently to the embeddings of each branch.
+At inference time, density-based clustering (DBSCAN) is applied independently to the embeddings of each branch.
 
-Standard self-attention already recovers both partitions on most
-windows (mean emitter adjusted Rand index, ARI, 0.948; mode ARI
-0.985). Rotary encoding of time of arrival and a pairwise physical
-attention bias raise emitter ARI to 1.000 and remove the remaining
-failure tail. A vanilla encoder trained only for deinterleaving
-outperforms the joint model on emitters (ARI 0.999 versus 0.948),
-while a mode-only encoder matches the joint mode scores (ARI 0.983).
-The joint objective is therefore a trade-off, not a cost-free extra
-head. Held-out modulations and operational recordings are left to
-future work.
+Standard self-attention already recovers both partitions on most windows (mean emitter adjusted Rand index, ARI, $0.948$; mode ARI $0.985$).
+Rotary encoding of time of arrival and a pairwise physical attention bias raise emitter ARI to $1.000$ and remove the remaining failure tail.
+A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ versus $0.948$), while a mode-only encoder reaches a similar level on modes (ARI $0.983$).
+The joint objective is therefore a trade-off, not a cost-free extra head.
+Held-out modulations and operational recordings are left to future work.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} transformer, deep clustering, electronic intelligence, radar emitter identification, mode recognition, supervised contrastive learning.
