@@ -10,7 +10,6 @@ Carrier frequency, pulse width, and log-amplitude are standardized with training
 Windows contain $L = 2000$ pulses.
 Training uses stride $\delta = 200$, so consecutive training windows overlap by $L - \delta = 1800$ pulses.
 Reported test scores use $\delta = L$ (overlap $0$), which yields $1168$ windows over the $244$ test scenarios (\cref{sec:exp:results:protocol}).
-Feature \gls{dbscan} of \cref{sec:method:baselines} is not trained; its test dump uses the same $L$ with overlap already $0$ and comprises $1412$ windows.
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
 The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
