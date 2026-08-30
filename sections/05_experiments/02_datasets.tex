@@ -13,7 +13,7 @@ Reported test scores use $\delta = L$ (overlap $0$), which yields $1168$ windows
 
 \cref{tab:exp:datasets} summarises corpus-level figures.
 The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
-The emitter column counts the distinct emitters active in each scenario.
+The emitter column counts the number of average distinct emitters active in each scenario.
 Emitter identifiers are meaningful only within their own scenario (\cref{sec:method:formulation}), so these figures describe how many emitters each scenario contains rather than membership in some global emitter set; at inference, the within-window clustering accordingly never has to separate more emitters than the enclosing scenario contains.
 The number of unique emitters per scenario ranges from 1 to 23 in every split, so the three partitions are statistically homogeneous in this respect.
 A window of length $L$ never contains that many concurrent emitters: on the non-overlapping neural test windows used for scoring, the largest number of distinct emitter labels in one window is $7$.
