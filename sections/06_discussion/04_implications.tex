@@ -3,7 +3,7 @@
 If the task is deinterleaving alone, the Vanilla ablation is the practical message.
 Train the emitter term only.
 If the task is modes alone, train the mode term only.
-The joint loss is for the case where both partitions are required from the same window, and even then the equal-weight sum is a compromise rather than a free extra head.
+The joint loss is for the case where both partitions are required from the same window, and even then the unweighted sum is a compromise rather than a free extra head.
 
 If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
 Putting \gls{toa} into the attention product, either as RoPE-TOA or as the pairwise bias, is what closes that gap.
@@ -20,7 +20,7 @@ Emitter indices are window-local hypotheses. They still need a later association
 For representation learning more broadly, the useful fact is the one in \cref{tab:exp:ablation_loss}.
 Two supervised contrastive terms with different positive-set scopes can share a trunk, and the trunk will trade one partition against the other.
 That is expected once the two similarities conflict, and it is measurable.
-Tuning $\lambda_{\mathrm{md}}$, or detaching more of the trunk, is the obvious next control when both heads must stay close to their single-task ceilings.
+A relative weight between the two terms, or detaching more of the trunk, is the obvious next control when both heads must stay close to their single-task ceilings.
 
 The ethical limits in \cref{sec:intro:ethics} do not change with these scores.
 The work is a clustering method on synthetic pulse features.

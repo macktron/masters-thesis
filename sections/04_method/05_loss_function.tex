@@ -37,11 +37,9 @@ The denominator runs over every other pulse in the batch, so unrelated samples e
 
 Both branches apply \cref{eq:method:supcon} to the same batch embeddings and differ only in the label that defines the positive sets: two pulses are positives on the emitter branch when they originate from the same physical emitter, and on the mode branch when they carry the same global mode label.
 Since emitter identifiers are recording-local in \cref{sec:method:formulation}, they are made unique within a mini-batch by pairing each identifier with its originating recording.
-Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses on the emitter and mode projections, the total training objective is
+Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses on the emitter and mode projections, joint training minimises the unweighted sum
 \begin{equation}\label{eq:method:loss_total}
-  \Loss \;=\; \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\,\Loss_{\mathrm{md}},
-  \qquad \lambda_{\mathrm{md}} = 1,
+  \Loss_{\mathrm{joint}} \;=\; \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}.
 \end{equation}
-so the two branches carry equal weight.
-Tuning $\lambda_{\mathrm{md}}$ could improve the trade-off between the tasks, but is not evaluated in this thesis.
+Emitter-only training minimises $\Loss_{\mathrm{em}}$ alone, and mode-only training minimises $\Loss_{\mathrm{md}}$ alone.
 The factor $1/\lvert P(i)\rvert$ in \cref{eq:method:supcon} keeps each pulse's contribution intensive in its positive-set size, which matters because emitter positives are usually few while mode positives can be many; a Gibbs--Boltzmann reading of the same kernel is given in \cref{app:supcon}.

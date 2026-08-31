@@ -7,9 +7,9 @@ The jointly trained attention variants are compared afterwards in \cref{sec:exp:
 
 The three objectives are:
 \begin{description}
-  \item[Joint] $\Loss = \Loss_{\mathrm{em}} + \lambda_{\mathrm{md}}\Loss_{\mathrm{md}}$ with $\lambda_{\mathrm{md}} = 1$, identical to Vanilla in \cref{sec:exp:results:vanilla}.
-  \item[Emitter-only] $\Loss = \Loss_{\mathrm{em}}$. The mode branch receives no direct gradient.
-  \item[Mode-only] $\Loss = \Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
+  \item[Joint] $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$, identical to Vanilla in \cref{sec:exp:results:vanilla}.
+  \item[Emitter-only] $\Loss_{\mathrm{em}}$. The mode branch receives no direct gradient.
+  \item[Mode-only] $\Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
 \end{description}
 Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
 The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}.
@@ -41,7 +41,7 @@ Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-
 
 On the emitter branch, Emitter-only outperforms Joint.
 Mean $\ARI$ rises from $0.948$ to $0.999$, the spread collapses, and the count error falls to $0.12\pm0.36$.
-Adding the mode term therefore costs deinterleaving accuracy on this backbone, at least at $\lambda_{\mathrm{md}}=1$.
+Adding the mode term therefore costs deinterleaving accuracy on this backbone.
 
 The unpaid cost of dropping the mode term is the mode branch itself.
 Under Emitter-only that branch still produces clusters, but they merge: homogeneity falls to $0.79$ while completeness stays at $0.998$, and the mean count error exceeds two modes per window.
