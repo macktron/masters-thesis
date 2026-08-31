@@ -15,7 +15,7 @@ Under $\Loss_{\mathrm{joint}}$ the trunk yields to that conflict on the emitter 
 Joint training is still the only objective that trains both partitions in one run.
 The leftover joint emitter errors sit in a minority of windows rather than on every window.
 Those windows are mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxmode}.
-Window $100$ of the original overlapping dump (test scenario $1752$) is the opposite case. The two emitters are already separated in incidence and in the scanning amplitude.
+\Cref{fig:exp:feat_w100_em} is the opposite case: two emitters already separated in incidence and in the scanning amplitude.
 
 The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
 On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
@@ -25,7 +25,6 @@ On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matche
 Mode clustering is already strong with standard self-attention.
 The attention variants mainly move the emitter scores, and they do not all move them the same way.
 The tail in \cref{fig:exp:hist_em} and the off-diagonal mass in \cref{fig:exp:kcorr_em} are the leftover joint emitter errors of \cref{sec:disc:joint}.
-Every jointly trained model in \cref{fig:exp:emb_w100_em} recovers both partitions on that scenario-$1752$ window.
 
 RoPE-TOA puts time into every attention product.
 On this corpus that is enough to close the emitter tail, with no extra weights.
@@ -33,7 +32,7 @@ Inter-arrival structure is the cue that distinguishes pulse trains once RF and p
 
 RoPE-az spends the deinterleaving rotations on planar incidence instead.
 Incidence is a useful input feature, as \cref{fig:exp:feat_w100_em} shows, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
-The embeddings in \cref{fig:exp:emb_w100_em} agree with the table. RoPE-az still splits the two colors, and it does not tighten them the way RoPE-TOA does.
+RoPE-az still improves on Vanilla (\cref{tab:exp:attn_em}) and does not match RoPE-TOA.
 A likely reason is that the Cartesian incidence channels are already in the token. Rotary encoding of those channels restates a cue the encoder already has, while TOA rotary encoding restates a cue that standard attention otherwise has to learn from a single scalar.
 
 The physical bias reaches the same emitter scores as RoPE-TOA by a more expensive route.

@@ -35,18 +35,6 @@ The plotted quantity is the objective that was optimised, so the single-task pan
 Evaluation uses the checkpoint of lowest validation loss, marked on each panel.
 Vertical axes are independent because those objectives do not share a scale.
 
-\providecommand{\expfig}[1]{%
-  \IfFileExists{figures/experiments/#1}{%
-    \includegraphics[width=\linewidth]{experiments/#1}%
-  }{%
-    \IfFileExists{../../figures/experiments/#1}{%
-      \includegraphics[width=\linewidth]{experiments/#1}%
-    }{%
-      \fbox{\parbox[c][3.6cm][c]{0.92\linewidth}{\centering\scriptsize\texttt{\detokenize{#1}}}}%
-    }%
-  }%
-}
-
 \begin{figure}[tbp]
   \centering
   \expfig{loss_curves.pdf}

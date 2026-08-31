@@ -30,6 +30,17 @@
 % ---- Floats, figures, tables ---------------------------------------
 \usepackage{graphicx}
 \graphicspath{{figures/}{../figures/}{../../figures/}}
+\newcommand{\expfig}[1]{%
+  \IfFileExists{figures/experiments/#1}{%
+    \includegraphics[width=\linewidth]{experiments/#1}%
+  }{%
+    \IfFileExists{../../figures/experiments/#1}{%
+      \includegraphics[width=\linewidth]{experiments/#1}%
+    }{%
+      \fbox{\parbox[c][3.6cm][c]{0.92\linewidth}{\centering\scriptsize\texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{multirow}
