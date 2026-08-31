@@ -22,7 +22,6 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 
 All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
 Feature \gls{dbscan} of \cref{sec:method:baselines} clusters the scaled \gls{pdw} vector of each pulse directly.
-It is not trained, and its test dump already uses overlap $0$ at the same $L$, with $1412$ windows.
 For each window, \gls{dbscan} on each branch yields an estimated partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
 
 Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $1168$ windows.
