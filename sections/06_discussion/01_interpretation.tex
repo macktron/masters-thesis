@@ -52,15 +52,14 @@ The intended split of \cref{sec:method:attention:bias} was that deinterleaving w
 The largest-magnitude means sit on the mode branch, and they are incidence, not time.
 Those table entries are averages over the eight heads and four layers of each stack, not a single shared coefficient.
 
-Because the term is subtracted from the logits, a negative $\bar\lambda_{\mathrm{inc}}$ raises attention as the incidence difference grows: pulses from different directions attend more.
-That mixes across viewing geometry rather than gating on a shared platform.
-It can help a mode that is seen from more than one direction inside a window.
-The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so that mixing does not break mode clustering on this corpus.
+Because the term is subtracted from the logits, a positive $\bar\lambda_{\mathrm{inc}}$ decreases attention as the incidence difference grows: pulses from different directions attend less.
+That uses viewing geometry on the mode branch rather than ignoring it.
+The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so that penalty does not break mode clustering on this corpus.
 
-The deinterleaving means are also negative, and of similar size on time and on incidence.
-A negative $\bar\lambda_t$ there raises attention as the \gls{toa} gap grows, so a pulse attends more strongly to pulses farther away in time than to its immediate neighbours in the interleaved stream.
-That is the cue that matches a pulse train whose next pulse is not the next token.
-Individual heads can differ in sign, as the $+0.832$ incidence head on the Bias emitter branch shows.
+The deinterleaving means are also positive, and of similar size on time and on incidence.
+A positive $\bar\lambda_t$ there decreases attention as the \gls{toa} gap grows, so a pulse attends more strongly to its temporal neighbours than to pulses farther away in the interleaved stream.
+Individual heads can differ in sign, as the $-0.832$ incidence head on the Bias emitter branch shows.
+Those reversed heads raise attention as the coordinate gap grows.
 Trunk means stay near zero, so most of the pairwise work is in the branches.
 
 RoPE never builds those maps.
@@ -71,9 +70,9 @@ Stacking the two time mechanisms does not add their gains.
 RoPE-TOA+Bias pays the Bias encoder time and scores below Vanilla on emitters (\cref{tab:exp:attn_em,fig:exp:hist_em}).
 The extra errors are splits (\cref{fig:exp:kcorr_em}).
 Both devices already put a function of $\Delta t$ into the attention product, so the stacked logits can double-count time.
-The stacked checkpoint still has a large negative mode incidence mean (\cref{tab:exp:bias_coef}), while its mode time mean changes sign relative to Bias.
-Under subtraction, that sign change turns a temporal proximity term into a temporal distance term.
-That is consistent with rotary encoding already carrying time and with the bias remaining an incidence mixing term.
+The stacked checkpoint still has a large positive mode incidence mean (\cref{tab:exp:bias_coef}), while its mode time mean changes sign relative to Bias.
+Under subtraction, that sign change turns a temporal distance term into a temporal proximity term.
+That is consistent with rotary encoding already carrying time and with the bias remaining an incidence penalty.
 The tables give no reason to pay for both.
 
 The accuracy of the bias is a statement about pairwise geometry.

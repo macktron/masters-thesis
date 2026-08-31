@@ -100,11 +100,6 @@ On the mode branch the five curves rise later and closer together. Bias is the l
 \subsection{Cluster-Count Recovery}\label{sec:exp:results:kcorr}
 
 \Cref{fig:exp:kcorr_em,fig:exp:kcorr_md} are heatmaps of estimated versus true cluster counts for the jointly trained attention variants, with the same reading as \cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md}.
-Each cell is the number of test windows with that pair.
-The diagonal is exact count recovery.
-Mass above the diagonal is extra clusters (splits).
-Mass below it is missing clusters (merges).
-That is why \cref{tab:exp:attn_em,tab:exp:attn_md} report homogeneity and completeness separately, and why they include a mean absolute count error.
 
 On the emitter branch, Vanilla leaves the diagonal more often than RoPE-TOA, RoPE-az, and Bias, with splits and merges in roughly equal number.
 RoPE-TOA never oversplits an emitter window in this set: the off-diagonal mass is only undercounts.
@@ -134,24 +129,8 @@ RoPE-TOA+Bias is noisier there than Bias, with more off-diagonal counts at the h
 \subsection{Model Size and Inference Cost}\label{sec:exp:results:efficiency}
 
 \Cref{tab:exp:efficiency} reports trainable parameters and wall-clock time per test window on the A100 of \cref{sec:exp:setup}.
-One window is forwarded at a time.
-A short GPU warmup is excluded from the mean.
+One window is forwarded at a time after a short GPU warmup, which is excluded from the mean.
 Clustering time is \gls{dbscan} on the embeddings of \cref{eq:method:cluster_decoding}.
-
-Rotary encoding adds no learned weights, so both RoPE models dump the same $16\,081\,536$ parameters as Vanilla.
-That is fewer extra parameters than a learned positional table of length $L$, and fewer than the physical bias, which stores one scalar per head, layer, and selected coordinate.
-Those scalars do not change the dumped total at the reported precision.
-They do change the encoder time: Bias spends $32$~ms in the forward pass where Vanilla spends $1.6$~ms.
-RoPE-TOA+Bias is in the same band, $30.1$~ms.
-The extra work is the pairwise differences $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$ of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
-Those matrices depend only on the window coordinates, so they are the same for every head and every attention sub-layer.
-The implementation rebuilds them in each head of each sub-layer and then scales by that head's $\lambda$.
-A single copy per coordinate, computed once per window, would remove that repetition.
-No such cache was used.
-The time in \cref{tab:exp:efficiency} includes that redundant construction, not only the subtraction from the logits.
-\Gls{dbscan} is about $55$~ms for every neural model, so it dominates Vanilla and both RoPE variants.
-Feature \gls{dbscan} has no encoder weights; its clustering time is $21$~ms.
-Memory for the pairwise maps is taken up in \cref{sec:disc:attention}.
 
 \begin{table}[H]
   \centering
@@ -171,41 +150,61 @@ Memory for the pairwise maps is taken up in \cref{sec:disc:attention}.
   \end{tabular}
 \end{table}
 
+Rotary encoding adds no learned weights, so both RoPE models match Vanilla.
+The physical bias stores one scalar per head, layer, and selected coordinate; those scalars do not change the dumped total at the reported precision.
+They do change the encoder time: Bias and RoPE-TOA+Bias spend about $30$~ms in the forward pass, against $1.6$~ms for Vanilla.
+Those times include rebuilding the pairwise maps $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$ of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk} in every head of every sub-layer; the matrices depend only on the window coordinates, and no cache was used.
+
+\Gls{dbscan} is about $55$~ms for every neural model and dominates Vanilla and both RoPE variants.
+Feature \gls{dbscan} has no encoder weights and clusters in $21$~ms.
+Memory for the pairwise maps is discussed in \cref{sec:disc:attention}.
+
 \subsection{Learned Bias Coefficients}\label{sec:exp:results:bias_coef}
 
 Bias and RoPE-TOA+Bias store one scalar per head, layer, and selected coordinate of \cref{eq:method:attn_bias,eq:method:attn_bias_trunk}.
-The trunk has only time.
-On the branches the checkpoint dump reports two scalars per head: a time coefficient $\lambda_t$ and an incidence coefficient $\lambda_{\mathrm{inc}}$.
-Those scalars are subtracted from the logits, so a negative value increases the attention score as the pairwise absolute difference grows.
+The trunk has only time; each task branch also has an incidence coefficient $\lambda_{\mathrm{inc}}$.
+The term is subtracted from the logits, so a positive $\lambda$ decreases attention as $\lvert p_i-p_j\rvert$ grows and a negative $\lambda$ increases it.
 
-\Cref{tab:exp:bias_coef} reports the mean $\bar\lambda$ of those scalars over the $8$ heads and $4$ layers of each stack, together with the range.
-The entries are therefore averages, not a single shared coefficient: each stack has $32$ learned values per coordinate ($8$ heads $\times$ $4$ layers).
+\Cref{tab:exp:bias_coef} reports the mean over the $8$ heads and $4$ layers of each stack ($32$ scalars per coordinate).
+All branch means are positive except the Bias mode time mean ($-0.118$).
+The typical head therefore penalizes a large \gls{toa} or incidence gap.
+Every mode incidence scalar is positive in both models.
+One Bias emitter head reaches $-0.832$ and instead raises attention as incidence differs, and some time heads in each stack do the same: those heads push the corresponding pulses together.
+The trunk mean stays near zero.
 
-The trunk mean stays near zero in both models.
-On the Bias mode branch, $\bar\lambda_t = 0.118$ and $\bar\lambda_{\mathrm{inc}} = -0.877$.
-Every one of the $32$ mode incidence scalars is negative, so every head of that stack raises attention when incidence differs.
-The deinterleaving branch has negative means of similar size on time and incidence ($-0.202$ and $-0.229$).
-A negative $\bar\lambda_t$ on that branch means that a larger \gls{toa} difference raises the attention score.
-Thirty of those $32$ incidence scalars are negative. One head reaches $+0.832$ and instead decreases attention as incidence differs.
-
-RoPE-TOA+Bias keeps the same incidence pattern with smaller magnitude: mode $\bar\lambda_{\mathrm{inc}} = -0.626$, again negative on every head, and deinterleaving means $-0.167$ (time) and $-0.136$ (incidence).
-Mode time coefficients that were positive under Bias become negative once rotary encoding already carries $\Delta t$.
+RoPE-TOA+Bias keeps the same incidence pattern at smaller magnitude.
+Mode time coefficients that were negative under Bias become positive once rotary encoding already carries $\Delta t$.
 
 \begin{table}[H]
   \centering
   \small
-  \caption{Learned bias coefficients after training. Each $\bar\lambda$ is the mean over the $8$ heads and $4$ layers of that stack; the brackets are the range of those $32$ scalars. The trunk has no incidence term. Because the term is subtracted from the logits (\cref{eq:method:attn_bias}), a negative coefficient increases attention as $\lvert p_i-p_j\rvert$ grows.}
+  \caption{Learned bias coefficients after training. Each $\bar\lambda$ is the mean over the $8$ heads and $4$ layers of that stack. A positive coefficient decreases attention as $\lvert p_i-p_j\rvert$ grows (\cref{eq:method:attn_bias}).}
   \label{tab:exp:bias_coef}
-  \begin{tabular}{@{}llcccc@{}}
-    \toprule
-    Model & Branch & $\bar\lambda_t$ & $[\min,\max]_t$ & $\bar\lambda_{\mathrm{inc}}$ & $[\min,\max]_{\mathrm{inc}}$ \\
-    \midrule
-    Bias & Trunk & $0.026$ & $[-0.240,0.292]$ & {---} & {---} \\
-    Bias & Mode & $0.118$ & $[-0.596,0.649]$ & $-0.877$ & $[-2.85,-0.016]$ \\
-    Bias & Emitter & $-0.202$ & $[-0.568,0.110]$ & $-0.229$ & $[-0.528,0.832]$ \\
-    RoPE-TOA+Bias & Trunk & $-0.037$ & $[-0.223,0.132]$ & {---} & {---} \\
-    RoPE-TOA+Bias & Mode & $-0.107$ & $[-0.500,0.195]$ & $-0.626$ & $[-2.17,-0.126]$ \\
-    RoPE-TOA+Bias & Emitter & $-0.167$ & $[-0.509,0.042]$ & $-0.136$ & $[-0.296,0.066]$ \\
-    \bottomrule
-  \end{tabular}
+  \begin{subtable}[t]{0.48\linewidth}
+    \centering
+    \caption{Bias}
+    \begin{tabular}{@{}lcc@{}}
+      \toprule
+      Branch & $\bar\lambda_t$ & $\bar\lambda_{\mathrm{inc}}$ \\
+      \midrule
+      Trunk & $-0.026$ & {---} \\
+      Mode & $-0.118$ & $0.877$ \\
+      Emitter & $0.202$ & $0.229$ \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
+  \hfill
+  \begin{subtable}[t]{0.48\linewidth}
+    \centering
+    \caption{RoPE-TOA+Bias}
+    \begin{tabular}{@{}lcc@{}}
+      \toprule
+      Branch & $\bar\lambda_t$ & $\bar\lambda_{\mathrm{inc}}$ \\
+      \midrule
+      Trunk & $0.037$ & {---} \\
+      Mode & $0.107$ & $0.626$ \\
+      Emitter & $0.167$ & $0.136$ \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
 \end{table}
