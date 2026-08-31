@@ -44,9 +44,17 @@ Window $200$ has two emitters and four modes; window $500$ has four emitters and
 Joint panels are both heads.
 Each single-task panel is the head that received the loss.
 
-\begin{figure}[tbp]
+\begin{figure}[p]
   \centering
-  \expfig{emb_vanilla_joint_vs_separate.pdf}
+  \IfFileExists{figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
+    \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{experiments/emb_vanilla_joint_vs_separate.pdf}%
+  }{%
+    \IfFileExists{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
+      \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}%
+    }{%
+      \expfig{emb_vanilla_joint_vs_separate.pdf}%
+    }%
+  }
   \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $200$ has $K=2$ and $M=4$; window $500$ has $K=4$ and $M=12$.}
   \label{fig:exp:emb_ablation}
 \end{figure}

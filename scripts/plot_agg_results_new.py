@@ -316,8 +316,8 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
     fig, axes = plt.subplots(
         len(cells),
         2,
-        figsize=(7.6, 13.8),
-        gridspec_kw={"wspace": 0.06, "hspace": 0.22, "left": 0.18, "right": 0.99, "top": 0.92, "bottom": 0.02},
+        figsize=(7.6, 11.0),
+        gridspec_kw={"wspace": 0.06, "hspace": 0.10, "left": 0.18, "right": 0.99, "top": 0.91, "bottom": 0.02},
     )
     for r, row in enumerate(cells):
         for c, (png, label, branch, met) in enumerate(row):
