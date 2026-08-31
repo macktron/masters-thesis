@@ -21,9 +21,8 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 \subsection{Evaluation Protocol}\label{sec:exp:results:protocol}
 
 All scores use the held-out test split of \cref{sec:exp:datasets}.
-Neural models are scored on $1168$ windows from that split.
-Feature \gls{dbscan} is scored on $1412$ windows of the same length.
-The \gls{dbscan} radii are those of \cref{tab:exp:hparams_attn}.
+All models are scored on $1168$ windows from the test split.
+Clustering uses the $\varepsilon$ of \cref{tab:exp:hparams_attn}.
 
 The reported scores are $\ARI$, $\AMI$, homogeneity, and completeness, defined in \cref{sec:method:metrics}, and the absolute cluster-count error $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
 Each table cell is the mean $\pm$ one standard deviation of that per-window score.

@@ -55,11 +55,11 @@ Vertical axes are independent because those objectives do not share a scale.
 \end{figure}
 
 The rotary scales are those of \cref{sec:method:attention} and are not repeated here.
-\Cref{tab:exp:hparams_attn} lists only the \gls{dbscan} radii of \cref{sec:method:arch}.
+\Cref{tab:exp:hparams_attn} lists only the selected $\varepsilon$ of \cref{sec:method:arch}.
 
 \begin{table}[tbp]
   \centering
-  \caption{\Gls{dbscan} radii. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed.}
+  \caption{Selected $\varepsilon$ for \gls{dbscan}. $\varepsilon_{\mathrm{em}}$ and $\varepsilon_{\mathrm{md}}$ are selected independently per model on the validation set; $\mathrm{minPts}=5$ is fixed.}
   \label{tab:exp:hparams_attn}
   \begin{tabular}{@{}lcc@{}}
     \toprule
@@ -79,4 +79,4 @@ The rotary scales are those of \cref{sec:method:attention} and are not repeated 
 \end{table}
 
 The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla architecture and the optimisation schedule of \cref{tab:exp:hparams_main}.
-Their radii are selected independently, as for the joint models.
+Their $\varepsilon$ are selected independently, as for the joint models.
