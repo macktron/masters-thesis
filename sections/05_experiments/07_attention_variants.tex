@@ -1,5 +1,6 @@
 \section{Attention Variants}\label{sec:exp:attention}\label{sec:exp:results:attention}
 
+This section compares jointly trained encoders that differ only in how time and incidence enter attention, which is the comparison for RQ3.
 Five configurations are trained with the joint objective of \cref{eq:method:loss_total}.
 Hyperparameters follow \cref{sec:exp:hparams}.
 Vanilla is the joint encoder of \cref{sec:exp:results:vanilla}.
@@ -10,7 +11,7 @@ Bias subtracts the pairwise physical term of \cref{eq:method:attn_bias,eq:method
 RoPE-TOA+Bias uses that same \gls{toa} rotary encoding in the trunk and in both branches, together with the pairwise bias.
 Incidence is not used as a rotary coordinate.
 
-The rows other than Vanilla test whether explicit physical structure in attention improves clustering relative to standard \gls{mha} (RQ3).
+The rows other than Vanilla test whether explicit physical structure in attention improves clustering relative to standard \gls{mha}.
 Feature \gls{dbscan} remains the no-encoder control of \cref{tab:exp:vanilla}; it is omitted here.
 \Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores.
 The best value in each column is in bold; ties are bold on every tied row.

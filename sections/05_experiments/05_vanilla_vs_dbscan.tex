@@ -1,38 +1,9 @@
-\section{Quantitative Results}\label{sec:exp:results}
-
-This section states the evaluation protocol used in the rest of the chapter and reports the existence test for RQ1: a jointly trained Vanilla encoder against Feature \gls{dbscan}.
-The joint-versus-single-task comparison (RQ2) follows in \cref{sec:exp:ablation}.
-The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:attention}.
-
-% Drop-in PDFs live in figures/experiments/. A labelled box is shown until each file exists,
-% so the chapter still compiles while results are being collected.
-\providecommand{\expfig}[1]{%
-  \IfFileExists{figures/experiments/#1}{%
-    \includegraphics[width=\linewidth]{experiments/#1}%
-  }{%
-    \IfFileExists{../../figures/experiments/#1}{%
-      \includegraphics[width=\linewidth]{experiments/#1}%
-    }{%
-      \fbox{\parbox[c][3.6cm][c]{0.92\linewidth}{\centering\scriptsize\texttt{\detokenize{#1}}}}%
-    }%
-  }%
-}
-
-\subsection{Evaluation Protocol}\label{sec:exp:results:protocol}
-
-All scores use the held-out test split of \cref{sec:exp:datasets}.
-All models are scored on the same $1169$ windows from the test split.
-Clustering uses the $\varepsilon$ of \cref{tab:exp:hparams_attn}.
-
-The reported scores are $\ARI$, $\AMI$, homogeneity, and completeness, defined in \cref{sec:method:metrics}, and the absolute cluster-count error $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
-Each table cell is the mean $\pm$ one standard deviation of that per-window score.
-
-\subsection{Joint Vanilla Encoder}\label{sec:exp:results:vanilla}
+\section{Joint Encoder versus Feature DBSCAN}\label{sec:exp:results}\label{sec:exp:results:vanilla}
 
 Vanilla is the encoder of \cref{sec:method:arch} with standard \gls{mha}, trained with the joint objective of \cref{eq:method:loss_total}.
 \Gls{toa} enters only as an input feature.
 Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
-\Cref{tab:exp:vanilla} reports both branches on the same windows, so the two tasks can be compared before any attention variant is introduced.
+\Cref{tab:exp:vanilla} reports both branches, so the two tasks can be compared before any attention variant is introduced.
 
 \begin{table}[tbp]
   \centering
