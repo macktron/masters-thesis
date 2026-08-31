@@ -8,18 +8,20 @@ Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Feature \gls{dbscan} versus jointly trained Vanilla encoder. Entries are mean $\pm$ std. Hom.\ and Comp.\ are homogeneity and completeness.}
+  \caption{Feature \gls{dbscan} (Baseline) versus jointly trained Vanilla encoder. Entries are mean $\pm$ std. Hom.\ and Comp.\ are homogeneity and completeness.}
   \label{tab:exp:vanilla}
+  \makebox[\linewidth][c]{%
   \begin{tabular}{@{}llccccc@{}}
     \toprule
     Method & Branch & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
     \midrule
-    Feature DBSCAN & Emitter & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
-    Feature DBSCAN & Mode    & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
-    Vanilla        & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
-    Vanilla        & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
+    Baseline & Emitter & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
+    Baseline & Mode    & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
+    Vanilla  & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
+    Vanilla  & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}%
+  }
 \end{table}
 
 Feature \gls{dbscan} sits well below Vanilla on both branches.

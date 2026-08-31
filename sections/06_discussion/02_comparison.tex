@@ -3,7 +3,7 @@
 Classical \gls{elint} pipelines surveyed in \cref{sec:related:classical} deinterleave with \gls{toa} histograms or with density clustering on raw \gls{pdw} coordinates, then match trains against a library.
 The encoder here replaces that first stage with a learned embedding, and it never performs the second.
 Scores in \cref{ch:experiments} are partition agreement, not equipment names.
-A raw-feature \gls{dbscan} control is the Feature \gls{dbscan} rows of \cref{tab:exp:vanilla}.
+A raw-feature \gls{dbscan} control is the Baseline rows of \cref{tab:exp:vanilla}.
 It oversplits emitters.
 Vanilla is already well above that control, so the encoder is doing work that density clustering on the same scaled \glspl{pdw} does not.
 On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_w100_em,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
