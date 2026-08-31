@@ -1,21 +1,18 @@
 \section{Hyperparameters and Training Details}\label{sec:exp:hparams}
 
-This section collects numerical training choices deferred from \cref{sec:method:training,sec:method:loss,sec:method:arch}.
-Unless \cref{sec:exp:ablation} states otherwise, jointly trained encoders use the same epoch budget and hardware (\cref{sec:exp:setup}) so that differences reflect architecture and objective rather than compute.
-Feature \gls{dbscan} is not trained.
-
-The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:method:loss}.
+The contrastive temperature is fixed at $\tau = \num{0.5}$ and the mode-loss weight at $\lambda_{\mathrm{md}} = 1$, as in \cref{sec:method:loss}.
 \cref{tab:exp:hparams_main} summarises the optimisation schedule and regularisation for the proposed dual-branch encoder.
 
 \begin{table}[t]
   \centering
   \caption{Primary optimisation hyperparameters for the proposed model.}
   \label{tab:exp:hparams_main}
-  \begin{tabular}{@{}p{0.40\linewidth}p{0.48\linewidth}@{}}
+  \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.40\linewidth}>{\raggedright\arraybackslash}X@{}}
     \toprule
     Setting & Value \\
     \midrule
-    Optimiser & AdamW \parencite{loshchilov2019adamw} with PyTorch defaults $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
+    Optimiser & AdamW \parencite{loshchilov2019adamw} with PyTorch defaults\newline
+    $(\beta_1,\beta_2) = (0.9,0.999)$ and $\epsilon = \num{e-8}$ \\
     Peak learning rate $\eta_{\max}$ & $\num{5e-4}$ \\
     Warmup & Linear from $0$ to $\eta_{\max}$ over $5\%$ of total steps \parencite{goyal2017accurate} \\
     Schedule after warmup & Cosine annealing to $\eta_{\min}$ \parencite{loshchilov2017sgdr} \\
@@ -25,10 +22,9 @@ The contrastive temperature is fixed at $\tau = \num{0.5}$ as in \cref{sec:metho
     Training stride $\delta$ & \num{200} (overlap $1800$ pulses) \\
     Dropout (attention and feed-forward) & \num{0.1} throughout the transformer blocks \\
     Batch size $B$ (windows per step) & \num{4} \\
-    Mode loss weight $\lambda_{\mathrm{md}}$ & \num{1} \\
     Weight decay & $\num{0.01}$ (PyTorch AdamW default) \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 Total optimisation steps equal ten epochs times the number of training batches per epoch.
