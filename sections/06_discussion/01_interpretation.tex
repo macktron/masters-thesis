@@ -14,8 +14,8 @@ Mode-only matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_abla
 Under $\Loss_{\mathrm{joint}}$ the trunk yields to that conflict on the emitter side and keeps the mode side intact.
 Joint training is still the only objective that trains both partitions in one run.
 The leftover joint emitter errors sit in a minority of windows rather than on every window.
-Those windows are mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxmode}.
-\Cref{fig:exp:feat_w100_em} is the opposite case: two emitters already separated in incidence and in the scanning amplitude.
+Those windows are mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode}.
+Scanning windows such as \cref{fig:exp:feat_scan} produce a different failure: one mode whose incidence and amplitude move inside the window.
 
 The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
 On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
@@ -31,7 +31,7 @@ On this corpus that is enough to close the emitter tail, with no extra weights.
 Inter-arrival structure is the cue that distinguishes pulse trains once RF and pulse width collide, and rotating queries and keys by window-local \gls{toa} makes that cue available in the inner product rather than only as one input channel.
 
 RoPE-az spends the deinterleaving rotations on planar incidence instead.
-Incidence is a useful input feature, as \cref{fig:exp:feat_w100_em} shows, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
+Incidence is a useful input feature, as \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode} show, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
 RoPE-az still improves on Vanilla (\cref{tab:exp:attn_em}) and does not match RoPE-TOA.
 A likely reason is that the Cartesian incidence channels are already in the token. Rotary encoding of those channels restates a cue the encoder already has, while TOA rotary encoding restates a cue that standard attention otherwise has to learn from a single scalar.
 

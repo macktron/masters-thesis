@@ -15,7 +15,7 @@ Self-attention and the physical bias both scale as $L^{2}$. Extending the window
 Pulse counts per label are unbalanced inside windows, as \cref{sec:exp:datasets} notes.
 Rare modes and sparse emitters contribute little to a window-mean $\ARI$.
 A method can look strong in \cref{tab:exp:attn_md} while still failing the labels that occupy few pulses.
-The crowded window in \cref{fig:exp:feat_maxmode} is a reminder of that regime, not a substitute for a stratified breakdown.
+The three-pulse emitter in \cref{fig:exp:feat_imbalance} and the crowded window in \cref{fig:exp:feat_maxmode} are reminders of that regime, not a substitute for a stratified breakdown.
 
 The two terms were not reweighted.
 The finding that joint training costs emitter $\ARI$ on Vanilla is therefore tied to the unweighted sum and to that backbone.

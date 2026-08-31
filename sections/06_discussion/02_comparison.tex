@@ -6,7 +6,7 @@ Scores in \cref{ch:experiments} are partition agreement, not equipment names.
 A raw-feature \gls{dbscan} control is the Baseline rows of \cref{tab:exp:vanilla}.
 It oversplits emitters.
 Vanilla is already well above that control, so the encoder is doing work that density clustering on the same scaled \glspl{pdw} does not.
-On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_w100_em,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
+On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
 
 Supervised radar classifiers in \cref{sec:related:dl_radar} assume a global emitter catalogue and a softmax at inference.
 \textcite{jonsson2023supcon} trains a related contrastive encoder on the same simulator lineage, still as closed-set identification.

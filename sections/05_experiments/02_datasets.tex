@@ -43,29 +43,36 @@ Scanning modes produce far fewer pulses than lock-on modes, and some modes diffe
   \end{tabular}
 \end{table}
 
-\Cref{fig:exp:feat_w100_em,fig:exp:feat_w100_md} are an example test window with carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate against window-local \gls{toa}.
+\Cref{fig:exp:feat_scan,fig:exp:feat_imbalance,fig:exp:feat_maxemitters,fig:exp:feat_maxmode} are four hard test windows: carrier frequency, amplitude, pulse width, and a Cartesian incidence coordinate against window-local \gls{toa}.
 The last panel is labelled Theta; it is a direction component after \cref{eq:method:aoa_scale}, not a raw azimuth.
-Color is the only change: emitters in \cref{fig:exp:feat_w100_em} and modes in \cref{fig:exp:feat_w100_md}.
-One platform scans, visible as the scalloped amplitude track; the other occupies flat levels that share frequency and pulse width and separate in incidence.
-\Cref{fig:exp:feat_maxmode} is a crowded alternative.
+\Cref{fig:exp:feat_scan} is a single scanning mode whose incidence drifts through the window.
+\Cref{fig:exp:feat_imbalance} has two emitters, one of them with only three pulses.
+\Cref{fig:exp:feat_maxemitters} is a crowded emitter mixture; \cref{fig:exp:feat_maxmode} is a crowded mode mixture.
 
 \begin{figure}[H]
   \centering
-  \expfig{feat_w100_em.png}
-  \caption{Example test window, colored by ground-truth emitter.}
-  \label{fig:exp:feat_w100_em}
+  \expfig{feat_scan.png}
+  \caption{A scanning mode with drifting incidence, colored by ground-truth mode.}
+  \label{fig:exp:feat_scan}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \expfig{feat_w100_md.png}
-  \caption{The same pulses as \cref{fig:exp:feat_w100_em}, colored by ground-truth mode.}
-  \label{fig:exp:feat_w100_md}
+  \expfig{feat_imbalance.png}
+  \caption{Two emitters with a $3$/$1997$ pulse split, colored by ground-truth emitter.}
+  \label{fig:exp:feat_imbalance}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \expfig{feat_maxemitters.png}
+  \caption{A crowded emitter mixture, colored by emitter.}
+  \label{fig:exp:feat_maxemitters}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \expfig{feat_maxmode.png}
-  \caption{A crowded alternative, colored by ground-truth mode.}
+  \caption{A crowded mode mixture, colored by ground-truth mode.}
   \label{fig:exp:feat_maxmode}
 \end{figure}
