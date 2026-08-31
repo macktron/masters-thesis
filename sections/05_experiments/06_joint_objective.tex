@@ -51,7 +51,7 @@ Each single-task panel is the head that received the loss.
   \label{fig:exp:emb_ablation}
 \end{figure}
 
-\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show count errors as heatmaps of estimated versus true cluster counts over the same $1168$ windows.
+\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show count errors as heatmaps of estimated versus true cluster counts.
 Each cell is a window count.
 The diagonal is exact recovery.
 Mass above the diagonal is extra clusters (splits).
@@ -60,7 +60,7 @@ The Joint panels are the Vanilla evaluation of \cref{sec:exp:results:vanilla}, n
 Only the active branch of each single-task run is shown.
 
 On the emitter branch, Emitter-only sits on the diagonal more tightly than Joint.
-On the mode branch, Mode-only stays with Joint.
+On the mode branch, Mode-only stays with Joint, apart from a few windows that contain one true mode and are split into extra clusters.
 
 \begin{figure}[tbp]
   \centering
@@ -78,6 +78,6 @@ On the mode branch, Mode-only stays with Joint.
 
 RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
 On the emitter metrics it does not.
-It also does not beat Mode-only on the mode metrics.
+It also does not greatly outperform Mode-only on the mode metrics.
 What it buys is that both partitions are trained in the same run.
 The next section asks whether physical structure in attention recovers the emitter accuracy of Emitter-only without dropping the mode term.
