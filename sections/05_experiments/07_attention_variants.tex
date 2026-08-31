@@ -13,7 +13,7 @@ RoPE-TOA+Bias uses that same \gls{toa} rotary encoding in the trunk and in both 
 
 The rows other than Vanilla test whether explicit physical structure in attention improves clustering relative to standard \gls{mha}.
 \Cref{tab:exp:attn_em,tab:exp:attn_md} collect the window-averaged scores.
-The best value in each column is in bold; ties are bold on every tied row.
+The best value in each column is in bold and ties are bold on every tied row.
 
 \begin{table}[H]
   \centering
@@ -54,9 +54,9 @@ The best value in each column is in bold; ties are bold on every tied row.
 RoPE-TOA and Bias remove the emitter tail that joint Vanilla leaves in \cref{tab:exp:vanilla,tab:exp:ablation_loss}.
 Mean emitter $\ARI$ is $1.000$ to three decimals, $99\%$ of windows sit at or above $0.99$, and none of the windows falls below $0.90$.
 Completeness is $1.000$ with no spread, so a true emitter is not split across clusters.
-The leftover errors are rare undercounts, visible as a small homogeneity gap and as the count-error column.
-Emitter-only Vanilla already reaches this emitter range in \cref{tab:exp:ablation_loss}.
-RoPE-TOA and Bias reach it under the joint objective.
+The remaining mistakes are rare undercounts: homogeneity sits just below $1$, and the mean absolute count error is $0.11$ for RoPE-TOA and $0.10$ for Bias.
+Emitter-only Vanilla already sits near that ceiling in \cref{tab:exp:ablation_loss} ($\ARI$ $0.999$).
+Joint RoPE-TOA and Bias sit slightly higher, with a tighter spread.
 An emitter-only RoPE-TOA run, not tabulated, matches that joint emitter $\ARI$ ($0.998$ against $1.000$); the Vanilla joint tax is therefore specific to standard attention.
 
 RoPE-az improves on Vanilla for emitters ($\ARI$ $0.973$, $4.6\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
@@ -66,14 +66,13 @@ Bias is the tightest there, with the smallest count error.
 
 RoPE-TOA+Bias does not keep the emitter gains of either parent.
 Mean emitter $\ARI$ is $0.851$, below joint Vanilla, and $31\%$ of windows fall below $0.90$.
-Completeness is $0.846$, so the leftover errors are splits.
+Completeness is $0.846$, so the remaining mistakes are splits.
 Mode $\ARI$ stays in the same band as the other joint models.
 Stacking the two time mechanisms is not an improvement on this split.
 
 \subsection{Per-Window ARI Distributions}\label{sec:exp:results:hist}
 
-\Cref{fig:exp:hist_em,fig:exp:hist_md} show the empirical CDF of per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, Bias, and RoPE-TOA+Bias.
-$\ARI$ is the metric used to select $\varepsilon$ on the validation grid, so the curves correspond to the neural rows of \cref{tab:exp:attn_em,tab:exp:attn_md}.
+\Cref{fig:exp:hist_em,fig:exp:hist_md} show the empirical CDF of per-window $\ARI$ for Vanilla, RoPE-TOA, RoPE-az, Bias, and RoPE-TOA+Bias, the same five models as \cref{tab:exp:attn_em,tab:exp:attn_md}.
 Each curve is the fraction of the $1168$ windows whose $\ARI$ does not exceed the value on the horizontal axis.
 The vertical axis is logarithmic so that a tail of a few windows remains visible against the jump at $1$.
 $\AMI$, homogeneity, and completeness follow the same right spike and are not repeated as extra pages.
@@ -84,7 +83,7 @@ RoPE-TOA and Bias stay near zero until just below $1$, and the two curves nearly
 RoPE-az sits between Vanilla and those two shapes.
 On the mode branch the five curves rise later and closer together. Bias is the last to leave zero. RoPE-TOA+Bias sits with Vanilla and RoPE-az.
 
-\begin{figure}[tbp]
+\begin{figure}[H]
   \centering
   \expfig{hist_em.pdf}
   \caption{Empirical CDF of emitter $\ARI$ over the $1168$ non-overlapping test windows. The vertical axis is logarithmic.}
