@@ -14,7 +14,8 @@ Reported test scores use $\delta = L$ (overlap $0$), which yields $1168$ windows
 \cref{tab:exp:datasets} summarises corpus-level figures.
 The training split contains 1461 scenarios and roughly 13.8 million pulses in total, while the validation and test splits contribute approximately 2.25 and 2.36 million pulses over 245 and 244 scenarios, respectively.
 The emitter column counts the number of average distinct emitters active in each scenario.
-Emitter identifiers are meaningful only within their own scenario (\cref{sec:method:formulation}), so these figures describe how many emitters each scenario contains rather than membership in some global emitter set; at inference, the within-window clustering accordingly never has to separate more emitters than the enclosing scenario contains.
+Emitter identifiers are unique only within a scenario (\cref{sec:method:formulation}).
+The same identifier in two scenarios does not refer to the same emitter, so the emitter column is the number of distinct emitters in each scenario, not the size of a shared emitter catalogue.
 The number of unique emitters per scenario ranges from 1 to 23 in every split, so the three partitions are statistically homogeneous in this respect.
 A window of length $L$ never contains that many concurrent emitters: on the non-overlapping neural test windows used for scoring, the largest number of distinct emitter labels in one window is $7$.
 The global mode catalogue is taken to have size $M = 17$, equal to the largest number of distinct mode labels in any of those same evaluated windows.
@@ -40,10 +41,3 @@ Because the encoder sees only windows of fixed length $L$ (\cref{sec:method:data
     \bottomrule
   \end{tabular}
 \end{table}
-
-\subsection{Qualitative Properties of the Synthetic Corpus}\label{sec:exp:datasets:qualitative}
-
-Beyond aggregate counts, the corpus is checked qualitatively before large training runs: example timelines are inspected for plausible \gls{pri} structure per mode, for physically admissible \gls{rf} and pulse-width ranges, and for the intended mixture density when multiple emitters are active.
-When the simulator regime adds dropped or spurious pulses (\cref{sec:method:data}), spot checks confirm that surviving pulses retain their original time order and that spurious insertions stay within the configured parameter ranges.
-This mirrors the reporting practice in earlier Saab-hosted simulator studies, which often include illustrative emitter tracks alongside tables \parencite{jonsson2023supcon}.
-\Cref{sec:exp:qualitative} inspects one light window and one crowded window from the test dump after training.
