@@ -20,15 +20,13 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 
 \subsection{Evaluation Protocol}\label{sec:exp:results:protocol}
 
-All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
-Feature \gls{dbscan} of \cref{sec:method:baselines} clusters the scaled \gls{pdw} vector of each pulse directly.
-For each window, \gls{dbscan} on each branch yields an estimated partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
+All scores use the held-out test split of \cref{sec:exp:datasets}.
+Neural models are scored on $1168$ windows from that split.
+Feature \gls{dbscan} is scored on $1412$ windows of the same length.
+The \gls{dbscan} radii are those of \cref{tab:exp:hparams_attn}.
 
-Each neural table entry is the mean $\pm$ one standard deviation of that per-window score over the $1168$ windows.
-The \gls{dbscan} radius $\varepsilon$ is selected independently for each model and each branch on the validation grid of \cref{sec:method:arch}, with $\mathrm{minPts} = 5$ throughout; selected radii are listed in \cref{tab:exp:hparams_attn}.
-
-Homogeneity and completeness are reported separately rather than only through their harmonic mean, the \gls{vmeasure}, so that oversplitting can be distinguished from undermerging.
-Mean absolute cluster-count error $\lvert\hat{K}-K\rvert$ (emitters) and $\lvert\hat{M}-M\rvert$ (modes) summarises how well the inferred number of clusters matches the number of distinct reference labels in the same window.
+The reported scores are $\ARI$, $\AMI$, homogeneity, and completeness, defined in \cref{sec:method:metrics}, and the absolute cluster-count error $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
+Each table cell is the mean $\pm$ one standard deviation of that per-window score.
 
 \subsection{Joint Vanilla Encoder}\label{sec:exp:results:vanilla}
 
