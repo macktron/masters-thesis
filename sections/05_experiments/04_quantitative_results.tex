@@ -21,7 +21,7 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 \subsection{Evaluation Protocol}\label{sec:exp:results:protocol}
 
 All scores use the held-out test split of \cref{sec:exp:datasets}.
-All models are scored on $1168$ windows from the test split.
+All models are scored on the same $1169$ windows from the test split.
 Clustering uses the $\varepsilon$ of \cref{tab:exp:hparams_attn}.
 
 The reported scores are $\ARI$, $\AMI$, homogeneity, and completeness, defined in \cref{sec:method:metrics}, and the absolute cluster-count error $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
