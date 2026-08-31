@@ -10,13 +10,25 @@ This section follows that order.
 The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
 Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
 Mode-only matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
-
 Under $\Loss_{\mathrm{joint}}$ the trunk yields to that conflict on the emitter side and keeps the mode side intact.
-Joint training is still the only objective that trains both partitions in one run.
-The leftover joint emitter errors sit in a minority of windows rather than on every window.
-Those windows are mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode}.
-Scanning windows such as \cref{fig:exp:feat_scan} produce a different failure: one mode whose incidence and amplitude move inside the window.
 
+That emitter cost is the one that matters for a classical chain.
+\Gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
+If deinterleaving is reliable, a later mode stage can run on a single-emitter pulse train.
+Joint training is for recovering both partitions from the still-mixed window.
+The Vanilla joint tax therefore hurts the stage that chain cannot skip.
+
+Feature \gls{dbscan} already ranks the tasks in the same order as the encoder (\cref{tab:exp:vanilla}): the mode partition is more separable in the raw \gls{pdw} features than the emitter partition.
+The encoder inherits that gap rather than creating it.
+A post-deinterleaving mode step is therefore the easier geometry once the train is well recovered.
+
+The leftover joint emitter errors sit in a minority of windows rather than on every window.
+Those windows are crowded emitter mixtures in which frequency and pulse width are shared across platforms, of the kind drawn in \cref{fig:exp:feat_maxemitters}.
+\Cref{fig:exp:feat_maxmode} is a crowded mode mixture, not that emitter tail.
+Scanning windows such as \cref{fig:exp:feat_scan} produce a different failure: one mode whose incidence and amplitude move inside the window.
+A $3$/$1997$ split (\cref{fig:exp:feat_imbalance}) makes deinterleaving hard, and a recovered train with three pulses is a poor input to any later mode classifier.
+
+Joint training is still the only objective that trains both partitions in one run.
 The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
 On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
 
@@ -31,12 +43,17 @@ On this corpus that is enough to close the emitter tail, with no extra weights.
 Inter-arrival structure is the cue that distinguishes pulse trains once RF and pulse width collide, and rotating queries and keys by window-local \gls{toa} makes that cue available in the inner product rather than only as one input channel.
 
 RoPE-az spends the deinterleaving rotations on planar incidence instead.
-Incidence is a useful input feature, as \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode} show, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
+Incidence is a useful input feature, as \cref{fig:exp:feat_maxemitters} shows, but using it as the rotary coordinate of the deinterleaving branch does not beat rotating that branch by \gls{toa}.
 RoPE-az still improves on Vanilla (\cref{tab:exp:attn_em}) and does not match RoPE-TOA.
 A likely reason is that the Cartesian incidence channels are already in the token. Rotary encoding of those channels restates a cue the encoder already has, while TOA rotary encoding restates a cue that standard attention otherwise has to learn from a single scalar.
 
 The physical bias reaches the same emitter scores as RoPE-TOA by a more expensive route.
 It adds a handful of learned scalars, not a second network.
+Vanilla attention already computes logits $\mat{A}\in\R^{L\times L}$ in every head (\cref{eq:method:attn_base}), so the bias matrices of \cref{eq:method:attn_bias} have the same $L\times L$ shape.
+Fused attention kernels can avoid storing that logit matrix.
+The bias is an explicit dense addend $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$.
+It has to be formed, or an equivalent pairwise loop run, and subtracted from the logits, which makes the quadratic storage harder to skip.
+
 What it adds at run time is a pairwise map of shape $h \times L \times L$ per layer.
 With $h=8$ and $L=2000$, one such map is $128$~MB in fp32.
 Twelve attention sublayers make about $1.5$~GB if the maps are all resident, and a training dump at batch size $4$ reports $30$~GB of forward and backward storage for Bias against $19$~GB for Vanilla.
@@ -56,7 +73,7 @@ That uses viewing geometry on the mode branch rather than ignoring it.
 The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so that penalty does not break mode clustering on this corpus.
 
 The deinterleaving means are also positive, and of similar size on time and on incidence.
-A positive $\bar\lambda_t$ there decreases attention as the \gls{toa} gap grows, so a pulse attends more strongly to its temporal neighbours than to pulses farther away in the interleaved stream.
+A positive $\bar\lambda_t$ there decreases attention as the \gls{toa} gap grows, so a pulse attends more strongly to its temporal neighbors than to pulses farther away in the interleaved stream.
 Individual heads can differ in sign, as the $-0.832$ incidence head on the Bias emitter branch shows.
 Those reversed heads raise attention as the coordinate gap grows.
 Trunk means stay near zero, so most of the pairwise work is in the branches.
@@ -74,12 +91,5 @@ Under subtraction, that sign change turns a temporal distance term into a tempor
 That is consistent with rotary encoding already carrying time and with the bias remaining an incidence penalty.
 The tables give no reason to pay for both.
 
-The accuracy of the bias is a statement about pairwise geometry.
 A few scalars on $\lvert p_i-p_j\rvert$ recover the same emitter partition as rotating every query and key by time.
-Vanilla has to learn that structure from a single \gls{toa} channel.
-The differences themselves already carry it.
-That points to a network whose layers read those delta matrices, rather than combining them with a learned query--key product.
-Self-attention on a window is already mixing on a complete graph (\cref{sec:bg:transformer}).
-The bias is already the Graphormer-style edge term of \cref{sec:method:attention:bias,sec:related:transformers_seq}.
-A graph network whose edges carry $(\lvert\Delta t\rvert,\lvert\Delta\tilde{u}^{x}\rvert,\lvert\Delta\tilde{u}^{y}\rvert)$ would use that pairwise physics directly.
-Whether it matches the scores, and whether it is cheaper once the differences are computed once, is not measured here.
+A graph whose edges carry those differences would use that pairwise physics directly; whether it matches the scores, and whether it is cheaper once the differences are computed once, is not measured here.

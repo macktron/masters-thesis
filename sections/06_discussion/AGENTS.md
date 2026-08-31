@@ -8,12 +8,29 @@ Interpret the experimental results, place them in context, and acknowledge limit
 
 4–6 pages.
 
+## Themes that must appear
+
+1. Deinterleaving is the scarcer joint-versus-pipeline resource. Classical ESM analyzes mode after deinterleaving (`sec:bg:elint_pipeline`). Feature DBSCAN already ranks modes more separable than emitters in raw PDWs (`tab:exp:vanilla`); the encoder inherits that gap. The Vanilla joint tax on emitters is costly because that stage cannot be skipped. Sparse trains (`fig:exp:feat_imbalance`) remain a poor input to any later mode classifier.
+2. Bias memory is $L\times L$, like attention, but harder to skip. Vanilla compute is already $\mathcal{O}(L^{2})$; fused kernels can avoid storing the logit matrix (`eq:method:attn_base`). The physical bias is an explicit dense addend $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$, so quadratic storage is harder to avoid (`tab:exp:efficiency`). Keep the measured $h\times L\times L$ / dump-GB figures; a cache removes the rebuild, not the subtraction. Do not expand Graphormer/GNN speculation beyond two sentences.
+3. The supervised contrastive kernel is $(BL)\times(BL)$ in compute (`eq:method:supcon`). Memory need not materialize the full matrix; do not invent a loss-tensor GB figure. Centroid/codebook/softmax/triplet losses avoid the all-pairs batch matrix. Switching kernel would change the method.
+
+## Feature-over-ToA figure roles
+
+These plots live in the datasets section. Do not mix their roles:
+
+- `fig:exp:feat_maxemitters` — hard **emitter** mixture (ground-truth 7-emitter window). Use for leftover emitter errors.
+- `fig:exp:feat_maxmode` — crowded **mode** mixture. Do not treat as a joint-emitter failure.
+- `fig:exp:feat_scan` — moving single mode (mode oversplit). Not the Vanilla emitter tail.
+- `fig:exp:feat_imbalance` — sparse $3$/$1997$ emitter split. Caveat for deint-then-mode, not a substitute for a stratified breakdown.
+
+Do not claim that those figures show learned embeddings; they are input-feature plots. Point at `tab:exp:vanilla` / RoPE-TOA for encoder scores.
+
 ## Subsection contracts
 
-- `01_interpretation.tex` — Why does the method work where it does and fail where it does? Numbered subsections in RQ order: joint versus single-task first (`sec:disc:joint`), then physical structure in attention (`sec:disc:attention`). Tie observed patterns back to the architectural choices in `\cref{ch:method}`. Interpret the active-head comparison only: Emitter-only vs Joint on emitters (`fig:exp:kcorr_ablation_em`, `fig:exp:emb_ablation`); Mode-only vs Joint on modes (`fig:exp:kcorr_ablation_md`, `fig:exp:emb_ablation`). Do not interpret unused-head scores. Feature geometry is `fig:exp:feat_*` in the datasets section; do not cite the removed five-model UMAPs (`fig:exp:emb_w100_*`). Note that RoPE-TOA has no joint emitter tax (cite `sec:exp:attention`; do not add a single-task table). Then RoPE-TOA+Bias (below Vanilla; same overlap and TOA RoPE on trunk as RoPE-TOA).
-- `02_comparison.tex` — Position the results against the related work surveyed in `\cref{ch:related_work}`. Where does the approach win, lose, or tie? Are the wins due to the transformer backbone, the joint clustering objective, or both?
-- `03_limitations.tex` — Be honest about (a) dataset limitations (synthetic, narrow, small), (b) methodological assumptions (number of clusters known, deinterleaving solved), (c) compute constraints, (d) generalization to unseen emitters/modes. Vanilla joint tax remains tied to the unweighted sum $\Loss_{\mathrm{joint}}$ on that backbone; do not claim the RoPE-TOA/Bias emitter-only cost is unknown — RoPE-TOA does not show it.
-- `04_implications.tex` — Implications for ELINT/ESM practitioners; for the broader deep-clustering community; for follow-up research.
+- `01_interpretation.tex` — Why does the method work where it does and fail where it does? Numbered subsections in RQ order: joint versus single-task first (`sec:disc:joint`), then physical structure in attention (`sec:disc:attention`). Tie observed patterns back to the architectural choices in `\cref{ch:method}`. Interpret the active-head comparison only: Emitter-only vs Joint on emitters (`fig:exp:kcorr_ablation_em`); Mode-only vs Joint on modes (`fig:exp:kcorr_ablation_md`). Do not interpret unused-head scores. Feature geometry is `fig:exp:feat_*` in the datasets section; do not cite removed UMAPs (`fig:exp:emb_ablation`, `fig:exp:emb_w100_*`). Note that RoPE-TOA has no joint emitter tax (cite `sec:exp:attention`; do not add a single-task table). Then RoPE-TOA+Bias (below Vanilla; same overlap and TOA RoPE on trunk as RoPE-TOA).
+- `02_comparison.tex` — Position the results against the related work surveyed in `\cref{ch:related_work}`. Where does the approach win, lose, or tie? Are the wins due to the transformer backbone, the joint clustering objective, or both? One sentence on all-pairs SupCon versus centroid/codebook losses; details stay in `03_limitations.tex`.
+- `03_limitations.tex` — Be honest about (a) dataset limitations (synthetic, narrow, small), (b) methodological assumptions (number of clusters known, deinterleaving solved), (c) compute constraints, including $(BL)^{2}$ contrastive compute versus optional materialization, (d) generalization to unseen emitters/modes. Vanilla joint tax remains tied to the unweighted sum $\Loss_{\mathrm{joint}}$ on that backbone; do not claim the RoPE-TOA/Bias emitter-only cost is unknown — RoPE-TOA does not show it.
+- `04_implications.tex` — Implications for ELINT/ESM practitioners; for the broader deep-clustering community; for follow-up research. Recap deint-then-mode with the Feature DBSCAN ranking and the sparse-train caveat. Keep RoPE-TOA as the practical joint recipe.
 
 ## Style notes
 

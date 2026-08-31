@@ -39,26 +39,7 @@ Adding the mode term therefore costs deinterleaving performance on this backbone
 
 Mode-only is the other single-task ceiling.
 Its mode $\ARI$ is $0.983$, within rounding of Joint.
-
-\Cref{fig:exp:emb_ablation} shows UMAP projections of the active-branch embeddings on two test windows from different scenarios.
-Window $100$ has two emitters and two modes; window $400$ has five emitters and nine modes.
-Joint panels are both heads.
-Each single-task panel is the head that received the loss.
-
-\begin{figure}[p]
-  \centering
-  \IfFileExists{figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
-    \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{experiments/emb_vanilla_joint_vs_separate.pdf}%
-  }{%
-    \IfFileExists{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
-      \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}%
-    }{%
-      \expfig{emb_vanilla_joint_vs_separate.pdf}%
-    }%
-  }
-  \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $100$ has $K=2$ and $M=2$; window $400$ has $K=5$ and $M=9$.}
-  \label{fig:exp:emb_ablation}
-\end{figure}
+\Gls{umap} projections of two windows are in \cref{app:embeddings}.
 
 \Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show count errors as heatmaps of estimated versus true cluster counts.
 Each cell is a window count.

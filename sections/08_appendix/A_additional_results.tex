@@ -1,0 +1,21 @@
+\chapter{Additional Embedding Visualisations}\label{app:embeddings}
+
+\Cref{fig:app:emb_joint} shows \gls{umap} projections of the Vanilla joint encoder and the matching single-task run on two test windows, the same models as \cref{sec:exp:ablation}.
+Window $100$ has two emitters and two modes; window $400$ has five emitters and nine modes.
+Both columns recover the partitions on these windows.
+The figure is included for inspection of the geometry; scores remain those of \cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md}.
+
+\begin{figure}[p]
+  \centering
+  \IfFileExists{figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
+    \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{experiments/emb_vanilla_joint_vs_separate.pdf}%
+  }{%
+    \IfFileExists{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}{%
+      \includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{../../figures/experiments/emb_vanilla_joint_vs_separate.pdf}%
+    }{%
+      \expfig{emb_vanilla_joint_vs_separate.pdf}%
+    }%
+  }
+  \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $100$ has $K=2$ and $M=2$; window $400$ has $K=5$ and $M=9$.}
+  \label{fig:app:emb_joint}
+\end{figure}

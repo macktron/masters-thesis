@@ -1,11 +1,6 @@
 \section{Future Work}\label{sec:concl:future}
 
-A relative weight between $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging or splitting.
-A stack that puts RoPE on time and the bias only on incidence would test whether the stacked failure is double-counting of $\Delta t$.
-
-Held-out modulation types are the experiment that the clustering decoder is for.
-Until that split is scored, the mode branch is a grouping of seen catalogue types.
-Operational recordings, and simulator drop or spurious-pulse regimes as an actual test set, are the corresponding check on distribution shift.
+\subsection{Cross-Window Association}\label{sec:concl:future:windows}
 
 The scores in \cref{ch:experiments} describe a window, not a recording.
 Cluster indices stop at the window boundary, so the same emitter in two adjacent windows is not known to be the same object.
@@ -14,20 +9,7 @@ The pulse encoder stays frozen.
 A second transformer on top of those means, or of the window embeddings, could learn the association instead of leaving it to a second density step.
 Either construction yields one partition per scenario.
 
-Mode labels are already global.
-A classification head on the mode embeddings would name types from the training catalogue, while clustering remains the decoder for types that are not in that list.
-The head can sit on a frozen encoder, or it can be trained jointly.
-The clustering scores in \cref{tab:exp:attn_md} do not say whether the catalogue is linearly separable in that space.
-
-Mean $\ARI$ hides which recordings are hard.
-Simple corpus statistics would make that visible: how often two emitters share a frequency band, how uneven the pulse counts are, how many modes sit in one window, and how large the \gls{toa} gaps are relative to the \gls{pri} of each mode.
-Those quantities can be computed from the simulator labels without a new model.
-They would also make a later comparison to another generator, or to operational data, a comparison of the same axes rather than of two unlabelled averages.
-
-Only \gls{dbscan} is used at inference.
-HDBSCAN would remove the $\varepsilon$ grid.
-A Gaussian mixture or spectral clustering would assume a different geometry in the same embeddings.
-Running those decoders on frozen embeddings would separate encoder error from decoder error.
+\subsection{Streaming Inference}\label{sec:concl:future:online}
 
 The encoder is bidirectional over a block of $L$ pulses.
 A live stream does not arrive as a block.
@@ -35,3 +17,43 @@ Keys and values from pulses already in the window can be cached, so a new pulse 
 A mask then chooses which cached pulses remain visible: a sliding window of length $L$, or a causal band if later pulses must not leak into the present.
 That is incremental inference.
 Updating the weights from the stream is a separate problem and is not required for the cache.
+
+\subsection{Capacity and Hyperparameters}\label{sec:concl:future:hparams}
+
+A relative weight between $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging or splitting.
+The encoder may also be oversized.
+A shared trunk of four layers and two four-layer branches, each of width $256$ with inner feed-forward dimension $2048$, give about sixteen million parameters (\cref{tab:exp:efficiency,sec:method:arch}), while most windows already sit at the score ceiling.
+A narrower or shallower stack, scored on the same split, would test that.
+The rotary scales were a single choice, $\gamma_t=\gamma_x=\gamma_y=10$, far below the window length $L$, and the rotary base was left at $b=10^{4}$ (\cref{sec:method:attention:rope}).
+A sweep of $\gamma$ and $b$ would show whether that setting is necessary or merely adequate.
+
+\subsection{Attention Stacking}\label{sec:concl:future:stack}
+
+RoPE-TOA+Bias is worse than Vanilla on emitters (\cref{tab:exp:attn_em}).
+A stack that puts RoPE on time and the bias only on incidence would test whether that failure is double-counting of $\Delta t$.
+
+\subsection{Dataset Hardness}\label{sec:concl:future:hardness}
+
+Mean $\ARI$ hides which recordings are hard.
+Preliminary checks on this corpus used label entropy, the consecutive-label transition rate, and a silhouette score on the raw \gls{pdw} features; none of them tracked per-window $\ARI$.
+Entropy and related information-theoretic summaries treat pulses as exchangeable draws, so they miss both class imbalance and the temporal and spatial dependence that make a mixture hard.
+A more useful scale is the error of a simple baseline that has to solve a related task on the same window: a histogram classifier on carrier frequency, pulse width, and \gls{pri} for modes, or Feature \gls{dbscan} for either partition.
+Windows where that baseline fails are the hard ones, and they give a comparison axis for a later generator or for operational data.
+
+\subsection{Held-Out Types and Operational Data}\label{sec:concl:future:shift}
+
+Held-out modulation types are the experiment that the clustering decoder is for.
+Until that split is scored, the mode branch is a grouping of seen catalogue types.
+Operational recordings, and simulator drop or spurious-pulse regimes as an actual test set, are the corresponding check on distribution shift.
+
+\subsection{Alternative Decoders}\label{sec:concl:future:decoders}
+
+Mode labels are already global.
+A classification head on the mode embeddings would name types from the training catalogue, while clustering remains the decoder for types that are not in that list.
+The head can sit on a frozen encoder, or it can be trained jointly.
+The clustering scores in \cref{tab:exp:attn_md} do not say whether the catalogue is linearly separable in that space.
+
+Only \gls{dbscan} is used at inference.
+HDBSCAN would remove the $\varepsilon$ grid.
+A Gaussian mixture or spectral clustering would assume a different geometry in the same embeddings.
+Running those decoders on frozen embeddings would separate encoder error from decoder error.

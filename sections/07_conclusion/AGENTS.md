@@ -12,7 +12,7 @@ Wrap up the thesis: summarize what was done, explicitly answer each research que
 
 - `01_summary.tex` — One or two paragraphs summarizing the thesis: problem, approach, headline result. No new claims.
 - `02_answers_rq.tex` — Restate each research question from `\cref{sec:intro:rq}` and answer it directly in 1–3 sentences with a reference to the supporting evidence (table/figure).
-- `03_future_work.tex` — Bulleted or short-paragraph list of concrete follow-ups: novel emitter detection, online learning, real-world deployment, scaling to longer sequences, joint deinterleaving + clustering.
+- `03_future_work.tex` — Numbered subsections, one suggestion each, kept to a few sentences: cross-window association via cluster means (`sec:concl:future:windows`); streaming inference with key--value caching (`sec:concl:future:online`); capacity, loss weights, and rotary scales (`sec:concl:future:hparams`); RoPE-on-time plus incidence-only bias (`sec:concl:future:stack`); dataset hardness (entropy / transition rate / silhouette failed to track $\ARI$; histogram or Feature DBSCAN error as a proxy) (`sec:concl:future:hardness`); held-out modulations and operational data (`sec:concl:future:shift`); catalogue head and alternative clusterers (`sec:concl:future:decoders`).
 
 ## Style notes
 

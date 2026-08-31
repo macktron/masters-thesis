@@ -12,6 +12,18 @@ Every score is a window score.
 The encoder never sees a full recording in one forward pass, trailing segments shorter than $L$ are dropped, and nothing is tracked across window boundaries.
 Self-attention and the physical bias both scale as $L^{2}$. Extending the window would raise the memory gap in \cref{sec:disc:attention} and would still not be streaming inference.
 
+The supervised contrastive kernel of \cref{eq:method:supcon} is a second quadratic term.
+A batch of $B$ windows of length $L$ is pooled as $\mathcal{B}$ with $\lvert\mathcal{B}\rvert=BL$, and each branch forms all-pairs similarities $s_{ij}=\vect{z}_i^{\top}\vect{z}_j$ over that set, so the naive kernel is a $(BL)\times(BL)$ matrix per branch.
+With $B=4$ and $L=2000$ that is $8000\times 8000$ per branch, and two branches.
+The compute is $\mathcal{O}((BL)^{2})$ per term and cannot be avoided for this kernel, because every other pulse in the batch is a candidate in the denominator.
+Memory need not hold the full matrix: the sum can be chunked.
+A naive materialization does store $(BL)\times(BL)$.
+This thesis does not report a measured loss-tensor size, unlike the Bias dump of \cref{sec:disc:attention}.
+Centroid methods such as \gls{dec} and \gls{idec} score $\mathcal{O}(NK)$ against $K$ centroids, a softmax scores $\mathcal{O}(NC)$ classes, triplets sample a few pairs, and SwAV uses a small codebook.
+Those losses avoid the all-pairs batch matrix.
+Supervised contrastive needs the full candidate set to define positives by label and to prevent collapse.
+Switching kernel would change the method, not just the implementation.
+
 Pulse counts per label are unbalanced inside windows, as \cref{sec:exp:datasets} notes.
 Rare modes and sparse emitters contribute little to a window-mean $\ARI$.
 A method can look strong in \cref{tab:exp:attn_md} while still failing the labels that occupy few pulses.

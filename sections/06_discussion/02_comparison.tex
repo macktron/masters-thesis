@@ -6,7 +6,7 @@ Scores in \cref{ch:experiments} are partition agreement, not equipment names.
 A raw-feature \gls{dbscan} control is the Baseline rows of \cref{tab:exp:vanilla}.
 It oversplits emitters.
 Vanilla is already well above that control, so the encoder is doing work that density clustering on the same scaled \glspl{pdw} does not.
-On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_maxemitters,fig:exp:feat_maxmode}, a metric on those coordinates alone is not enough. The learned embeddings still separate the platforms.
+On windows where frequency and pulse width collide, as in \cref{fig:exp:feat_maxemitters}, a metric on those coordinates alone is not enough; RoPE-TOA closes the remaining emitter tail (\cref{tab:exp:attn_em}).
 
 Supervised radar classifiers in \cref{sec:related:dl_radar} assume a global emitter catalogue and a softmax at inference.
 \textcite{jonsson2023supcon} trains a related contrastive encoder on the same simulator lineage, still as closed-set identification.
@@ -24,6 +24,7 @@ Stacking the two time mechanisms does not close the tail either.
 None of these variants is a published radar baseline. They are drop-in changes of the same encoder, which is the comparison RQ3 asks for.
 
 Deep clustering methods in \cref{sec:related:deep_clustering} usually learn one partition, often with the number of clusters chosen in advance.
+Unlike \gls{dec}, DeepCluster, a catalogue softmax, sampled triplets, or a SwAV codebook, the supervised contrastive kernel of \cref{eq:method:supcon} forms all-pairs similarities over the pooled batch; that is a compute cost rather than a clustering-quality claim (\cref{sec:disc:limitations}).
 The two branches here are not a hierarchy of one relation. Modes are not subtypes of emitters.
 A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_loss} is the empirical trace of that conflict in the shared trunk: joint training costs emitter agreement relative to the emitter-only ceiling.
 The comparison with multi-task softmax heads in \cref{sec:related:joint} is the same point in other words. Those heads need globally consistent class names. The emitter identifiers in this corpus are not that.

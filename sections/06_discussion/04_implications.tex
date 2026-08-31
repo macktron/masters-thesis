@@ -4,7 +4,10 @@ If the task is deinterleaving alone, the Vanilla ablation is the practical messa
 Train the emitter term only.
 If the task is modes alone, train the mode term only.
 Classical \gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
+Feature \gls{dbscan} already shows that the mode partition is the more separable of the two in the raw \gls{pdw} features (\cref{tab:exp:vanilla}), so a later mode stage on a well recovered train is the easier geometry.
 An emitter-only encoder can in principle feed that second stage; whether those trains then yield a usable mode grouping is not measured here.
+A sparse split such as \cref{fig:exp:feat_imbalance} is the caveat: deinterleaving is hard, and a recovered train with three pulses is a poor input to any later mode classifier.
+Joint mode clustering on the mixed window does not remove that sparsity.
 The joint loss is for the case where both partitions are required from the same interleaved window, and even then the unweighted sum is a compromise rather than a free extra head.
 
 If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
