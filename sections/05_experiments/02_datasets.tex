@@ -14,17 +14,23 @@ The encoder sees windows of $L = 2000$ pulses.
 Training uses stride $\delta = 200$, so consecutive training windows overlap by $1800$ pulses.
 Validation and test windows use $\delta = L$ and do not overlap.
 
-\Cref{tab:exp:datasets} lists the splits after windowing.
+Those two columns of \cref{tab:exp:datasets} are not the same kind of count.
+The pulse column is the number of uniquely generated \glspl{pdw} in the split.
+The window column is the number of encoder inputs after the stride of \cref{sec:method:data:window}.
+Training contains about six times as many unique pulses as validation or test, in line with the scenario counts.
+The training stride is $L/10$, so each training pulse is reused in about ten overlapping windows and the window count is about fifty times that of validation or test.
+That extra factor is overlap, not additional unique pulses.
+
 The largest number of distinct emitters in a window is $7$ in every split.
 The largest number of distinct modes is $17$ in training, $15$ in validation, and $19$ in test.
-A window is a slice of a scenario, so these peaks are what the cut happened to contain, not a constrain set on the windows.
+A window is a slice of a scenario, so these peaks are what the cut happened to contain, not a constraint imposed on the windows.
 
 Pulse counts per emitter and per mode are unbalanced inside windows.
 Scanning modes produce far fewer pulses than lock-on modes, and some modes differ by more than an order of magnitude in base \gls{pri}.
 
 \begin{table}[t]
   \centering
-  \caption{Windowed corpus. Pulse counts are split totals. Emitter and mode columns are the number of distinct labels in a window, as mean $\pm$ standard deviation.}
+  \caption{Windowed corpus. Pulses are unique while training windows overlap. Emitter and mode columns are mean $\pm$ std distinct labels per window.}
   \label{tab:exp:datasets}
   \begin{tabular}{@{}lccccc@{}}
     \toprule
