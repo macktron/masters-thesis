@@ -42,4 +42,3 @@ Writing $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ for the resulting losses
   \Loss_{\mathrm{joint}} \;=\; \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}.
 \end{equation}
 Emitter-only training minimises $\Loss_{\mathrm{em}}$ alone, and mode-only training minimises $\Loss_{\mathrm{md}}$ alone.
-The factor $1/\lvert P(i)\rvert$ in \cref{eq:method:supcon} keeps each pulse's contribution intensive in its positive-set size, which matters because emitter positives are usually few while mode positives can be many; a Gibbs--Boltzmann reading of the same kernel is given in \cref{app:supcon}.

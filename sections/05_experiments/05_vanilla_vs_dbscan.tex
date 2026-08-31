@@ -8,19 +8,16 @@ Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Feature \gls{dbscan} versus jointly trained Vanilla Transformer. Entries are mean $\pm$ std.}
+  \caption{Feature \gls{dbscan} versus jointly trained Vanilla encoder. Entries are mean $\pm$ std. Hom.\ and Comp.\ are homogeneity and completeness.}
   \label{tab:exp:vanilla}
-  \begin{tabular}{@{}lcccc@{}}
+  \begin{tabular}{@{}llccccc@{}}
     \toprule
-    & \multicolumn{2}{c}{Feature DBSCAN} & \multicolumn{2}{c}{Vanilla} \\
-    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-    & Emitter & Mode & Emitter & Mode \\
+    Method & Branch & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
     \midrule
-    $\ARI$ & $0.578\pm0.348$ & $0.811\pm0.250$ & $0.948\pm0.176$ & $0.985\pm0.107$ \\
-    $\AMI$ & $0.630\pm0.260$ & $0.829\pm0.196$ & $0.957\pm0.138$ & $0.986\pm0.102$ \\
-    Homogeneity & $0.976\pm0.049$ & $0.962\pm0.064$ & $0.989\pm0.052$ & $0.994\pm0.027$ \\
-    Completeness & $0.523\pm0.275$ & $0.774\pm0.218$ & $0.951\pm0.166$ & $0.988\pm0.103$ \\
-    Count error & $7.04\pm5.85$ & $4.99\pm3.99$ & $0.25\pm0.49$ & $0.23\pm0.50$ \\
+    Feature DBSCAN & Emitter & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
+    Feature DBSCAN & Mode    & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
+    Vanilla        & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
+    Vanilla        & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -31,10 +28,10 @@ Completeness is $0.523$ and the mean count error exceeds seven emitters, so the 
 Homogeneity remains $0.976$: the extra clusters are internally pure.
 Mode $\ARI$ is $0.811$, still below Vanilla, with a mean count error of five modes.
 
-Vanilla already recovers both partitions on this corpus, which is the existence test of RQ1.
 Emitter $\ARI$ is $0.948$, and $88\%$ of windows score at or above $0.99$, but about one window in ten falls below $0.90$.
 That tail is what widens the standard deviation.
 Mode recovery is stronger: mean $\ARI$ $0.985$, with only $2.5\%$ of windows below $0.90$.
-The two tasks are therefore not equally hard for this encoder.
-Deinterleaving is the branch that still fails on a minority of windows; mode clustering is already tight on almost every window.
+Vanilla therefore still leaves a tail of failed deinterleaving windows, while the mode branch is already recovered on almost every window.
+Feature \gls{dbscan} already ranks the tasks in the same order, with higher mode $\ARI$ and $\AMI$ and a lower mode count error than on emitters.
+The mode partition is already more separable in the raw PDW features and the encoder inherits that gap rather than creating it.
 The per-window emitter tail is the Vanilla curve of \cref{fig:exp:hist_em}; the corresponding count errors are the Vanilla panel of \cref{fig:exp:kcorr_em}.
