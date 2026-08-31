@@ -17,7 +17,7 @@ Describe the proposed approach in enough detail that another researcher could re
 - `05_loss_function.tex` — The two supervised contrastive terms (same functional form; emitter labels recording-local, mode labels global) and the three training objectives: $\Loss_{\mathrm{joint}}=\Loss_{\mathrm{em}}+\Loss_{\mathrm{md}}$, emitter-only $\Loss_{\mathrm{em}}$, and mode-only $\Loss_{\mathrm{md}}$. Do not introduce a relative weight $\lambda$.
 - `06_training_procedure.tex` — Optimizer, learning rate schedule, batch composition, and the scenario-aware sampler.
 - `07_evaluation_metrics.tex` — How this method is scored: per-window, per-branch partition comparison against simulator labels; relabelling invariance because cluster IDs are window-local. Cite definitions in `sec:bg:cluster_metrics`. State why ARI, AMI, and homogeneity/completeness are reported here. No derivations.
-- `08_baselines.tex` — Matched dual-branch single-task controls (Vanilla with $\Loss_{\mathrm{em}}$ only or $\Loss_{\mathrm{md}}$ only) and optional classical DBSCAN on fixed window features. Do not describe a flat single-stack encoder unless that run exists.
+- `08_baselines.tex` — Matched dual-branch single-task controls (Vanilla with $\Loss_{\mathrm{em}}$ only or $\Loss_{\mathrm{md}}$ only) and optional classical DBSCAN on fixed window features. Inactive branch excluded from the backward pass and not scored. Do not describe a flat single-stack encoder unless that run exists.
 
 ## Heading / TOC policy
 

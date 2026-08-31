@@ -1,25 +1,26 @@
 \section{Joint versus Single-Task Objectives}\label{sec:exp:ablation}
 
-This section isolates the joint objective of \cref{eq:method:loss_total} from the attention mechanism.
-The runs use the Vanilla encoder of \cref{sec:method:arch}, so the only change is which contrastive term is active.
-That matched dual-branch control is the comparison for RQ2.
+This section compares the joint loss of \cref{eq:method:loss_total} with training on only one of the two contrastive terms.
+Every run uses the Vanilla encoder of \cref{sec:method:arch}; the only change is which term is active.
+That is the comparison for RQ2.
+
+The dual-branch architecture is kept so that the single-task runs match the joint model in width and depth.
+The inactive branch is excluded from the backward pass: it receives no contrastive gradient and does not affect the trained parameters.
+Only the active branch is scored.
 
 The three objectives are:
 \begin{description}
-  \item[Joint] $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$, identical to Vanilla in \cref{sec:exp:results:vanilla}.
-  \item[Emitter-only] $\Loss_{\mathrm{em}}$. The mode branch receives no direct gradient.
-  \item[Mode-only] $\Loss_{\mathrm{md}}$. The emitter branch receives no direct gradient.
+  \item[Joint] $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$, identical to Vanilla in \cref{sec:exp:results:vanilla}. Both branches are active.
+  \item[Emitter-only] $\Loss_{\mathrm{em}}$. The emitter branch is scored.
+  \item[Mode-only] $\Loss_{\mathrm{md}}$. The mode branch is scored.
 \end{description}
-Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
-The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}.
 
-Both branches are decoded with \gls{dbscan} in every run, including the branch that was not trained.
-The informative cells are therefore the emitter scores of Mode-only and the mode scores of Emitter-only.
-They measure how much the shared trunk transfers to the unsupervised branch, versus collapse of that branch.
+Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
+The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}; the only difference is the loss function.
 
 \begin{table}[tbp]
   \centering
-  \caption{Joint versus single-task objectives on the Vanilla encoder.}
+  \caption{Joint versus single-task objectives on the Vanilla encoder. Single-task rows report the active branch only.}
   \label{tab:exp:ablation_loss}
   \small
   \begin{tabular}{@{}llccccc@{}}
@@ -29,69 +30,57 @@ They measure how much the shared trunk transfers to the unsupervised branch, ver
     Joint         & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
     Joint         & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
     Emitter-only  & Emitter & $0.999\pm0.012$ & $0.997\pm0.013$ & $0.995\pm0.021$ & $0.999\pm0.009$ & $0.12\pm0.36$ \\
-    Emitter-only  & Mode    & $0.812\pm0.253$ & $0.865\pm0.164$ & $0.793\pm0.209$ & $0.998\pm0.014$ & $2.17\pm1.96$ \\
-    Mode-only     & Emitter & $0.714\pm0.309$ & $0.761\pm0.232$ & $0.934\pm0.150$ & $0.702\pm0.257$ & $1.86\pm1.53$ \\
     Mode-only     & Mode    & $0.983\pm0.110$ & $0.984\pm0.103$ & $0.992\pm0.036$ & $0.988\pm0.102$ & $0.24\pm0.56$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
-
 On the emitter branch, Emitter-only outperforms Joint.
 Mean $\ARI$ rises from $0.948$ to $0.999$, the spread collapses, and the count error falls to $0.12\pm0.36$.
-Adding the mode term therefore costs deinterleaving accuracy on this backbone.
-
-The unpaid cost of dropping the mode term is the mode branch itself.
-Under Emitter-only that branch still produces clusters, but they merge: homogeneity falls to $0.79$ while completeness stays at $0.998$, and the mean count error exceeds two modes per window.
-The clusters are internally pure and too few.
+Adding the mode term therefore costs deinterleaving performance on this backbone.
 
 Mode-only is the other single-task ceiling.
 Its mode $\ARI$ is $0.983$, within rounding of Joint.
-The untrained emitter branch splits rather than merges: homogeneity stays at $0.93$ while completeness falls to $0.70$, and the mean count error is $1.86\pm1.53$.
-True emitters are broken into extra clusters.
-Window $200$ (test scenario $1793$) is a local case: two emitters and four modes, with Mode-only recovering the emitters as four clusters ($\ARI=0.030$).
 
-\Cref{fig:exp:emb_ablation} shows that geometry on the same window and on a crowded counterpart (window $500$, four emitters and twelve modes).
-Joint keeps both partitions.
-Emitter-only keeps emitters and merges modes that share a platform.
-Mode-only keeps modes and splits emitters that occupy several modes.
-Red frames mark the branch that received no gradient.
+\Cref{fig:exp:emb_ablation} shows UMAP projections of the active-branch embeddings on two test windows from different scenarios.
+Window $200$ has two emitters and four modes; window $500$ has four emitters and twelve modes.
+Joint panels are both heads.
+Each single-task panel is the head that received the loss.
 
 \begin{figure}[tbp]
   \centering
   \expfig{emb_vanilla_joint_vs_separate.pdf}
-  \caption{UMAP of Vanilla embeddings on two test windows, colored by ground-truth labels. Columns are Joint, Emitter-only, and Mode-only. Rows alternate emitter and mode branches. Red frames mark the unused branch. Window $200$ is test scenario $1793$ ($K=2$, $M=4$); window $500$ is scenario $1858$ ($K=4$, $M=12$).}
+  \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $200$ has $K=2$ and $M=4$; window $500$ has $K=4$ and $M=12$.}
   \label{fig:exp:emb_ablation}
 \end{figure}
 
-\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show those count errors as heatmaps of estimated versus true cluster counts over the same $1168$ windows.
+\Cref{fig:exp:kcorr_ablation_em,fig:exp:kcorr_ablation_md} show count errors as heatmaps of estimated versus true cluster counts over the same $1168$ windows.
 Each cell is a window count.
 The diagonal is exact recovery.
 Mass above the diagonal is extra clusters (splits).
 Mass below it is missing clusters (merges).
 The Joint panels are the Vanilla evaluation of \cref{sec:exp:results:vanilla}, not a second run.
+Only the active branch of each single-task run is shown.
 
-On the emitter branch, Emitter-only sits on the diagonal.
-Mode-only leaves most of its mass above it.
-On the mode branch the pattern reverses: Mode-only stays with Joint, and Emitter-only sits below the diagonal.
+On the emitter branch, Emitter-only sits on the diagonal more tightly than Joint.
+On the mode branch, Mode-only stays with Joint.
 
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_ablation_em.pdf}
-  \caption{Estimated versus true number of emitters per test window for the three Vanilla objectives. Cell values are window counts. The line is $\hat{K}=K$. The Joint panel is the Vanilla evaluation of \cref{tab:exp:vanilla}.}
+  \caption{Estimated versus true number of emitters per test window for Joint and Emitter-only Vanilla. Cell values are window counts. The line is $\hat{K}=K$. The Joint panel is the Vanilla evaluation of \cref{tab:exp:vanilla}.}
   \label{fig:exp:kcorr_ablation_em}
 \end{figure}
 
 \begin{figure}[tbp]
   \centering
   \expfig{kcorr_ablation_md.pdf}
-  \caption{Estimated versus true number of modes per test window. Layout as in \cref{fig:exp:kcorr_ablation_em}.}
+  \caption{Estimated versus true number of modes per test window for Joint and Mode-only Vanilla. Layout as in \cref{fig:exp:kcorr_ablation_em}.}
   \label{fig:exp:kcorr_ablation_md}
 \end{figure}
 
 RQ2, as stated, asks whether the joint objective outperforms a comparable transformer trained for deinterleaving alone.
 On the emitter metrics it does not.
 It also does not beat Mode-only on the mode metrics.
-What it buys is that both partitions remain usable in the same run.
+What it buys is that both partitions are trained in the same run.
 The next section asks whether physical structure in attention recovers the emitter accuracy of Emitter-only without dropping the mode term.

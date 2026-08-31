@@ -197,17 +197,22 @@ def plot_heatmaps(branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Pat
 
 
 def plot_ablation_heatmaps(
-    branch: str, kmax: int, xlabel: str, ylabel: str, outfile: Path
+    runs: list[tuple[str, Path]],
+    branch: str,
+    kmax: int,
+    xlabel: str,
+    ylabel: str,
+    outfile: Path,
 ) -> None:
-    """1x3 count heatmaps for Joint, Emitter-only, and Mode-only."""
-    mats = [count_matrix(load_branch(path, branch), kmax) for _, path in ABLATION_RUNS]
+    """1xN count heatmaps for the given ablation runs (active branch only)."""
+    mats = [count_matrix(load_branch(path, branch), kmax) for _, path in runs]
     vmax = max(int(m.max()) for m in mats)
-    fig, axes = plt.subplots(1, 3, figsize=(6.8, 3.05), squeeze=False)
+    fig, axes = plt.subplots(1, len(runs), figsize=(6.8, 3.2), squeeze=False)
     ticks = list(range(1, kmax + 1)) if kmax <= 8 else [1, 4, 8, 12, kmax]
     cmap = plt.cm.Blues.copy()
     cmap.set_under("white")
     im = None
-    for ax, (name, _), mat in zip(axes[0], ABLATION_RUNS, mats):
+    for ax, (name, _), mat in zip(axes[0], runs, mats):
         vis = mat.astype(float)
         vis[vis == 0] = np.nan
         im = ax.imshow(
@@ -345,6 +350,7 @@ def main() -> None:
         OUT / "kcorr_md.pdf",
     )
     plot_ablation_heatmaps(
+        ABLATION_RUNS[:2],
         "deint",
         7,
         r"True emitters $K$",
@@ -352,6 +358,7 @@ def main() -> None:
         OUT / "kcorr_ablation_em.pdf",
     )
     plot_ablation_heatmaps(
+        [ABLATION_RUNS[0], ABLATION_RUNS[2]],
         "mode",
         17,
         r"True modes $M$",

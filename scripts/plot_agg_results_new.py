@@ -279,17 +279,15 @@ def _crop_umap_png(img: np.ndarray) -> np.ndarray:
 
 
 def plot_vanilla_embedding_grid(outfile: Path) -> None:
-    """3 models x 2 branches x 2 windows, from hardcoded eval UMAPs."""
-    cols = [
-        ("joint", "Joint\n(both losses)"),
-        ("em", "Emitter-only\n(mode loss = 0)"),
-        ("md", "Mode-only\n(emitter loss = 0)"),
-    ]
+    """Joint vs the active single-task head, two windows."""
+    singles = {
+        "deint": ("em", "Emitter-only"),
+        "mode": ("md", "Mode-only"),
+    }
     branch_rows = [
         ("deint", "Emitter embeddings", "K"),
         ("mode", "Mode embeddings", "M"),
     ]
-    unused = {("em", "mode"), ("md", "deint")}
 
     cells: list[list[tuple]] = []
     row_labels: list[str] = []
@@ -297,9 +295,11 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
         km = load_window_metrics(*VANILLA_EMB["joint"], wid)
         k, m = km["deint"]["true"], km["mode"]["true"]
         for branch, branch_name, letter in branch_rows:
-            row_labels.append(f"Window {wid}  ({letter}={k if letter == 'K' else m})\n{branch_name}")
+            val = k if letter == "K" else m
+            row_labels.append(f"Window {wid}  ({letter}={val})\n{branch_name}")
+            skey, slabel = singles[branch]
             row = []
-            for key, _ in cols:
+            for key, label in (("joint", "Joint"), (skey, slabel)):
                 folder, stamp = VANILLA_EMB[key]
                 met = load_window_metrics(folder, stamp, wid)[branch]
                 png = (
@@ -310,18 +310,17 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
                     / "plots"
                     / f"embeddings_{branch}_hardcoded_embeddings_{wid}.png"
                 )
-                row.append((png, key, branch, met))
+                row.append((png, label, branch, met))
             cells.append(row)
 
-    n_rows, n_cols = len(cells), 3
     fig, axes = plt.subplots(
-        n_rows,
-        n_cols,
-        figsize=(11.2, 13.8),
-        gridspec_kw={"wspace": 0.04, "hspace": 0.22, "left": 0.12, "right": 0.99, "top": 0.90, "bottom": 0.02},
+        len(cells),
+        2,
+        figsize=(7.6, 13.8),
+        gridspec_kw={"wspace": 0.06, "hspace": 0.22, "left": 0.18, "right": 0.99, "top": 0.92, "bottom": 0.02},
     )
     for r, row in enumerate(cells):
-        for c, (png, key, branch, met) in enumerate(row):
+        for c, (png, label, branch, met) in enumerate(row):
             ax = axes[r, c]
             img = _crop_umap_png(plt.imread(png))
             ax.imshow(img)
@@ -334,23 +333,9 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
             ari = met["ari"]
             letter = "K" if branch == "deint" else "M"
             subtitle = f"ARI={ari:.3f}   {letter}̂={met['pred']}/{letter}={met['true']}"
-            if (key, branch) in unused:
-                ax.set_title(subtitle + "\nno gradient on this branch", fontsize=7.5, color="#7A1F1F", pad=3)
-                for sp in ax.spines.values():
-                    sp.set_color("#C44E52")
-                    sp.set_linewidth(1.6)
-            else:
-                ax.set_title(subtitle, fontsize=8, pad=3)
-            if r == 0:
-                axes[0, c].annotate(
-                    cols[c][1],
-                    xy=(0.5, 1.28),
-                    xycoords="axes fraction",
-                    ha="center",
-                    va="bottom",
-                    fontsize=10,
-                    fontweight="bold",
-                )
+            if c == 1:
+                subtitle = f"{label}\n{subtitle}"
+            ax.set_title(subtitle, fontsize=8, pad=3)
         axes[r, 0].annotate(
             row_labels[r],
             xy=(-0.04, 0.5),
@@ -360,6 +345,8 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
             fontsize=8,
             rotation=0,
         )
+    fig.text(0.385, 0.965, "Joint", ha="center", va="bottom", fontsize=10, fontweight="bold")
+    fig.text(0.785, 0.965, "Active single-task", ha="center", va="bottom", fontsize=10, fontweight="bold")
 
     fig.savefig(outfile)
     fig.savefig(outfile.with_suffix(".png"))

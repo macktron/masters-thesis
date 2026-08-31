@@ -3,7 +3,9 @@
 If the task is deinterleaving alone, the Vanilla ablation is the practical message.
 Train the emitter term only.
 If the task is modes alone, train the mode term only.
-The joint loss is for the case where both partitions are required from the same window, and even then the unweighted sum is a compromise rather than a free extra head.
+Classical \gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
+An emitter-only encoder can in principle feed that second stage; whether those trains then yield a usable mode grouping is not measured here.
+The joint loss is for the case where both partitions are required from the same interleaved window, and even then the unweighted sum is a compromise rather than a free extra head.
 
 If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
 Putting \gls{toa} into the attention product, either as RoPE-TOA or as the pairwise bias, is what closes that gap.

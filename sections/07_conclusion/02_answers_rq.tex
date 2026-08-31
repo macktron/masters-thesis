@@ -13,8 +13,8 @@
   \emph{Does a joint objective that couples deinterleaving with mode clustering outperform a comparable transformer trained for deinterleaving alone?}
 
   Not when only one partition is required.
-  A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$, while its mode branch merges (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
-  A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes and splits emitters (\cref{fig:exp:kcorr_ablation_em,fig:exp:emb_ablation}).
+  A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$ (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
+  A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
   Separate blocks are therefore the better choice if deinterleaving or mode analysis is the sole product.
   Joint training is the right objective only when both partitions must come from the same window and the same encoder; even then it is a compromise, not a free extra head.
 
