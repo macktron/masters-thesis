@@ -15,9 +15,9 @@ Training uses stride $\delta = 200$, so consecutive training windows overlap by 
 Validation and test windows use $\delta = L$ and do not overlap.
 
 \Cref{tab:exp:datasets} lists the splits after windowing.
-No window contains more than $7$ distinct emitters.
-The largest number of distinct modes in a window is $17$ in training, $15$ in validation, and $19$ in test.
-Those maxima differ from the parent scenarios because a window is a slice of the timeline.
+The largest number of distinct emitters in a window is $7$ in every split.
+The largest number of distinct modes is $17$ in training, $15$ in validation, and $19$ in test.
+A window is a slice of a scenario, so these peaks are what the cut happened to contain, not a constrain set on the windows.
 
 Pulse counts per emitter and per mode are unbalanced inside windows.
 Scanning modes produce far fewer pulses than lock-on modes, and some modes differ by more than an order of magnitude in base \gls{pri}.
