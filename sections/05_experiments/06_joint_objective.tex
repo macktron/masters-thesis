@@ -1,22 +1,19 @@
 \section{Joint versus Single-Task Objectives}\label{sec:exp:ablation}
 
 This section compares the joint loss of \cref{eq:method:loss_total} with training on only one of the two contrastive terms.
-Every run uses the Vanilla encoder of \cref{sec:method:arch}; the only change is which term is active.
 That is the comparison for RQ2.
-
-The dual-branch architecture is kept so that the single-task runs match the joint model in width and depth.
-The inactive branch is excluded from the backward pass: it receives no contrastive gradient and does not affect the trained parameters.
-Only the active branch is scored.
+Every run uses the Vanilla encoder of \cref{sec:method:arch}.
+Single-task runs keep the dual-branch layout so that width and depth match, the inactive branch is severed from the backward pass, so it does not affect the trained parameters and is not scored.
 
 The three objectives are:
 \begin{description}
-  \item[Joint] $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$, identical to Vanilla in \cref{sec:exp:results:vanilla}. Both branches are active.
+  \item[Joint] $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$, identical to Vanilla in \cref{sec:exp:results:vanilla}. Both branches are scored.
   \item[Emitter-only] $\Loss_{\mathrm{em}}$. The emitter branch is scored.
   \item[Mode-only] $\Loss_{\mathrm{md}}$. The mode branch is scored.
 \end{description}
 
 Joint numbers in \cref{tab:exp:ablation_loss} are copied from the Vanilla rows of \cref{tab:exp:vanilla}, not from a second training run.
-The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}; the only difference is the loss function.
+The single-task models use the same splits and the remaining hyperparameters of \cref{sec:exp:hparams}, except $\varepsilon$, which is selected independently on the validation grid (\cref{tab:exp:hparams_attn}).
 
 \begin{table}[tbp]
   \centering
