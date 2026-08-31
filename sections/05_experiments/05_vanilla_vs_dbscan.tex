@@ -38,5 +38,5 @@ Feature \gls{dbscan} already ranks the tasks in the same order, with higher mode
 The mode partition is already more separable in the raw PDW features and the encoder inherits that gap rather than creating it.
 The input geometry of \cref{fig:exp:feat_scan,fig:exp:feat_imbalance,fig:exp:feat_maxemitters,fig:exp:feat_maxmode} makes that ranking visible before any encoder is trained.
 A scanning track is not a compact cluster, a $3$/$1997$ split is easy to miss, and crowded windows share a handful of frequency and pulse-width bands among many labels.
-A density clusterer on those scaled coordinates oversplits; Vanilla is trained to recover both partitions from the same four channels.
+A density clusterer on those scaled coordinates oversplits; Vanilla is trained to recover both partitions from the same features.
 The per-window emitter tail is the Vanilla curve of \cref{fig:exp:hist_em}; the corresponding count errors are the Vanilla panel of \cref{fig:exp:kcorr_em}.

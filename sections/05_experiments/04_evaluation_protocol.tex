@@ -1,7 +1,9 @@
 \section{Evaluation Protocol}\label{sec:exp:protocol}\label{sec:exp:results:protocol}
 
 All scores in this chapter use the held-out test split of \cref{sec:exp:datasets}.
-Test clustering of embeddings, and raw feature for the DBSCan baseline model, uses the frozen $\varepsilon$ of \cref{tab:exp:hparams_attn}.
+That split contains $1169$ non-overlapping windows.
+Feature \gls{dbscan} is scored on the same windows as the neural models.
+Test clustering of embeddings, and of the raw features for the Feature \gls{dbscan} baseline, uses the frozen $\varepsilon$ of \cref{tab:exp:hparams_attn}.
 
 The reported scores are $\ARI$, $\AMI$, homogeneity, and completeness, defined in \cref{sec:method:metrics}, and the absolute cluster-count error $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.
 Each table cell is the mean $\pm$ one standard deviation of that per-window score.

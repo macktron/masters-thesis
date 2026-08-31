@@ -9,9 +9,9 @@ Operators need both emitter and mode groupings from the same stream.
 Classical pipelines deinterleave first and then classify modes, so the two partitions are never formed jointly from the mixed list.
 
 The experiments use a synthetic, fully labelled scenario corpus.
-Each pulse carries a recording-local emitter identity and a mode from a catalogue of $17$ types shared across recordings.
+Each pulse carries a recording-local emitter identity and a mode from a catalogue of $19$ types shared across recordings.
 Training, validation and test windows contain $2000$ pulses, created by breaking up recordings of different simulated scenarios into fixed windows.
-Scores are reported on $1168$ non-overlapping test windows.
+Scores are reported on $1169$ non-overlapping test windows.
 
 A transformer encoder with a shared trunk and two separate branches, one for deinterleaving and one for mode clustering, is trained with two supervised contrastive losses.
 The losses differ only in how positives are chosen.

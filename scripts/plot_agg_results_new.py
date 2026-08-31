@@ -252,8 +252,8 @@ VANILLA_EMB = {
     "md": ("final_vanilla_mode", "20260819_014313"),
 }
 
-# Windows with UMAP dumps. 100 is too easy (K=M=2, ARI=1 on every branch).
-EMB_WINDOWS = (200, 500)
+# Windows with UMAP dumps. 100 is a light mixture; 400 has more emitters and modes.
+EMB_WINDOWS = (100, 400)
 
 
 def load_window_metrics(folder: str, stamp: str, wid: int) -> dict[str, dict]:
@@ -292,11 +292,8 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
     cells: list[list[tuple]] = []
     row_labels: list[str] = []
     for wid in EMB_WINDOWS:
-        km = load_window_metrics(*VANILLA_EMB["joint"], wid)
-        k, m = km["deint"]["true"], km["mode"]["true"]
         for branch, branch_name, letter in branch_rows:
-            val = k if letter == "K" else m
-            row_labels.append(f"Window {wid}  ({letter}={val})\n{branch_name}")
+            row_labels.append(f"Window {wid}\n{branch_name}")
             skey, slabel = singles[branch]
             row = []
             for key, label in (("joint", "Joint"), (skey, slabel)):
@@ -333,8 +330,6 @@ def plot_vanilla_embedding_grid(outfile: Path) -> None:
             ari = met["ari"]
             letter = "K" if branch == "deint" else "M"
             subtitle = f"ARI={ari:.3f}   {letter}̂={met['pred']}/{letter}={met['true']}"
-            if c == 1:
-                subtitle = f"{label}\n{subtitle}"
             ax.set_title(subtitle, fontsize=8, pad=3)
         axes[r, 0].annotate(
             row_labels[r],

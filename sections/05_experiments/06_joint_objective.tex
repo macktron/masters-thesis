@@ -3,7 +3,8 @@
 This section compares the joint loss of \cref{eq:method:loss_total} with training on only one of the two contrastive terms.
 That is the comparison for RQ2.
 Every run uses the Vanilla encoder of \cref{sec:method:arch}.
-Single-task runs keep the dual-branch layout so that width and depth match, the inactive branch is severed from the backward pass, so it does not affect the trained parameters and is not scored.
+Single-task runs keep the dual-branch layout so that width and depth match.
+The inactive branch is severed from the backward pass, so it does not affect the trained parameters and is not scored.
 
 The three objectives are:
 \begin{description}
@@ -40,7 +41,7 @@ Mode-only is the other single-task ceiling.
 Its mode $\ARI$ is $0.983$, within rounding of Joint.
 
 \Cref{fig:exp:emb_ablation} shows UMAP projections of the active-branch embeddings on two test windows from different scenarios.
-Window $200$ has two emitters and four modes; window $500$ has four emitters and twelve modes.
+Window $100$ has two emitters and two modes; window $400$ has five emitters and nine modes.
 Joint panels are both heads.
 Each single-task panel is the head that received the loss.
 
@@ -55,7 +56,7 @@ Each single-task panel is the head that received the loss.
       \expfig{emb_vanilla_joint_vs_separate.pdf}%
     }%
   }
-  \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $200$ has $K=2$ and $M=4$; window $500$ has $K=4$ and $M=12$.}
+  \caption{UMAP of active-branch embeddings on two test windows, colored by ground-truth labels. Columns are Joint and the matching single-task run. Rows alternate emitter and mode embeddings. Window $100$ has $K=2$ and $M=2$; window $400$ has $K=5$ and $M=9$.}
   \label{fig:exp:emb_ablation}
 \end{figure}
 
