@@ -55,7 +55,8 @@ Vertical axes are independent because those objectives do not share a scale.
 \end{figure}
 
 The rotary scales are those of \cref{sec:method:attention} and are not repeated here.
-\Cref{tab:exp:hparams_attn} lists only the selected $\varepsilon$ of \cref{sec:method:arch}.
+The neighbourhood radius $\varepsilon$ is selected independently per model and per branch by the validation grid of \cref{sec:method:arch}, using $\ARI$; $\mathrm{minPts}=5$ is fixed.
+\Cref{tab:exp:hparams_attn} reports the selected values.
 
 \begin{table}[tbp]
   \centering

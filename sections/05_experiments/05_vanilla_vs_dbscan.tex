@@ -1,24 +1,26 @@
 \section{Joint Encoder versus Feature DBSCAN}\label{sec:exp:results}\label{sec:exp:results:vanilla}
 
 Vanilla is the encoder of \cref{sec:method:arch} with standard \gls{mha}, trained with the joint objective of \cref{eq:method:loss_total}.
-\Gls{toa} enters only as an input feature.
+No positional encodings are used and \Gls{toa} enters only as an input feature.
 Feature \gls{dbscan} is the no-encoder control of \cref{sec:method:baselines}.
 \Cref{tab:exp:vanilla} reports both branches, so the two tasks can be compared before any attention variant is introduced.
 
 \begin{table}[tbp]
   \centering
   \small
-  \caption{Feature \gls{dbscan} versus jointly trained Vanilla on the test split. Vanilla entries are mean $\pm$ std over $1168$ non-overlapping windows of length $L=2000$; Feature \gls{dbscan} is not trained and is scored on $1412$ windows of the same length. Hom.\ and Comp.\ are homogeneity and completeness. Count error is $\lvert\hat{K}-K\rvert$ on the emitter branch and $\lvert\hat{M}-M\rvert$ on the mode branch.}
+  \caption{Feature \gls{dbscan} versus jointly trained Vanilla Transformer. Entries are mean $\pm$ std.}
   \label{tab:exp:vanilla}
-  \begin{tabular}{@{}llccccc@{}}
+  \begin{tabular}{@{}lcccc@{}}
     \toprule
-    Model & Branch & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
+    & \multicolumn{2}{c}{Feature DBSCAN} & \multicolumn{2}{c}{Vanilla} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+    & Emitter & Mode & Emitter & Mode \\
     \midrule
-    Feature DBSCAN & Emitter & $0.578\pm0.348$ & $0.630\pm0.260$ & $0.976\pm0.049$ & $0.523\pm0.275$ & $7.04\pm5.85$ \\
-    Feature DBSCAN & Mode    & $0.811\pm0.250$ & $0.829\pm0.196$ & $0.962\pm0.064$ & $0.774\pm0.218$ & $4.99\pm3.99$ \\
-    \midrule
-    Vanilla        & Emitter & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
-    Vanilla        & Mode    & $0.985\pm0.107$ & $0.986\pm0.102$ & $0.994\pm0.027$ & $0.988\pm0.103$ & $0.23\pm0.50$ \\
+    $\ARI$ & $0.578\pm0.348$ & $0.811\pm0.250$ & $0.948\pm0.176$ & $0.985\pm0.107$ \\
+    $\AMI$ & $0.630\pm0.260$ & $0.829\pm0.196$ & $0.957\pm0.138$ & $0.986\pm0.102$ \\
+    Homogeneity & $0.976\pm0.049$ & $0.962\pm0.064$ & $0.989\pm0.052$ & $0.994\pm0.027$ \\
+    Completeness & $0.523\pm0.275$ & $0.774\pm0.218$ & $0.951\pm0.166$ & $0.988\pm0.103$ \\
+    Count error & $7.04\pm5.85$ & $4.99\pm3.99$ & $0.25\pm0.49$ & $0.23\pm0.50$ \\
     \bottomrule
   \end{tabular}
 \end{table}
