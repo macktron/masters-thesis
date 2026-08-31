@@ -21,8 +21,6 @@ The remaining jointly trained encoders (RQ3) are compared in \cref{sec:exp:atten
 \subsection{Evaluation Protocol}\label{sec:exp:results:protocol}
 
 All scores are computed on the held-out test split of \cref{sec:exp:datasets}.
-Every model is scored with window length $L = 2000$ and with no overlap between scored windows.
-The neural test dumps are generated at stride $\delta = L$ and comprise $1168$ windows over the $244$ test scenarios.
 Feature \gls{dbscan} of \cref{sec:method:baselines} clusters the scaled \gls{pdw} vector of each pulse directly.
 It is not trained, and its test dump already uses overlap $0$ at the same $L$, with $1412$ windows.
 For each window, \gls{dbscan} on each branch yields an estimated partition that is scored against the simulator labels with $\ARI$, $\AMI$, homogeneity, and completeness (\cref{sec:method:metrics}).
