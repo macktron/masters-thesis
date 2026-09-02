@@ -53,6 +53,57 @@ ECDF_STYLE = {
     "Bias": dict(color="#CC79A7", linestyle=":", linewidth=2.0),
 }
 
+# Joint plus the matched single-task run of Vanilla, RoPE-TOA, and Bias.
+# Architecture colour is shared; joint is solid, single-task is dashed.
+ALL_RUNS = {
+    "Vanilla (Joint)": NEW / "final_vanilla/20260817_191119/eval_results/metrics.csv",
+    "Vanilla (Em-only)": NEW / "final_vanilla_deint/20260818_104915/eval_results/metrics.csv",
+    "Vanilla (Md-only)": NEW / "final_vanilla_mode/20260819_014313/eval_results/metrics.csv",
+    "RoPE-TOA (Joint)": NEW / "final_pure_rope/20260817_055105/eval_results/metrics.csv",
+    "RoPE-TOA (Em-only)": NEW / "final_pure_rope_deint/20260822_191306/eval_results/metrics.csv",
+    "RoPE-TOA (Md-only)": NEW / "final_pure_rope_mode/20260823_060836/eval_results/metrics.csv",
+    "RoPE-az (Joint)": NEW / "final_multi_rope/20260816_010619/eval_results/metrics.csv",
+    "Bias (Joint)": NEW / "final_physical_bias/20260816_130229/eval_results/metrics.csv",
+    "Bias (Em-only)": NEW / "final_physical_bias_deint/20260822_043704/eval_results/metrics.csv",
+    "Bias (Md-only)": NEW / "final_physical_bias_mode/20260821_135752/eval_results/metrics.csv",
+    "RoPE-TOA+Bias (Joint)": NEW / "final_combined/20260819_200101/eval_results/metrics.csv",
+}
+
+# Longer tails first. Only the active branch of each single-task run is plotted.
+ECDF_ORDER_EM = (
+    "Bias (Em-only)",
+    "RoPE-TOA+Bias (Joint)",
+    "Vanilla (Joint)",
+    "RoPE-az (Joint)",
+    "RoPE-TOA (Em-only)",
+    "Vanilla (Em-only)",
+    "RoPE-TOA (Joint)",
+    "Bias (Joint)",
+)
+ECDF_ORDER_MD = (
+    "RoPE-TOA+Bias (Joint)",
+    "RoPE-az (Joint)",
+    "Bias (Md-only)",
+    "Vanilla (Md-only)",
+    "Vanilla (Joint)",
+    "RoPE-TOA (Md-only)",
+    "RoPE-TOA (Joint)",
+    "Bias (Joint)",
+)
+ECDF_STYLE_ALL = {
+    "Vanilla (Joint)": dict(color="#0072B2", linestyle="-", linewidth=1.6),
+    "Vanilla (Em-only)": dict(color="#0072B2", linestyle="--", linewidth=1.8),
+    "Vanilla (Md-only)": dict(color="#0072B2", linestyle="--", linewidth=1.8),
+    "RoPE-TOA (Joint)": dict(color="#D55E00", linestyle="-", linewidth=1.6),
+    "RoPE-TOA (Em-only)": dict(color="#D55E00", linestyle="--", linewidth=1.8),
+    "RoPE-TOA (Md-only)": dict(color="#D55E00", linestyle="--", linewidth=1.8),
+    "RoPE-az (Joint)": dict(color="#009E73", linestyle="-.", linewidth=1.6),
+    "Bias (Joint)": dict(color="#CC79A7", linestyle="-", linewidth=1.8),
+    "Bias (Em-only)": dict(color="#CC79A7", linestyle="--", linewidth=1.8),
+    "Bias (Md-only)": dict(color="#CC79A7", linestyle="--", linewidth=1.8),
+    "RoPE-TOA+Bias (Joint)": dict(color="#000000", linestyle="-", linewidth=1.4),
+}
+
 
 def load_branch(path: Path, branch: str) -> list[dict]:
     rows = []
@@ -89,15 +140,32 @@ def style() -> None:
     )
 
 
-def plot_ari_ecdf(branch: str, outfile: Path) -> None:
+def plot_ari_ecdf(
+    branch: str,
+    outfile: Path,
+    runs: dict[str, Path] | None = None,
+    order: tuple[str, ...] | None = None,
+    styles: dict[str, dict] | None = None,
+    figsize: tuple[float, float] = (6.8, 3.6),
+    legend_ncol: int = 1,
+    legend_fontsize: float = 6.5,
+    legend_loc: str = "upper left",
+    legend_bbox: tuple[float, float] | None = None,
+    save_png: bool = False,
+) -> None:
     """Overlaid ECDF of per-window ARI on a log vertical axis.
 
     Linear histograms (and linear ECDFs) collapse to a spike at 1. The log
     scale makes the leftover tail, down to a single window, readable.
     """
-    runs = dict(RUNS)
-    fig, ax = plt.subplots(figsize=(6.8, 3.6))
-    for name in ECDF_ORDER:
+    if runs is None:
+        runs = dict(RUNS)
+    if order is None:
+        order = ECDF_ORDER
+    if styles is None:
+        styles = ECDF_STYLE
+    fig, ax = plt.subplots(figsize=figsize)
+    for name in order:
         ari = np.sort(np.array([r["ari"] for r in load_branch(runs[name], branch)]))
         n = len(ari)
         x = np.concatenate((ari, [1.0]))
@@ -108,7 +176,7 @@ def plot_ari_ecdf(branch: str, outfile: Path) -> None:
             y,
             drawstyle="steps-post",
             label=rf"{name} ({100 * n_hi:.0f}% $\geq$ 0.99)",
-            **ECDF_STYLE[name],
+            **styles[name],
         )
     ax.set_yscale("log")
     ax.set_xlim(-0.02, 1.02)
@@ -118,9 +186,22 @@ def plot_ari_ecdf(branch: str, outfile: Path) -> None:
     ax.set_yticklabels(["0.001", "0.01", "0.1", "1"])
     ax.set_xlabel("ARI")
     ax.set_ylabel("Fraction of windows")
-    ax.legend(frameon=False, loc="upper left", fontsize=6.5)
+    legend_kw: dict = dict(
+        frameon=False,
+        loc=legend_loc,
+        fontsize=legend_fontsize,
+        ncol=legend_ncol,
+        columnspacing=1.0,
+        handlelength=2.4,
+    )
+    if legend_bbox is not None:
+        legend_kw["bbox_to_anchor"] = legend_bbox
+    ax.legend(**legend_kw)
     fig.tight_layout()
-    fig.savefig(outfile)
+    save_kw = dict(bbox_inches="tight", pad_inches=0.08) if legend_bbox is not None else {}
+    fig.savefig(outfile, **save_kw)
+    if save_png:
+        fig.savefig(outfile.with_suffix(".png"), **save_kw)
     plt.close(fig)
 
 
@@ -335,6 +416,18 @@ def main() -> None:
     style()
     plot_ari_ecdf("deint", OUT / "hist_em.pdf")
     plot_ari_ecdf("mode", OUT / "hist_md.pdf")
+    ecdf_all_kw = dict(
+        runs=ALL_RUNS,
+        styles=ECDF_STYLE_ALL,
+        figsize=(6.8, 4.2),
+        legend_ncol=2,
+        legend_fontsize=6.2,
+        legend_loc="upper center",
+        legend_bbox=(0.5, -0.16),
+        save_png=True,
+    )
+    plot_ari_ecdf("deint", OUT / "hist_em_all.pdf", order=ECDF_ORDER_EM, **ecdf_all_kw)
+    plot_ari_ecdf("mode", OUT / "hist_md_all.pdf", order=ECDF_ORDER_MD, **ecdf_all_kw)
     plot_heatmaps(
         "deint",
         7,
@@ -367,6 +460,8 @@ def main() -> None:
     )
     print("wrote", OUT / "hist_em.pdf")
     print("wrote", OUT / "hist_md.pdf")
+    print("wrote", OUT / "hist_em_all.pdf")
+    print("wrote", OUT / "hist_md_all.pdf")
     print("wrote", OUT / "kcorr_em.pdf")
     print("wrote", OUT / "kcorr_md.pdf")
     print("wrote", OUT / "kcorr_ablation_em.pdf")

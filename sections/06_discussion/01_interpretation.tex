@@ -30,7 +30,8 @@ A $3$/$1997$ split (\cref{fig:exp:feat_imbalance}) makes deinterleaving hard, an
 
 Joint training is still the only objective that trains both partitions in one run.
 The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
-On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
+On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention,tab:app:ari_em}.
+Emitter-only Bias does not: it sits with RoPE-TOA+Bias rather than with joint Bias.
 
 \subsection{Physical Structure in Attention}\label{sec:disc:attention}
 

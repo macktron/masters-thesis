@@ -8,10 +8,10 @@ Do not add an implementation-details appendix (code is proprietary) or a notatio
 
 ## Subsection contracts
 
-- `A_additional_results.tex` — Joint versus single-task Vanilla UMAP (`emb_vanilla_joint_vs_separate.pdf`, windows 100 and 400). Label `app:embeddings`. Figure `fig:app:emb_joint`. Referenced from `sec:exp:ablation`. Do not restore this figure to Chapter 5. Chapter title uses American spelling (Visualizations).
+- `A_additional_results.tex` — Joint versus single-task Vanilla UMAP (`emb_vanilla_joint_vs_separate.pdf`, windows 100 and 400), then all-model ARI tables and ECDFs. Chapter label `app:embeddings`. Figure `fig:app:emb_joint`. Subsection `app:ari_all` with `tab:app:ari_em`, `tab:app:ari_md`, `fig:app:hist_em_all`, `fig:app:hist_md_all` (`hist_{em,md}_all.pdf` from `scripts/plot_eval_figures.py`). Referenced from `sec:exp:ablation` and `sec:exp:attention`. Do not restore the UMAP to Chapter 5. Do not report unused-head scores. Chapter title is Additional Results.
 - `B_contrastive_loss.tex` — Optional Gibbs--Boltzmann / attraction--repulsion reading of the supervised contrastive kernel from `\cref{sec:method:loss}`. Label `app:supcon`. Referenced from that section with one sentence; do not inline the derivation in Chapter 4.
 
 ## Style notes
 
 - The `\appendix` command in `main.tex` rewrites `\chapter` to produce "Appendix A", "Appendix B". Each appendix file opens with `\chapter{...}`.
-- Cross-reference appendix material from the main text with `\cref{app:embeddings}` and `\cref{app:supcon}`.
+- Cross-reference appendix material from the main text with `\cref{app:embeddings}`, `\cref{app:ari_all}`, and `\cref{app:supcon}`.
