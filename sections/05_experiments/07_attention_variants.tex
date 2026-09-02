@@ -57,8 +57,7 @@ Completeness is $1.000$ with no spread, so a true emitter is not split across cl
 The remaining mistakes are rare undercounts: homogeneity sits just below $1$, and the mean absolute count error is $0.11$ for RoPE-TOA and $0.10$ for Bias.
 Emitter-only Vanilla already sits near that ceiling in \cref{tab:exp:ablation_loss} ($\ARI$ $0.999$).
 Joint RoPE-TOA and Bias sit slightly higher, with a tighter spread.
-An emitter-only RoPE-TOA run matches that joint emitter $\ARI$ (\cref{tab:app:ari_em}); the Vanilla joint tax is therefore specific to standard attention.
-Emitter-only Bias does not reach the joint Bias ceiling.
+An emitter-only RoPE-TOA run, not tabulated, matches that joint emitter $\ARI$ ($0.998$ against $1.000$); the Vanilla joint tax is therefore specific to standard attention.
 
 RoPE-az improves on Vanilla for emitters ($\ARI$ $0.973$, $4.6\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
 Rotating the deinterleaving branch by planar incidence is not, on this test set, a replacement for rotating every layer by \gls{toa}.
@@ -83,7 +82,7 @@ RoPE-TOA+Bias leaves earlier still, and $57\%$ of its windows sit at or above $0
 RoPE-TOA and Bias stay near zero until just below $1$, and the two curves nearly coincide on this split.
 RoPE-az sits between Vanilla and those two shapes.
 On the mode branch the five curves rise later and closer together. Bias is the last to leave zero. RoPE-TOA+Bias sits with Vanilla and RoPE-az.
-\Cref{fig:app:hist_em_all,fig:app:hist_md_all} add the single-task runs of Vanilla, RoPE-TOA, and Bias.
+\Cref{fig:app:hist_em_all,fig:app:hist_md_all} add Vanilla single-task on the matching branch.
 
 \begin{figure}[H]
   \centering
