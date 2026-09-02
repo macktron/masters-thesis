@@ -1,0 +1,5 @@
+.venv/
+assets/animations/manim_media/
+assets/animations/preview/
+__pycache__/
+.DS_Store

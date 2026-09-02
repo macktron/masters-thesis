@@ -11,4 +11,7 @@ Inference clusters each branch with \gls{dbscan}. No catalogue softmax is used.
 On the synthetic test split, standard self-attention already recovers both partitions on most windows.
 Rotary encoding of window-local \gls{toa}, and a pairwise physical bias on the same coordinates, close the remaining emitter errors.
 Using both together does not.
-A joint loss is not a free improvement over a single-task encoder. It costs emitter agreement relative to deinterleaving-only training, and it is what trains both branches in one run.
+A joint loss is not a free improvement over a single-task encoder.
+On standard self-attention it costs emitter agreement relative to deinterleaving-only training.
+A joint RoPE-TOA encoder does not pay that cost: it recovers both partitions and matches an emitter-only copy of the same encoder on emitters.
+Joint training is still what trains both branches in one run.

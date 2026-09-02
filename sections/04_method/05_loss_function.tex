@@ -32,6 +32,7 @@ The supervised contrastive contribution \parencite{khosla2020supcon} is then
 where $\mathcal{B}^{+} = \{i \in \mathcal{B} : P(i) \neq \emptyset\}$ and $\Loss_{\mathrm{SC}} = 0$ when $\mathcal{B}^{+} = \emptyset$.
 Pulses outside $\mathcal{B}^{+}$ contribute only as negatives.
 The denominator runs over every other pulse in the batch, so unrelated samples exert repulsive pressure and the encoder cannot collapse to a constant map \parencite{chen2020simclr}.
+A Gibbs--Boltzmann reading of the same kernel is in \cref{app:supcon}.
 
 \subsection*{Branch losses and total objective}
 

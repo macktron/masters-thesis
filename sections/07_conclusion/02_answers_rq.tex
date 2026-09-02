@@ -16,7 +16,9 @@
   A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$ (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
   A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
   Separate blocks are therefore the better choice if deinterleaving or mode analysis is the sole product.
-  Joint training is the right objective only when both partitions must come from the same window and the same encoder; even then it is a compromise, not a free extra head.
+  Joint training is the right objective when both partitions must come from the same window and the same encoder.
+  On Vanilla that is a compromise on emitters.
+  A joint RoPE-TOA encoder does not pay that cost: its emitter agreement matches an emitter-only copy of the same encoder (\cref{sec:exp:attention}).
 
   \item[RQ3]
   \emph{Do a pairwise physical attention bias and rotary positional encoding on pulse coordinates improve clustering relative to standard multi-head attention?}

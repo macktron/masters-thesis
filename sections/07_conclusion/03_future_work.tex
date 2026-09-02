@@ -13,30 +13,48 @@ Either construction yields one partition per scenario.
 
 The encoder is bidirectional over a block of $L$ pulses.
 A live stream does not arrive as a block.
-Keys and values from pulses already in the window can be cached, so a new pulse attends against that cache instead of forcing a full forward pass.
+Key--value (KV) caching stores the keys and values of pulses already in the window, so a new pulse attends against that cache instead of forcing a full forward pass.
 A mask then chooses which cached pulses remain visible: a sliding window of length $L$, or a causal band if later pulses must not leak into the present.
 That is incremental inference.
 Updating the weights from the stream is a separate problem and is not required for the cache.
 
-\subsection{Capacity and Hyperparameters}\label{sec:concl:future:hparams}
+\subsection{Capacity}\label{sec:concl:future:capacity}
 
-A relative weight between $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging or splitting.
-The encoder may also be oversized.
+The encoder may be oversized for this corpus.
 A shared trunk of four layers and two four-layer branches, each of width $256$ with inner feed-forward dimension $2048$, give about sixteen million parameters (\cref{tab:exp:efficiency,sec:method:arch}), while most windows already sit at the score ceiling.
-A narrower or shallower stack, scored on the same split, would test that.
-The rotary scales were a single choice, $\gamma_t=\gamma_x=\gamma_y=10$, far below the window length $L$, and the rotary base was left at $b=10^{4}$ (\cref{sec:method:attention:rope}).
-A sweep of $\gamma$ and $b$ would show whether that setting is necessary or merely adequate.
+A narrower or shallower stack, scored on the same split, would test whether those scores survive a smaller model.
+Width, depth, and feed-forward expansion can be reduced independently.
+The useful product is the smallest encoder that still matches the tables of \cref{ch:experiments}.
 
-\subsection{Attention Stacking}\label{sec:concl:future:stack}
+\subsection{Hyperparameters}\label{sec:concl:future:hparams}
 
-RoPE-TOA+Bias is worse than Vanilla on emitters (\cref{tab:exp:attn_em}).
-A stack that puts RoPE on time and the bias only on incidence would test whether that failure is double-counting of $\Delta t$.
+Joint training uses the unweighted sum $\Loss_{\mathrm{joint}} = \Loss_{\mathrm{em}} + \Loss_{\mathrm{md}}$ (\cref{eq:method:loss_total}).
+A relative weight between the two terms would show whether the emitter cost of the joint loss can be reduced without giving the mode branch back to merging or splitting.
+The ratio need not be fixed: weights that follow the running values of $\Loss_{\mathrm{em}}$ and $\Loss_{\mathrm{md}}$ could keep the two terms on a comparable scale as training proceeds.
+
+The rotary scales were a single unlearned choice, $\gamma_t=\gamma_x=\gamma_y=10$, far below the window length $L$, and the rotary base was left at $b=10^{4}$ (\cref{sec:method:attention:rope}).
+RoPE-TOA already sits at the emitter ceiling of \cref{tab:exp:attn_em}, so retuning $\gamma_t$ is unlikely to move that score.
+RoPE-az still has headroom, and tying $\gamma_x$ and $\gamma_y$ to $\gamma_t$ is one candidate reason it does not match TOA-only rotation.
+Window-local \gls{toa} and planar incidence both occupy $[0,1]$ after \cref{sec:method:data:norm}, yet a numerical gap of a given size is not the same physical distance in the two coordinates, and the deinterleaving split gives each incidence axis only half the rotation planes of a TOA head.
+A larger $\gamma_x$ and $\gamma_y$ would give nearby platforms more phase; a smaller pair would keep phases unique across a wide scene and would flatten those nearby distinctions.
+A per-coordinate sweep, or treating $\gamma$ as a learned scalar like $\lambda$, would show whether the shared setting, rather than incidence already being an input feature, is what left RoPE-az short of RoPE-TOA.
+
+\subsection{Mode Classification Head}\label{sec:concl:future:cls}
+
+Mode labels are already global.
+After contrastive training, a classification head can be attached to the mode-branch tokens $\vect{h}^{\mathrm{md}}_n$ of \cref{sec:method:arch}, before the projection that produces $\vect{z}^{\mathrm{md}}_n$.
+The encoder stays frozen; only the head is trained to name types from the training catalogue.
+Mode clustering already recovers those types on almost every window (\cref{tab:exp:attn_md}), so the branch representation already separates them on the manifold.
+A linear head on the same tokens tests whether that separation is readable as class logits.
+Clustering remains the decoder for types that are not in the catalogue.
 
 \subsection{Dataset Hardness}\label{sec:concl:future:hardness}
 
 Mean $\ARI$ hides which recordings are hard.
 Preliminary checks on this corpus used label entropy, the consecutive-label transition rate, and a silhouette score on the raw \gls{pdw} features; none of them tracked per-window $\ARI$.
 Entropy and related information-theoretic summaries treat pulses as exchangeable draws, so they miss both class imbalance and the temporal and spatial dependence that make a mixture hard.
+Those checks also omitted the mutual information between the emitter and mode labels of a window (\cref{eq:bg:mi_def}).
+That quantity would say how much one ground-truth partition determines the other, which was not measured here.
 A more useful scale is the error of a simple baseline that has to solve a related task on the same window: a histogram classifier on carrier frequency, pulse width, and \gls{pri} for modes, or Feature \gls{dbscan} for either partition.
 Windows where that baseline fails are the hard ones, and they give a comparison axis for a later generator or for operational data.
 
@@ -48,12 +66,6 @@ Operational recordings, and simulator drop or spurious-pulse regimes as an actua
 
 \subsection{Alternative Decoders}\label{sec:concl:future:decoders}
 
-Mode labels are already global.
-A classification head on the mode embeddings would name types from the training catalogue, while clustering remains the decoder for types that are not in that list.
-The head can sit on a frozen encoder, or it can be trained jointly.
-The clustering scores in \cref{tab:exp:attn_md} do not say whether the catalogue is linearly separable in that space.
-
 Only \gls{dbscan} is used at inference.
-HDBSCAN would remove the $\varepsilon$ grid.
 A Gaussian mixture or spectral clustering would assume a different geometry in the same embeddings.
 Running those decoders on frozen embeddings would separate encoder error from decoder error.
