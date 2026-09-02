@@ -20,18 +20,19 @@ The figure is included for inspection of the geometry; scores remain those of \c
   \label{fig:app:emb_joint}
 \end{figure}
 
-\subsection*{All-model $\ARI$ comparison}
+\subsection*{Aggregated $\ARI$}
 \phantomsection\label{app:ari_all}
 
-\Cref{tab:app:ari_em,tab:app:ari_md} collect mean per-window $\ARI$ for the encoders of \cref{ch:experiments}.
-Vanilla single-task is the matching single-task Vanilla run of \cref{sec:exp:ablation}: emitter-only on the emitter table, mode-only on the mode table.
+\Cref{tab:app:ari_em,tab:app:ari_md} summarise mean per-window $\ARI$ for Feature \gls{dbscan}, joint Vanilla, Vanilla single-task, RoPE-TOA, and Bias.
+Vanilla single-task is the matching Vanilla run of \cref{sec:exp:ablation}: emitter-only on the emitter table, mode-only on the mode table.
 Feature \gls{dbscan} is the no-encoder control of \cref{tab:exp:vanilla}.
 Joint rows are copied from \cref{tab:exp:attn_em,tab:exp:attn_md}, not from a second evaluation.
+RoPE-az and RoPE-TOA+Bias remain in \cref{tab:exp:attn_em,tab:exp:attn_md} and are omitted here.
 
 On the emitter branch, Vanilla single-task, RoPE-TOA, and Bias sit at the ceiling; joint Vanilla does not.
 On the mode branch the neural runs occupy a narrow band, and Bias is highest.
 
-\Cref{fig:app:hist_em_all,fig:app:hist_md_all} show Vanilla, Vanilla single-task, RoPE-TOA, and Bias on the same log vertical axis as \cref{fig:exp:hist_em,fig:exp:hist_md}.
+\Cref{fig:app:hist_em_all,fig:app:hist_md_all} show the same four neural encoders on the log vertical axis of \cref{fig:exp:hist_em,fig:exp:hist_md}.
 Vanilla single-task closes the emitter tail that joint Vanilla leaves; RoPE-TOA and Bias stay with it.
 The mode curves rise later and closer together.
 
@@ -48,9 +49,7 @@ The mode curves rise later and closer together.
     Vanilla & $0.948\pm0.176$ \\
     Vanilla single-task & $0.999\pm0.012$ \\
     RoPE-TOA & $\mathbf{1.000\pm0.003}$ \\
-    RoPE-az & $0.973\pm0.135$ \\
     Bias & $\mathbf{1.000\pm0.002}$ \\
-    RoPE-TOA+Bias & $0.851\pm0.255$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -68,9 +67,7 @@ The mode curves rise later and closer together.
     Vanilla & $0.985\pm0.107$ \\
     Vanilla single-task & $0.983\pm0.110$ \\
     RoPE-TOA & $0.991\pm0.075$ \\
-    RoPE-az & $0.983\pm0.102$ \\
     Bias & $\mathbf{0.992\pm0.081}$ \\
-    RoPE-TOA+Bias & $0.977\pm0.112$ \\
     \bottomrule
   \end{tabular}
 \end{table}
