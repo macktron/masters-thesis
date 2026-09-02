@@ -45,10 +45,7 @@ def _style():
 def interleaved_stream() -> Path:
     """Cartoon of an interleaved PDW stream with two labels."""
     _style()
-    fig, ax = plt.subplots(figsize=(11.2, 3.4), dpi=180)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(-0.4, 3.2)
-    ax.axis("off")
+    fig, ax = plt.subplots(figsize=(11.2, 3.15), dpi=180)
 
     rng = np.random.default_rng(4)
     # Emitter A: dense lock-on
@@ -58,16 +55,13 @@ def interleaved_stream() -> Path:
         [np.linspace(1.1, 2.0, 4), np.linspace(6.4, 7.5, 5), np.linspace(10.2, 11.1, 3)]
     )
 
-    ax.plot([0.3, 11.6], [1.35, 1.35], color="#C5D0DA", lw=1.4, zorder=0)
-    ax.text(0.3, 0.55, "time", color=MUTED, fontsize=11)
-
     for t in tA:
-        h = 1.15 + 0.08 * rng.normal()
+        h = 0.78 + 0.06 * rng.normal()
         ax.add_patch(
             FancyBboxPatch(
-                (t - 0.07, 1.35),
+                (t - 0.07, 0.0),
                 0.14,
-                h,
+                max(0.55, h),
                 boxstyle="round,pad=0.01,rounding_size=0.03",
                 facecolor=ORANGE,
                 edgecolor="none",
@@ -75,12 +69,12 @@ def interleaved_stream() -> Path:
             )
         )
     for t in tB:
-        h = 1.35 + 0.25 * np.sin((t - 1.1) / 1.5 * np.pi)
+        h = 1.05 + 0.22 * np.sin((t - 1.1) / 1.5 * np.pi)
         ax.add_patch(
             FancyBboxPatch(
-                (t - 0.08, 1.35),
+                (t - 0.08, 0.0),
                 0.16,
-                max(0.7, h),
+                max(0.55, h),
                 boxstyle="round,pad=0.01,rounding_size=0.03",
                 facecolor=PURPLE,
                 edgecolor="none",
@@ -88,19 +82,45 @@ def interleaved_stream() -> Path:
             )
         )
 
-    ax.scatter([], [], c=ORANGE, s=80, label="Emitter A  ·  lock-on, low PRI")
-    ax.scatter([], [], c=PURPLE, s=80, label="Emitter B  ·  scanning, sparse")
-    ax.legend(loc="upper left", frameon=False, fontsize=11, ncol=2)
-    ax.text(
-        0.3,
-        0.12,
-        "One receiver sees a mixed list. Same stream, two jobs: who / what mode.",
-        color=MUTED,
-        fontsize=11,
+    ax.set_xlim(0.15, 11.85)
+    ax.set_ylim(0.0, 1.85)
+    ax.set_xticks([2, 4, 6, 8, 10])
+    ax.set_xticklabels([])
+    ax.set_yticks([0.0, 0.6, 1.2, 1.8])
+    ax.set_yticklabels([])
+    ax.tick_params(axis="both", length=4, color=MUTED, width=0.9)
+    ax.set_xlabel("time", fontsize=13, color=NAVY, labelpad=6)
+    ax.set_ylabel("amplitude", fontsize=12, color=NAVY, labelpad=8)
+    ax.spines["bottom"].set_color("#C5D0DA")
+    ax.spines["left"].set_color("#C5D0DA")
+    ax.spines["bottom"].set_linewidth(1.4)
+    ax.spines["left"].set_linewidth(1.2)
+    ax.annotate(
+        "",
+        xy=(12.15, 0.0),
+        xytext=(11.85, 0.0),
+        arrowprops=dict(arrowstyle="-|>", color="#C5D0DA", lw=1.4, mutation_scale=11),
+        annotation_clip=False,
+        zorder=4,
     )
-    fig.tight_layout()
+
+    hA = ax.scatter([], [], c=ORANGE, s=80, label="Emitter A  ·  lock-on, low PRI")
+    hB = ax.scatter([], [], c=PURPLE, s=80, label="Emitter B  ·  scanning, sparse")
+    fig.legend(
+        handles=[hA, hB],
+        loc="upper left",
+        bbox_to_anchor=(0.07, 1.0),
+        bbox_transform=fig.transFigure,
+        frameon=False,
+        fontsize=11,
+        ncol=2,
+        borderaxespad=0,
+        handletextpad=0.45,
+        columnspacing=1.8,
+    )
+    fig.subplots_adjust(top=0.78, bottom=0.22, left=0.08, right=0.99)
     path = OUT / "interleaved_stream.png"
-    fig.savefig(path, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, bbox_inches="tight", pad_inches=0.18, facecolor="white")
     plt.close()
     return path
 

@@ -130,7 +130,7 @@ class RoPEToA(Scene):
 
         title = label("RoPE on time of arrival", size=32)
         title.to_edge(UP, buff=0.20)
-        sub1 = caption("Attention is the query-key dot product.", size=18)
+        sub1 = caption("Attention is the dot product of query and key.", size=18)
         sub2 = caption("Rotation changes the enclosed angle, so the score changes.", size=18)
         sub1.next_to(title, DOWN, buff=0.08)
         sub2.next_to(sub1, DOWN, buff=0.04)
@@ -235,7 +235,7 @@ class RoPEToA(Scene):
             ).move_arc_center_to(origin)
 
         q0, k0 = 0.32, 0.92
-        omega = 2.2
+        omega = 1.35
         t_i, t_close, t_far = 0.08, 0.27, 0.78
         dt_close = abs(t_close - t_i)
         dt_far = abs(t_far - t_i)
@@ -251,7 +251,8 @@ class RoPEToA(Scene):
         score0 = float(np.cos(phi0))
         phi_arc = arc_between(q0, k0, color=INK)
         phi_lab = caption("content angle  φ", size=16, color=INK)
-        phi_lab.next_to(circle, RIGHT, buff=0.22)
+        phi_lab.next_to(circle, RIGHT, buff=0.30)
+        phi_lab.shift(UP * 0.42)
 
         score_chip = chip(f"q · k  =  cos φ  =  {score0:.2f}", CYAN, width=3.9, height=0.42, size=14)
         score_chip.next_to(circle, DOWN, buff=0.28)
@@ -403,49 +404,44 @@ class PhysicalBias(Scene):
         self.wait(1.4)
 
         t = np.array([0.06, 0.14, 0.22, 0.31, 0.58, 0.84])
-        ux = np.array([0.22, 0.23, 0.78, 0.21, 0.80, 0.24])
-        em = np.array(["A", "A", "B", "A", "B", "A"])
-        colors = [ORANGE if e == "A" else PURPLE for e in em]
+        u = np.array([0.22, 0.23, 0.78, 0.21, 0.80, 0.24])
         n = len(t)
 
         pills = VGroup()
         for i in range(n):
             body = RoundedRectangle(
                 width=1.48,
-                height=0.58,
+                height=0.62,
                 corner_radius=0.08,
                 fill_color=WHITE,
-                stroke_color=colors[i],
-                stroke_width=2.5,
+                stroke_color=CYAN,
+                stroke_width=2.0,
             )
-            idx = caption(f"{i}   {em[i]}", size=13, color=colors[i])
-            feat = caption(f"t={t[i]:.2f}   uˣ={ux[i]:.2f}", size=11, color=MUTED)
-            block = VGroup(idx, feat).arrange(DOWN, buff=0.03)
+            idx = caption(f"PDW  {i}", size=13, color=INK)
+            feat = caption(f"t = {t[i]:.2f}    u = {u[i]:.2f}", size=11, color=MUTED)
+            block = VGroup(idx, feat).arrange(DOWN, buff=0.04)
             block.move_to(body.get_center())
             pills.add(VGroup(body, block))
         pills.arrange(RIGHT, buff=0.12)
         pills.next_to(sub, DOWN, buff=0.20)
-        legend = VGroup(
-            caption("A  lock-on, same direction", size=13, color=ORANGE),
-            caption("B  other bearing", size=13, color=PURPLE),
-        ).arrange(RIGHT, buff=0.50)
-        legend.next_to(pills, DOWN, buff=0.08)
-        self.play(FadeIn(pills, lag_ratio=0.08), FadeIn(legend), run_time=2.0)
+        stream_lab = caption("PDW stream  ·  ToA (t) and incidence (u)", size=14, color=MUTED)
+        stream_lab.next_to(pills, DOWN, buff=0.10)
+        self.play(FadeIn(pills, lag_ratio=0.08), FadeIn(stream_lab), run_time=2.0)
         self.wait(1.4)
 
         Bt = np.abs(t[:, None] - t[None, :])
-        Bx = np.abs(ux[:, None] - ux[None, :])
+        Bu = np.abs(u[:, None] - u[None, :])
         Bt_n = to01(Bt)
-        Bx_n = to01(Bx)
+        Bu_n = to01(Bu)
 
-        same = (em[:, None] == em[None, :]).astype(float)
+        close = ((np.abs(u[:, None] - u[None, :])) < 0.15).astype(float)
         rng = np.random.default_rng(1)
-        vanilla = 0.50 + 0.10 * same + 0.08 * rng.normal(size=(n, n))
+        vanilla = 0.50 + 0.10 * close + 0.08 * rng.normal(size=(n, n))
         vanilla = 0.5 * (vanilla + vanilla.T)
         np.fill_diagonal(vanilla, vanilla.max())
 
-        lam_t, lam_x = 0.90, 1.10
-        bias = lam_t * Bt_n + lam_x * Bx_n
+        lam_t, lam_u = 0.90, 1.10
+        bias = lam_t * Bt_n + lam_u * Bu_n
         biased = vanilla - bias
 
         A_n = to01(vanilla)
@@ -453,10 +449,10 @@ class PhysicalBias(Scene):
         Ap_n = to01(biased)
 
         eq = math(
-            r"A'_{ij}= A_{ij}-\lambda_t|\Delta t_{ij}|-\lambda_x|\Delta u^{x}_{ij}|",
+            r"A'_{ij}= A_{ij}-\lambda_t|\Delta t_{ij}|-\lambda_u|\Delta u_{ij}|",
             size=26,
         )
-        eq.next_to(legend, DOWN, buff=0.18)
+        eq.next_to(stream_lab, DOWN, buff=0.18)
         self.play(Write(eq), run_time=2.2)
         self.wait(1.2)
 
@@ -465,7 +461,7 @@ class PhysicalBias(Scene):
             Bt_n, "|Δ ToA|  ×  λ_t = 0.9", np.array([-4.55, y1, 0]), CYAN, CYAN, side=0.28
         )
         map_dx = named_map(
-            Bx_n, "|Δ incidence|  ×  λ_x = 1.1", np.array([-1.05, y1, 0]), ORANGE, ORANGE, side=0.28
+            Bu_n, "|Δ incidence|  ×  λ_u = 1.1", np.array([-1.05, y1, 0]), ORANGE, ORANGE, side=0.28
         )
         plus = label("+", size=28, color=MUTED)
         plus.move_to(np.array([-2.80, y1 - 0.08, 0]))

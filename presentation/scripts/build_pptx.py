@@ -157,29 +157,49 @@ def raster_pdf(src: Path, name: str, zoom: float = 2.6) -> Path:
     return dst
 
 
+P_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
+
+
 def find_anim(stem: str) -> tuple[Path | None, Path | None]:
-    """Return (gif, poster_or_mp4_fallback)."""
-    gif = ANIM / f"{stem}.gif"
+    """Return (unused_gif, mp4_or_poster). GIFs loop in PowerPoint, so we prefer MP4."""
     mp4 = ANIM / f"{stem}.mp4"
     mp4_hq = ANIM / "manim_media" / "videos" / "scenes" / "1080p30" / f"{stem}.mp4"
     poster = ANIM / f"{stem}_poster.png"
-    gif_path = gif if gif.exists() else None
     video = mp4 if mp4.exists() else (mp4_hq if mp4_hq.exists() else None)
-    return gif_path, video if video else (poster if poster.exists() else None)
+    return None, video if video else (poster if poster.exists() else None)
+
+
+def _autoplay_hold_last_frame(slide) -> None:
+    """Play once when the slide appears; freeze on the last frame (do not rewind)."""
+    sld = slide._element
+    for node in sld.xpath(".//p:cMediaNode"):
+        node.set("showWhenStopped", "1")
+        ctn = None
+        for child in list(node):
+            if child.tag.endswith("}cTn") or child.tag == "cTn":
+                ctn = child
+                break
+        if ctn is not None:
+            ctn.set("fill", "hold")
+            ctn.set("restart", "never")
+            for el in ctn.iter():
+                if el.tag.endswith("}cond") and el.get("delay") == "indefinite":
+                    el.set("delay", "0")
 
 
 def add_movie_or_gif(slide, gif, video, left, top, width, height, poster=None):
-    if gif is not None:
-        slide.shapes.add_picture(str(gif), left, top, width, height)
-        return "gif"
-    if video is not None and video.suffix.lower() == ".mp4":
+    if video is not None and Path(video).suffix.lower() == ".mp4":
         poster_path = poster if poster and Path(poster).exists() else None
         kwargs = dict(left=left, top=top, width=width, height=height, mime_type="video/mp4")
         if poster_path:
             slide.shapes.add_movie(str(video), poster_frame_image=str(poster_path), **kwargs)
         else:
             slide.shapes.add_movie(str(video), **kwargs)
+        _autoplay_hold_last_frame(slide)
         return "mp4"
+    if gif is not None:
+        slide.shapes.add_picture(str(gif), left, top, width, height)
+        return "gif"
     if video is not None:
         slide.shapes.add_picture(str(video), left, top, width, height)
         return "png"
@@ -255,27 +275,9 @@ def build() -> Path:
         "Same mode can sit on several emitters.",
         "Inference still clusters — no catalogue softmax.",
     ], size=15, gap=0.55)
-    _notes(s, "Classical chain deinterleaves first. We want both partitions from the mixed list.")
+    _notes(s, "Classical chain deinterleaves first. We want both partitions from the mixed list. Answers at the end.")
 
-    # 3 RQs
-    s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.25), Inches(12), Inches(0.45), "Three questions", size=26, color=INK, bold=True)
-    qs = [
-        ("RQ1", "Can a transformer deinterleave pulses and recover modes by clustering a window of PDWs?"),
-        ("RQ2", "Does training both jobs together beat training deinterleaving alone?"),
-        ("RQ3", "Does a pairwise physical bias, or rotary encoding of pulse coordinates, actually help?"),
-    ]
-    for i, (tag, q) in enumerate(qs):
-        y = Inches(1.05 + i * 1.7)
-        _card(s, Inches(0.55), y, Inches(12.2), Inches(1.5))
-        chip = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), y + Inches(0.5), Inches(1.2), Inches(0.48))
-        _fill(chip, CYAN)
-        chip.adjustments[0] = 0.2
-        _textbox(s, Inches(0.8), y + Inches(0.54), Inches(1.2), Inches(0.42), tag, size=16, color=WHITE, bold=True, align=PP_ALIGN.CENTER)
-        _textbox(s, Inches(2.25), y + Inches(0.4), Inches(10.1), Inches(0.75), q, size=18, color=INK)
-    _notes(s, "Answers at the end. First the data.")
-
-    # 4 corpus + dense/sparse
+    # 3 corpus + dense/sparse
     s = d.new()
     _textbox(s, Inches(0.55), Inches(0.22), Inches(12), Inches(0.4), "Dense lock-on versus sparse scan", size=24, color=INK, bold=True)
     stats = [("L = 2000", "pulses / window"), ("1 169", "test windows"), ("~3 / ~6", "emitters / modes"), ("19", "mode types")]
@@ -288,65 +290,37 @@ def build() -> Path:
     _bullets(s, Inches(8.2), Inches(1.85), Inches(4.7), [
         "Orange: lock-on, low PRI, fills the window.",
         "Purple: scanning. Only seen when the beam sweeps the receiver.",
-        "Amplitude is the giveaway — lobes, not a line.",
-        "Scan period 2–5 s, so one window may contain a single lobe.",
+        "Amplitude is the giveaway: lobes, not a line. Scan period 2–5 s.",
         "A density clusterer on RF/PW ignores the sparse class.",
+        "3 pulses vs 1997 in the same window is common.",
     ], size=14, gap=0.72)
     _notes(s, "Walk the amplitude panel. Gaps between purple lobes are the rotation.")
 
-    # 5 scan + imbalance
+    # 4 imbalance + crowded RF/PW
     s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.2), Inches(12), Inches(0.4), "Slow scans and lock-on floods", size=24, color=INK, bold=True)
-    _plot(s, FIG / "feat_scan.png", Inches(0.4), Inches(0.7), Inches(6.2), max_height=Inches(4.55))
-    _plot(s, FIG / "feat_imbalance.png", Inches(6.85), Inches(0.7), Inches(6.05), max_height=Inches(4.55))
-    _textbox(s, Inches(0.5), Inches(5.55), Inches(6.1), Inches(1.15),
-             "Left: one scanning mode. Incidence drifts; amplitude follows the beam. Density methods oversplit a smear.",
+    _textbox(s, Inches(0.55), Inches(0.2), Inches(12), Inches(0.4), "Floods, and RF/PW that are not unique IDs", size=24, color=INK, bold=True)
+    _plot(s, FIG / "feat_imbalance.png", Inches(0.4), Inches(0.7), Inches(6.1), max_height=Inches(4.5))
+    _plot(s, FIG / "feat_maxemitters.png", Inches(6.75), Inches(0.7), Inches(6.1), max_height=Inches(4.5))
+    _textbox(s, Inches(0.5), Inches(5.5), Inches(6.1), Inches(1.2),
+             "Left: 3 pulses vs 1997. One lock-on, one long PRI or mid-scan. A 3-pulse train is a poor later mode input.",
              size=13, color=INK)
-    _textbox(s, Inches(6.9), Inches(5.55), Inches(6.0), Inches(1.15),
-             "Right: 3 pulses vs 1997 in the same window. One lock-on, one long PRI or mid-scan. A 3-pulse train is a poor later mode input.",
+    _textbox(s, Inches(6.85), Inches(5.5), Inches(6.0), Inches(1.2),
+             "Right: several platforms share RF and PW bands. Timing is the remaining cue. All-pairs attention is the bet.",
              size=13, color=INK)
-    _notes(s, "Feature DBSCAN completeness 0.52 on emitters: extra clusters that are internally pure.")
+    _notes(s, "Why attention rather than an O(L) state. Feature DBSCAN completeness 0.52 on emitters.")
 
-    # 6 crowded
-    s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.22), Inches(12), Inches(0.4), "Crowded mixtures: RF and PW are not unique IDs", size=24, color=INK, bold=True)
-    _plot(s, FIG / "feat_maxemitters.png", Inches(0.45), Inches(0.75), Inches(7.5), max_height=Inches(5.85))
-    _bullets(s, Inches(8.2), Inches(1.0), Inches(4.7), [
-        "Several platforms share frequency and pulse-width bands.",
-        "Lock-on (flat) sits next to scan (curves).",
-        "Timing structure is the remaining cue.",
-        "This is the Vanilla emitter tail: about one window in ten.",
-        "All-pairs attention is the bet: sparse trains have to find each other across a flood.",
-    ], size=14, gap=0.78)
-    _notes(s, "Why attention rather than an O(L) state.")
-
-    # 7 encoder
-    s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.22), Inches(12), Inches(0.4), "L pulses in, L embeddings out", size=24, color=INK, bold=True)
-    _plot(s, GEN / "complexity.png", Inches(0.4), Inches(0.75), Inches(6.7), max_height=Inches(5.7))
-    _bullets(s, Inches(7.4), Inches(0.9), Inches(5.5), [
-        "Self-attention: every pulse scores every other pulse. That mix is deinterleaving.",
-        "Cost is O(L²), so we window at L = 2000 rather than the whole recording.",
-        "LSTM is O(L), but a hidden state has to carry a 3-pulse train across a lock-on flood.",
-        "Mamba / SSMs compress the past into a state. Pairwise “same PRI train?” is a comparison, not a state update.",
-        "We did not bake off Mamba. The bet is that paying L² is worth it when the physics is pairwise.",
-        "Then DBSCAN on the embeddings. Cluster IDs are local to the window.",
-    ], size=14, gap=0.68)
-    _notes(s, "Do not claim a Mamba bake-off. Claim the inductive bias.")
-
-    # 8 architecture
+    # 5 architecture
     s = d.new()
     _textbox(s, Inches(0.55), Inches(0.22), Inches(12), Inches(0.4), "Shared trunk, two heads, two positive sets", size=24, color=INK, bold=True)
     _plot(s, GEN / "y_architecture.png", Inches(0.4), Inches(0.75), Inches(7.7), max_height=Inches(5.85))
-    _bullets(s, Inches(8.3), Inches(0.95), Inches(4.6), [
-        "~16 M parameters. Width 256, 8 heads.",
-        "Emitter loss: same recording-local ID.",
-        "Mode loss: same global catalogue label.",
-        "Same contrastive kernel. Only the positive set changes.",
-        "Joint training is the unweighted sum.",
-        "DBSCAN at inference. Not in the loss.",
-    ], size=14, gap=0.68)
-    _notes(s, "The two similarities can fight in the trunk.")
+    _bullets(s, Inches(8.3), Inches(0.85), Inches(4.6), [
+        "~16 M parameters. Width 256, 8 heads. L = 2000 in, L embeddings out.",
+        "Self-attention is O(L²). That mix is deinterleaving.",
+        "LSTM / Mamba are O(L), but pairwise “same train?” is a comparison, not a state. Not compared.",
+        "Emitter loss: same recording-local ID. Mode loss: same global catalogue label.",
+        "Joint training is the unweighted sum. DBSCAN at inference, not in the loss.",
+    ], size=13, gap=0.78)
+    _notes(s, "The two similarities can fight in the trunk. Do not claim a Mamba bake-off.")
 
     # 9 two mechanisms
     s = d.new()
@@ -380,7 +354,7 @@ def build() -> Path:
         "New angle: φ + Δt · ω.",
         "Close in time → small extra twist, high score.",
         "Far in time → larger twist, lower score.",
-        "GIF loops. Prefer the MP4, play once.",
+        "Plays once, then holds the last frame.",
     ], size=13, gap=0.68)
     _notes(s, "Vanilla already has ToA as a channel. RoPE puts Δt into every query-key product.")
 
@@ -391,7 +365,7 @@ def build() -> Path:
     add_movie_or_gif(s, gif, vid, Inches(0.45), Inches(0.58), Inches(8.7), Inches(4.9), poster=ANIM / "PhysicalBias_poster.png")
     _bullets(s, Inches(9.35), Inches(0.75), Inches(3.6), [
         "|ΔToA| and |Δ incidence| from the inputs.",
-        "λ_t, λ_x: one scalar per head.",
+        "λ_t, λ_u: learned scalars on ToA and incidence.",
         "Bias λB is subtracted from vanilla A.",
         "Same-direction, nearby pulses stay bright.",
         "Maps are L×L. That is the bill.",
@@ -403,41 +377,32 @@ def build() -> Path:
     _textbox(s, Inches(0.55), Inches(0.2), Inches(12), Inches(0.4), "Vanilla already works on most windows", size=24, color=INK, bold=True)
     _plot(s, hist_em, Inches(0.4), Inches(0.7), Inches(7.35), max_height=Inches(5.9))
     _bullets(s, Inches(8.0), Inches(0.85), Inches(4.9), [
-        "Feature DBSCAN emitter ARI 0.58, ~7 extra clusters. Completeness 0.52.",
+        "Feature DBSCAN emitter ARI 0.58. Completeness 0.52.",
         "Vanilla joint: 0.95 emitter, 0.99 mode.",
-        "88% of windows ≥ 0.99. About 1 in 10 below 0.90. That tail is the story.",
-        "RoPE-TOA and Bias stay down until just below 1. None below 0.90.",
-        "Stacking them is worse than Vanilla (57% vs 88% at ≥ 0.99).",
-    ], size=14, gap=0.78)
+        "88% of windows ≥ 0.99. About 1 in 10 below 0.90.",
+        "RoPE-TOA and Bias stay just below 1. None below 0.90.",
+        "Stacking them is worse than Vanilla.",
+    ], size=14, gap=0.82)
     _notes(s, "RQ1 is yes, with a leftover deinterleaving tail. Mode is already easier in the raw PDWs.")
 
-    # 13 joint + bakeoff
+    # 10 joint + bakeoff + cost
     s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.2), Inches(12), Inches(0.4), "Joint is a tax on Vanilla. Time in attention removes it.", size=22, color=INK, bold=True)
-    _plot(s, GEN / "joint_tax.png", Inches(0.4), Inches(0.7), Inches(6.2), max_height=Inches(4.4))
-    _plot(s, GEN / "emitter_ari.png", Inches(6.8), Inches(0.7), Inches(6.1), max_height=Inches(4.4))
-    _textbox(s, Inches(0.5), Inches(5.4), Inches(12.3), Inches(1.3),
-             "Left: emitter-only Vanilla hits 0.999; joint drops to 0.948. Modes do not pay. "
-             "Right: RoPE-TOA and Bias close the tail (ARI 1.000). An emitter-only RoPE-TOA copy matches joint RoPE-TOA — the tax is a Vanilla problem. "
-             "RoPE-az 0.973. Stacking the two time devices scores below Vanilla.",
+    _textbox(s, Inches(0.55), Inches(0.18), Inches(12), Inches(0.35), "Joint is a tax on Vanilla. Time in attention removes it.", size=20, color=INK, bold=True)
+    _plot(s, GEN / "joint_tax.png", Inches(0.35), Inches(0.58), Inches(4.2), max_height=Inches(3.15))
+    _plot(s, GEN / "emitter_ari.png", Inches(4.6), Inches(0.58), Inches(4.3), max_height=Inches(3.15))
+    _plot(s, GEN / "encoder_time.png", Inches(9.0), Inches(0.58), Inches(3.95), max_height=Inches(3.15))
+    _textbox(s, Inches(0.5), Inches(4.0), Inches(12.3), Inches(0.85),
+             "Emitter-only Vanilla hits 0.999; joint drops to 0.948. RoPE-TOA and Bias close the tail (ARI 1.000) without that tax. "
+             "RoPE-az 0.973. Stacking the two time devices scores below Vanilla. RoPE-TOA is +0.9 ms; Bias is ~32 ms encoder.",
              size=14, color=INK)
-    _notes(s, "RQ2 is no for deinterleaving alone. RQ3 is yes for time, no for stacking.")
-
-    # 14 cost + implications
-    s = d.new()
-    _textbox(s, Inches(0.55), Inches(0.2), Inches(12), Inches(0.4), "Same scores, different bills — and what to do with that", size=22, color=INK, bold=True)
-    _plot(s, GEN / "encoder_time.png", Inches(0.4), Inches(0.7), Inches(6.5), max_height=Inches(4.35))
-    _bullets(s, Inches(7.15), Inches(0.75), Inches(5.7), [
-        "RoPE-TOA: +0.9 ms vs Vanilla. Same parameter count.",
-        "Bias: ~32 ms encoder. DBSCAN ~55 ms dominates Vanilla and RoPE.",
+    _bullets(s, Inches(0.55), Inches(4.85), Inches(12.2), [
         "Both partitions from the mixed window → joint RoPE-TOA. Do not stack the bias.",
-        "Deinterleaving only → emitter-only Vanilla is already at the ceiling.",
-        "Cluster IDs die at the window edge. Tracks need a later association.",
+        "Deinterleaving only → emitter-only Vanilla is already at the ceiling. Cluster IDs die at the window edge.",
         "Synthetic. Held-out modulations and operational data are not scored.",
-    ], size=14, gap=0.62)
-    _notes(s, "Do not recommend Bias for production on this evidence.")
+    ], size=14, gap=0.48)
+    _notes(s, "RQ2 is no for deinterleaving alone. RQ3 is yes for time, no for stacking. Do not recommend Bias for production.")
 
-    # 15 close
+    # 11 close
     s = d.new()
     _textbox(s, Inches(0.55), Inches(0.25), Inches(12), Inches(0.45), "In one breath", size=26, color=INK, bold=True)
     lines = [
