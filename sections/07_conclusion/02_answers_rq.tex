@@ -16,9 +16,11 @@
   A Vanilla encoder trained only on $\Loss_{\mathrm{em}}$ outperforms joint Vanilla on emitter $\ARI$ (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
   A Vanilla encoder trained only on $\Loss_{\mathrm{md}}$ matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
   Separate blocks are therefore the better choice if deinterleaving or mode analysis is the sole product.
+  That order matches the classical chain, in which deinterleaving comes first and a later mode stage can run on the recovered train.
   Joint training is the right objective when both partitions must come from the same window and the same encoder.
   On Vanilla that is a compromise on emitters.
-  A joint RoPE-TOA encoder does not pay that cost: its emitter agreement matches an emitter-only copy of the same encoder (\cref{sec:exp:attention}).
+  A joint RoPE-TOA encoder does not pay that cost: its emitter agreement matches an emitter-only copy of the same encoder (\cref{tab:exp:attn_em_task}).
+  An emitter-only Bias encoder does not match its joint scores.
 
   \item[RQ3]
   \emph{Do a pairwise physical attention bias and rotary positional encoding on pulse coordinates improve clustering relative to standard multi-head attention?}
@@ -28,5 +30,5 @@
   Stacking them does not: RoPE-TOA+Bias is slower than Vanilla and worse on emitters.
   Rotary encoding of planar incidence on the deinterleaving branch improves on Vanilla and does not match TOA-only rotary encoding.
   Mode scores move much less.
-  The bias matches RoPE-TOA on accuracy and spends extra memory and encoder time on pairwise maps (\cref{tab:exp:efficiency,sec:disc:attention}).
+  The two mechanisms do the same job; the bias is the quadratic version, and RoPE-TOA is cheaper (\cref{tab:exp:efficiency,sec:disc:attention}).
 \end{description}

@@ -57,7 +57,6 @@ Completeness is $1.000$ with no spread, so a true emitter is not split across cl
 The remaining mistakes are rare undercounts: homogeneity sits just below $1$, and the mean absolute count error is $0.11$ for RoPE-TOA and $0.10$ for Bias.
 Emitter-only Vanilla already sits near that ceiling in \cref{tab:exp:ablation_loss} ($\ARI$ $0.999$).
 Joint RoPE-TOA and Bias sit slightly higher, with a tighter spread.
-An emitter-only RoPE-TOA run, not tabulated, matches that joint emitter $\ARI$ ($0.998$ against $1.000$); the Vanilla joint tax is therefore specific to standard attention.
 
 RoPE-az improves on Vanilla for emitters ($\ARI$ $0.973$, $4.6\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
 Rotating the deinterleaving branch by planar incidence is not, on this test set, a replacement for rotating every layer by \gls{toa}.
@@ -69,6 +68,34 @@ Mean emitter $\ARI$ is $0.851$, below joint Vanilla, and $31\%$ of windows fall 
 Completeness is $0.846$, so the remaining mistakes are splits.
 Mode $\ARI$ stays in the same band as the other joint models.
 Stacking the two time mechanisms is not an improvement on this split.
+
+\subsection{Joint Versus Emitter-Only}\label{sec:exp:attn_task}
+
+The joint scores do not say whether RoPE-TOA and Bias would deinterleave as well without the mode term.
+\Cref{tab:exp:attn_em_task} reports emitter $\ARI$ for those encoders trained with $\Loss_{\mathrm{em}}$ only.
+Vanilla is the ablation of \cref{tab:exp:ablation_loss}.
+RoPE-az and RoPE-TOA+Bias have no emitter-only run.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Emitter $\ARI$ under the joint objective and under $\Loss_{\mathrm{em}}$ only. Joint rows are copied from \cref{tab:exp:attn_em}. Vanilla emitter-only is copied from \cref{tab:exp:ablation_loss}.}
+  \label{tab:exp:attn_em_task}
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    Model & Joint & Emitter-only \\
+    \midrule
+    Vanilla   & $0.948\pm0.176$ & $0.999\pm0.012$ \\
+    RoPE-TOA  & $1.000\pm0.003$ & $0.998\pm0.036$ \\
+    Bias      & $1.000\pm0.002$ & $0.840\pm0.265$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Emitter-only RoPE-TOA matches the joint row.
+The Vanilla joint tax is therefore specific to standard attention.
+Emitter-only Bias does not match: mean $\ARI$ falls to $0.840$, below joint Vanilla.
+The pairwise bias is not a drop-in deinterleaving-only encoder on this split.
 
 \subsection{Per-Window ARI Distributions}\label{sec:exp:results:hist}
 

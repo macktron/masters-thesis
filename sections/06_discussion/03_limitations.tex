@@ -31,7 +31,9 @@ The three-pulse emitter in \cref{fig:exp:feat_imbalance} and the crowded window 
 
 The two terms were not reweighted.
 The finding that joint training costs emitter $\ARI$ on Vanilla is therefore tied to the unweighted sum and to that backbone.
-RoPE-TOA does not show the same cost: its joint emitter $\ARI$ already matches an emitter-only copy of that encoder (\cref{sec:exp:attention}).
+RoPE-TOA does not show the same cost: its joint emitter $\ARI$ already matches an emitter-only copy of that encoder (\cref{tab:exp:attn_em_task}).
+Emitter-only Bias does not match its joint scores on that table.
+Each of those comparisons is one training run; a longer schedule or a reweighted joint loss could shrink either gap.
 
 \Gls{dbscan} is part of the reported system.
 The radius is chosen on the validation grid, $\mathrm{minPts}$ is fixed, and the noise category was ignored because it stayed small on this corpus.

@@ -1,9 +1,9 @@
 """Two Manim scenes for the Saab internal briefing (white theme).
 
 RoPEToA
-    Attention is a query--key dot product. Rotating Q and K by ToA
-    changes the enclosed angle, so the score depends on the relative
-    time gap Δt.
+    A head is a stack of 2D planes. Each plane rotates Q and K by
+    its own frequency times ToA. Shared time co-rotates every plane;
+    a time gap twists fast planes more than slow ones. No captions.
 
 PhysicalBias
     Pairwise |p_i − p_j| maps, scaled by learned λ, are subtracted
@@ -27,6 +27,8 @@ from manim import (
     FadeIn,
     FadeOut,
     GrowArrow,
+    LaggedStart,
+    Line,
     ManimColor,
     MathTex,
     RoundedRectangle,
@@ -35,9 +37,13 @@ from manim import (
     SurroundingRectangle,
     Text,
     Transform,
+    ValueTracker,
     VGroup,
     Write,
+    always_redraw,
     interpolate_color,
+    linear,
+    smooth,
 )
 
 WHITE = "#FFFFFF"
@@ -123,268 +129,182 @@ def to01(m):
 
 
 class RoPEToA(Scene):
-    """Rotary encoding of window-local ToA. Attention = dot product."""
+    """Several 2D planes, each with its own ω. No captions."""
 
     def construct(self):
         self.camera.background_color = WHITE
 
-        title = label("RoPE on time of arrival", size=32)
-        title.to_edge(UP, buff=0.20)
-        sub1 = caption("Attention is the dot product of query and key.", size=18)
-        sub2 = caption("Rotation changes the enclosed angle, so the score changes.", size=18)
-        sub1.next_to(title, DOWN, buff=0.08)
-        sub2.next_to(sub1, DOWN, buff=0.04)
-        self.play(FadeIn(title), FadeIn(sub1), FadeIn(sub2), run_time=1.5)
-        self.wait(1.8)
+        n_planes = 4
+        omegas = np.array([9.0, 3.0, 1.0, 1.0 / 3.0])
+        n_ticks = (32, 16, 8, 6)
+        q0 = np.array([0.32, 0.88, -0.18, 1.08])
+        k0 = np.array([0.58, 1.18, 0.12, 0.78])
 
-        axis = Arrow(LEFT * 5.4, RIGHT * 5.4, color=LINE, stroke_width=3, buff=0)
-        axis_name = caption("window-local ToA", size=16)
-        axis_name.next_to(axis, DOWN, buff=0.12)
+        radius = 1.12
+        origins = [np.array([x, 0.02, 0.0]) for x in np.linspace(-4.95, 4.95, n_planes)]
+        axis_y = 2.48
+        x_left, x_right = -5.35, 5.35
 
-        pulses_spec = [
-            (0.08, ORANGE),
-            (0.18, PURPLE),
-            (0.27, ORANGE),
-            (0.41, PURPLE),
-            (0.52, ORANGE),
-            (0.78, ORANGE),
-            (0.91, PURPLE),
-        ]
-        glyphs = VGroup()
-        ticks = VGroup()
-        for t, color in pulses_spec:
-            x = -5.1 + t * 10.2
-            g = pulse_glyph(color)
-            g.move_to(np.array([x, 0.48, 0]))
-            tick = DashedLine(
-                np.array([x, 0.06, 0]), np.array([x, -0.06, 0]), color=LINE, stroke_width=2
-            )
-            glyphs.add(g)
-            ticks.add(tick)
+        t_q = ValueTracker(0.16)
+        t_k = ValueTracker(0.16)
 
-        legend = VGroup(
-            pulse_glyph(ORANGE, height=0.22, width=0.20),
-            caption("emitter A", size=15, color=ORANGE),
-            pulse_glyph(PURPLE, height=0.22, width=0.20),
-            caption("emitter B", size=15, color=PURPLE),
-        ).arrange(RIGHT, buff=0.16)
-        legend.next_to(axis_name, DOWN, buff=0.16)
+        def x_of(t):
+            return x_left + float(t) * (x_right - x_left)
 
-        train = VGroup(axis, axis_name, glyphs, ticks, legend)
-        train.shift(DOWN * 0.35)
-        self.play(GrowArrow(axis), FadeIn(axis_name), run_time=1.2)
-        self.play(FadeIn(glyphs, lag_ratio=0.12), FadeIn(ticks), FadeIn(legend), run_time=2.0)
-        self.wait(1.2)
+        def angle_q(i):
+            return float(q0[i] + omegas[i] * t_q.get_value())
 
-        close_box = SurroundingRectangle(
-            VGroup(glyphs[0], glyphs[2]), color=CYAN, buff=0.10, corner_radius=0.08
-        )
-        close_note = caption("close in time", size=16, color=CYAN)
-        close_note.next_to(close_box, UP, buff=0.10)
-        far_box = SurroundingRectangle(glyphs[5], color=ORANGE, buff=0.10, corner_radius=0.08)
-        far_note = caption("same emitter, far in time", size=16, color=ORANGE)
-        far_note.next_to(far_box, UP, buff=0.10)
-        self.play(Create(close_box), FadeIn(close_note), run_time=1.2)
-        self.wait(1.4)
-        self.play(Create(far_box), FadeIn(far_note), run_time=1.2)
-        self.wait(1.8)
-        self.play(
-            FadeOut(close_box),
-            FadeOut(close_note),
-            FadeOut(far_box),
-            FadeOut(far_note),
-            FadeOut(train),
-            run_time=1.0,
-        )
+        def angle_k(i):
+            return float(k0[i] + omegas[i] * t_k.get_value())
 
-        origin = np.array([-3.20, 0.05, 0])
-        radius = 1.48
-        plane_title = label("One attention plane", size=20)
-        plane_title.move_to(origin + UP * (radius + 0.52))
-        circle = Circle(radius=radius, color=LINE, stroke_width=2).move_to(origin)
-        xax = Arrow(
-            origin + LEFT * (radius + 0.22),
-            origin + RIGHT * (radius + 0.32),
-            color=LINE,
-            stroke_width=2,
-            buff=0,
-        )
-        yax = Arrow(
-            origin + DOWN * (radius + 0.18),
-            origin + UP * (radius + 0.32),
-            color=LINE,
-            stroke_width=2,
-            buff=0,
-        )
-        self.play(FadeIn(plane_title), Create(circle), GrowArrow(xax), GrowArrow(yax), run_time=1.4)
+        def unit(ang):
+            return np.array([np.cos(ang), np.sin(ang), 0.0])
 
-        def vec(angle, color, length=radius):
-            end = origin + length * np.array([np.cos(angle), np.sin(angle), 0.0])
+        def tick_ring(origin, n):
+            ticks = VGroup()
+            for k in range(n):
+                a = 2.0 * np.pi * k / n
+                d = unit(a)
+                ticks.add(
+                    Line(
+                        origin + (radius - 0.10) * d,
+                        origin + radius * d,
+                        color=LINE,
+                        stroke_width=1.6,
+                    )
+                )
+            return ticks
+
+        def vec_at(origin, ang, color):
             return Arrow(
-                origin, end, color=color, buff=0, stroke_width=7, max_tip_length_to_length_ratio=0.11
-            )
-
-        def arc_between(a0, a1, rad=0.58, color=INK):
-            span = (a1 - a0 + np.pi) % (2 * np.pi) - np.pi
-            return Arc(
-                radius=rad,
-                start_angle=a0,
-                angle=span,
+                origin,
+                origin + radius * unit(ang),
                 color=color,
-                stroke_width=4,
-            ).move_arc_center_to(origin)
+                buff=0,
+                stroke_width=7.5,
+                max_tip_length_to_length_ratio=0.11,
+            )
 
-        q0, k0 = 0.32, 0.92
-        omega = 1.35
-        t_i, t_close, t_far = 0.08, 0.27, 0.78
-        dt_close = abs(t_close - t_i)
-        dt_far = abs(t_far - t_i)
+        def wrapped_span(a0, a1):
+            return (a1 - a0 + np.pi) % (2.0 * np.pi) - np.pi
 
-        q_arrow = vec(q0, CYAN)
-        k_arrow = vec(k0, RED)
-        q_lab = caption("query q", size=16, color=CYAN)
-        k_lab = caption("key k", size=16, color=RED)
-        qk_labs = VGroup(q_lab, k_lab).arrange(DOWN, buff=0.16, aligned_edge=RIGHT)
-        qk_labs.next_to(circle, LEFT, buff=0.28)
+        axis = Arrow(
+            np.array([x_left, axis_y, 0.0]),
+            np.array([x_right + 0.22, axis_y, 0.0]),
+            color=LINE,
+            stroke_width=3,
+            buff=0,
+        )
+        q_pulse = pulse_glyph(CYAN, height=0.42, width=0.22)
+        k_pulse = pulse_glyph(RED, height=0.42, width=0.22)
 
-        phi0 = k0 - q0
-        score0 = float(np.cos(phi0))
-        phi_arc = arc_between(q0, k0, color=INK)
-        phi_lab = caption("content angle  φ", size=16, color=INK)
-        phi_lab.next_to(circle, RIGHT, buff=0.30)
-        phi_lab.shift(UP * 0.42)
+        def put_pulses(*_args, **_kwargs):
+            xq, xk = x_of(t_q.get_value()), x_of(t_k.get_value())
+            q_pulse.move_to(np.array([xq, axis_y + 0.52, 0.0]))
+            k_pulse.move_to(np.array([xk, axis_y - 0.52, 0.0]))
 
-        score_chip = chip(f"q · k  =  cos φ  =  {score0:.2f}", CYAN, width=3.9, height=0.42, size=14)
-        score_chip.next_to(circle, DOWN, buff=0.28)
+        put_pulses()
+        q_pulse.add_updater(put_pulses)
 
-        self.play(GrowArrow(q_arrow), GrowArrow(k_arrow), FadeIn(qk_labs), run_time=1.8)
-        self.wait(1.0)
-        self.play(Create(phi_arc), FadeIn(phi_lab), FadeIn(score_chip), run_time=1.6)
-        self.wait(2.2)
+        q_stem = always_redraw(
+            lambda: DashedLine(
+                np.array([x_of(t_q.get_value()), axis_y + 0.28, 0.0]),
+                np.array([x_of(t_q.get_value()), axis_y, 0.0]),
+                color=CYAN,
+                stroke_width=2,
+            )
+        )
+        k_stem = always_redraw(
+            lambda: DashedLine(
+                np.array([x_of(t_k.get_value()), axis_y, 0.0]),
+                np.array([x_of(t_k.get_value()), axis_y - 0.28, 0.0]),
+                color=RED,
+                stroke_width=2,
+            )
+        )
+        gap = always_redraw(
+            lambda: Line(
+                np.array([x_of(t_q.get_value()), axis_y, 0.0]),
+                np.array([max(x_of(t_k.get_value()), x_of(t_q.get_value()) + 0.01), axis_y, 0.0]),
+                color=MUTED,
+                stroke_width=6,
+            )
+        )
 
-        q1 = q0 + t_i * omega
-        k_close = k0 + t_close * omega
-        q_rot = vec(q1, CYAN)
-        k_rot = vec(k_close, RED)
-        phi_close = k_close - q1
-        score_close = float(np.cos(phi_close))
-        new_arc = arc_between(q1, k_close, color=CYAN)
-        new_phi_lab = caption("φ + Δt · ω", size=16, color=CYAN).move_to(phi_lab.get_center())
-        q_lab2 = caption("q̃ = R(tᵢ) q", size=16, color=CYAN)
-        k_lab2 = caption("k̃ = R(tⱼ) k", size=16, color=RED)
-        qk_labs2 = VGroup(q_lab2, k_lab2).arrange(DOWN, buff=0.16, aligned_edge=RIGHT)
-        qk_labs2.next_to(circle, LEFT, buff=0.28)
-        score_chip2 = chip(
-            f"q̃ · k̃  =  cos(φ + Δt ω)  =  {score_close:.2f}",
-            CYAN,
-            width=4.6,
-            height=0.42,
-            size=14,
-        ).move_to(score_chip.get_center())
+        circles = VGroup()
+        ticks = VGroup()
+        crosses = VGroup()
+        for i, origin in enumerate(origins):
+            circles.add(Circle(radius=radius, color=LINE, stroke_width=2).move_to(origin))
+            ticks.add(tick_ring(origin, n_ticks[i]))
+            crosses.add(
+                VGroup(
+                    Line(
+                        origin + LEFT * (radius + 0.16),
+                        origin + RIGHT * (radius + 0.22),
+                        color=LINE,
+                        stroke_width=1.4,
+                    ),
+                    Line(
+                        origin + DOWN * (radius + 0.12),
+                        origin + UP * (radius + 0.22),
+                        color=LINE,
+                        stroke_width=1.4,
+                    ),
+                )
+            )
+
+        arrows = VGroup()
+        arcs = VGroup()
+        for i, origin in enumerate(origins):
+            arrows.add(
+                always_redraw(lambda i=i, origin=origin: vec_at(origin, angle_q(i), CYAN))
+            )
+            arrows.add(
+                always_redraw(lambda i=i, origin=origin: vec_at(origin, angle_k(i), RED))
+            )
+            arcs.add(
+                always_redraw(
+                    lambda i=i, origin=origin: Arc(
+                        radius=0.42,
+                        start_angle=angle_q(i),
+                        angle=wrapped_span(angle_q(i), angle_k(i)),
+                        color=INK,
+                        stroke_width=4,
+                    ).move_arc_center_to(origin)
+                )
+            )
+
+        plane_intro = [
+            VGroup(circles[i], ticks[i], crosses[i]) for i in range(n_planes)
+        ]
+        self.play(
+            GrowArrow(axis),
+            LaggedStart(*[FadeIn(g) for g in plane_intro], lag_ratio=0.14),
+            run_time=1.6,
+        )
+        self.play(
+            FadeIn(q_pulse),
+            FadeIn(k_pulse),
+            FadeIn(q_stem),
+            FadeIn(k_stem),
+            FadeIn(gap),
+            FadeIn(arrows),
+            FadeIn(arcs),
+            run_time=1.3,
+        )
+        self.wait(0.7)
 
         self.play(
-            Transform(q_arrow, q_rot),
-            Transform(k_arrow, k_rot),
-            Transform(qk_labs, qk_labs2),
-            Transform(phi_arc, new_arc),
-            Transform(phi_lab, new_phi_lab),
-            Transform(score_chip, score_chip2),
-            run_time=3.0,
+            t_q.animate.set_value(0.42),
+            t_k.animate.set_value(0.42),
+            run_time=3.4,
+            rate_func=smooth,
         )
+        self.wait(0.9)
+
+        self.play(t_k.animate.set_value(0.90), run_time=5.6, rate_func=linear)
         self.wait(2.4)
-
-        panel = RoundedRectangle(
-            width=6.15,
-            height=4.55,
-            corner_radius=0.10,
-            fill_color=CARD,
-            fill_opacity=1.0,
-            stroke_color=LINE,
-            stroke_width=1.5,
-        )
-        panel.move_to(np.array([3.70, 0.05, 0]))
-        panel_title = label("Same content. Only the time gap changes.", size=16)
-        panel_title.move_to(panel.get_top() + DOWN * 0.32)
-
-        eq = math(
-            r"\tilde{\mathbf{q}}_i\cdot\tilde{\mathbf{k}}_j"
-            r"= \mathbf{q}_i^{\top} R(t_j-t_i)\,\mathbf{k}_j",
-            size=24,
-        )
-        eq.next_to(panel_title, DOWN, buff=0.18)
-
-        def case_row(title_text, dt, color, extra_note):
-            extra = dt * omega
-            sc = float(np.cos(phi0 + extra))
-            name = caption(title_text, size=16, color=color)
-            dt_t = caption(f"Δt = {dt:.2f}   ·   {extra_note}", size=14, color=MUTED)
-            sc_t = caption(f"cos(φ + Δt ω) = {sc:.2f}", size=15, color=INK)
-            left = VGroup(name, dt_t).arrange(DOWN, aligned_edge=LEFT, buff=0.05)
-            bar_bg = RoundedRectangle(
-                width=2.15,
-                height=0.24,
-                corner_radius=0.04,
-                fill_color=WHITE,
-                stroke_color=LINE,
-                stroke_width=1,
-            )
-            fill_w = 0.20 + 1.85 * max(sc, 0.0)
-            bar = RoundedRectangle(
-                width=fill_w,
-                height=0.24,
-                corner_radius=0.04,
-                fill_color=color,
-                fill_opacity=1,
-                stroke_width=0,
-            )
-            g = VGroup(left, bar_bg).arrange(RIGHT, buff=0.18)
-            bar.move_to(bar_bg.get_left() + RIGHT * (fill_w / 2))
-            g.add(bar)
-            return VGroup(g, sc_t).arrange(DOWN, buff=0.10, aligned_edge=LEFT)
-
-        row_close = case_row("close in time", dt_close, ORANGE, "small extra rotation")
-        row_far = case_row("far in time", dt_far, MUTED, "large extra rotation")
-        rows = VGroup(row_close, row_far).arrange(DOWN, buff=0.28, aligned_edge=LEFT)
-        rows.next_to(eq, DOWN, buff=0.26)
-        rows.align_to(eq, LEFT)
-
-        foot = caption("The product only sees the relative rotation R(Δt).", size=15, color=MUTED)
-        foot.next_to(rows, DOWN, buff=0.22)
-
-        self.play(FadeIn(panel), FadeIn(panel_title), run_time=1.1)
-        self.play(Write(eq), run_time=2.0)
-        self.wait(0.8)
-        self.play(FadeIn(row_close), run_time=1.2)
-        self.wait(1.8)
-
-        k_far_ang = k0 + t_far * omega
-        k_far_vec = vec(k_far_ang, RED)
-        phi_far = k_far_ang - q1
-        score_far = float(np.cos(phi_far))
-        far_arc = arc_between(q1, k_far_ang, color=ORANGE)
-        score_chip3 = chip(
-            f"q̃ · k̃  =  cos(φ + Δt ω)  =  {score_far:.2f}",
-            ORANGE,
-            width=4.6,
-            height=0.42,
-            size=14,
-        ).move_to(score_chip.get_center())
-
-        self.play(
-            Transform(k_arrow, k_far_vec),
-            Transform(phi_arc, far_arc),
-            Transform(score_chip, score_chip3),
-            FadeIn(row_far),
-            run_time=3.2,
-        )
-        self.wait(1.6)
-        self.play(FadeIn(foot), run_time=1.0)
-        self.wait(2.4)
-
-        takeaway = label("Time enters the dot product. No extra weights.", size=22, color=CYAN)
-        takeaway.to_edge(DOWN, buff=0.22)
-        self.play(FadeIn(takeaway), run_time=1.2)
-        self.wait(3.4)
 
 
 class PhysicalBias(Scene):

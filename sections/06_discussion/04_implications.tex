@@ -2,6 +2,7 @@
 
 If the task is deinterleaving alone, the Vanilla ablation is the practical message.
 Train the emitter term only.
+Emitter-only Bias is not a substitute (\cref{tab:exp:attn_em_task}).
 If the task is modes alone, train the mode term only.
 Classical \gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
 Feature \gls{dbscan} already shows that the mode partition is the more separable of the two in the raw \gls{pdw} features (\cref{tab:exp:vanilla}), so a later mode stage on a well recovered train is the easier geometry.
@@ -12,8 +13,10 @@ The joint loss is for the case where both partitions are required from the same 
 
 If both partitions are required, standard self-attention is already enough for modes on this corpus and is not enough for the hardest emitter windows.
 Putting \gls{toa} into the attention product, either as RoPE-TOA or as the pairwise bias, is what closes that gap.
+The two mechanisms do the same job.
 RoPE-TOA does it without extra weights and without a material change in encoder time.
 The bias matches those scores and spends memory and milliseconds on pairwise maps.
+RoPE-TOA is the practical choice of the two.
 Using both at once does not help on this split, and it keeps the pairwise cost.
 Incidence rotary encoding on the deinterleaving branch is not a substitute, once the Cartesian direction channels are already input features.
 

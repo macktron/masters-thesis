@@ -9,6 +9,7 @@ Final configurations and numbers are deferred to \cref{ch:experiments}; this sec
   The inactive branch is excluded from the backward pass and is not scored.
   Emitter-only is the comparable transformer for whether the joint loss outperforms deinterleaving-alone training.
   Mode-only is the symmetric control, trained only on $\Loss_{\mathrm{md}}$.
+  Emitter-only copies of the RoPE-TOA and Bias encoders are scored with the attention variants in \cref{ch:experiments}.
 
   \item[\Gls{dbscan} on fixed window features.] No transformer; \gls{dbscan} \parencite{ester1996density} clusters a deterministic vector built from the scaled \glspl{pdw} of a window.
   There is no training.

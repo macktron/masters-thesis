@@ -63,9 +63,12 @@ The neighbourhood radius $\varepsilon$ is selected independently per model and p
     \midrule
     Emitter-only & $0.6$ & $0.1$ \\
     Mode-only & $0.5$ & $0.1$ \\
+    RoPE-TOA emitter-only & $0.3$ & $0.1$ \\
+    Bias emitter-only & $0.3$ & $0.1$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 The single-task runs of \cref{sec:exp:ablation} inherit the Vanilla architecture and the optimisation schedule of \cref{tab:exp:hparams_main}.
 Their $\varepsilon$ are selected independently, as for the joint models.
+Emitter-only RoPE-TOA and Bias in \cref{tab:exp:attn_em_task} inherit the same schedule.

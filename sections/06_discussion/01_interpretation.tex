@@ -15,6 +15,7 @@ Under $\Loss_{\mathrm{joint}}$ the trunk yields to that conflict on the emitter 
 That emitter cost is the one that matters for a classical chain.
 \Gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
 If deinterleaving is reliable, a later mode stage can run on a single-emitter pulse train.
+Better task-specific deinterleaving is what that order assumes, and \cref{tab:exp:ablation_loss} is that result.
 Joint training is for recovering both partitions from the still-mixed window.
 The Vanilla joint tax therefore hurts the stage that chain cannot skip.
 
@@ -29,8 +30,13 @@ Scanning windows such as \cref{fig:exp:feat_scan} produce a different failure: o
 A $3$/$1997$ split (\cref{fig:exp:feat_imbalance}) makes deinterleaving hard, and a recovered train with three pulses is a poor input to any later mode classifier.
 
 Joint training is still the only objective that trains both partitions in one run.
-The attention variants were all trained jointly, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
-On RoPE-TOA the joint tax is absent: an emitter-only copy of that encoder matches the joint emitter $\ARI$ already reported in \cref{sec:exp:attention}.
+The attention bake-off of \cref{sec:exp:attention} is under that objective, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
+\Cref{tab:exp:attn_em_task} reports the same comparison on RoPE-TOA and Bias.
+On RoPE-TOA the joint tax is absent: the emitter-only copy matches the joint $\ARI$.
+Emitter-only Bias falls below joint Vanilla.
+Within a window, pulses that share an emitter often share a mode, so $\Loss_{\mathrm{md}}$ can pull with $\Loss_{\mathrm{em}}$ once time is in the attention product.
+That reading fits joint RoPE-TOA and joint Bias; it does not remove the Vanilla tax.
+Whether either comparison would hold after a longer or reweighted run is not known.
 
 \subsection{Physical Structure in Attention}\label{sec:disc:attention}
 
@@ -47,8 +53,11 @@ Incidence is a useful input feature, as \cref{fig:exp:feat_maxemitters} shows, b
 RoPE-az still improves on Vanilla (\cref{tab:exp:attn_em}) and does not match RoPE-TOA.
 A likely reason is that the Cartesian incidence channels are already in the token. Rotary encoding of those channels restates a cue the encoder already has, while TOA rotary encoding restates a cue that standard attention otherwise has to learn from a single scalar.
 
-The physical bias reaches the same emitter scores as RoPE-TOA by a more expensive route.
-It adds a handful of learned scalars, not a second network.
+RoPE-TOA and the physical bias are two ways of putting time into the attention product.
+Under the joint objective they close the same emitter tail (\cref{tab:exp:attn_em_task}).
+The bias does that with an explicit $L\times L$ map and a handful of learned scalars, not a second network.
+Rotary encoding does it in the inner product, with no extra weights.
+On this split they behave alike, and RoPE-TOA is the cheaper of the two.
 Vanilla attention already computes logits $\mat{A}\in\R^{L\times L}$ in every head (\cref{eq:method:attn_base}), so the bias matrices of \cref{eq:method:attn_bias} have the same $L\times L$ shape.
 Fused attention kernels can avoid storing that logit matrix.
 The bias is an explicit dense addend $B^{(p)}_{ij}=\lvert p_i-p_j\rvert$.
