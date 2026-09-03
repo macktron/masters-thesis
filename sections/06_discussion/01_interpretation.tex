@@ -9,13 +9,13 @@ This section follows that order.
 
 The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
 Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
-Mode-only matches Joint on modes (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
-Under $\Loss_{\mathrm{joint}}$ the trunk yields to that conflict on the emitter side and keeps the mode side intact.
+Joint is slightly higher on modes than Mode-only (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
+Under $\Loss_{\mathrm{joint}}$ the trunk yields on the emitter side; the mode side is not the one that pays.
 
-That emitter cost is the one that matters for a classical chain.
+That Vanilla emitter cost is real.
 \Gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
 If deinterleaving is reliable, a later mode stage can run on a single-emitter pulse train.
-Better task-specific deinterleaving is what that order assumes, and \cref{tab:exp:ablation_loss} is that result.
+Better task-specific deinterleaving is what that order assumes, and on Vanilla \cref{tab:exp:ablation_loss} is that result.
 Joint training is for recovering both partitions from the still-mixed window.
 The Vanilla joint tax therefore hurts the stage that chain cannot skip.
 
@@ -32,8 +32,11 @@ A $3$/$1997$ split (\cref{fig:exp:feat_imbalance}) makes deinterleaving hard, an
 Joint training is still the only objective that trains both partitions in one run.
 The attention bake-off of \cref{sec:exp:attention} is under that objective, so the emitter gains of RoPE-TOA and Bias in \cref{sec:disc:attention} are gains under that more demanding objective, not under a deinterleaving-only loss.
 \Cref{tab:exp:attn_em_task} reports the same comparison on RoPE-TOA and Bias.
-On RoPE-TOA the joint tax is absent: the emitter-only copy matches the joint $\ARI$.
-Emitter-only Bias falls below joint Vanilla.
+On RoPE-TOA the joint encoder is at par with its emitter-only copy, and slightly higher.
+Joint Bias sits at the same ceiling.
+Both are at par with emitter-only Vanilla on deinterleaving; the margins are small, and there is no clear winner (\cref{tab:exp:attn_em_task,tab:exp:ablation_loss}).
+On modes, joint Vanilla is already slightly higher than Mode-only, and joint RoPE-TOA and Bias sit higher still (\cref{tab:exp:attn_md}).
+A fairer single-task comparison would run a classical mode clusterer or classifier on the trains recovered by an emitter-only encoder; that second stage was not scored.
 Within a window, pulses that share an emitter often share a mode, so $\Loss_{\mathrm{md}}$ can pull with $\Loss_{\mathrm{em}}$ once time is in the attention product.
 That reading fits joint RoPE-TOA and joint Bias; it does not remove the Vanilla tax.
 Whether either comparison would hold after a longer or reweighted run is not known.

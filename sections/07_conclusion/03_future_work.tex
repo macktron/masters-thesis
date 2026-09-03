@@ -47,6 +47,7 @@ The encoder stays frozen; only the head is trained to name types from the traini
 Mode clustering already recovers those types on almost every window (\cref{tab:exp:attn_md}), so the branch representation already separates them on the manifold.
 A linear head on the same tokens tests whether that separation is readable as class logits.
 Clustering remains the decoder for types that are not in the catalogue.
+The missing single-task counterpart is a classical mode clusterer or classifier on the trains of an emitter-only encoder.
 
 \subsection{Dataset Hardness}\label{sec:concl:future:hardness}
 
@@ -63,9 +64,3 @@ Windows where that baseline fails are the hard ones, and they give a comparison 
 Held-out modulation types are the experiment that the clustering decoder is for.
 Until that split is scored, the mode branch is a grouping of seen catalogue types.
 Operational recordings, and simulator drop or spurious-pulse regimes as an actual test set, are the corresponding check on distribution shift.
-
-\subsection{Alternative Decoders}\label{sec:concl:future:decoders}
-
-Only \gls{dbscan} is used at inference.
-A Gaussian mixture or spectral clustering would assume a different geometry in the same embeddings.
-Running those decoders on frozen embeddings would separate encoder error from decoder error.

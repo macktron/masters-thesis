@@ -29,9 +29,11 @@ Rare modes and sparse emitters contribute little to a window-mean $\ARI$.
 A method can look strong in \cref{tab:exp:attn_md} while still failing the labels that occupy few pulses.
 The three-pulse emitter in \cref{fig:exp:feat_imbalance} and the crowded window in \cref{fig:exp:feat_maxmode} are reminders of that regime, not a substitute for a stratified breakdown.
 
+The single-task pipeline of deinterleaving then a classical mode stage on the recovered trains was not scored.
+
 The two terms were not reweighted.
 The finding that joint training costs emitter $\ARI$ on Vanilla is therefore tied to the unweighted sum and to that backbone.
-RoPE-TOA does not show the same cost: its joint emitter $\ARI$ already matches an emitter-only copy of that encoder (\cref{tab:exp:attn_em_task}).
+RoPE-TOA does not show the same cost: its joint emitter $\ARI$ is at par with an emitter-only copy of that encoder, and slightly higher (\cref{tab:exp:attn_em_task}).
 Emitter-only Bias does not match its joint scores on that table.
 Each of those comparisons is one training run; a longer schedule or a reweighted joint loss could shrink either gap.
 
