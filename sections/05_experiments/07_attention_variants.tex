@@ -3,6 +3,7 @@
 
 This section compares jointly trained encoders that differ only in how time and incidence enter attention, which is the comparison for RQ3.
 Five configurations are trained with the joint objective of \cref{eq:method:loss_total}.
+Emitter-only copies of RoPE-TOA and Bias follow the joint bake-off in \cref{sec:exp:attn_task}.
 Hyperparameters follow \cref{sec:exp:hparams}.
 Vanilla is the joint encoder of \cref{sec:exp:results:vanilla}.
 RoPE-TOA applies rotary encoding on the window-local \gls{toa} in the trunk and in both branches.
@@ -69,7 +70,7 @@ Completeness is $0.846$, so the remaining mistakes are splits.
 Mode $\ARI$ stays in the same band as the other joint models.
 Stacking the two time mechanisms is not an improvement on this split.
 
-\subsection{Joint Versus Emitter-Only}\label{sec:exp:attn_task}
+\subsection{Single-Task RoPE-TOA and Bias}\label{sec:exp:attn_task}
 
 The joint scores do not say whether RoPE-TOA and Bias would deinterleave as well without the mode term.
 \Cref{tab:exp:attn_em_task} reports emitter $\ARI$ for those encoders trained with $\Loss_{\mathrm{em}}$ only.
@@ -79,7 +80,7 @@ RoPE-az and RoPE-TOA+Bias have no emitter-only run.
 \begin{table}[H]
   \centering
   \small
-  \caption{Emitter $\ARI$ under the joint objective and under $\Loss_{\mathrm{em}}$ only. Joint rows are copied from \cref{tab:exp:attn_em}. Vanilla emitter-only is copied from \cref{tab:exp:ablation_loss}.}
+  \caption{Emitter $\ARI$ for joint and single-task (emitter-only) Vanilla, RoPE-TOA, and Bias. Joint rows are copied from \cref{tab:exp:attn_em}. Vanilla emitter-only is copied from \cref{tab:exp:ablation_loss}.}
   \label{tab:exp:attn_em_task}
   \begin{tabular}{@{}lcc@{}}
     \toprule
