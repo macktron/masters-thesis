@@ -22,6 +22,7 @@ The best value in each column is in bold and ties are bold on every tied row.
   \caption{Emitter clustering for joint versus single-task objectives on the Vanilla encoder.}
   \label{tab:exp:ablation_em}
   \small
+  \makebox[\linewidth][c]{%
   \begin{tabular}{@{}lccccc@{}}
     \toprule
     Objective & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
@@ -29,7 +30,8 @@ The best value in each column is in bold and ties are bold on every tied row.
     Joint        & $0.948\pm0.176$ & $0.957\pm0.138$ & $0.989\pm0.052$ & $0.951\pm0.166$ & $0.25\pm0.49$ \\
     Emitter-only & $\mathbf{0.999\pm0.012}$ & $\mathbf{0.997\pm0.013}$ & $\mathbf{0.995\pm0.021}$ & $\mathbf{0.999\pm0.009}$ & $\mathbf{0.12\pm0.36}$ \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}%
+  }
 \end{table}
 
 \begin{table}[tbp]
@@ -37,6 +39,7 @@ The best value in each column is in bold and ties are bold on every tied row.
   \caption{Mode clustering for joint versus single-task objectives on the Vanilla encoder. Entries follow the same aggregation as \cref{tab:exp:ablation_em}.}
   \label{tab:exp:ablation_md}
   \small
+  \makebox[\linewidth][c]{%
   \begin{tabular}{@{}lccccc@{}}
     \toprule
     Objective & $\ARI$ & $\AMI$ & Hom. & Comp. & Count error \\
@@ -44,7 +47,8 @@ The best value in each column is in bold and ties are bold on every tied row.
     Joint     & $\mathbf{0.985\pm0.107}$ & $\mathbf{0.986\pm0.102}$ & $\mathbf{0.994\pm0.027}$ & $\mathbf{0.988\pm0.103}$ & $\mathbf{0.23\pm0.50}$ \\
     Mode-only & $0.983\pm0.110$ & $0.984\pm0.103$ & $0.992\pm0.036$ & $\mathbf{0.988\pm0.102}$ & $0.24\pm0.56$ \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}%
+  }
 \end{table}
 
 On emitters, Emitter-only outperforms Joint.
