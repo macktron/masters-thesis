@@ -8,14 +8,14 @@ This section follows that order.
 \subsection{Joint Versus Single-Task Training}\label{sec:disc:joint}
 
 The two contrastive terms pull on incompatible similarities in the shared trunk: pulses that should be close as modes may need to be far as emitters.
-Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em}).
-Joint is slightly higher on modes than Mode-only (\cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_md}).
+Emitter-only Vanilla already deinterleaves more cleanly than joint Vanilla (\cref{tab:exp:ablation_em,fig:exp:kcorr_ablation_em}).
+Joint is slightly higher on modes than Mode-only (\cref{tab:exp:ablation_md,fig:exp:kcorr_ablation_md}).
 Under $\Loss_{\mathrm{joint}}$ the trunk yields on the emitter side; the mode side is not the one that pays.
 
 That Vanilla emitter cost is real.
 \Gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
 If deinterleaving is reliable, a later mode stage can run on a single-emitter pulse train.
-Better task-specific deinterleaving is what that order assumes, and on Vanilla \cref{tab:exp:ablation_loss} is that result.
+Better task-specific deinterleaving is what that order assumes, and on Vanilla \cref{tab:exp:ablation_em} is that result.
 Joint training is for recovering both partitions from the still-mixed window.
 The Vanilla joint tax therefore hurts the stage that chain cannot skip.
 
@@ -34,8 +34,8 @@ The attention bake-off of \cref{sec:exp:attention} is under that objective, so t
 \Cref{tab:exp:attn_em_task} reports the same comparison on RoPE-TOA and Bias.
 On RoPE-TOA the joint encoder is at par with its emitter-only copy, and slightly higher.
 Joint Bias sits at the same ceiling.
-Both are at par with emitter-only Vanilla on deinterleaving; the margins are small, and there is no clear winner (\cref{tab:exp:attn_em_task,tab:exp:ablation_loss}).
-On modes, joint Vanilla is already slightly higher than Mode-only, and joint RoPE-TOA and Bias sit higher still (\cref{tab:exp:attn_md}).
+Both are at par with emitter-only Vanilla on deinterleaving; the margins are small, and there is no clear winner (\cref{tab:exp:attn_em_task,tab:exp:ablation_em}).
+On modes, joint Vanilla is already slightly higher than Mode-only (\cref{tab:exp:ablation_md}), and joint RoPE-TOA and Bias sit higher still (\cref{tab:exp:attn_md}).
 A fairer single-task comparison would run a classical mode clusterer or classifier on the trains recovered by an emitter-only encoder; that second stage was not scored.
 Within a window, pulses that share an emitter often share a mode, so $\Loss_{\mathrm{md}}$ can pull with $\Loss_{\mathrm{em}}$ once time is in the attention product.
 That reading fits joint RoPE-TOA and joint Bias; it does not remove the Vanilla tax.
@@ -77,18 +77,18 @@ It would not remove the subtraction from each head's logits, which is still quad
 
 The intended split of \cref{sec:method:attention:bias} was that deinterleaving would use incidence and that the mode branch would ignore it.
 \Cref{tab:exp:bias_coef} does not show that split.
-The largest-magnitude means sit on the mode branch, and they are incidence, not time.
-Those table entries are averages over the eight heads and four layers of each stack, not a single shared coefficient.
+The largest-magnitude medians sit on the mode branch, and they are incidence, not time.
+Those table entries are medians over the eight heads and four layers of each stack, not a single shared coefficient.
 
-Because the term is subtracted from the logits, a positive $\bar\lambda_{\mathrm{inc}}$ decreases attention as the incidence difference grows: pulses from different directions attend less.
+Because the term is subtracted from the logits, a positive $\lambda_{\mathrm{inc}}$ decreases attention as the incidence difference grows: pulses from different directions attend less.
 That uses viewing geometry on the mode branch rather than ignoring it.
 The Bias mode scores remain the tightest in \cref{tab:exp:attn_md}, so that penalty does not break mode clustering on this corpus.
 
-The deinterleaving means are also positive, and of similar size on time and on incidence.
-A positive $\bar\lambda_t$ there decreases attention as the \gls{toa} gap grows, so a pulse attends more strongly to its temporal neighbors than to pulses farther away in the interleaved stream.
+The deinterleaving medians are also positive, and of similar size on time and on incidence.
+A positive $\lambda_t$ there decreases attention as the \gls{toa} gap grows, so a pulse attends more strongly to its temporal neighbors than to pulses farther away in the interleaved stream.
 Individual heads can differ in sign, as the $-0.832$ incidence head on the Bias emitter branch shows.
 Those reversed heads raise attention as the coordinate gap grows.
-Trunk means stay near zero, so most of the pairwise work is in the branches.
+Trunk medians stay near zero, and the quartile interval on that stack crosses zero, so most of the pairwise work is in the branches.
 
 RoPE never builds those maps.
 Its dumped parameter count matches Vanilla, and its encoder time stays within a couple of milliseconds of Vanilla.
@@ -98,7 +98,7 @@ Stacking the two time mechanisms does not add their gains.
 RoPE-TOA+Bias pays the Bias encoder time and scores below Vanilla on emitters (\cref{tab:exp:attn_em,fig:exp:hist_em}).
 The extra errors are splits (\cref{fig:exp:kcorr_em}).
 Both devices already put a function of $\Delta t$ into the attention product, so the stacked logits can double-count time.
-The stacked checkpoint still has a large positive mode incidence mean (\cref{tab:exp:bias_coef}), while its mode time mean changes sign relative to Bias.
+The stacked checkpoint still has a large positive mode incidence median (\cref{tab:exp:bias_coef}), while its mode time median changes sign relative to Bias.
 Under subtraction, that sign change turns a temporal distance term into a temporal proximity term.
 That is consistent with rotary encoding already carrying time and with the bias remaining an incidence penalty.
 The tables give no reason to pay for both.

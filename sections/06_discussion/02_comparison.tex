@@ -14,7 +14,7 @@ The present scores cannot be stacked against that accuracy. The tasks differ.
 Emitter labels here are recording-local, and both branches are clustered rather than classified.
 That is closer to \textcite{gunn2025deinterleaving}, who train a transformer for deinterleaving and cluster the embeddings with HDBSCAN.
 The Vanilla emitter row of \cref{tab:exp:vanilla} is the analogous existence test, on a different corpus and with \gls{dbscan} rather than HDBSCAN.
-Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_loss,fig:exp:kcorr_ablation_em} show that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
+Gunn et al.\ stop at one partition. The Vanilla mode row of \cref{tab:exp:vanilla} is the addition, and \cref{tab:exp:ablation_em,fig:exp:kcorr_ablation_em} show that it is not free: joint Vanilla deinterleaves less cleanly than an emitter-only copy of the same encoder.
 
 The attention variants go one step past that counterpart.
 Gunn et al.\ use standard dot-product attention and leave \gls{toa} as an input feature.
@@ -26,5 +26,5 @@ None of these variants is a published radar baseline. They are drop-in changes o
 Deep clustering methods in \cref{sec:related:deep_clustering} usually learn one partition, often with the number of clusters chosen in advance.
 Unlike \gls{dec}, DeepCluster, a catalogue softmax, sampled triplets, or a SwAV codebook, the supervised contrastive kernel of \cref{eq:method:supcon} forms all-pairs similarities over the pooled batch; that is a compute cost rather than a clustering-quality claim (\cref{sec:disc:limitations}).
 The two branches here are not a hierarchy of one relation. Modes are not subtypes of emitters.
-A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_loss} is the empirical trace of that conflict in the shared trunk: joint training costs emitter agreement relative to the emitter-only ceiling.
+A single embedding cannot keep both similarities, and \cref{tab:exp:ablation_em} is the empirical trace of that conflict in the shared trunk: joint training costs emitter agreement relative to the emitter-only ceiling.
 The comparison with multi-task softmax heads in \cref{sec:related:joint} is the same point in other words. Those heads need globally consistent class names. The emitter identifiers in this corpus are not that.

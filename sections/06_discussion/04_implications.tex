@@ -1,8 +1,8 @@
 \section{Implications}\label{sec:disc:implications}
 
-If the task is deinterleaving alone, emitter-only Vanilla and joint RoPE-TOA sit at the same ceiling; there is no clear winner (\cref{tab:exp:ablation_loss,tab:exp:attn_em_task}).
+If the task is deinterleaving alone, emitter-only Vanilla and joint RoPE-TOA sit at the same ceiling; there is no clear winner (\cref{tab:exp:ablation_em,tab:exp:attn_em_task}).
 Emitter-only Bias is not a substitute (\cref{tab:exp:attn_em_task}).
-If the task is modes alone, a mode-only encoder is slightly below joint Vanilla, and below joint RoPE-TOA and Bias (\cref{tab:exp:ablation_loss,tab:exp:attn_md}).
+If the task is modes alone, a mode-only encoder is slightly below joint Vanilla, and below joint RoPE-TOA and Bias (\cref{tab:exp:ablation_md,tab:exp:attn_md}).
 Classical \gls{esm} pipelines analyze mode after deinterleaving, on each recovered train (\cref{sec:bg:elint_pipeline}).
 Feature \gls{dbscan} already shows that the mode partition is the more separable of the two in the raw \gls{pdw} features (\cref{tab:exp:vanilla}), so a later mode stage on a well recovered train is the easier geometry.
 An emitter-only encoder can in principle feed that second stage; a classical mode clusterer or classifier on those trains was not scored, so the single-task pipeline is not a measured alternative.
@@ -26,7 +26,7 @@ It does not, by itself, demonstrate that unseen modes would form their own clust
 Until a held-out-modulation split is scored, operators should read the mode indices as a grouping of catalogue types that were present in training, not as a detector of new waveforms.
 Emitter indices are window-local hypotheses. They still need a later association stage if the product is a track, not a window.
 
-For representation learning more broadly, the useful Vanilla fact is the one in \cref{tab:exp:ablation_loss}.
+For representation learning more broadly, the useful Vanilla fact is the one in \cref{tab:exp:ablation_em,tab:exp:ablation_md}.
 Two supervised contrastive terms with different positive-set scopes can share a trunk, and the trunk will trade one partition against the other.
 That is expected once the two similarities conflict, and it is measurable.
 A relative weight between the two terms, or detaching more of the trunk, is the obvious next control when both heads must stay close to their single-task ceilings.

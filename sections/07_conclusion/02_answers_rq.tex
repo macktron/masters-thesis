@@ -13,10 +13,10 @@
   \emph{Does a joint objective that couples deinterleaving with mode clustering outperform a comparable transformer trained for deinterleaving alone?}
 
   The joint encoder is at par once time is in attention, not under Vanilla joint training.
-  Joint RoPE-TOA and Bias match or slightly exceed deinterleaving-only training on emitters and are slightly higher on modes than mode-only Vanilla (\cref{tab:exp:attn_em_task,tab:exp:ablation_loss,tab:exp:attn_md}).
+  Joint RoPE-TOA and Bias match or slightly exceed deinterleaving-only training on emitters and are slightly higher on modes than mode-only Vanilla (\cref{tab:exp:attn_em_task,tab:exp:ablation_em,tab:exp:ablation_md,tab:exp:attn_md}).
   The margins are small, and there is no clear winner between emitter-only Vanilla and joint RoPE-TOA on deinterleaving.
   A fairer single-task comparison would run a classical mode clusterer or classifier on the trains of an emitter-only encoder, which was not scored.
-  On Vanilla attention the joint loss still costs emitters (\cref{tab:exp:ablation_loss}).
+  On Vanilla attention the joint loss still costs emitters (\cref{tab:exp:ablation_em}).
 
   \item[RQ3]
   \emph{Do a pairwise physical attention bias and rotary positional encoding on pulse coordinates improve clustering relative to standard multi-head attention?}

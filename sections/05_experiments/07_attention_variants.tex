@@ -52,11 +52,11 @@ The best value in each column is in bold and ties are bold on every tied row.
   \end{tabular}
 \end{table}
 
-RoPE-TOA and Bias remove the emitter tail that joint Vanilla leaves in \cref{tab:exp:vanilla,tab:exp:ablation_loss}.
+RoPE-TOA and Bias remove the emitter tail that joint Vanilla leaves in \cref{tab:exp:vanilla,tab:exp:ablation_em}.
 Mean emitter $\ARI$ is $1.000$ to three decimals, $99\%$ of windows sit at or above $0.99$, and none of the windows falls below $0.90$.
 Completeness is $1.000$ with no spread, so a true emitter is not split across clusters.
 The remaining mistakes are rare undercounts: homogeneity sits just below $1$, and the mean absolute count error is $0.11$ for RoPE-TOA and $0.10$ for Bias.
-Emitter-only Vanilla already sits near that ceiling in \cref{tab:exp:ablation_loss} ($\ARI$ $0.999$).
+Emitter-only Vanilla already sits near that ceiling in \cref{tab:exp:ablation_em} ($\ARI$ $0.999$).
 Joint RoPE-TOA and Bias sit slightly higher, with a tighter spread.
 
 RoPE-az improves on Vanilla for emitters ($\ARI$ $0.973$, $4.6\%$ of windows below $0.90$) but does not match TOA-only rotary encoding.
@@ -74,13 +74,13 @@ Stacking the two time mechanisms is not an improvement on this split.
 
 The joint scores do not say whether RoPE-TOA and Bias would deinterleave as well without the mode term.
 \Cref{tab:exp:attn_em_task} reports emitter $\ARI$ for those encoders trained with $\Loss_{\mathrm{em}}$ only.
-Vanilla is the ablation of \cref{tab:exp:ablation_loss}.
+Vanilla is the ablation of \cref{tab:exp:ablation_em}.
 RoPE-az and RoPE-TOA+Bias have no emitter-only run.
 
 \begin{table}[H]
   \centering
   \small
-  \caption{Emitter $\ARI$ for joint and single-task (emitter-only) Vanilla, RoPE-TOA, and Bias. Joint rows are copied from \cref{tab:exp:attn_em}. Vanilla emitter-only is copied from \cref{tab:exp:ablation_loss}.}
+  \caption{Emitter $\ARI$ for joint and single-task (emitter-only) Vanilla, RoPE-TOA, and Bias. Joint rows are copied from \cref{tab:exp:attn_em}. Vanilla emitter-only is copied from \cref{tab:exp:ablation_em}.}
   \label{tab:exp:attn_em_task}
   \begin{tabular}{@{}lcc@{}}
     \toprule
@@ -195,31 +195,38 @@ Bias and RoPE-TOA+Bias store one scalar per head, layer, and selected coordinate
 The trunk has only time; each task branch also has an incidence coefficient $\lambda_{\mathrm{inc}}$.
 The term is subtracted from the logits, so a positive $\lambda$ decreases attention as $\lvert p_i-p_j\rvert$ grows and a negative $\lambda$ increases it.
 
-\Cref{tab:exp:bias_coef} reports the mean over the $8$ heads and $4$ layers of each stack ($32$ scalars per coordinate).
-All branch means are positive except the Bias mode time mean ($-0.118$).
+\Cref{tab:exp:bias_coef} reports the median over the $8$ heads and $4$ layers of each stack ($32$ scalars per coordinate), with the first and third quartiles.
+The mean is a poor summary here: a few large heads pull it away from the value that most heads actually take.
+All branch medians are positive except Bias mode time ($-0.115$).
 The typical head therefore penalizes a large \gls{toa} or incidence gap.
-Every mode incidence scalar is positive in both models.
+Every mode incidence scalar is positive in both models, and the two medians agree ($0.622$ and $0.617$); the Bias mean of $0.877$ was the outlier tail, not the typical head.
 One Bias emitter head reaches $-0.832$ and instead raises attention as incidence differs, and some time heads in each stack do the same: those heads push the corresponding pulses together.
-The trunk mean stays near zero.
+The trunk median stays near zero, and its quartile interval crosses zero.
 
-RoPE-TOA+Bias keeps the same incidence pattern at smaller magnitude.
+RoPE-TOA+Bias keeps the same incidence pattern.
 Mode time coefficients that were negative under Bias become positive once rotary encoding already carries $\Delta t$.
 
 \begin{table}[H]
   \centering
   \small
-  \caption{Learned bias coefficients after training. Each $\bar\lambda$ is the mean over the $8$ heads and $4$ layers of that stack. A positive coefficient decreases attention as $\lvert p_i-p_j\rvert$ grows (\cref{eq:method:attn_bias}).}
+  \caption{Learned bias coefficients after training. Each cell is the median over the $8$ heads and $4$ layers of that stack ($32$ scalars); the brackets are the first and third quartiles. A positive coefficient decreases attention as $\lvert p_i-p_j\rvert$ grows (\cref{eq:method:attn_bias}).}
   \label{tab:exp:bias_coef}
+  \providecommand{\medq}[3]{%
+    \begin{tabular}[t]{@{}c@{}}
+      $#1$\\[-0.12em]
+      {\scriptsize $[#2,\,#3]$}
+    \end{tabular}%
+  }
   \begin{subtable}[t]{0.48\linewidth}
     \centering
     \caption{Bias}
     \begin{tabular}{@{}lcc@{}}
       \toprule
-      Branch & $\bar\lambda_t$ & $\bar\lambda_{\mathrm{inc}}$ \\
+      Branch & $\lambda_t$ & $\lambda_{\mathrm{inc}}$ \\
       \midrule
-      Trunk & $-0.026$ & {---} \\
-      Mode & $-0.118$ & $0.877$ \\
-      Emitter & $0.202$ & $0.229$ \\
+      Trunk   & \medq{-0.018}{-0.077}{0.031} & {---} \\
+      Mode    & \medq{-0.115}{-0.295}{-0.005} & \medq{0.622}{0.370}{1.159} \\
+      Emitter & \medq{0.197}{0.105}{0.305} & \medq{0.260}{0.169}{0.351} \\
       \bottomrule
     \end{tabular}
   \end{subtable}
@@ -229,11 +236,11 @@ Mode time coefficients that were negative under Bias become positive once rotary
     \caption{RoPE-TOA+Bias}
     \begin{tabular}{@{}lcc@{}}
       \toprule
-      Branch & $\bar\lambda_t$ & $\bar\lambda_{\mathrm{inc}}$ \\
+      Branch & $\lambda_t$ & $\lambda_{\mathrm{inc}}$ \\
       \midrule
-      Trunk & $0.037$ & {---} \\
-      Mode & $0.107$ & $0.626$ \\
-      Emitter & $0.167$ & $0.136$ \\
+      Trunk   & \medq{0.034}{-0.018}{0.092} & {---} \\
+      Mode    & \medq{0.083}{0.037}{0.148} & \medq{0.617}{0.349}{0.792} \\
+      Emitter & \medq{0.155}{0.070}{0.238} & \medq{0.143}{0.083}{0.186} \\
       \bottomrule
     \end{tabular}
   \end{subtable}
