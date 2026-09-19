@@ -4,27 +4,27 @@
 \chapter*{Abstract}
 \markboth{Abstract}{Abstract}
 
-Passive electronic support measures record a time-ordered stream of pulse descriptor words in which several radars are interleaved and each radar may change its operating mode.
-Operators need both emitter and mode groupings from the same stream.
-Classical pipelines deinterleave first and then classify modes, so the two partitions are never formed jointly from the mixed list.
+Passive electronic support measures record a time-ordered stream of pulse descriptor words in which pulses from several emitters are interleaved and each emitter may change its operating mode.
+Operators need both groupings from that mixed list: which pulses belong to the same physical emitter, and which pulses share an operating mode.
+Classical pipelines deinterleave first and then classify modes on the recovered trains.
+That split never learns the two partitions jointly from the interleaved stream, and it scales poorly when waveforms are agile and trains overlap.
 
-The experiments use a synthetic, fully labelled scenario corpus.
+This thesis treats the two partitions as a joint clustering problem.
+A transformer encoder with a shared trunk and two branches maps a window of pulses to an emitter embedding and a mode embedding.
+The branches are trained with two supervised contrastive losses that differ only in how positives are chosen: recording-local emitter identifiers versus global mode labels.
+At inference, density-based clustering (DBSCAN) is applied independently to each branch, without assigning names from a fixed catalogue.
+
+We train and evaluate the encoder on a synthetic, fully labelled scenario corpus.
 Each pulse carries a recording-local emitter identity and a mode from a catalogue of $19$ types shared across recordings.
-Training, validation and test windows contain $2000$ pulses, created by breaking up recordings of different simulated scenarios into fixed windows.
-Scores are reported on $1169$ non-overlapping test windows.
+Recordings are split into windows of $2000$ pulses, and scores are reported on $1169$ non-overlapping test windows.
+We compare the joint objective with single-task training, and standard self-attention with rotary encoding of time of arrival and with a pairwise physical attention bias.
 
-A transformer encoder with a shared trunk and two separate branches, one for deinterleaving and one for mode clustering, is trained with two supervised contrastive losses.
-The losses differ only in how positives are chosen.
-The emitter loss treats pulses from the same recording-local emitter as positives.
-The mode loss treats pulses with the same global mode label as positives.
-
-At inference time, density-based clustering (DBSCAN) is applied independently to the embeddings of each branch.
-
-Standard self-attention already recovers both partitions on most windows.
-Mean emitter adjusted Rand index (ARI) is $0.948$ and mean mode ARI is $0.985$.
-Rotary encoding of time of arrival and a pairwise physical attention bias raise emitter ARI to $1.000$ and remove the remaining failure tail.
-A Vanilla encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ versus $0.948$), while a mode-only encoder reaches a similar level on modes (ARI $0.983$).
-The joint objective is therefore a trade-off, not a free extra head.
+Standard self-attention already recovers both partitions on most windows, with mean emitter adjusted Rand index (ARI) $0.948$ and mean mode ARI $0.985$.
+Rotary encoding of time of arrival, or a pairwise physical attention bias, each raises emitter ARI to $1.000$ and removes the remaining failure tail.
+Combining the two does not.
+Under standard attention, a deinterleaving-only encoder outperforms the joint model on emitters (ARI $0.999$ versus $0.948$).
+Once time is in attention, the joint encoder matches that single-task baseline.
+The joint objective is therefore a trade-off under standard attention, not a free extra head.
 Held-out modulations and operational recordings are left to future work.
 
 \vspace{1em}

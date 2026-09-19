@@ -15,13 +15,6 @@ where the factor of 2 accounts for the outbound and return paths \parencite{skol
 Radars emit pulses at a \gls{pri}, or equivalently a \gls{prf}.
 If an echo from an earlier pulse arrives after the next pulse has been sent, the measured delay no longer identifies a unique range.
 
-\begin{figure}[tbp]
-\centering
-\input{figures/background/monostatic_radar.tex}
-\caption{Monostatic radar geometry and round-trip timing. A co-located transmit/receive (TX/RX) aperture on the left emits a pulse that travels to a target at range $R$, scatters, and returns to the same aperture as an echo. The lower timeline shows the corresponding events: the outgoing TX pulse at $t=0$ and the received echo at $t=\tau$, separated by the round-trip delay $\tau = 2R/c$ from \cref{eq:bg:range}.}
-\label{fig:bg:pulse_echo_timeline}
-\end{figure}
-
 \subsection*{Active Radar Versus Passive Reception}
 
 An active radar times the echo against its own outgoing pulses and from that delay obtains range \parencite{skolnik2008radar}.
