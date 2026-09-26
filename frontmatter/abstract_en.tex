@@ -14,7 +14,7 @@ The branches are trained with two supervised contrastive losses that differ only
 At inference, density-based clustering (DBSCAN) is applied independently to the mode and emitter embeddings, without assigning names from a fixed catalogue.
 
 We train and evaluate the encoder on a synthetic, fully labelled scenario corpus.
-Each pulse carries a recording-local emitter identity and a mode from a catalogue of $19$ types shared across recordings.
+Each pulse carries an emitter identity and a mode from a catalogue of $19$ types shared across recordings.
 Recordings are split into windows of $2000$ pulses, and scores are reported on $1169$ non-overlapping test windows.
 We compare the joint objective with single-task training, and standard self-attention with rotary encoding of time of arrival and with a pairwise physical attention bias.
 
