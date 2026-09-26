@@ -7,8 +7,9 @@
 Passive electronic support measures systems usually record a time-ordered stream of pulse descriptor words in which pulses from several emitters are interleaved and each emitter may change its operating mode.
 Operators need both groupings from that mixed list: which pulses belong to the same physical emitter, and which pulses share an operating mode.
 Classical pipelines deinterleave first and then classify modes on the recovered trains.
-
-This thesis instead treats the two partitions as a joint clustering problem.
+In such a cascade the mode stage takes the deinterleaver's hard pulse assignments as given, with no notion of how reliable they are, so a split or contaminated train silently corrupts the input to mode recognition.
+The two tasks also rely on overlapping pulse-level cues such as carrier frequency, pulse width, and pulse repetition pattern, which suggests that a representation shared between them, as in multi-task learning, may serve both better than two separately designed stages.
+This thesis therefore treats the two partitions as a joint clustering problem.
 A multi-task transformer encoder architecture is proposed, composed of a shared trunk and two task-specific branches maps a window of pulses to an emitter embedding and a mode embedding.
 The branches are trained with two supervised contrastive losses that differ only in how positives are chosen: emitter identifiers versus mode labels.
 At inference, density-based clustering (DBSCAN) is applied independently to the mode and emitter embeddings, without assigning names from a fixed catalogue.
