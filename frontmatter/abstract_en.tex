@@ -26,8 +26,8 @@ Encoding time of arrival in attention, through RoPE or the pairwise bias, raises
 Combining the two mechanisms lowers emitter ARI to $0.851$, below standard attention.
 With time encoded in attention, the joint encoder matches the emitter-only standard encoder on emitters and slightly exceeds the mode-only standard encoder on modes (ARI up to $0.992$ versus $0.983$).
 The pairwise bias benefits most from the joint objective: trained on emitters alone, it reaches an emitter ARI of only $0.840$.
-The cost of the joint objective is therefore specific to standard attention.
-Held-out modulations and operational recordings are left to future work.
+The cost of the joint objective therefore disappears once time of arrival is encoded through RoPE or the pairwise bias. Held-out modulations and operational recordings are left to future work.
 
+The cost of the joint objective therefore disappears once time of arrival is encoded through RoPE or the pairwise bias.
 \vspace{1em}
 \noindent\textbf{Keywords:} transformer, deep clustering, electronic intelligence, radar emitter identification, mode recognition, supervised contrastive learning.
