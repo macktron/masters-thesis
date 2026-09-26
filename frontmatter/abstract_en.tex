@@ -22,7 +22,7 @@ We compare the encoder with DBSCAN on the raw pulse features, the joint objectiv
 
 With standard self-attention, the joint encoder already recovers both partitions on most windows, with mean emitter adjusted Rand index (ARI) $0.948$ and mean mode ARI $0.985$, against $0.578$ and $0.811$ for DBSCAN on the raw features.
 On emitters, however, it falls short of an encoder trained only for deinterleaving (ARI $0.999$).
-Encoding time of arrival in attention, through RoPE or the pairwise bias, closes that gap: the joint encoder then reaches emitter ARI $1.000$ and mode ARI up to $0.992$, at or above every single-task encoder tested
+Encoding time of arrival in attention, through RoPE or the pairwise bias, closes that gap: the joint encoder then reaches emitter ARI $1.000$ and mode ARI up to $0.992$, at or above every single-task encoder tested.
 Held-out modulations and operational recordings are left to future work.
 
 \vspace{1em}
