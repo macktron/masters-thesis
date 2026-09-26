@@ -11,7 +11,7 @@ Classical pipelines deinterleave first and then classify modes on the recovered 
 This thesis instead treats the two partitions as a joint clustering problem.
 A multi-task transformer encoder architecture is proposed, composed of a shared trunk and two task-specific branches maps a window of pulses to an emitter embedding and a mode embedding.
 The branches are trained with two supervised contrastive losses that differ only in how positives are chosen: emitter identifiers versus mode labels.
-At inference, density-based clustering (DBSCAN) is applied independently to each branch, without assigning names from a fixed catalogue.
+At inference, density-based clustering (DBSCAN) is applied independently to the mode and emitter embeddings, without assigning names from a fixed catalogue.
 
 We train and evaluate the encoder on a synthetic, fully labelled scenario corpus.
 Each pulse carries a recording-local emitter identity and a mode from a catalogue of $19$ types shared across recordings.
