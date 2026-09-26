@@ -8,7 +8,7 @@
 System för elektronisk stödverksamhet (ESM) fångar passivt upp och analyserar radarsignaler för att identifiera vilka radarsändare som finns och i vilket driftläge de befinner sig.
 Efter mottagaren reduceras varje inspelning vanligtvis till en tidsordnad ström av pulsbeskrivande ord, där pulser från flera sändare är blandade och varje sändare kan byta arbetsmod.
 Operatörer behöver två grupperingar ur samma blandade ström: vilka pulser som kommer från samma fysiska sändare, och vilka pulser som delar arbetsmod.
-Klassiska kedjor sorterar först pulserna per unik radarsändare och klassificerar sedan moder på de skattade pulstågen för varje sändare.
+Traditionella ESM kedjor sorterar först pulserna per unik radarsändare och klassificerar sedan moder på de skattade pulstågen för varje sändare.
 Varje fel i sorteringen förs därmed vidare till modigenkänningen, eftersom pulstilldelningarna är hårda och saknar mått på tillförlitlighet.
 De två uppgifterna bygger dessutom på delvis samma egenskaper hos pulserna, till exempel bärfrekvens, pulsbredd och pulsrepetitionsmönster, vilket tyder på att en gemensam representation, som i fleruppgiftsinlärning, kan fungera bättre för båda än två separat utformade steg.
 Denna uppsats behandlar därför de två partitionerna som ett gemensamt klustringsproblem.
