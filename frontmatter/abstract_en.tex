@@ -21,14 +21,9 @@ Recordings are split into windows of $2000$ pulses, and scores are reported on $
 We compare the encoder with DBSCAN on the raw pulse features, the joint objective with single-task training, and standard self-attention with two ways of encoding time of arrival in attention: rotary position encoding (RoPE) and a pairwise physical attention bias.
 
 With standard self-attention, the joint encoder already recovers both partitions on most windows, with mean emitter adjusted Rand index (ARI) $0.948$ and mean mode ARI $0.985$, against $0.578$ and $0.811$ for DBSCAN on the raw features.
-Under standard attention, however, an encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ versus $0.948$).
-Encoding time of arrival in attention, through RoPE or the pairwise bias, raises joint emitter ARI to $1.000$ and removes the remaining tail of failed windows.
-Combining the two mechanisms lowers emitter ARI to $0.851$, below standard attention.
-With time encoded in attention, the joint encoder matches the emitter-only standard encoder on emitters and slightly exceeds the mode-only standard encoder on modes (ARI up to $0.992$ versus $0.983$).
-The pairwise bias benefits most from the joint objective: trained on emitters alone, it reaches an emitter ARI of only $0.840$.
-The cost of the joint objective therefore disappears once time of arrival is encoded through RoPE or the pairwise bias.
+On emitters, however, it falls short of an encoder trained only for deinterleaving (ARI $0.999$).
+Encoding time of arrival in attention, through RoPE or the pairwise bias, closes that gap: the joint encoder then reaches emitter ARI $1.000$ and mode ARI up to $0.992$, at or above every single-task encoder tested.
 Held-out modulations and operational recordings are left to future work.
 
-The cost of the joint objective therefore disappears once time of arrival is encoded through RoPE or the pairwise bias.
 \vspace{1em}
 \noindent\textbf{Keywords:} transformer, deep clustering, electronic intelligence, radar emitter identification, mode recognition, supervised contrastive learning.
