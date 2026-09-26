@@ -5,29 +5,29 @@
 \chapter*{Sammanfattning}
 \markboth{Sammanfattning}{Sammanfattning}
 
-Passiv signalspaning registrerar en tidsordnad ström av pulsbeskrivande ord där flera radarstationer är sammanflätade och varje radar kan byta sin arbetsmod.
-Operatörer behöver både sändar- och modgrupperingar ur samma ström.
-Klassiska kedjor avinterfolierar först och klassificerar sedan moder, så de två partitionerna bildas aldrig gemensamt ur den blandade listan.
+Passiva system för elektroniska stödåtgärder (ESM) registrerar vanligtvis en tidsordnad ström av pulsbeskrivande ord, där pulser från flera sändare är blandade och varje sändare kan byta arbetsmod.
+Operatörer behöver två grupperingar ur samma blandade lista: vilka pulser som kommer från samma fysiska sändare, och vilka pulser som delar arbetsmod.
+Klassiska kedjor sorterar först pulserna per unik radarsändare och klassificerar sedan moder på de återskapade pulstågen.
+I en sådan kedja tar modsteget sorteringens hårda tilldelningar för givna, utan någon uppfattning om hur tillförlitliga de är, så ett uppdelat eller förorenat pulståg försämrar tyst indata till modigenkänningen.
+De två uppgifterna bygger dessutom på delvis samma egenskaper hos pulserna, till exempel bärfrekvens, pulsbredd och pulsrepetitionsmönster, vilket tyder på att en gemensam representation, som i fleruppgiftsinlärning, kan fungera bättre för båda än två separat utformade steg.
+Denna uppsats behandlar därför de två partitionerna som ett gemensamt klustringsproblem.
+En transformerkodare för flera uppgifter föreslås, med en gemensam stam och två uppgiftsspecifika grenar som avbildar ett fönster av pulser på en sändarinbäddning och en modinbäddning.
+Grenarna tränas med två övervakade kontrastiva förlustfunktioner som bara skiljer sig i hur positiva par väljs: sändaridentitet respektive modetikett.
+Vid inferens tillämpas täthetsbaserad klustring (DBSCAN) oberoende på mod- och sändarinbäddningarna, utan att namn tilldelas från en fast katalog.
 
-Försöken använder ett syntetiskt, fullt märkt scenariokorpus.
-Varje puls bär en inspelningslokal sändaridentitet och en mod ur en katalog med $19$ typer som delas mellan inspelningar.
-Tränings-, validerings- och testfönster innehåller $2000$ pulser, skapade genom att dela upp inspelningar av olika simulerade scenarier i fasta fönster.
-Resultat redovisas på $1169$ överlappningsfria testfönster.
+Kodaren tränas och utvärderas på en syntetisk, fullständigt märkt samling scenarier.
+Varje puls har en sändaridentitet som är lokal för inspelningen och en mod ur en katalog med $19$ typer som delas mellan inspelningar.
+Inspelningarna delas upp i fönster om $2000$ pulser, och resultat redovisas på $1169$ icke-överlappande testfönster.
+Vi jämför det gemensamma träningsmålet med träning för en enskild uppgift, samt vanlig självuppmärksamhet med roterande kodning av ankomsttid och med en parvis fysisk uppmärksamhetsbias.
 
-En transformerkodare med gemensam stam och två separata grenar, en för avinterfoliering och en för modklustring, tränas med två övervakade kontrastiva förluster.
-Förlusterna skiljer sig bara i hur positiva exempel väljs.
-Sändarförlusten behandlar pulser från samma inspelningslokala sändare som positiva.
-Modförlusten behandlar pulser med samma globala modetikett som positiva.
-
-Vid inferens tillämpas täthetsbaserad klustring (DBSCAN) oberoende på inbäddningarna från varje gren.
-
-Vanlig självuppmärksamhet återfinner redan båda partitionerna på de flesta fönster.
-Medelvärdet av justerat Rand-index (ARI) för sändare är $0{,}948$ och medelvärdet av mod-ARI är $0{,}985$.
-Roterande kodning av ankomsttid och en parvis fysisk uppmärksamhetsbias höjer sändar-ARI till $1{,}000$ och tar bort den kvarvarande felsvansen.
-En Vanilla-kodare tränad bara för avinterfoliering slår den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}948$), medan en kodare tränad bara för moder når en liknande nivå på moder (ARI $0{,}983$).
-Det gemensamma målet är alltså en avvägning, inte ett gratis extra huvud.
-Held-out-modulationer och operativa inspelningar lämnas till fortsatt arbete.
+Vanlig självuppmärksamhet återskapar redan båda partitionerna på de flesta fönster, med ett medelvärde för justerat Rand-index (ARI) på $0{,}948$ för sändare och $0{,}985$ för moder.
+Att koda ankomsttid i uppmärksamheten, antingen med RoPE eller med den föreslagna parvisa fysiska uppmärksamhetsbiasen, höjer var för sig sändar-ARI till $1{,}000$ och tar bort den kvarvarande svansen av misslyckade fönster.
+En kombination av de två gör det inte.
+Med vanlig uppmärksamhet, utan någon kodning av ankomsttid, presterar en kodare tränad enbart för radiosändarsortering bättre än den gemensamma modellen på sändare (ARI $0{,}999$ mot $0{,}948$).
+När tid kodas i uppmärksamheten presterar den gemensamma kodaren något bättre än enkeluppgiftsmodellerna med vanlig uppmärksamhet.
+Det gemensamma målet är alltså en avvägning med vanlig uppmärksamhet, inte ett gratis extra huvud.
+Modulationstyper som hållits utanför träningen och operativa inspelningar lämnas till framtida arbete.
 
 \vspace{1em}
-\noindent\textbf{Nyckelord:} transformer, djup klustring, signalspaning, radarsändaridentifiering, modigenkänning, övervakad kontrastiv inlärning.
+\noindent\textbf{Nyckelord:} transformer, djup klustring, signalspaning, identifiering av radarsändare, modigenkänning, övervakad kontrastiv inlärning.
 \end{otherlanguage}
