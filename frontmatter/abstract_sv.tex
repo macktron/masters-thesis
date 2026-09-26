@@ -12,8 +12,8 @@ Traditionella ESM kedjor sorterar först pulserna per unik radarsändare och kla
 Varje fel i sorteringen förs därmed vidare till modigenkänningen, eftersom pulstilldelningarna är hårda och saknar mått på tillförlitlighet.
 De två uppgifterna bygger dessutom på delvis samma egenskaper hos pulserna, till exempel bärfrekvens, pulsbredd och pulsrepetitionsmönster, vilket tyder på att en gemensam representation, som i fleruppgiftsinlärning, kan fungera bättre för båda än två separat utformade steg.
 Denna uppsats behandlar därför de två partitionerna som ett gemensamt klustringsproblem.
-En transformerkodare för flera uppgifter, med en gemensam stam och två uppgiftsspecifika grenar, avbildar ett fönster av pulser på en sändarinbäddning och en modinbäddning.
-Grenarna tränas med två övervakade kontrastiva förlustfunktioner som bara skiljer sig i hur positiva par väljs: sändaridentitet respektive modetikett.
+En transformerkodare för båda uppgifterna, med en delad stamenkodare och två uppgiftsspecifika grenar, skapar två uppsättningar av latenta representationer (embeddings) av pulserna, en baserat på vilket radarsändaren pulsen kommer ifrån, och en från vilken mod radarsändearen använde vid utsändningen.
+Modellen tränas med två övervakade kontrastiva förlustfunktioner, en på vardera gren, som bara skiljer sig i hur positiva par väljs: sändaridentitet respektive mod.
 
 Vid inferens tillämpas täthetsbaserad klustring (DBSCAN) oberoende på sändar- och modinbäddningarna i stället för att moder tilldelas från en fast katalog, så att båda grenarna tränas och avkodas på samma sätt.
 
