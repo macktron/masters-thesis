@@ -4,10 +4,10 @@
 \chapter*{Abstract}
 \markboth{Abstract}{Abstract}
 
-Electronic support measures systems intercept and analyze radar signals to identify the emitters present and how they operate.
+Electronic support measures systems passively intercept and analyze radar signals to identify the emitters present and how they operate.
 After the receiver, each recording is typically reduced to a time-ordered stream of pulse descriptor words, in which pulses from several emitters are interleaved and each emitter may change its operating mode.
 Operators need both groupings from that mixed list: which pulses belong to the same physical emitter, and which pulses share an operating mode.
-Classical pipelines deinterleave first and then classify modes on the recovered trains.
+Classical pipelines deinterleave first and then classify modes on the predicted single emitter trains.
 In such a cascade the mode stage takes the deinterleaver's hard pulse assignments as given, with no notion of how reliable they are, so a split or contaminated train silently corrupts the input to mode recognition.
 The two tasks also rely on overlapping pulse-level cues such as carrier frequency, pulse width, and pulse repetition pattern, which suggests that a representation shared between them, as in multi-task learning, may serve both better than two separately designed stages.
 This thesis therefore treats the two partitions as a joint clustering problem.
