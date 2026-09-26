@@ -7,7 +7,6 @@
 Passive electronic support measures record a time-ordered stream of pulse descriptor words in which pulses from several emitters are interleaved and each emitter may change its operating mode.
 Operators need both groupings from that mixed list: which pulses belong to the same physical emitter, and which pulses share an operating mode.
 Classical pipelines deinterleave first and then classify modes on the recovered trains.
-That split never learns the two partitions jointly from the interleaved stream, and it scales poorly when waveforms are agile and trains overlap.
 
 This thesis treats the two partitions as a joint clustering problem.
 A transformer encoder with a shared trunk and two branches maps a window of pulses to an emitter embedding and a mode embedding.
