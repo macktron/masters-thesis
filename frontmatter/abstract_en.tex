@@ -4,32 +4,29 @@
 \chapter*{Abstract}
 \markboth{Abstract}{Abstract}
 
-
-Electronic support measures systems intercept and analyse radar signals to identify the emitters present and how they operate among other things.
-
-After the receiver, each recording is traditionally reduced to a time-ordered stream of pulse descriptor words, in which pulses from several emitters are interleaved and each emitter may change its operating mode.
-
-
+Electronic support measures systems intercept and analyze radar signals to identify the emitters present and how they operate.
+After the receiver, each recording is typically reduced to a time-ordered stream of pulse descriptor words, in which pulses from several emitters are interleaved and each emitter may change its operating mode.
 Operators need both groupings from that mixed list: which pulses belong to the same physical emitter, and which pulses share an operating mode.
 Classical pipelines deinterleave first and then classify modes on the recovered trains.
 In such a cascade the mode stage takes the deinterleaver's hard pulse assignments as given, with no notion of how reliable they are, so a split or contaminated train silently corrupts the input to mode recognition.
 The two tasks also rely on overlapping pulse-level cues such as carrier frequency, pulse width, and pulse repetition pattern, which suggests that a representation shared between them, as in multi-task learning, may serve both better than two separately designed stages.
 This thesis therefore treats the two partitions as a joint clustering problem.
-A multi-task transformer encoder architecture is proposed, composed of a shared trunk and two task-specific branches maps a window of pulses to an emitter embedding and a mode embedding.
+A multi-task transformer encoder, composed of a shared trunk and two task-specific branches, maps a window of pulses to an emitter embedding and a mode embedding.
 The branches are trained with two supervised contrastive losses that differ only in how positives are chosen: emitter identifiers versus mode labels.
-At inference, density-based clustering (DBSCAN) is applied independently to the mode and emitter embeddings, without assigning names from a fixed catalogue.
+At inference, density-based clustering (DBSCAN) is applied independently to the emitter and mode embeddings instead of assigning modes from a fixed catalogue, so the mode output stays open to modulations not seen in training.
 
-We train and evaluate the encoder on a synthetic, fully labelled scenario corpus.
+We train and evaluate the encoder on a synthetic, fully labeled scenario corpus.
 Each pulse carries a recording-local emitter identity and a mode from a catalogue of $19$ types shared across recordings.
 Recordings are split into windows of $2000$ pulses, and scores are reported on $1169$ non-overlapping test windows.
-We compare the joint objective with single-task training, and standard self-attention with rotary encoding of time of arrival and with a pairwise physical attention bias.
+We compare the encoder with DBSCAN on the raw pulse features, the joint objective with single-task training, and standard self-attention with two ways of encoding time of arrival in attention: rotary position encoding (RoPE) and a pairwise physical attention bias.
 
-Standard self-attention already recovers both partitions on most windows, with mean emitter adjusted Rand index (ARI) $0.948$ and mean mode ARI $0.985$.
-Encoding time of arrival in attention, trogh RoPE or a introduced pairwise physical attention bias, each raises emitter ARI to $1.000$ and removes the remaining failure tail.
-Combining the two does not.
-Under standard attention, without any encoding of time of arrival, a deinterleaving-only encoder outperforms the joint model on emitters (ARI $0.999$ versus $0.948$).
-Once time is encoded in attention, the joint encoder narrowly outperforms the single-task vanilla models.
-The joint objective is therefore a trade-off under standard attention, not a free extra head.
+With standard self-attention, the joint encoder already recovers both partitions on most windows, with mean emitter adjusted Rand index (ARI) $0.948$ and mean mode ARI $0.985$, against $0.578$ and $0.811$ for DBSCAN on the raw features.
+Under standard attention, however, an encoder trained only for deinterleaving outperforms the joint model on emitters (ARI $0.999$ versus $0.948$).
+Encoding time of arrival in attention, through RoPE or the pairwise bias, raises joint emitter ARI to $1.000$ and removes the remaining tail of failed windows.
+Combining the two mechanisms lowers emitter ARI to $0.851$, below standard attention.
+With time encoded in attention, the joint encoder matches the emitter-only standard encoder on emitters and slightly exceeds the mode-only standard encoder on modes (ARI up to $0.992$ versus $0.983$).
+The pairwise bias benefits most from the joint objective: trained on emitters alone, it reaches an emitter ARI of only $0.840$.
+The cost of the joint objective is therefore specific to standard attention.
 Held-out modulations and operational recordings are left to future work.
 
 \vspace{1em}
