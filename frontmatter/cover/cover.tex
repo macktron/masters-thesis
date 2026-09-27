@@ -1,0 +1,120 @@
+% =====================================================================
+% cover.tex - KTH front cover, compiled separately with XeLaTeX so it can
+% use Arial exactly as the official KTH thesis template does
+% (kth/kth-fonts.tex, kth/kth-layout.tex \kthcover). main.tex includes the
+% resulting build/cover/cover.pdf as its first page.
+%
+% Build (done automatically by .latexmkrc; run from the repository root):
+%   xelatex -output-directory=build/cover frontmatter/cover/cover.tex
+% =====================================================================
+\documentclass[12pt]{report}
+
+\usepackage{etoolbox}
+\usepackage{xstring}
+\usepackage{ifthen}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[absolute,overlay]{textpos}
+\usepackage[a4paper,twoside,
+  top=37mm,bottom=50mm,inner=45mm,outer=35mm,
+  headsep=15mm,headheight=6mm,footskip=25mm]{geometry}
+
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures={TeX}}
+\newfontfamily\coverlfont[Mapping=tex-text]{Arial}
+\newfontfamily\coverbfont[Mapping=tex-text]{Arial Bold}
+
+\usepackage{polyglossia}
+\setmainlanguage[variant=us]{english}
+
+\linespread{1.05}
+
+\input{thesis-metadata}
+
+\newtoggle{gfivepaper}
+\newif\ifinswedish
+
+\makeatletter
+\title{\thesistitle}
+\edef\@subtitle{\thesissubtitle}
+\edef\@authorsFirstname{\thesisauthorfirstname}
+\edef\@authorsLastname{\thesisauthorlastname}
+\let\@secondAuthorsLastname\@empty
+\let\@secondAuthorsFirstname\@empty
+\def\@subjectArea{\thesissubjectarea}
+\let\@secondSubjectArea\@empty
+\edef\@courseCycle{\thesiscoursecycle}
+\edef\@courseCredits{\thesiscredits}
+\let\@coverIllustration\@empty
+
+% ---- Verbatim from kth/kth-layout.tex (\kthcover), English branch ----
+\newcommand{\kthcover}{
+\iftoggle{gfivepaper}{
+  \newgeometry{top=65mm,bottom=30mm,left=62mm,right=18mm}
+}{
+  \newgeometry{top=232.34pt,bottom=70.9pt,left=70.9pt, right=70.9pt}
+}
+
+\thispagestyle{empty}
+
+
+
+\begin{textblock*}{106.16898110pt}(226.77pt, 35.4pt)
+\includegraphics[width=106.16898110pt, height=118.9419140pt, keepaspectratio]{figures/kth/KTH_logo_RGB_bla.png}
+\end{textblock*}
+\begin{center}
+{\coverlfont \fontsize{12}{13}
+  Degree Project in \@subjectArea\\
+}
+  \addvspace{8pt}
+  {\fontsize{10}{12} \coverlfont 
+  \IfEqCase{\@courseCycle}{%
+    {XXX}{\textcolor{red}{*****Unknown cycle*****,}}
+    {1}{First cycle,}%
+    {2}{Second cycle,}%
+  }[\typeout{unknown cycle}]
+\,\IfEqCase{\@courseCredits}{%
+    {XXX}{\textcolor{red}{*****Unknown number of *****}}%
+    {15.0}{15}%
+    {30.0}{30}%
+    }[\typeout{unknown credits}]%
+~credits\\
+  }
+\addvspace{28pt}
+{\fontsize{26}{30}\coverbfont \@title \par }
+
+
+\ifx\@subtitle\@empty\relax
+\else
+\addvspace{12pt}
+    {\fontsize{16}{18}\coverlfont  \@subtitle \par }
+\fi
+
+\addvspace{30pt}
+    {\fontsize{12}{13}\coverbfont
+    \expandafter\MakeUppercase\expandafter\@authorsFirstname\space\expandafter\MakeUppercase\expandafter\@authorsLastname \par
+    \ifx\@secondAuthorsLastname\@empty\relax
+    \else\addvspace{2pt}\expandafter\MakeUppercase\expandafter\@secondAuthorsFirstname\space\expandafter\MakeUppercase\expandafter\@secondAuthorsLastname \par
+    \fi
+    }
+\end{center}
+\vfill
+\ifx\@coverIllustration\@empty\relax
+\else
+\addvspace{1cm}
+    \begin{center}
+    \IfFileExists{\@coverIllustration}{
+\noindent\includegraphics[width=16cm, height=10cm, keepaspectratio]{\@coverIllustration}
+    }{}
+    \end{center}
+\fi
+\restoregeometry
+\clearpage
+}
+\makeatother
+
+\begin{document}
+\selectlanguage{english}
+\pagenumbering{alph}
+\kthcover
+\end{document}

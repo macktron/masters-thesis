@@ -30,12 +30,8 @@
   {\Huge}
 \titlespacing*{\chapter}{0pt}{-20pt}{30pt}
 
-% ---- Thesis metadata (override in main.tex if desired) --------------
-\newcommand{\thesistitle}{Joint Radar Emitter and Mode Clustering Using Transformer Encoder Architecture}
-\newcommand{\thesissubtitle}{}
-\newcommand{\thesisauthor}{Markus Johnson Swegmark}
-\newcommand{\thesisyear}{\the\year}
-\newcommand{\thesismonth}{\ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
+% ---- Thesis metadata -------------------------------------------------
+\input{thesis-metadata}
 
 \newcommand{\thesisschool}{School of Electrical Engineering and Computer Science}
 \newcommand{\thesisuniversity}{KTH Royal Institute of Technology}
@@ -58,6 +54,24 @@
   pdfkeywords={transformer, clustering, radar, deep learning, ELINT}
 }
 
+% ---- Front cover (KTH graphical profile) ----------------------------
+% The cover is the official template's \kthcover, compiled with XeLaTeX
+% (Arial) from frontmatter/cover/cover.tex by .latexmkrc. As in the
+% template, the cover is followed by an empty back-of-cover page.
+\usepackage{pdfpages}
+\newcommand{\coverpdf}{build/cover/cover.pdf}
+\newcommand{\makecoverKTH}{%
+  \hypersetup{pageanchor=false}%
+  \IfFileExists{\coverpdf}{%
+    \includepdf[pages=1]{\coverpdf}%
+  }{%
+    \PackageWarningNoLine{kth-style}{\coverpdf\space not found; build it with
+      xelatex -output-directory=build/cover frontmatter/cover/cover.tex}%
+    \thispagestyle{empty}\mbox{}\clearpage
+  }%
+  \thispagestyle{empty}\mbox{}\clearpage
+}
+
 % ---- Title-page macro ----------------------------------------------
 % Renders a centered KTH-style title page. Logos can be dropped into
 % figures/kth-logo.pdf later; we wrap the include in \IfFileExists so
@@ -74,7 +88,7 @@
       {\sffamily\bfseries\Large KTH}\par
     }
     \vspace{1.5cm}
-    {\sffamily\large \MakeUppercase{Degree Project in Computer Science and Engineering}\par}
+    {\sffamily\large \MakeUppercase{Degree Project in \thesissubjectarea}\par}
     {\sffamily\large \MakeUppercase{Second Cycle, 30 Credits}\par}
     \vspace{0.5cm}
     {\sffamily\small Stockholm, Sweden \thesisyear\par}
