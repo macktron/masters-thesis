@@ -1,0 +1,248 @@
+% =====================================================================
+% Opposition review of Robert Kihlborg's degree project.
+% Standalone document; not part of the thesis build (see main.tex).
+%
+% Build:  latexmk -pdf opposition-report.tex
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{csquotes}
+
+\usepackage[a4paper,
+            inner=30mm,outer=25mm,
+            top=27mm,bottom=27mm,
+            headheight=15pt]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+\usepackage[hidelinks,unicode=true]{hyperref}
+
+% ---- Metadata -------------------------------------------------------
+\newcommand{\oppauthor}{Robert Kihlborg}
+\newcommand{\opptitle}{Latent Grid Distributions for Better Robustness in Beat Tracking}
+\newcommand{\oppsubtitle}{Encoding Ambiguity with Metric Distributions over a Learned Tatum Grid}
+\newcommand{\oppopponent}{Markus Johnson Swegmark}
+\newcommand{\oppdate}{} % fill in the date of the opposition seminar
+
+\hypersetup{
+  pdftitle={Opposition review: \opptitle},
+  pdfauthor={\oppopponent},
+  pdfsubject={Opposition review, KTH EECS}
+}
+
+% ---- Headings (same conventions as kth-style.tex) -------------------
+\titleformat{\section}
+  {\normalfont\sffamily\Large\bfseries}
+  {\thesection}
+  {0.8em}
+  {}
+\titlespacing*{\section}{0pt}{1.6em}{0.6em}
+
+\titleformat{\subsection}
+  {\normalfont\sffamily\large\bfseries}
+  {\thesubsection}
+  {0.6em}
+  {}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\sffamily\small Opposition review}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% Guiding question, set off from the answer that follows.
+\newcommand{\prompt}[1]{%
+  \par\medskip
+  \noindent\textit{#1}%
+  \par\smallskip
+}
+
+\setlist[enumerate]{itemsep=0.35em,topsep=0.4em}
+
+\begin{document}
+
+\begin{center}
+  {\sffamily\bfseries\Large KTH Royal Institute of Technology}\\[0.35em]
+  {\sffamily School of Electrical Engineering and Computer Science}\\[1.4em]
+  {\sffamily\Huge\bfseries Opposition Review}%
+  \footnote{Adapted from Kerstin Frenckner's original template.}\\[0.8em]
+  {\large Master's Programme in Machine Learning}
+\end{center}
+
+\vspace{1.2em}
+
+\noindent
+\begin{tabularx}{\linewidth}{@{}>{\sffamily\bfseries}l X@{}}
+  \toprule
+  Author of the thesis   & \oppauthor \\
+  Title of the thesis    & \opptitle \\
+  \addlinespace
+                         & \textit{\oppsubtitle} \\
+  Name of the opponent   & \oppopponent \\
+  Date of the opposition & \ifx\oppdate\empty\rule{4.5cm}{0.4pt}\else\oppdate\fi \\
+  \bottomrule
+\end{tabularx}
+
+\vspace{1.2em}
+
+\noindent
+The questions below are a guide. Answers should be justified, and potential issues should be remarked on in enough detail for the author to act on them, either here or as comments in an annotated copy of the thesis.
+
+\section{Summary}
+
+\prompt{Briefly summarise the work in one or two paragraphs.}
+
+% Write the summary here.
+
+\section{Title, Introduction, Background}
+
+\prompt{Do the report title and abstract justly reflect the contents of the report?}
+
+% 
+
+\prompt{Are the project background and underlying interest adequately described?}
+
+% 
+
+\prompt{Is the introduction with general survey of the area clear and complete?}
+
+% 
+
+\prompt{Is the research question, aim, or purpose clear?\footnote{Since Master's thesis projects differ, it is common, but not compulsory, to include an explicit research question. Regardless, the author should clearly state what the focus of the project is, in the form of a question, aim, or purpose.}}
+
+% 
+
+\section{Theory and Previous Work}
+
+\prompt{Is the theory description sufficient to understand the project, and is it explicitly connected to the project?\footnote{The description should be connected to the project, rather than merely being a general description of the area of research.}}
+
+% 
+
+\prompt{Is the description of related work complete enough, and synthesised so as to describe how the project relates to previous research?}
+
+% 
+
+\section{Method}
+
+\prompt{Is the choice of method for tackling the problem justified, including a discussion of alternative methods?}
+
+% 
+
+\prompt{Are the prerequisites for applying the method considered?}
+
+% 
+
+\prompt{Is the method adequately explained?}
+
+% 
+
+\section{Results, Discussion, and Conclusions}
+
+\prompt{Are the results clearly described?}
+
+% 
+
+\prompt{Is the evaluation performed to assess the results adequate to answer the research question or aim?}
+
+% 
+
+\prompt{Does the author discuss the limitations and possible future work, and compare the achieved results to those of related work?}
+
+% 
+
+\prompt{Are the conclusions credible and supported by the results?}
+
+% 
+
+\section{Figures, Tables, and Bibliography}
+
+\prompt{Are the figures and tables clear? Consider graphical quality, units, axis labels, and whether each caption is informative enough to make the figure or table self-contained.}
+
+% 
+
+\prompt{Are the figures and tables a valuable support to the main text? Consider whether they are referenced in the text, whether they provide new or more accessible information, and whether any are superfluous.}
+
+% 
+
+\prompt{Is any figure or table necessary for understanding the text missing?}
+
+% 
+
+\prompt{Is the source of information and the origin of graphics clear, for instance when a figure is based on an external reference, and is copyrighted or Creative Commons material handled adequately?}
+
+% 
+
+\prompt{Rate the bibliography in terms of coverage and quality of the references included.}
+
+% 
+
+\section{Strengths, Weaknesses, and Structure}
+
+\prompt{What are the strong aspects of the work and of the report?}
+
+% 
+
+\prompt{What are the weak aspects of the work and of the report?}
+
+% 
+
+\prompt{Which sections of the report were difficult to understand? Why, and what could be done to improve this?}
+
+% 
+
+\prompt{Other general comments on the report and its structure, including whether there is a logical line of argument from the introduction to the conclusions.}
+
+% 
+
+\section{Outlook and Concluding Assessment}
+
+\prompt{What is your view of the news value of the work?}
+
+% 
+
+\prompt{Does the report put the project into a larger perspective, considering for example societal impact, sustainability (economic, ecological, or societal), and ethics?}
+
+% 
+
+\prompt{What is your concluding assessment of this Master's thesis project?}
+
+% 
+
+\section{Seminar Questions}
+
+\prompt{List about six questions to ask the presenter at the seminar.}
+
+\begin{enumerate}
+  \item
+  \item
+  \item
+  \item
+  \item
+  \item
+\end{enumerate}
+
+\appendix
+\section{Instructions to the opponent}
+
+The aim of the opposition review is twofold. As an opponent, one should demonstrate the learning outcome of being able to reflect on, and critically review, others' scientific achievements. For the presenter, the feedback is an opportunity to improve the report further, and to demonstrate an ability to address constructive criticism by considering the remarks when preparing the final version of the thesis.
+
+The review should therefore identify strengths of the work and, in relative detail, suggest improvements that would make the report better in completeness, ease of understanding, and readability. The evaluation questions above are a guide. A different outline is acceptable, provided the review contains enough remarks for the presenter to consider the suggested improvements. Details may instead be given as comments in an annotated PDF of the report. If so, state briefly in the relevant section where those comments are provided.
+
+\end{document}
