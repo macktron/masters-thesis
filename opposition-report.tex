@@ -229,13 +229,20 @@ The questions below are a guide. Answers should be justified, and potential issu
 
 \prompt{List about six questions to ask the presenter at the seminar.}
 
+The questions below are meant to be asked in this order. Each one names the passage it refers to, so that the discussion can stay on a claim, a table, or a design choice in the report.
+
 \begin{enumerate}
-  \item
-  \item
-  \item
-  \item
-  \item
-  \item
+  \item The introduction argues that a distribution over metric interpretations cannot be recovered from framewise beat probabilities, and that a categorical distribution over subgrid states can represent that ambiguity (Figure~1.3 and Section~1.1). Chapter~5 reports that the trained subgrid usually places its mass on a single metric signature, often with probabilities near zero, and that mean squared error was used after binary cross-entropy produced numerical errors. On GTZAN, the clearest gain against other systems without a dynamic Bayesian network is downbeat CMLt (Table~4.5). How much of that gain do you attribute to an explicit distribution over meters, and how much to the penalty on inconsistent neighboring states? What further measurement would separate those two accounts?
+
+  \item The first research question asks whether a network can learn a tatum grid when no tatum annotation exists. The grid is trained with soft recall at the annotated beats, which requires those beats to lie on the grid and only mildly prefers a coarser grid. Aggregate recall on the cross-validation set is about 91\% (Table~4.1). On JAAH and HJDB, AMLt is higher than recall, which the report reads as a grid that is sometimes slower than the beat, and Figure~4.1c shows a jazz excerpt at 272~bpm on which the grid is too slow. What has been learned in the successful cases: a tatum in the sense of Section~2.1, or a beat grid that is sometimes subdivided? How should the fast-tempo failures enter the answer to the research question?
+
+  \item Section~3.2.3 presents Viterbi decoding of the subgrid state sequence as the inference procedure the architecture is built for. On the cross-validation set, thresholding the marginal probabilities gives higher CMLt than Viterbi (Table~4.3). On GTZAN the two decoders are close, with a small advantage for Viterbi (Table~4.5). Recordings longer than 30~seconds are decoded window by window, so Viterbi is never run on one state sequence for the whole piece. How much of the difference between the two decoders do you attribute to that choice? What result would show that the decoder ought to use the full state distribution, beyond the effect the subgrid loss already has on the marginal activations?
+
+  \item The learned grid is compared with one predominant-local-pulse configuration, with the window, hop, and tempo range chosen on the combined training and validation data. That baseline is omitted from the GTZAN grid table, because a weak baseline would exaggerate the improvement (Section~4.1.1). Section~1.5 also sets aside an experiment that would pass a non-learned grid into the same subgrid. On GTZAN beat CMLt, the system of Gagneré et al.\ without a dynamic Bayesian network remains slightly ahead (Table~4.5). Which result do you take the experiments to have established: that the learned grid improves on this pulse baseline, that the full system is competitive with recent beat trackers that do not use a dynamic Bayesian network, or that the split into grid and subgrid is what produces the downbeat continuity gain?
+
+  \item A reason given for avoiding dynamic Bayesian network postprocessing is that the allowed tempos, time signatures, and meter changes leave some music out (Section~1.1). In Table~4.4, constant 4/4 accounts for about three quarters of the cross-validation pieces that have downbeat labels, and CMLt falls for every system once the bar length is not constantly four beats. Figure~4.2 shows the subgrid shifting probability from one phase to another across a bar of 2/4, described in the text as a slow change of confidence. On the music that a typical dynamic Bayesian network handles poorly, where does this model improve on that postprocessing, and where do the training distribution and the transition penalty reproduce a similar preference for a stable 4/4?
+
+  \item The abstract notes that the aggregate scores can look strong while inspection of individual excerpts still shows failures on comparatively straightforward material. Chapter~6 describes the system both as a proof of concept at the level of beat-activation models and as a design that might remain a dead end. Taking the downbeat CMLt numbers in Table~4.5 as given, which behavior in Figures~4.1b, 4.1c, and~4.2 is, in your view, the clearest sign that the model is not yet doing what the grid and the subgrid were designed to do? What change would you try first?
 \end{enumerate}
 
 \appendix
