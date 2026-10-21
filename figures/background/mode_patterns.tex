@@ -1,0 +1,43 @@
+% Four operating-mode schedules on one time axis, for the presentation.
+% One emitter, one color: the pattern is the spacing, not a second source.
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\footnotesize,
+    >=Latex,
+    line join=round,
+  ]
+
+  \def\pw{0.30}
+  \def\ph{0.46}
+
+  % #1 y of the baseline, #2 name, #3 short gloss, then pulse start times.
+  \def\modelabel#1#2#3{%
+    \node[anchor=east, align=right] at (-0.35,#1+0.18)
+      {\textbf{#2}\\[-0.15em]\scriptsize #3};
+    \draw[gray!40] (0,#1) -- (11.15,#1);
+  }
+  \def\pulse#1#2{%
+    \draw[thick, fill=blue!22, draw=blue!55!black]
+      (#2,#1) rectangle ++(\pw,\ph);
+  }
+
+  % Search: long, steady gaps.
+  \modelabel{4.85}{Search}{steady, slow}
+  \foreach \t in {0.15, 3.55, 6.95, 10.35} {\pulse{4.85}{\t}}
+
+  % Track: the same rhythm, compressed.
+  \modelabel{3.25}{Track}{steady, fast}
+  \foreach \t in {0.15, 1.15, 2.15, 3.15, 4.15, 5.15, 6.15, 7.15, 8.15, 9.15, 10.15} {\pulse{3.25}{\t}}
+
+  % Stagger: two alternating intervals.
+  \modelabel{1.65}{Stagger}{alternating gaps}
+  \foreach \t in {0.15, 1.05, 3.25, 4.15, 6.35, 7.25, 9.45, 10.35} {\pulse{1.65}{\t}}
+
+  % Scan: bursts separated by silence.
+  \modelabel{0.05}{Scan}{bursts, then quiet}
+  \foreach \t in {0.15, 0.72, 1.29, 4.55, 5.12, 5.69, 8.95, 9.52, 10.09} {\pulse{0.05}{\t}}
+
+  \draw[->, gray!70!black] (0,-0.55) -- (11.15,-0.55) node[right, text=black] {time};
+
+  \path (-2.85,-0.85) rectangle (12.05,5.55);
+\end{tikzpicture}

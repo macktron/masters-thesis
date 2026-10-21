@@ -1,0 +1,93 @@
+% Schematic for the presentation opening: a silent own platform among
+% radiating emitters, and the single mixed pulse stream it records.
+% Emitter colors match figures/method/partitions.tex.
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\footnotesize,
+    >=Latex,
+    line join=round,
+    line cap=round,
+  ]
+
+  % Aircraft silhouette, nose along +x. One outline so the wings stay attached.
+  % #1 is a base color name (red, blue, black).
+  \def\esmplane#1{%
+    \draw[thick, fill=#1!18, line join=round]
+      (0.80, 0.00)
+      -- (0.26, 0.09) -- (0.08, 0.10)
+      -- (-0.06, 0.48) -- (-0.26, 0.40) -- (-0.04, 0.11)
+      -- (-0.32, 0.07) -- (-0.40, 0.06)
+      -- (-0.50, 0.22) -- (-0.60, 0.15) -- (-0.46, 0.045)
+      -- (-0.64, 0.00)
+      -- (-0.46,-0.045)
+      -- (-0.60,-0.15) -- (-0.50,-0.22) -- (-0.40,-0.06)
+      -- (-0.32,-0.07) -- (-0.04,-0.11)
+      -- (-0.26,-0.40) -- (-0.06,-0.48) -- (0.08,-0.10)
+      -- (0.26,-0.09)
+      -- cycle;
+  }
+
+  % Short transmit sector. #1 is a base color name. Drawn before the icon.
+  \def\esmfan#1#2#3{%
+    \fill[#1!30] (0,0) -- (#2:0.92) arc (#2:#3:0.92) -- cycle;
+    \draw[#1!65!black, semithick] (#2:0.92) arc (#2:#3:0.92);
+  }
+
+  % ------------------------------------------------------------------
+  % Other emitters. Fans point roughly toward the listener and stop short.
+  % ------------------------------------------------------------------
+  \begin{scope}[shift={(1.05,4.15)}]
+    \esmfan{red}{-78}{-18}
+    \begin{scope}[rotate=-28]
+      \esmplane{red}
+    \end{scope}
+    \node[anchor=south] at (0,0.78) {Aircraft};
+  \end{scope}
+
+  \begin{scope}[shift={(5.45,4.20)}]
+    \esmfan{blue}{198}{258}
+    \begin{scope}[rotate=168]
+      \esmplane{blue}
+    \end{scope}
+    \node[anchor=south] at (0.05,0.78) {Aircraft};
+  \end{scope}
+
+  \begin{scope}[shift={(5.45,1.95)}]
+    \esmfan{green}{150}{205}
+    \draw[thick, fill=green!16]
+      (-0.62,0.10) -- (0.68,0.14) -- (0.46,-0.16) -- (-0.42,-0.16) -- cycle;
+    \draw[thick, fill=green!18]
+      (0.02,0.12) -- (0.16,0.12) -- (0.12,0.42) -- (0.06,0.42) -- cycle;
+    \node[anchor=north] at (0.05,-0.24) {Ship};
+  \end{scope}
+
+  % ------------------------------------------------------------------
+  % Own platform: same air picture, no transmit sector.
+  % ------------------------------------------------------------------
+  \begin{scope}[shift={(2.25,2.25)}, scale=1.12]
+    \begin{scope}[rotate=12]
+      \esmplane{black}
+    \end{scope}
+  \end{scope}
+  \node[align=center, anchor=east] at (1.35,2.25) {Own platform\\[-0.15em]\scriptsize silent};
+
+  \draw[->, thick, black!65] (2.25,1.45) -- (2.25,0.92);
+
+  % ------------------------------------------------------------------
+  % What the listener records: one interleaved stream.
+  % ------------------------------------------------------------------
+  \colorlet{pulseblue}{blue!55}
+  \colorlet{pulsered}{red!55}
+  \colorlet{pulsegreen}{green!55!black}
+  \foreach \i/\col in {%
+      0/pulseblue, 1/pulsered, 2/pulsegreen,
+      3/pulseblue, 4/pulsegreen, 5/pulsered,
+      6/pulseblue, 7/pulsered, 8/pulsegreen,
+      9/pulseblue, 10/pulsered}{%
+    \draw[fill=\col, draw=\col!70!black, thin, rounded corners=0.5pt]
+      ({0.20+\i*0.58},0.22) rectangle ++(0.38,0.42);
+  }
+  \node[anchor=north] at (3.40,-0.02) {Mixed pulse stream};
+
+  \path (-1.55,-0.48) rectangle (6.55,5.45);
+\end{tikzpicture}

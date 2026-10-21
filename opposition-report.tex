@@ -34,7 +34,7 @@
 \newcommand{\opptitle}{Latent Grid Distributions for Better Robustness in Beat Tracking}
 \newcommand{\oppsubtitle}{Encoding Ambiguity with Metric Distributions over a Learned Tatum Grid}
 \newcommand{\oppopponent}{Markus Johnson Swegmark}
-\newcommand{\oppdate}{} % fill in the date of the opposition seminar
+\newcommand{\oppdate}{October 16, 2026}
 
 \hypersetup{
   pdftitle={Opposition review: \opptitle},
@@ -109,142 +109,145 @@ The questions below are a guide. Answers should be justified, and potential issu
 
 \prompt{Briefly summarise the work in one or two paragraphs.}
 
-% Write the summary here.
+The thesis is about beat and downbeat tracking without a DBN. They keep Beat This and add a grid module (tatum as tempo and phase, 1-second windows, several frequency bands, soft recall) and a subgrid, which is a distribution over meters on that grid. Output is either a threshold or Viterbi.
+
+Same datasets as Beat This, GTZAN held out. Grid recall is around 90\%. Beats are close to other DBN-free models. Downbeat continuity is better than those, still behind the best DBN models. Some fairly easy excerpts still fail, see chapter 4.
 
 \section{Title, Introduction, Background}
 
 \prompt{Do the report title and abstract justly reflect the contents of the report?}
 
-% 
+Mostly yes. The title matches the model, and the abstract already says the scores can look good while easy excerpts fail. ``Better robustness'' is a bit much. The gain is mainly downbeat CMLt, and in chapter 5 the subgrid usually sticks to one meter.
 
 \prompt{Are the project background and underlying interest adequately described?}
 
-% 
+Yes. The musicology and DAW part is short, which is fine. The actual reason for the project is Figure~1.3, plus that a DBN only stays consistent if you limit tempo and meter.
 
 \prompt{Is the introduction with general survey of the area clear and complete?}
 
-% 
+Clear enough for this project. I did not feel a longer history was missing. Section~2.3.1 is the useful part, tempo as both regression and classification, since that is why they use several bands.
 
 \prompt{Is the research question, aim, or purpose clear?\footnote{Since Master's thesis projects differ, it is common, but not compulsory, to include an explicit research question. Regardless, the author should clearly state what the focus of the project is, in the form of a question, aim, or purpose.}}
 
-% 
+The two questions in Section~1.2 are clear, and so are the goals in 1.3. ``More consistent'' is vague there. They use CMLt later, which makes sense, but it is not in the question.
 
 \section{Theory and Previous Work}
 
 \prompt{Is the theory description sufficient to understand the project, and is it explicitly connected to the project?\footnote{The description should be connected to the project, rather than merely being a general description of the area of research.}}
 
-% 
+Yes. It is written for this model, not as a general background chapter. Equation~2.1 is very general. The part you actually need is in chapter 3, and I could follow the soft-recall problem and the four integers in a subgrid state.
 
 \prompt{Is the description of related work complete enough, and synthesised so as to describe how the project relates to previous research?}
 
-% 
+Good enough for the comparisons they actually run. Beat This, the DBN line, PLP, and Gagneré et al.\ as the nearest multiple-hypothesis model. They do say how Gagneré differs (deterministic pulse, dropped when tempo changes). The claim that nobody has learned a tatum with deep learning follows from those papers. I did not check further than that.
 
 \section{Method}
 
 \prompt{Is the choice of method for tackling the problem justified, including a discussion of alternative methods?}
 
-% 
+Mostly justified. Beat This is the obvious base if you want a fair comparison, and they do mention activations, a DBN, PLP, and just regressing tempo. Section~1.5 also says they skip a non-learned grid. The weak spot is MSE instead of BCE. It is basically a workaround for NaNs, and chapter 5 then blames a lot of the subgrid on that choice.
 
 \prompt{Are the prerequisites for applying the method considered?}
 
-% 
+Partly. They say the grid has to cover the beats, and that the subgrid learns badly until the grid is stable. Window length and the period bounds are there. Bad annotations (offsets, some 6/8 counted on 1 and 4) are mentioned and then ignored, to match Beat This. No estimate of what that does to the downbeat scores.
 
 \prompt{Is the method adequately explained?}
 
-% 
+The model itself is explained well enough. I never found one expression for the full loss, or the weights on soft recall, the window penalty, the subgrid MSE and the KL term. The extra uniformity in the backward pass is also only in words. Training setup is specified (AdamW, 100 epochs, and so on).
 
 \section{Results, Discussion, and Conclusions}
 
 \prompt{Are the results clearly described?}
 
-% 
+Yes. Grid is separate from the beat scores, and cross-validation is separate from GTZAN. The text matches the tables: recall near 90\%, beats similar to Beat This, downbeats better than the other DBN-free models, and threshold vs Viterbi swaps rank between validation and test. The failures are in Figures~4.1 and~4.2. Only the test numbers have a spread over seeds.
 
 \prompt{Is the evaluation performed to assess the results adequate to answer the research question or aim?}
 
-% 
+Enough to say it is competitive on CMLt. Less so for the first research question. Beat recall of the grid only says the annotated beats land on it, not that the grid is really a tatum. The PLP baseline is weak, and they leave it off the test table. There is no ablation of the grid or the subgrid, so the scores do not show that the split is what helped.
 
 \prompt{Does the author discuss the limitations and possible future work, and compare the achieved results to those of related work?}
 
-% 
+Yes. Chapters~5 and~6 go through the 4/4 bias, the MSE workaround, tempo changes, and that Viterbi is not run on the whole piece. Future work is concrete (BCE, a better grid metric, more weight on rare meters). The comparison itself is Tables~4.3 and~4.5. They list a few reasons the decoder ranking flips and do not really choose.
 
 \prompt{Are the conclusions credible and supported by the results?}
 
-% 
+The narrow part is fine: grid recall around 90\%, and downbeat CMLt higher than the other DBN-free models. Section~6.1 then calls the model on par with beat-activation systems after years of work, which the beat numbers do not really show. Beat This is similar or a bit better on beats. The conclusion also skips that the subgrid rarely keeps more than one meter, and that was the whole idea.
 
 \section{Figures, Tables, and Bibliography}
 
 \prompt{Are the figures and tables clear? Consider graphical quality, units, axis labels, and whether each caption is informative enough to make the figure or table self-contained.}
 
-% 
+Tables are clear. Figures~1.3 and~3.2 too. Figure~4.1 I had to use the caption to see which row is the tatum, and the x-axis is just frames. Figure~4.2 has the same problem with which curve is negative. A legend would be enough.
 
 \prompt{Are the figures and tables a valuable support to the main text? Consider whether they are referenced in the text, whether they provide new or more accessible information, and whether any are superfluous.}
 
-% 
+Yes. They are referred to in the text, and a few carry the argument (Figure~1.3, the soft-recall plot). I would not remove any. Figure~1.2 is useful.
 
 \prompt{Is any figure or table necessary for understanding the text missing?}
 
-% 
+Not really a missing figure. A single formula for the whole loss would help more. Also some number for how often the subgrid actually has two meters at once. Chapter~5 only shows examples.
 
 \prompt{Is the source of information and the origin of graphics clear, for instance when a figure is based on an external reference, and is copyrighted or Creative Commons material handled adequately?}
 
-% 
+Datasets are cited, and Figure~1.2 points at the Beatles annotations. Section~1.6 says some figures are from the ISMIR paper but not which ones. That should be in the captions. I did not see another problem.
 
 \prompt{Rate the bibliography in terms of coverage and quality of the references included.}
 
-% 
+Good. The beat-tracking papers and the datasets are there, including the ones in the result tables. A few entries are thin, Sinkhorn is mostly an arXiv link. Not a real problem.
 
 \section{Strengths, Weaknesses, and Structure}
 
 \prompt{What are the strong aspects of the work and of the report?}
 
-% 
+The problem is specific, and they built the model on a public baseline with the same data and a held-out test set. They also show what goes wrong, not only the good tables. The 4/4 collapse is described plainly.
 
 \prompt{What are the weak aspects of the work and of the report?}
 
-% 
+Ambiguity is never measured. No weights on the losses, and no ablation of grid vs subgrid vs the Beat This trunk. The PLP comparison is too easy. Section~6.1 is a bit ahead of Table~4.5.
 
 \prompt{Which sections of the report were difficult to understand? Why, and what could be done to improve this?}
 
-% 
+Section~3.2.1. The bands, the phase distance, the clamp and Sinkhorn come at once, and there is no single loss to look at. One displayed equation would fix most of it. Figure~3.4 is a reduced state and it took a reread to see how it maps to the 280 states. The rest was fine.
 
 \prompt{Other general comments on the report and its structure, including whether there is a logical line of argument from the introduction to the conclusions.}
 
-% 
+The line is easy to follow, from Figure~1.3 to the questions, then the model, GTZAN, and the limitations. Section~3.1 says a lot was decided on toy examples, but those tests are barely shown. One failed loss written out would help.
 
 \section{Outlook and Concluding Assessment}
 
 \prompt{What is your view of the news value of the work?}
 
-% 
+There is some. Learning the tatum in the network, instead of PLP or a DBN, seems new given their related work. The measured gain is mostly downbeat continuity. Still something to follow up, which is also what they say.
 
 \prompt{Does the report put the project into a larger perspective, considering for example societal impact, sustainability (economic, ecological, or societal), and ethics?}
 
-% 
+Barely. The introduction mentions musicology and DAWs. Nothing on ethics or sustainability. For this project that is a small miss. Section~6.3 stays on the research idea.
 
 \prompt{What is your concluding assessment of this Master's thesis project?}
 
-% 
+I think this is a solid master's project. The model runs, the evaluation is the usual one, and they are open about the failures. It meets what they set out in Section~1.3 if that is read as a proof of concept with a gain on downbeat continuity. It would be stronger if they had measured the ambiguity, and the losses separately. That is what I ask later.
 
+\newpage
 \section{Seminar Questions}
+\label{sec:questions}
 
 \prompt{List about six questions to ask the presenter at the seminar.}
 
-The questions below are meant to be asked in this order. Each one names the passage it refers to, so that the discussion can stay on a claim, a table, or a design choice in the report.
-
 \begin{enumerate}
-  \item The introduction argues that a distribution over metric interpretations cannot be recovered from framewise beat probabilities, and that a categorical distribution over subgrid states can represent that ambiguity (Figure~1.3 and Section~1.1). Chapter~5 reports that the trained subgrid usually places its mass on a single metric signature, often with probabilities near zero, and that mean squared error was used after binary cross-entropy produced numerical errors. On GTZAN, the clearest gain against other systems without a dynamic Bayesian network is downbeat CMLt (Table~4.5). How much of that gain do you attribute to an explicit distribution over meters, and how much to the penalty on inconsistent neighboring states? What further measurement would separate those two accounts?
+  \item Did you consider starting from the Beat This weights instead of training the shared backbone from scratch?
 
-  \item The first research question asks whether a network can learn a tatum grid when no tatum annotation exists. The grid is trained with soft recall at the annotated beats, which requires those beats to lie on the grid and only mildly prefers a coarser grid. Aggregate recall on the cross-validation set is about 91\% (Table~4.1). On JAAH and HJDB, AMLt is higher than recall, which the report reads as a grid that is sometimes slower than the beat, and Figure~4.1c shows a jazz excerpt at 272~bpm on which the grid is too slow. What has been learned in the successful cases: a tatum in the sense of Section~2.1, or a beat grid that is sometimes subdivided? How should the fast-tempo failures enter the answer to the research question?
+  \item Could there be any more evaluation to investigate whether the downbeat improvement comes from the learned grid or from the subgrid? Could you also plot the losses separately, for example the soft-recall loss and the subgrid loss?
 
-  \item Section~3.2.3 presents Viterbi decoding of the subgrid state sequence as the inference procedure the architecture is built for. On the cross-validation set, thresholding the marginal probabilities gives higher CMLt than Viterbi (Table~4.3). On GTZAN the two decoders are close, with a small advantage for Viterbi (Table~4.5). Recordings longer than 30~seconds are decoded window by window, so Viterbi is never run on one state sequence for the whole piece. How much of the difference between the two decoders do you attribute to that choice? What result would show that the decoder ought to use the full state distribution, beyond the effect the subgrid loss already has on the marginal activations?
+  \item You already attribute the fast jazz and the classical timing problems to the tatum grid. On the pieces where the grid comes out too slow, is that mostly the soft-recall loss preferring a slower tatum, or the one-second windows?
 
-  \item The learned grid is compared with one predominant-local-pulse configuration, with the window, hop, and tempo range chosen on the combined training and validation data. That baseline is omitted from the GTZAN grid table, because a weak baseline would exaggerate the improvement (Section~4.1.1). Section~1.5 also sets aside an experiment that would pass a non-learned grid into the same subgrid. On GTZAN beat CMLt, the system of Gagneré et al.\ without a dynamic Bayesian network remains slightly ahead (Table~4.5). Which result do you take the experiments to have established: that the learned grid improves on this pulse baseline, that the full system is competitive with recent beat trackers that do not use a dynamic Bayesian network, or that the split into grid and subgrid is what produces the downbeat continuity gain?
+  \item Since so much of the training data is in 4/4, how can we tell whether the model has learned to handle changes in meter? Did you try weighting uncommon meters more heavily in the subgrid loss, so a 3/4 or a changing meter is not drowned out by the 4/4 pieces?
 
-  \item A reason given for avoiding dynamic Bayesian network postprocessing is that the allowed tempos, time signatures, and meter changes leave some music out (Section~1.1). In Table~4.4, constant 4/4 accounts for about three quarters of the cross-validation pieces that have downbeat labels, and CMLt falls for every system once the bar length is not constantly four beats. Figure~4.2 shows the subgrid shifting probability from one phase to another across a bar of 2/4, described in the text as a slow change of confidence. On the music that a typical dynamic Bayesian network handles poorly, where does this model improve on that postprocessing, and where do the training distribution and the transition penalty reproduce a similar preference for a stable 4/4?
+  \item Thresholding often worked as well as Viterbi. What does that tell you about the value of predicting a distribution over meters? Is it that the distribution is not adding much, or that the subgrid has already learned to act like Viterbi, so a threshold is enough?
 
-  \item The abstract notes that the aggregate scores can look strong while inspection of individual excerpts still shows failures on comparatively straightforward material. Chapter~6 describes the system both as a proof of concept at the level of beat-activation models and as a design that might remain a dead end. Taking the downbeat CMLt numbers in Table~4.5 as given, which behavior in Figures~4.1b, 4.1c, and~4.2 is, in your view, the clearest sign that the model is not yet doing what the grid and the subgrid were designed to do? What change would you try first?
+  \item What led you to use 12 fixed tempo bands for the grid, rather than learning the tempo hypotheses more freely, for example as a mixture distribution?
 \end{enumerate}
 
+\newpage
 \appendix
 \section{Instructions to the opponent}
 
